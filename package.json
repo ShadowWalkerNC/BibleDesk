@@ -1,6 +1,7 @@
 {
-  "name": "bibledesk-temp",
-  "version": "0.1.0",
+  "name": "bibledesk",
+  "version": "1.0.0",
+  "description": "Free AI-powered Bible study platform — 5-dimension sourced answers",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,7 +21,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/uuid": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "typescript": "^5"
