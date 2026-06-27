@@ -1,24 +1,37 @@
 // BibleDesk — Supabase client
 // Two exports: serverClient (service role, server-only) and browserClient (anon, safe in browser)
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Lazy-init: clients are only created when first used, not at module load time.
+// This prevents build-time failures when env vars aren't set.
+
+let _browserClient: SupabaseClient | null = null;
+let _serverClient: SupabaseClient | null = null;
 
 // Browser-safe client (anon key, respects RLS)
-export const browserClient = createClient(supabaseUrl, supabaseAnonKey);
+export function getBrowserClient(): SupabaseClient {
+  if (!_browserClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) throw new Error('Supabase public env vars are not set');
+    _browserClient = createClient(url, key);
+  }
+  return _browserClient;
+}
 
 // Server-only client (service role, bypasses RLS for admin ops)
-// SECURITY: Never expose supabaseServiceKey to the browser
-export function getServerClient() {
-  if (!supabaseServiceKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set — server client unavailable');
+// SECURITY: Never expose SUPABASE_SERVICE_ROLE_KEY to the browser
+export function getServerClient(): SupabaseClient {
+  if (!_serverClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
+    _serverClient = createClient(url, serviceKey, {
+      auth: { persistSession: false },
+    });
   }
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false },
-  });
+  return _serverClient;
 }
 
 // ── Type-safe DB helpers ────────────────────────────────────────────────────
