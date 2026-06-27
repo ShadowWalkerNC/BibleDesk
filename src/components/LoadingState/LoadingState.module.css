@@ -1,0 +1,83 @@
+.wrapper {
+  padding: 2.5rem 0 4rem;
+}
+
+.skeletonSummary {
+  height: 120px;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+.skeletonTabBar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.skeletonTab {
+  height: 38px;
+  border-radius: var(--radius-md);
+  flex: 1;
+  max-width: 160px;
+}
+
+.skeletonPanel {
+  height: 280px;
+  border-radius: var(--radius-lg);
+}
+
+.statusText {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  animation: fadeInUp 0.4s var(--ease-out) both;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-400);
+  margin-right: 8px;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.error {
+  padding: 1.5rem 1.75rem;
+  background: rgba(251, 113, 133, 0.08);
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  border-radius: var(--radius-lg);
+  color: var(--dim-practical);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  animation: fadeInUp 0.4s var(--ease-out) both;
+}
+
+.errorTitle {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1rem;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  border-radius: var(--radius-sm);
+  color: var(--dim-practical);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+
+.retryBtn:hover {
+  background: rgba(251, 113, 133, 0.1);
+  border-color: var(--dim-practical);
+}

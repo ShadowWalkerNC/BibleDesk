@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════
+   BIBLEDESK DESIGN SYSTEM
+   Dark, reverent, scholarly — warm gold accents on deep navy
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Core palette */
+  --navy-950: #06081a;
+  --navy-900: #0b0f2e;
+  --navy-800: #111840;
+  --navy-700: #1a2456;
+  --navy-600: #243070;
+  --navy-500: #2e3d8a;
+
+  --gold-400: #f5c842;
+  --gold-500: #e8b320;
+  --gold-600: #c99a10;
+  --gold-glow: rgba(245, 200, 66, 0.15);
+
+  --parchment-100: #fdf8f0;
+  --parchment-200: #f7eed9;
+  --parchment-300: #edd9b0;
+
+  --text-primary: #f0eefd;
+  --text-secondary: #9fa8d4;
+  --text-muted: #6070a8;
+  --text-inverse: #0b0f2e;
+
+  /* Dimension accent colors */
+  --dim-scripture:    #4f9cf9;
+  --dim-historical:   #e67e42;
+  --dim-language:     #a78bfa;
+  --dim-theological:  #34d399;
+  --dim-practical:    #fb7185;
+
+  /* Glass surfaces */
+  --glass-bg: rgba(17, 24, 64, 0.6);
+  --glass-border: rgba(159, 168, 212, 0.12);
+  --glass-hover: rgba(245, 200, 66, 0.06);
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+}
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--navy-950);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(46, 61, 138, 0.4), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(11, 15, 46, 0.6), transparent);
+}
+
+a {
+  color: var(--gold-400);
+  text-decoration: none;
+  transition: color 0.2s var(--ease-out);
+}
+
+a:hover {
+  color: var(--gold-500);
+  text-decoration: underline;
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+
+.text-serif {
+  font-family: var(--font-serif);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--gold-400) 0%, #fff5c0 50%, var(--gold-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glass Card ───────────────────────────────────────────── */
+
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy-900); }
+::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-600); }
+
+/* ── Focus Styles (Accessibility) ────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50%       { box-shadow: 0 0 24px 8px var(--gold-glow); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s var(--ease-out) both;
+}
+
+.animate-stagger > * {
+  animation: fadeInUp 0.5s var(--ease-out) both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+
+/* ── Skeleton loader ──────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--navy-800) 25%,
+    var(--navy-700) 50%,
+    var(--navy-800) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Utility ──────────────────────────────────────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  html { font-size: 15px; }
+  .container { padding: 0 1rem; }
+}

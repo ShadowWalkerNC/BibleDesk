@@ -1,0 +1,286 @@
+.container {
+  margin-top: 2.5rem;
+  animation: fadeInUp 0.5s var(--ease-out) both;
+}
+
+/* ── Summary ───────────────────────────────────────────────── */
+
+.summary {
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(17, 24, 64, 0.8), rgba(11, 15, 46, 0.9));
+  border: 1px solid rgba(245, 200, 66, 0.2);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-500), var(--gold-400), transparent);
+}
+
+.summaryLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  margin-bottom: 0.6rem;
+}
+
+.summaryText {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--parchment-100);
+}
+
+.summaryMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.confidenceBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.confidenceHigh   { background: rgba(52, 211, 153, 0.15); color: var(--dim-theological); border: 1px solid rgba(52, 211, 153, 0.3); }
+.confidenceMedium { background: rgba(245, 200, 66, 0.12); color: var(--gold-400); border: 1px solid rgba(245, 200, 66, 0.25); }
+.confidenceLow    { background: rgba(251, 113, 133, 0.12); color: var(--dim-practical); border: 1px solid rgba(251, 113, 133, 0.25); }
+
+.translationTag {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Dimension Tabs ─────────────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+
+.tabBar::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 1rem;
+  background: var(--navy-800);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s var(--ease-out);
+  flex-shrink: 0;
+}
+
+.tab:hover:not(.activeTab) {
+  background: var(--glass-hover);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+}
+
+.tab.activeTab {
+  background: rgba(17, 24, 64, 0.9);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-color: currentColor;
+}
+
+/* Accent colors per dimension */
+.tab[data-dim="scripture"].activeTab      { color: var(--dim-scripture); }
+.tab[data-dim="historical"].activeTab     { color: var(--dim-historical); }
+.tab[data-dim="original_language"].activeTab { color: var(--dim-language); }
+.tab[data-dim="theological"].activeTab    { color: var(--dim-theological); }
+.tab[data-dim="practical"].activeTab      { color: var(--dim-practical); }
+
+.tabEmoji { font-size: 1rem; }
+
+/* ── Dimension Panel ─────────────────────────────────────────── */
+
+.panel {
+  padding: 1.75rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: fadeInUp 0.35s var(--ease-out) both;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.panelEmoji {
+  font-size: 1.5rem;
+}
+
+.panelTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.keyPoints {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.keyPoint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.keyPointDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.panelContent {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--parchment-200);
+  margin-bottom: 1.25rem;
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.citationsLabel {
+  width: 100%;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.citation {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(17, 24, 64, 0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: var(--gold-400);
+  font-weight: 500;
+  transition: all 0.2s var(--ease-out);
+  cursor: default;
+}
+
+.citation:hover {
+  background: var(--gold-glow);
+  border-color: rgba(245, 200, 66, 0.3);
+}
+
+/* ── Disclaimer ─────────────────────────────────────────────── */
+
+.disclaimer {
+  margin-top: 1.5rem;
+  padding: 0.875rem 1.25rem;
+  background: rgba(6, 8, 26, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.disclaimer strong {
+  color: var(--text-secondary);
+}
+
+/* ── Share bar ──────────────────────────────────────────────── */
+
+.shareBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(17, 24, 64, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.shareLabel {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.shareActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.shareBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--navy-800);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+
+.shareBtn:hover {
+  background: var(--glass-hover);
+  border-color: var(--gold-500);
+  color: var(--gold-400);
+}
+
+@media (max-width: 640px) {
+  .tabBar { gap: 0.3rem; }
+  .tab { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
+  .panel { padding: 1.25rem; }
+}
