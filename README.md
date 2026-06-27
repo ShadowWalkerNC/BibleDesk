@@ -1,8 +1,10 @@
 # BibleDesk ✦
 
-**Free AI-powered Bible study platform — 5-dimension sourced answers for churches, pastors, and anyone seeking truth.**
+<!-- TODO: add live URL once deployed, e.g. > 🌐 **Live:** https://bibledesk.vercel.app -->
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
+**Free AI-powered Bible study platform — ask any question, get 5-dimension sourced answers grounded in Scripture.**
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -73,7 +75,7 @@ See [`.env.example`](.env.example) for all variables. Required for basic operati
 ## Architecture
 
 ```
-BibleDesk (Next.js 16, App Router)
+BibleDesk (Next.js 15, App Router)
 │
 ├── src/app/
 │   ├── page.tsx                    ← Homepage (search + answer display)
@@ -126,7 +128,7 @@ BIBLEDESK_WEBHOOK_SECRET=your-shared-secret
 
 | Phase | Status | Description |
 |---|---|---|
-| **Phase 1 — AI Study Core** | ✅ **In development** | Question → 5-dimension AI answer |
+| **Phase 1 — AI Study Core** | ✅ **Complete** | Question → 5-dimension AI answer |
 | **Phase 2 — Bible Reader** | 📋 Planned | Full chapter/verse browser, Strong's concordance, commentaries |
 | **Phase 3 — Church Tools** | 📋 Planned | Reading plans, sermon prep, prayer boards, auth/accounts |
 | **Phase 4 — Integrations** | 📋 Planned | Full Sigil/Discord integration, webhooks |
