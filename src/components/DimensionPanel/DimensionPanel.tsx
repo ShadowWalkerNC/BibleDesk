@@ -3,6 +3,7 @@
 import type { BibleAnswer, DimensionKey } from '@/types';
 import { DIMENSION_META } from '@/types';
 import { useToast } from '@/components/Toast/Toast';
+import { useBookmark } from '@/hooks/useBookmark';
 import { useState } from 'react';
 import styles from './DimensionPanel.module.css';
 
@@ -23,6 +24,10 @@ const DIMENSION_COLORS: Record<DimensionKey, string> = {
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
+  const { bookmarked, loading: bookmarkLoading, toggle: toggleBookmark } = useBookmark(
+    answer,
+    shareSlug ?? null
+  );
 
   const activeDim   = answer.dimensions[activeTab];
   const activeMeta  = DIMENSION_META.find((m) => m.key === activeTab)!;
@@ -43,7 +48,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
         return `${m.emoji} ${dim.title}\n${dim.content}\n\nCitations: ${dim.citations.join(', ')}`;
       }),
       '',
-      shareUrl ? `🔗 ${shareUrl}` : '',
+      shareUrl ? `\uD83D\uDD17 ${shareUrl}` : '',
     ].filter(Boolean).join('\n\n');
 
     navigator.clipboard.writeText(text)
@@ -55,6 +60,15 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
     navigator.clipboard.writeText(shareUrl)
       .then(() => toast('Link copied to clipboard'))
       .catch(() => toast('Could not copy link', 'error'));
+  }
+
+  async function handleBookmark() {
+    if (!shareSlug) {
+      toast('Answer must be saved before bookmarking', 'error');
+      return;
+    }
+    await toggleBookmark();
+    toast(bookmarked ? 'Bookmark removed' : 'Bookmarked!');
   }
 
   return (
@@ -151,6 +165,18 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
       <div className={styles.shareBar} aria-label="Share options">
         <span className={styles.shareLabel}>Share this study</span>
         <div className={styles.shareActions}>
+          {/* Bookmark toggle */}
+          <button
+            className={`${styles.shareBtn} ${bookmarked ? styles.shareBtnBookmarked : ''}`}
+            onClick={handleBookmark}
+            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this answer'}
+            aria-pressed={bookmarked}
+            disabled={bookmarkLoading}
+            type="button"
+          >
+            {bookmarked ? '★ Saved' : '☆ Save'}
+          </button>
+
           <button
             className={styles.shareBtn}
             onClick={handleCopyText}
