@@ -2,7 +2,7 @@
 
 > **Current phase:** Phase 2 — Knowledge Graph + RAG pipeline live
 > **Last updated:** 2026-06-28
-> **Session:** Steps 1-6 complete — schema-v3, graph.ts, /api/graph, GraphView, Obsidian export, Electron desktop
+> **Session:** Steps 1-6 + shareable links + /graph nav complete
 
 ---
 
@@ -30,11 +30,13 @@
 - [ ] **Test rate limiting** — confirm 429 fires after 15 requests/hour
 - [ ] **Test RAG pipeline** — ask a question twice, confirm second hit returns `X-RAG-Hit: exact`
 - [ ] **Test graph population** — after first answer, confirm rows appear in `graph_nodes` + `graph_edges`
+- [ ] **Test share links** — confirm `/share/[slug]` renders answer + OG preview on Discord/iMessage
 
 ---
 
-## ✅ Completed (Steps 1–6, 2026-06-28)
+## ✅ Completed (2026-06-28)
 
+### Steps 1–6 — Core infrastructure
 - [x] `supabase/schema-v3.sql` — `graph_nodes` + `graph_edges` tables, RLS, `get_node_subgraph` RPC
 - [x] `src/lib/graph.ts` — 6 typed functions: upsertNode, upsertEdge, writeGraphFromAnswer, getFullGraph, getSubgraph, getNodeByKey
 - [x] `src/app/api/graph/route.ts` — GET (full/subgraph) + POST (secret-protected write)
@@ -44,6 +46,11 @@
 - [x] `apps/desktop/` — Electron wrapper: vault IPC (pick/read/write/reveal), graphify rebuild, sync indicator, DesktopShell top bar
 - [x] Root `package.json` — workspaces + d3 + openai + desktop:dev / desktop:dist scripts
 - [x] `.env.example` — all env vars documented with generation instructions
+
+### Enhancements
+- [x] **Shareable answer links** — `/share/[slug]` SSR page with OG metadata, permalink badge, 🔗 Copy link button
+- [x] **`shareSlug` in API response** — `AskResponse.shareSlug` added to types + `/api/ask` returns it
+- [x] **`/graph` in Header nav** — active route highlight with gold underline via `usePathname`
 
 ---
 
@@ -77,9 +84,9 @@
 ## 🎨 Customizations & Enhancements
 
 ### High value, low effort
-- [ ] **Shareable answer links** — `/share/[slug]` page (slug already saved by `saveAnswer()`)
+- [x] **Shareable answer links** — `/share/[slug]` ✔
+- [x] **Link /graph in Header nav** — ✔
 - [ ] **Answer history page** — `/history` listing past questions with search/filter
-- [ ] **Link /graph in Header nav** — graph page exists but has no nav link yet
 - [ ] **Bible translation switcher UI** — backend accepts `translation` param, no frontend picker yet
 - [ ] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown
 - [ ] **Toast on clipboard copy** — answer share button copies but gives no feedback
@@ -162,7 +169,6 @@
 
 ## Tech Debt & Known Issues
 
-- [ ] No `/graph` link in Header nav
 - [ ] No Electron desktop icon (`apps/desktop/public/icon.png` missing)
 - [ ] Turbopack root warning — suppressed in `next.config.ts`, may resurface after Node upgrade
 - [ ] No PWA icons yet — `icon-192.png` 404 in dev logs
@@ -184,6 +190,8 @@
 | 2026-06-28 | Zero-dep PKZIP for Obsidian export | No extra npm packages; Node.js zlib built-in sufficient |
 | 2026-06-28 | Render + Supabase Pro stack | Render Web Service ($7) + Supabase Pro ($25) = always-on with pgvector |
 | 2026-06-28 | Electron contextBridge IPC | Security best practice; no nodeIntegration in renderer |
+| 2026-06-28 | shareSlug from UUID prefix | Slug computed client-side from answer.id — no extra DB read needed |
+| 2026-06-28 | usePathname for active nav | Header converted to client component for route-aware highlighting |
 
 ---
 
