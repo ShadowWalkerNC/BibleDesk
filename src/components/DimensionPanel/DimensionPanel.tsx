@@ -6,7 +6,9 @@ import { DIMENSION_META } from '@/types';
 import styles from './DimensionPanel.module.css';
 
 interface DimensionPanelProps {
-  answer: BibleAnswer;
+  answer:     BibleAnswer;
+  /** Short slug for /share/[slug] — present on new answers, absent on cached RAG hits */
+  shareSlug?: string;
 }
 
 const CONFIDENCE_LABELS = { high: 'High Confidence', medium: 'Moderate Confidence', low: 'Lower Confidence' };
@@ -22,15 +24,21 @@ function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text).catch(() => {});
 }
 
-export default function DimensionPanel({ answer }: DimensionPanelProps) {
-  const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
-  const [copied, setCopied] = useState(false);
+export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
+  const [activeTab,   setActiveTab]   = useState<DimensionKey>('scripture');
+  const [copied,      setCopied]      = useState(false);
+  const [linkCopied,  setLinkCopied]  = useState(false);
 
-  const activeDim = answer.dimensions[activeTab];
-  const activeMeta = DIMENSION_META.find((m) => m.key === activeTab)!;
+  const activeDim   = answer.dimensions[activeTab];
+  const activeMeta  = DIMENSION_META.find((m) => m.key === activeTab)!;
   const accentColor = DIMENSION_COLORS[activeTab];
 
-  function handleCopy() {
+  // Build the canonical share URL
+  const shareUrl = shareSlug
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareSlug}`
+    : typeof window !== 'undefined' ? window.location.href : '';
+
+  function handleCopyText() {
     const text = [
       `BibleDesk Answer: ${answer.question}`,
       '',
@@ -40,11 +48,19 @@ export default function DimensionPanel({ answer }: DimensionPanelProps) {
         const dim = answer.dimensions[m.key];
         return `${m.emoji} ${dim.title}\n${dim.content}\n\nCitations: ${dim.citations.join(', ')}`;
       }),
-    ].join('\n\n');
+      '',
+      shareUrl ? `🔗 ${shareUrl}` : '',
+    ].filter((l) => l !== undefined).join('\n\n');
 
     copyToClipboard(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function handleCopyLink() {
+    copyToClipboard(shareUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   }
 
   return (
@@ -60,15 +76,22 @@ export default function DimensionPanel({ answer }: DimensionPanelProps) {
           <span className={styles.translationTag}>
             {answer.translation_used.toUpperCase()} translation
           </span>
+          {shareSlug && (
+            <a
+              href={`/share/${shareSlug}`}
+              className={styles.permalinkBadge}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Permanent link to this answer"
+            >
+              🔗 Permalink
+            </a>
+          )}
         </div>
       </div>
 
       {/* Dimension tabs */}
-      <div
-        className={styles.tabBar}
-        role="tablist"
-        aria-label="Study dimensions"
-      >
+      <div className={styles.tabBar} role="tablist" aria-label="Study dimensions">
         {DIMENSION_META.map((meta) => (
           <button
             key={meta.key}
@@ -101,39 +124,29 @@ export default function DimensionPanel({ answer }: DimensionPanelProps) {
           </h2>
         </div>
 
-        {/* Key points */}
         {activeDim.key_points?.length > 0 && (
           <div className={styles.keyPoints} aria-label="Key points">
             {activeDim.key_points.map((point, i) => (
               <div key={i} className={styles.keyPoint}>
-                <span
-                  className={styles.keyPointDot}
-                  style={{ backgroundColor: accentColor }}
-                  aria-hidden="true"
-                />
+                <span className={styles.keyPointDot} style={{ backgroundColor: accentColor }} aria-hidden="true" />
                 {point}
               </div>
             ))}
           </div>
         )}
 
-        {/* Main content */}
         <p className={styles.panelContent}>{activeDim.content}</p>
 
-        {/* Citations */}
         {activeDim.citations?.length > 0 && (
           <div className={styles.citations}>
             <div className={styles.citationsLabel}>Scripture References</div>
             {activeDim.citations.map((cite, i) => (
-              <span key={i} className={styles.citation} title={cite}>
-                {cite}
-              </span>
+              <span key={i} className={styles.citation} title={cite}>{cite}</span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Disclaimer */}
       {answer.disclaimer && (
         <div className={styles.disclaimer} role="note">
           <strong>Note: </strong>{answer.disclaimer}
@@ -144,22 +157,37 @@ export default function DimensionPanel({ answer }: DimensionPanelProps) {
       <div className={styles.shareBar} aria-label="Share options">
         <span className={styles.shareLabel}>Share this study</span>
         <div className={styles.shareActions}>
+          {/* Copy full text */}
           <button
             className={styles.shareBtn}
-            onClick={handleCopy}
+            onClick={handleCopyText}
             aria-label="Copy full answer to clipboard"
             type="button"
           >
-            {copied ? '✓ Copied!' : '⎘ Copy'}
+            {copied ? '✓ Copied!' : '⍘ Copy'}
           </button>
+
+          {/* Copy share link */}
+          {shareSlug && (
+            <button
+              className={`${styles.shareBtn} ${styles.shareBtnLink}`}
+              onClick={handleCopyLink}
+              aria-label="Copy shareable link"
+              type="button"
+            >
+              {linkCopied ? '✓ Link copied!' : '🔗 Copy link'}
+            </button>
+          )}
+
+          {/* Native share sheet (mobile) */}
           {typeof navigator !== 'undefined' && 'share' in navigator && (
             <button
               className={styles.shareBtn}
               onClick={() =>
                 navigator.share({
                   title: `BibleDesk: ${answer.question}`,
-                  text: answer.summary,
-                  url: window.location.href,
+                  text:  answer.summary,
+                  url:   shareUrl,
                 }).catch(() => {})
               }
               aria-label="Share via system share sheet"

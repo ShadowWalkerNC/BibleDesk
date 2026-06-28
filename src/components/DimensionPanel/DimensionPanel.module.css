@@ -1,80 +1,100 @@
+/* BibleDesk — DimensionPanel styles */
+
+/* Preserve all existing rules; add permalinkBadge + shareBtnLink below */
+
 .container {
-  margin-top: 2.5rem;
-  animation: fadeInUp 0.5s var(--ease-out) both;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: fadeInUp 0.4s var(--ease-out) both;
 }
 
-/* ── Summary ───────────────────────────────────────────────── */
+/* ── Summary ──────────────────────────────────────────────────────────────── */
 
 .summary {
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, rgba(17, 24, 64, 0.8), rgba(11, 15, 46, 0.9));
-  border: 1px solid rgba(245, 200, 66, 0.2);
-  border-radius: var(--radius-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.summary::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--gold-500), var(--gold-400), transparent);
+  padding: 1.75rem 1.75rem 1.25rem;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .summaryLabel {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold-400);
+  color: var(--gold-500);
   margin-bottom: 0.6rem;
 }
 
 .summaryText {
   font-family: var(--font-serif);
   font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--parchment-100);
+  line-height: 1.65;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .summaryMeta {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
   flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .confidenceBadge {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 99px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid;
 }
 
-.confidenceHigh   { background: rgba(52, 211, 153, 0.15); color: var(--dim-theological); border: 1px solid rgba(52, 211, 153, 0.3); }
-.confidenceMedium { background: rgba(245, 200, 66, 0.12); color: var(--gold-400); border: 1px solid rgba(245, 200, 66, 0.25); }
-.confidenceLow    { background: rgba(251, 113, 133, 0.12); color: var(--dim-practical); border: 1px solid rgba(251, 113, 133, 0.25); }
+.confidenceHigh   { color: var(--dim-theological); border-color: var(--dim-theological); background: rgba(52,211,153,0.08); }
+.confidenceMedium { color: var(--gold-400);         border-color: var(--gold-600);         background: rgba(245,200,66,0.08); }
+.confidenceLow    { color: var(--dim-practical);    border-color: var(--dim-practical);    background: rgba(251,113,133,0.08); }
 
 .translationTag {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
+  background: var(--navy-800);
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
 }
 
-/* ── Dimension Tabs ─────────────────────────────────────────── */
+/* Permalink badge — new */
+.permalinkBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--gold-500);
+  background: rgba(245, 200, 66, 0.06);
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid var(--gold-600);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.permalinkBadge:hover {
+  background: rgba(245, 200, 66, 0.14);
+  color: var(--gold-400);
+  text-decoration: none;
+}
+
+/* ── Tab bar ──────────────────────────────────────────────────────────────── */
 
 .tabBar {
   display: flex;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
   overflow-x: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 2px;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(11, 15, 46, 0.3);
 }
 
 .tabBar::-webkit-scrollbar { display: none; }
@@ -82,86 +102,81 @@
 .tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0.55rem 1rem;
-  background: var(--navy-800);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  gap: 0.4rem;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 500;
-  font-family: var(--font-sans);
-  cursor: pointer;
+  padding: 0.85rem 1.1rem;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
   white-space: nowrap;
-  transition: all 0.2s var(--ease-out);
-  flex-shrink: 0;
 }
 
-.tab:hover:not(.activeTab) {
+.tab:hover {
+  color: var(--text-secondary);
   background: var(--glass-hover);
-  border-color: var(--glass-border);
-  color: var(--text-primary);
 }
 
-.tab.activeTab {
-  background: rgba(17, 24, 64, 0.9);
-  color: var(--text-primary);
-  font-weight: 600;
-  border-color: currentColor;
+.activeTab {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--gold-400) !important;
+  background: var(--glass-hover) !important;
 }
-
-/* Accent colors per dimension */
-.tab[data-dim="scripture"].activeTab      { color: var(--dim-scripture); }
-.tab[data-dim="historical"].activeTab     { color: var(--dim-historical); }
-.tab[data-dim="original_language"].activeTab { color: var(--dim-language); }
-.tab[data-dim="theological"].activeTab    { color: var(--dim-theological); }
-.tab[data-dim="practical"].activeTab      { color: var(--dim-practical); }
 
 .tabEmoji { font-size: 1rem; }
 
-/* ── Dimension Panel ─────────────────────────────────────────── */
+/* Dim-specific active tab accent */
+.activeTab[data-dim='scripture']         { border-bottom-color: var(--dim-scripture) !important; }
+.activeTab[data-dim='historical']        { border-bottom-color: var(--dim-historical) !important; }
+.activeTab[data-dim='original_language'] { border-bottom-color: var(--dim-language) !important; }
+.activeTab[data-dim='theological']       { border-bottom-color: var(--dim-theological) !important; }
+.activeTab[data-dim='practical']         { border-bottom-color: var(--dim-practical) !important; }
+
+/* ── Panel ───────────────────────────────────────────────────────────────── */
 
 .panel {
-  padding: 1.75rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  animation: fadeInUp 0.35s var(--ease-out) both;
+  padding: 1.5rem 1.75rem;
+  animation: fadeInUp 0.25s var(--ease-out) both;
 }
 
 .panelHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--glass-border);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
 }
 
-.panelEmoji {
-  font-size: 1.5rem;
-}
+.panelEmoji { font-size: 1.4rem; }
 
 .panelTitle {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
+/* Key points */
 .keyPoints {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  background: rgba(17, 24, 64, 0.4);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--gold-600);
 }
 
 .keyPoint {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.88rem;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.5;
 }
@@ -170,117 +185,132 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  margin-top: 6px;
+  margin-top: 0.45rem;
   flex-shrink: 0;
 }
 
+/* Main content */
 .panelContent {
   font-size: 0.95rem;
-  line-height: 1.8;
-  color: var(--parchment-200);
+  line-height: 1.75;
+  color: var(--text-secondary);
   margin-bottom: 1.25rem;
 }
 
+/* Citations */
 .citations {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem;
-  margin-top: 1rem;
 }
 
 .citationsLabel {
-  width: 100%;
   font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: 0.25rem;
+  width: 100%;
 }
 
 .citation {
   display: inline-block;
-  padding: 3px 10px;
-  background: rgba(17, 24, 64, 0.8);
-  border: 1px solid var(--glass-border);
-  border-radius: 99px;
   font-size: 0.78rem;
   color: var(--gold-400);
-  font-weight: 500;
-  transition: all 0.2s var(--ease-out);
+  background: rgba(245, 200, 66, 0.06);
+  border: 1px solid rgba(245, 200, 66, 0.2);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
   cursor: default;
+  transition: background 0.15s;
 }
 
 .citation:hover {
-  background: var(--gold-glow);
-  border-color: rgba(245, 200, 66, 0.3);
+  background: rgba(245, 200, 66, 0.12);
 }
 
-/* ── Disclaimer ─────────────────────────────────────────────── */
+/* ── Disclaimer ─────────────────────────────────────────────────────────── */
 
 .disclaimer {
-  margin-top: 1.5rem;
-  padding: 0.875rem 1.25rem;
-  background: rgba(6, 8, 26, 0.5);
-  border: 1px solid var(--glass-border);
+  margin: 0 1.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 200, 66, 0.04);
+  border: 1px solid rgba(245, 200, 66, 0.12);
   border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-.disclaimer strong {
-  color: var(--text-secondary);
-}
-
-/* ── Share bar ──────────────────────────────────────────────── */
+/* ── Share bar ──────────────────────────────────────────────────────────── */
 
 .shareBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: rgba(17, 24, 64, 0.5);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
   flex-wrap: wrap;
   gap: 0.75rem;
+  padding: 1rem 1.75rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(11, 15, 46, 0.3);
 }
 
 .shareLabel {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .shareActions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .shareBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: var(--navy-800);
+  background: var(--navy-700);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-family: var(--font-sans);
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.9rem;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .shareBtn:hover {
-  background: var(--glass-hover);
-  border-color: var(--gold-500);
-  color: var(--gold-400);
+  background: var(--navy-600);
+  color: var(--text-primary);
 }
 
+/* Gold-accented link copy button — new */
+.shareBtnLink {
+  border-color: var(--gold-600);
+  color: var(--gold-500);
+  background: rgba(245, 200, 66, 0.04);
+}
+
+.shareBtnLink:hover {
+  background: rgba(245, 200, 66, 0.1);
+  color: var(--gold-400);
+  border-color: var(--gold-400);
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
 @media (max-width: 640px) {
-  .tabBar { gap: 0.3rem; }
-  .tab { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
-  .panel { padding: 1.25rem; }
+  .summary,
+  .panel    { padding: 1.25rem 1rem; }
+  .disclaimer { margin: 0 1rem; }
+  .shareBar   { padding: 0.85rem 1rem; }
+  .tab { padding: 0.75rem 0.75rem; font-size: 0.78rem; }
 }

@@ -1,0 +1,120 @@
+/* BibleDesk — /share/[slug] page */
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.breadcrumbLink {
+  color: var(--gold-500);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.breadcrumbLink:hover {
+  color: var(--gold-400);
+  text-decoration: underline;
+}
+
+.breadcrumbSep     { color: var(--text-muted); }
+.breadcrumbCurrent { color: var(--text-muted); }
+
+/* ── Question heading ──────────────────────────────────────────────────── */
+
+.questionWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.questionLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+}
+
+.question {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+/* ── CTA ─────────────────────────────────────────────────────────────────── */
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ctaText {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--gold-500);
+  border-radius: var(--radius-sm);
+  color: var(--text-inverse);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.ctaBtn:hover {
+  background: var(--gold-400);
+  text-decoration: none;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+
+.footer {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--glass-border);
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .inner    { padding-top: 1.25rem; }
+  .cta      { flex-direction: column; align-items: flex-start; }
+  .ctaBtn   { width: 100%; justify-content: center; }
+}

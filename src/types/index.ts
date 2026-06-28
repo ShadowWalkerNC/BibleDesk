@@ -15,7 +15,7 @@ export const TRANSLATIONS: Translation[] = [
   { id: 'asv', name: 'American Standard Version', description: 'Literal, public domain' },
 ];
 
-// ── Bible API ────────────────────────────────────────────────────────────
+// ── Bible API ────────────────────────────────────────────────────────────────
 
 export interface BibleVerse {
   book_id: string;
@@ -34,7 +34,7 @@ export interface BiblePassage {
   translation_note: string;
 }
 
-// ── AI Answer ────────────────────────────────────────────────────────────
+// ── AI Answer ────────────────────────────────────────────────────────────────
 
 export interface Dimension {
   title: string;
@@ -77,14 +77,14 @@ export interface DimensionMeta {
 }
 
 export const DIMENSION_META: DimensionMeta[] = [
-  { key: 'scripture',         emoji: '📖', label: 'Scripture',           color: '--dim-scripture' },
-  { key: 'historical',        emoji: '🏗️', label: 'Historical Context', color: '--dim-historical' },
-  { key: 'original_language', emoji: '🔤', label: 'Original Language',   color: '--dim-language' },
-  { key: 'theological',       emoji: '✝️', label: 'Theological Meaning', color: '--dim-theological' },
+  { key: 'scripture',         emoji: '📖', label: 'Scripture',             color: '--dim-scripture' },
+  { key: 'historical',        emoji: '🏗️', label: 'Historical Context',  color: '--dim-historical' },
+  { key: 'original_language', emoji: '🔤', label: 'Original Language',    color: '--dim-language' },
+  { key: 'theological',       emoji: '✝️', label: 'Theological Meaning',  color: '--dim-theological' },
   { key: 'practical',         emoji: '🌱', label: 'Practical Application', color: '--dim-practical' },
 ];
 
-// ── API Request/Response ───────────────────────────────────────────────
+// ── API Request/Response ─────────────────────────────────────────────────────
 
 export interface AskRequest {
   question: string;
@@ -94,6 +94,8 @@ export interface AskRequest {
 export interface AskResponse {
   success: true;
   answer: BibleAnswer;
+  /** Short 8-char slug for /share/[slug] — only present on new pipeline answers */
+  shareSlug?: string;
 }
 
 export interface ErrorResponse {

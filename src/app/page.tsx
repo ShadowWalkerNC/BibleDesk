@@ -9,10 +9,11 @@ import type { BibleAnswer, TranslationId, ApiResponse } from '@/types';
 import styles from './page.module.css';
 
 export default function HomePage() {
-  const [answer, setAnswer] = useState<BibleAnswer | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastQuestion, setLastQuestion] = useState('');
+  const [answer,          setAnswer]          = useState<BibleAnswer | null>(null);
+  const [shareSlug,       setShareSlug]       = useState<string | null>(null);
+  const [isLoading,       setIsLoading]       = useState(false);
+  const [error,           setError]           = useState<string | null>(null);
+  const [lastQuestion,    setLastQuestion]    = useState('');
   const [lastTranslation, setLastTranslation] = useState<TranslationId>('web');
   const answerRef = useRef<HTMLDivElement>(null);
 
@@ -20,19 +21,19 @@ export default function HomePage() {
     setIsLoading(true);
     setError(null);
     setAnswer(null);
+    setShareSlug(null);
     setLastQuestion(question);
     setLastTranslation(translation);
 
-    // Scroll toward result area smoothly
     setTimeout(() => {
       answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
     try {
-      const res = await fetch('/api/ask', {
-        method: 'POST',
+      const res  = await fetch('/api/ask', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, translation }),
+        body:    JSON.stringify({ question, translation }),
       });
 
       const data: ApiResponse = await res.json();
@@ -43,6 +44,7 @@ export default function HomePage() {
       }
 
       setAnswer(data.answer);
+      if (data.shareSlug) setShareSlug(data.shareSlug);
     } catch {
       setError('Network error. Please check your connection and try again.');
     } finally {
@@ -89,7 +91,7 @@ export default function HomePage() {
                   <ErrorState message={error} onRetry={handleRetry} />
                 )}
                 {answer && !isLoading && (
-                  <DimensionPanel answer={answer} />
+                  <DimensionPanel answer={answer} shareSlug={shareSlug ?? undefined} />
                 )}
               </div>
             </section>
@@ -102,9 +104,9 @@ export default function HomePage() {
             <div className="container">
               <div className={styles.featureGrid}>
                 {[
-                  { emoji: '📖', label: 'Scripture', desc: 'Direct verse analysis and cross-references in your preferred translation' },
-                  { emoji: '🏛️', label: 'Historical Context', desc: 'Cultural, political, and historical background of the time period' },
-                  { emoji: '🔤', label: 'Original Language', desc: 'Hebrew and Greek word meanings, nuance, and translation insights' },
+                  { emoji: '📖', label: 'Scripture',           desc: 'Direct verse analysis and cross-references in your preferred translation' },
+                  { emoji: '🏗️', label: 'Historical Context', desc: 'Cultural, political, and historical background of the time period' },
+                  { emoji: '🔤', label: 'Original Language',   desc: 'Hebrew and Greek word meanings, nuance, and translation insights' },
                   { emoji: '✝️', label: 'Theological Meaning', desc: 'What scholars and traditions have taught across church history' },
                   { emoji: '🌱', label: 'Practical Application', desc: 'Concrete ways to apply these truths to daily life, family, and faith' },
                   { emoji: '🔗', label: 'Discord Integration', desc: 'Connected to Sigil — prayer requests and sermons go right to your server' },
