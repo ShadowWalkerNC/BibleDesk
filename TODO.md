@@ -8,34 +8,28 @@
 
 ## 🔴 Known Gaps (fix before going live)
 
-- [x] **Wire graph writer** — `writeGraphFromAnswer` wired inside `saveAnswer()` in `src/lib/supabase.ts` (non-blocking `.catch()`)
-- [x] **Install openai package** — added `openai ^4.100.0` to `package.json` (run `npm install` locally)
-- [x] **Add `OPENAI_API_KEY`** — add to `.env.local` and Render project settings *(manual step — key not stored in repo)*
-- [x] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2) *(manual step)*
-- [x] **Set `GRAPH_WRITE_SECRET`** — `openssl rand -hex 32` → add to env *(manual step)*
-
-> ⚠️ **TODO NEXT SESSION — 4 manual steps still needed before deploy:**
-> 1. Run `npm install` locally to lock `openai` into `package-lock.json`
-> 2. Add `OPENAI_API_KEY` to `.env.local` and Render env vars
-> 3. Apply `supabase/schema-v3.sql` in Supabase SQL editor
-> 4. Generate + set `GRAPH_WRITE_SECRET` in Render env vars (`openssl rand -hex 32`)
->
-> Once these are done → move on to 🟡 Deploy Blockers below.
+- [x] **Wire graph writer** — `writeGraphFromAnswer` already imported + called in `saveAnswer()` ✔
+- [x] **`openai` in package.json** — `"openai": "^4.100.0"` already present ✔
+- [x] **`GRAPH_WRITE_SECRET` in .env.example** — already documented ✔
+- [x] **Add `ANTHROPIC_API_KEY` + `OPENAI_API_KEY` to .env.example** — added 2026-06-28 ✔
+- [ ] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2)
+- [ ] **Set all env vars** — fill `.env.local` from `.env.example` (ANTHROPIC_API_KEY, OPENAI_API_KEY, Supabase keys, GRAPH_WRITE_SECRET, IP_HASH_SALT)
 
 ---
 
 ## 🟡 Deploy Blockers (must do before first public URL)
 
-- [ ] **Create Supabase project** — run `supabase/schema.sql` in SQL editor
+- [ ] **Create Supabase project** — run `supabase/schema.sql` then `supabase/schema-v3.sql` in SQL editor
 - [ ] **Set environment variables** — copy `.env.example` → `.env.local`, fill all values
 - [ ] **Generate IP hash salt** — `openssl rand -hex 16` → `IP_HASH_SALT`
-- [ ] **Generate Sigil webhook secret** — `openssl rand -hex 32` → `BIBLEDESK_WEBHOOK_SECRET`
+- [ ] **Generate secrets** — `openssl rand -hex 32` → `GRAPH_WRITE_SECRET` and `BIBLEDESK_WEBHOOK_SECRET`
 - [ ] **Deploy to Render** — Web Service, Node runtime, build: `npm install && npm run build`, start: `npm run start`
 - [ ] **Set `NEXT_PUBLIC_APP_URL`** — to production Render URL
 - [ ] **Upgrade Supabase to Pro** ($25/mo) — prevents project pause after 7 days inactivity
 - [ ] **Verify build passes** on Render with real env vars
 - [ ] **Test rate limiting** — confirm 429 fires after 15 requests/hour
 - [ ] **Test RAG pipeline** — ask a question twice, confirm second hit returns `X-RAG-Hit: exact`
+- [ ] **Test graph population** — after first answer, confirm rows appear in `graph_nodes` + `graph_edges`
 
 ---
 
@@ -48,9 +42,8 @@
 - [x] `src/app/graph/page.tsx` — /graph explorer page with concept focus + drill-in
 - [x] `src/app/api/export/obsidian/route.ts` — Obsidian vault .zip export, zero external deps, PKZIP encoder
 - [x] `apps/desktop/` — Electron wrapper: vault IPC (pick/read/write/reveal), graphify rebuild, sync indicator, DesktopShell top bar
-- [x] Root `package.json` — workspaces + d3 + desktop:dev / desktop:dist scripts
-- [x] `openai` added to `package.json` dependencies (^4.100.0)
-- [x] `writeGraphFromAnswer` wired into `saveAnswer()` — fire-and-forget, non-blocking
+- [x] Root `package.json` — workspaces + d3 + openai + desktop:dev / desktop:dist scripts
+- [x] `.env.example` — all env vars documented with generation instructions
 
 ---
 
@@ -169,8 +162,6 @@
 
 ## Tech Debt & Known Issues
 
-- [x] `openai` package added to `package.json` — run `npm install`
-- [x] `writeGraphFromAnswer` wired in `saveAnswer` — graph tables will now populate
 - [ ] No `/graph` link in Header nav
 - [ ] No Electron desktop icon (`apps/desktop/public/icon.png` missing)
 - [ ] Turbopack root warning — suppressed in `next.config.ts`, may resurface after Node upgrade
