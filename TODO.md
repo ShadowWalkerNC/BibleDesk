@@ -14,11 +14,13 @@
 - [x] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2) *(manual step)*
 - [x] **Set `GRAPH_WRITE_SECRET`** — `openssl rand -hex 32` → add to env *(manual step)*
 
-> ⚠️ **Manual steps remaining before deploy:**
+> ⚠️ **TODO NEXT SESSION — 4 manual steps still needed before deploy:**
 > 1. Run `npm install` locally to lock `openai` into `package-lock.json`
 > 2. Add `OPENAI_API_KEY` to `.env.local` and Render env vars
 > 3. Apply `supabase/schema-v3.sql` in Supabase SQL editor
-> 4. Generate + set `GRAPH_WRITE_SECRET` in Render env vars
+> 4. Generate + set `GRAPH_WRITE_SECRET` in Render env vars (`openssl rand -hex 32`)
+>
+> Once these are done → move on to 🟡 Deploy Blockers below.
 
 ---
 
