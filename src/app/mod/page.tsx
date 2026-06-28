@@ -1,65 +1,46 @@
 'use client';
 
-// BibleDesk — Moderator Dashboard
-// Displays the pending flag queue and exposes vote / approve / invite actions.
-// Auth: reads session from localStorage (Supabase anon key flow).
-//       Unauthenticated visitors see a simple "Access Denied" message.
-//
-// Panels:
-//   1. Flag Queue       — lists each pending flag with answer + vote buttons
-//   2. Approve          — admin force-promotes a flag to canonical
-//   3. Invite Moderator — admin invites a new moderator by email
-
 import { useEffect, useState, useCallback, FormEvent } from 'react';
 import styles from './page.module.css';
-
-// ─── Types ────────────────────────────────────────────────────────────────
+import { getBrowserClient } from '@/lib/supabase';
 
 interface FlagItem {
-  id:          string;
-  created_at:  string;
-  reason:      string;
+  id: string;
+  created_at: string;
+  reason: string;
   question_id: string;
   answer: {
-    id:        string;
-    body:      string;
+    id: string;
+    body: string;
     dimension: string;
-    source:    string;
-    status:    string;
+    source: string;
+    status: string;
   };
   votes: {
-    accurate:   number;
+    accurate: number;
     inaccurate: number;
-    total:      number;
+    total: number;
   };
 }
 
 type VoteValue = 'accurate' | 'inaccurate';
-
 type Tab = 'queue' | 'approve' | 'invite';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
-
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  // Supabase stores the session under this key by default
-  const raw = localStorage.getItem(
-    `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`
-  );
-  if (!raw) return null;
+async function getToken(): Promise<string | null> {
   try {
-    const parsed = JSON.parse(raw);
-    return parsed?.access_token ?? null;
+    const supabase = getBrowserClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
   } catch {
     return null;
   }
 }
 
-async function apiFetch<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<{ data: T | null; error: string | null }> {
-  const token = getToken();
+async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<{ data: T | null; error: string | null }> {
+  const token = await getToken();
+
   try {
     const res = await fetch(path, {
       ...options,
@@ -69,10 +50,13 @@ async function apiFetch<T>(
         ...(options.headers ?? {}),
       },
     });
+
     const json = await res.json();
+
     if (!res.ok) {
       return { data: null, error: json.error ?? `HTTP ${res.status}` };
     }
+
     return { data: json as T, error: null };
   } catch (err) {
     return { data: null, error: String(err) };
@@ -80,11 +64,11 @@ async function apiFetch<T>(
 }
 
 const DIM_COLORS: Record<string, string> = {
-  scripture:   'var(--dim-scripture)',
-  historical:  'var(--dim-historical)',
-  language:    'var(--dim-language)',
+  scripture: 'var(--dim-scripture)',
+  historical: 'var(--dim-historical)',
+  language: 'var(--dim-language)',
   theological: 'var(--dim-theological)',
-  practical:   'var(--dim-practical)',
+  practical: 'var(--dim-practical)',
 };
 
 function dimColor(d: string) {
@@ -93,44 +77,41 @@ function dimColor(d: string) {
 
 function relativeTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
-  const mins  = Math.floor(diff / 60_000);
+  const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
-  const days  = Math.floor(diff / 86_400_000);
-  if (mins < 2)   return 'just now';
-  if (mins < 60)  return `${mins}m ago`;
+  const days = Math.floor(diff / 86_400_000);
+  if (mins < 2) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
   return `${days}d ago`;
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
-
 function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => void }) {
-  const [vote,       setVote]       = useState<VoteValue | ''>('');
+  const [vote, setVote] = useState<VoteValue | ''>('');
   const [correction, setCorrection] = useState('');
-  const [refs,       setRefs]       = useState('');
+  const [refs, setRefs] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [feedback,   setFeedback]   = useState<{ ok: boolean; msg: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function handleVote(e: FormEvent) {
     e.preventDefault();
     if (!vote) return;
+
     setSubmitting(true);
     setFeedback(null);
 
     const { error } = await apiFetch('/api/mod/vote', {
       method: 'POST',
       body: JSON.stringify({
-        flagId:       flag.id,
+        flagId: flag.id,
         vote,
-        correction:   correction.trim() || undefined,
-        scriptureRefs: refs
-          .split(',')
-          .map(r => r.trim())
-          .filter(Boolean),
+        correction: correction.trim() || undefined,
+        scriptureRefs: refs.split(',').map((r) => r.trim()).filter(Boolean),
       }),
     });
 
     setSubmitting(false);
+
     if (error) {
       setFeedback({ ok: false, msg: error });
     } else {
@@ -141,27 +122,19 @@ function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => 
 
   return (
     <article className={styles.flagCard}>
-      {/* Header */}
       <header className={styles.flagCardHeader}>
-        <span
-          className={styles.dimBadge}
-          style={{ color: dimColor(flag.answer.dimension) }}
-        >
+        <span className={styles.dimBadge} style={{ color: dimColor(flag.answer.dimension) }}>
           {flag.answer.dimension}
         </span>
         <span className={styles.flagReason}>⚠️ {flag.reason}</span>
         <time className={styles.flagTime}>{relativeTime(flag.created_at)}</time>
       </header>
 
-      {/* Answer body */}
       <div className={styles.answerBody}>
         <p>{flag.answer.body}</p>
-        {flag.answer.source && (
-          <p className={styles.answerSource}>Source: {flag.answer.source}</p>
-        )}
+        {flag.answer.source && <p className={styles.answerSource}>Source: {flag.answer.source}</p>}
       </div>
 
-      {/* Existing vote tally */}
       {flag.votes.total > 0 && (
         <div className={styles.voteTally}>
           <span className={styles.voteAccurate}>✔ {flag.votes.accurate} accurate</span>
@@ -170,7 +143,6 @@ function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => 
         </div>
       )}
 
-      {/* Vote form */}
       <form className={styles.voteForm} onSubmit={handleVote}>
         <div className={styles.voteButtons}>
           <button
@@ -195,7 +167,7 @@ function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => 
               className={styles.correctionInput}
               placeholder="Correction or note (optional)"
               value={correction}
-              onChange={e => setCorrection(e.target.value)}
+              onChange={(e) => setCorrection(e.target.value)}
               rows={3}
             />
             <input
@@ -203,22 +175,14 @@ function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => 
               type="text"
               placeholder="Scripture refs (comma-separated, optional)"
               value={refs}
-              onChange={e => setRefs(e.target.value)}
+              onChange={(e) => setRefs(e.target.value)}
             />
           </>
         )}
 
-        {feedback && (
-          <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>
-            {feedback.msg}
-          </p>
-        )}
+        {feedback && <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>{feedback.msg}</p>}
 
-        <button
-          type="submit"
-          className={styles.submitVoteBtn}
-          disabled={!vote || submitting}
-        >
+        <button type="submit" className={styles.submitVoteBtn} disabled={!vote || submitting}>
           {submitting ? 'Submitting…' : 'Submit Vote'}
         </button>
       </form>
@@ -226,16 +190,15 @@ function FlagCard({ flag, onVoted }: { flag: FlagItem; onVoted: (id: string) => 
   );
 }
 
-// ─── Approve panel ─────────────────────────────────────────────────────────
-
 function ApprovePanel() {
-  const [flagId,     setFlagId]     = useState('');
+  const [flagId, setFlagId] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [feedback,   setFeedback]   = useState<{ ok: boolean; msg: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function handleApprove(e: FormEvent) {
     e.preventDefault();
     if (!flagId.trim()) return;
+
     setSubmitting(true);
     setFeedback(null);
 
@@ -245,6 +208,7 @@ function ApprovePanel() {
     });
 
     setSubmitting(false);
+
     if (error) {
       setFeedback({ ok: false, msg: error });
     } else {
@@ -257,8 +221,7 @@ function ApprovePanel() {
     <section className={styles.panel}>
       <h2 className={styles.panelTitle}>📜 Force Approve Answer</h2>
       <p className={styles.panelDesc}>
-        Bypasses vote threshold and immediately promotes the flagged answer to
-        canonical. Admin only.
+        Bypasses vote threshold and immediately promotes the flagged answer to canonical. Admin only.
       </p>
       <form className={styles.simpleForm} onSubmit={handleApprove}>
         <label className={styles.fieldLabel} htmlFor="approve-flag-id">
@@ -270,19 +233,11 @@ function ApprovePanel() {
           type="text"
           placeholder="e.g. f7a3c1e2-..."
           value={flagId}
-          onChange={e => setFlagId(e.target.value)}
+          onChange={(e) => setFlagId(e.target.value)}
           required
         />
-        {feedback && (
-          <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>
-            {feedback.msg}
-          </p>
-        )}
-        <button
-          type="submit"
-          className={styles.primaryBtn}
-          disabled={!flagId.trim() || submitting}
-        >
+        {feedback && <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>{feedback.msg}</p>}
+        <button type="submit" className={styles.primaryBtn} disabled={!flagId.trim() || submitting}>
           {submitting ? 'Promoting…' : 'Promote to Canonical'}
         </button>
       </form>
@@ -290,14 +245,12 @@ function ApprovePanel() {
   );
 }
 
-// ─── Invite panel ──────────────────────────────────────────────────────────
-
 function InvitePanel() {
-  const [email,      setEmail]      = useState('');
-  const [name,       setName]       = useState('');
-  const [role,       setRole]       = useState<'moderator' | 'admin'>('moderator');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<'moderator' | 'admin'>('moderator');
   const [submitting, setSubmitting] = useState(false);
-  const [feedback,   setFeedback]   = useState<{ ok: boolean; msg: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault();
@@ -310,6 +263,7 @@ function InvitePanel() {
     });
 
     setSubmitting(false);
+
     if (error) {
       setFeedback({ ok: false, msg: error });
     } else {
@@ -324,8 +278,7 @@ function InvitePanel() {
     <section className={styles.panel}>
       <h2 className={styles.panelTitle}>📧 Invite Moderator</h2>
       <p className={styles.panelDesc}>
-        Sends a Supabase magic-link invite and creates a moderator record.
-        Admin only.
+        Sends a Supabase magic-link invite and creates a moderator record. Admin only.
       </p>
       <form className={styles.simpleForm} onSubmit={handleInvite}>
         <label className={styles.fieldLabel} htmlFor="invite-name">
@@ -337,7 +290,7 @@ function InvitePanel() {
           type="text"
           placeholder="Jane Doe"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           required
         />
         <label className={styles.fieldLabel} htmlFor="invite-email">
@@ -349,7 +302,7 @@ function InvitePanel() {
           type="email"
           placeholder="jane@example.com"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <label className={styles.fieldLabel} htmlFor="invite-role">
@@ -359,21 +312,13 @@ function InvitePanel() {
           id="invite-role"
           className={styles.selectInput}
           value={role}
-          onChange={e => setRole(e.target.value as 'moderator' | 'admin')}
+          onChange={(e) => setRole(e.target.value as 'moderator' | 'admin')}
         >
           <option value="moderator">Moderator</option>
           <option value="admin">Admin</option>
         </select>
-        {feedback && (
-          <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>
-            {feedback.msg}
-          </p>
-        )}
-        <button
-          type="submit"
-          className={styles.primaryBtn}
-          disabled={!email.trim() || !name.trim() || submitting}
-        >
+        {feedback && <p className={feedback.ok ? styles.feedbackOk : styles.feedbackErr}>{feedback.msg}</p>}
+        <button type="submit" className={styles.primaryBtn} disabled={!email.trim() || !name.trim() || submitting}>
           {submitting ? 'Sending…' : 'Send Invite'}
         </button>
       </form>
@@ -381,23 +326,21 @@ function InvitePanel() {
   );
 }
 
-// ─── Main page ──────────────────────────────────────────────────────────────
-
 export default function ModDashboard() {
-  const [tab,         setTab]       = useState<Tab>('queue');
-  const [queue,       setQueue]     = useState<FlagItem[]>([]);
-  const [loading,     setLoading]   = useState(true);
-  const [queueError,  setQueueError]= useState<string | null>(null);
-  const [authed,      setAuthed]    = useState<boolean | null>(null); // null = checking
+  const [tab, setTab] = useState<Tab>('queue');
+  const [queue, setQueue] = useState<FlagItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [queueError, setQueueError] = useState<string | null>(null);
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
-  // Load queue
   const loadQueue = useCallback(async () => {
     setLoading(true);
     setQueueError(null);
-    const { data, error } = await apiFetch<{ success: boolean; queue: FlagItem[] }>(
-      '/api/mod/queue'
-    );
+
+    const { data, error } = await apiFetch<{ success: boolean; queue: FlagItem[] }>('/api/mod/queue');
+
     setLoading(false);
+
     if (error) {
       if (error.toLowerCase().includes('unauthorized') || error.includes('401')) {
         setAuthed(false);
@@ -415,12 +358,10 @@ export default function ModDashboard() {
     loadQueue();
   }, [loadQueue]);
 
-  // Remove a voted-on card from local state
   function removeFlag(id: string) {
-    setQueue(prev => prev.filter(f => f.id !== id));
+    setQueue((prev) => prev.filter((f) => f.id !== id));
   }
 
-  // ── Access denied
   if (authed === false) {
     return (
       <main className={styles.accessDenied}>
@@ -435,23 +376,16 @@ export default function ModDashboard() {
 
   return (
     <main className={styles.dashboard}>
-      {/* Top bar */}
       <header className={styles.topBar}>
         <span className={styles.topBarLogo}>BibleDesk</span>
         <h1 className={styles.topBarTitle}>Moderation Dashboard</h1>
-        <button
-          className={styles.refreshBtn}
-          onClick={loadQueue}
-          disabled={loading}
-          aria-label="Refresh queue"
-        >
+        <button className={styles.refreshBtn} onClick={loadQueue} disabled={loading} aria-label="Refresh queue">
           {loading ? '⧗' : '⟳'}
         </button>
       </header>
 
-      {/* Tabs */}
       <nav className={styles.tabs} role="tablist">
-        {(['queue', 'approve', 'invite'] as Tab[]).map(t => (
+        {(['queue', 'approve', 'invite'] as Tab[]).map((t) => (
           <button
             key={t}
             role="tab"
@@ -459,20 +393,19 @@ export default function ModDashboard() {
             className={`${styles.tabBtn} ${tab === t ? styles.tabBtnActive : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'queue'   && `📊 Queue (${queue.length})`}
+            {t === 'queue' && `📊 Queue (${queue.length})`}
             {t === 'approve' && '📜 Approve'}
-            {t === 'invite'  && '📧 Invite'}
+            {t === 'invite' && '📧 Invite'}
           </button>
         ))}
       </nav>
 
-      {/* Content */}
       <div className={styles.content}>
         {tab === 'queue' && (
           <>
             {loading && (
               <div className={styles.loadingState}>
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3].map((i) => (
                   <div key={i} className={`${styles.skeletonCard} skeleton`} />
                 ))}
               </div>
@@ -496,7 +429,7 @@ export default function ModDashboard() {
 
             {!loading && !queueError && queue.length > 0 && (
               <div className={`${styles.flagList} animate-stagger`}>
-                {queue.map(flag => (
+                {queue.map((flag) => (
                   <FlagCard key={flag.id} flag={flag} onVoted={removeFlag} />
                 ))}
               </div>
@@ -505,7 +438,7 @@ export default function ModDashboard() {
         )}
 
         {tab === 'approve' && <ApprovePanel />}
-        {tab === 'invite'  && <InvitePanel />}
+        {tab === 'invite' && <InvitePanel />}
       </div>
     </main>
   );

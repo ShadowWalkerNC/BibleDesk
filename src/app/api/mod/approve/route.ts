@@ -1,55 +1,12 @@
 // BibleDesk — POST /api/mod/approve
-// Admin manually promotes a flagged answer to canonical_answers,
-// bypassing the vote threshold (e.g. for seed content or obvious accuracy).
-// Auth-gated: admin role only.
-//
-// Request body:
-//   { flagId: string }
-//
-// Response:
-//   200 { success: true, promoted: true }
-//   400 { success: false, error: '...', code: 'INVALID_INPUT' }
-//   401 { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }
-//   403 { success: false, error: 'Admin only', code: 'FORBIDDEN' }
-//   500 { success: false, error: '...', code: 'PROMOTE_FAILED' }
+// Admin manually promotes a flagged answer to canonical_answers.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getServerClient } from '@/lib/supabase';
 import { promoteToCanonical } from '@/lib/moderation';
-
-// ─── Auth helper ──────────────────────────────────────────────────────────
-
-async function getActiveModerator(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-
-  const svc = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-  const { data: mod } = await svc
-    .from('moderators')
-    .select('id, role, active')
-    .eq('user_id', user.id)
-    .eq('active', true)
-    .single();
-
-  return mod ?? null;
-}
-
-// ─── Route handler ────────────────────────────────────────────────────────
+import { getActiveModerator } from '@/lib/mod-auth';
 
 export async function POST(req: NextRequest) {
-  // ── Auth
   const mod = await getActiveModerator(req);
   if (!mod) {
     return NextResponse.json(
@@ -58,7 +15,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Admin only — moderators can vote but only admins can force-promote
   if (mod.role !== 'admin') {
     return NextResponse.json(
       { success: false, error: 'Admin role required to promote answers.', code: 'FORBIDDEN' },
@@ -66,7 +22,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Parse body
   let body: { flagId?: string };
   try {
     body = await req.json();
@@ -85,7 +40,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Promote
   try {
     const promoted = await promoteToCanonical(flagId, mod.id);
     if (!promoted) {
@@ -95,22 +49,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Also resolve the flag itself
-    const svc = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const svc = getServerClient();
+
+    const { data: flagRow } = await svc
+      .from('flags')
+      .select('answer_id')
+      .eq('id', flagId)
+      .single();
+
     await svc
       .from('flags')
       .update({ status: 'approved' })
       .eq('id', flagId);
-    await svc
-      .from('answers')
-      .update({ status: 'approved' })
-      .eq(
-        'id',
-        (await svc.from('flags').select('answer_id').eq('id', flagId).single()).data?.answer_id
-      );
+
+    if (flagRow?.answer_id) {
+      await svc
+        .from('answers')
+        .update({ status: 'approved' })
+        .eq('id', flagRow.answer_id);
+    }
 
     return NextResponse.json({ success: true, promoted: true });
   } catch (err) {
