@@ -1,0 +1,317 @@
+/* BibleDesk — GraphView styles */
+
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(11, 15, 46, 0.5);
+}
+
+.toolbarTitle {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--gold-400);
+  font-style: italic;
+  flex: 1;
+}
+
+.toolbarMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.refreshBtn {
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.55rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  color: var(--gold-400);
+  border-color: var(--gold-600);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Canvas ──────────────────────────────────────────────────────────────── */
+
+.canvas {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(17, 24, 64, 0.8),
+    var(--navy-950) 90%
+  );
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  cursor: grab;
+}
+
+.svg:active {
+  cursor: grabbing;
+}
+
+/* Node group hover */
+.nodeGroup {
+  cursor: pointer;
+}
+
+.nodeGroup circle {
+  transition: r 0.15s ease, filter 0.15s ease;
+}
+
+.nodeGroup:hover circle {
+  filter: brightness(1.35) drop-shadow(0 0 6px currentColor);
+}
+
+/* ── State overlays ──────────────────────────────────────────────────────── */
+
+.stateOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.stateOverlay button {
+  pointer-events: auto;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--navy-600);
+  border-top-color: var(--gold-400);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorMsg {
+  color: var(--dim-practical);
+  text-align: center;
+  max-width: 300px;
+}
+
+.retryBtn {
+  background: var(--navy-700);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  transition: background 0.2s;
+}
+
+.retryBtn:hover {
+  background: var(--navy-600);
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  color: var(--gold-600);
+  opacity: 0.4;
+}
+
+.emptyHint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 280px;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  padding: 0.6rem 1.25rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(11, 15, 46, 0.4);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.legendDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Confidence key ──────────────────────────────────────────────────────── */
+
+.confidenceKey {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.45rem 1.25rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(11, 15, 46, 0.3);
+}
+
+.confItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.confLine {
+  display: inline-block;
+  width: 28px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 1px;
+}
+
+/* ── Selected node panel ─────────────────────────────────────────────────── */
+
+.nodePanel {
+  position: absolute;
+  top: 3.5rem;
+  right: 1rem;
+  width: 230px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem 1.1rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeInUp 0.2s var(--ease-out) both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nodePanelClose {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0.2rem;
+  transition: color 0.15s;
+}
+
+.nodePanelClose:hover {
+  color: var(--text-primary);
+}
+
+.nodePanelDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+.nodePanelLabel {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.nodePanelMeta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  margin-bottom: 0.6rem;
+}
+
+.nodePanelDesc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.nodePanelLink {
+  font-size: 0.72rem;
+  color: var(--gold-500);
+  text-decoration: none;
+}
+
+.nodePanelLink:hover {
+  text-decoration: underline;
+  color: var(--gold-400);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .nodePanel {
+    width: calc(100% - 2rem);
+    top: auto;
+    bottom: 5rem;
+    right: 1rem;
+  }
+
+  .legend {
+    gap: 0.4rem 0.9rem;
+  }
+
+  .confidenceKey {
+    gap: 1rem;
+  }
+}

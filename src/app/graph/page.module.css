@@ -1,0 +1,156 @@
+/* BibleDesk — /graph page styles */
+
+.page {
+  min-height: 100vh;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+}
+
+/* ── Search row ──────────────────────────────────────────────────────────── */
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 220px;
+  max-width: 400px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.55rem 0.9rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--gold-600);
+}
+
+.focusBtn {
+  background: var(--gold-500);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-inverse);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  transition: background 0.2s;
+}
+
+.focusBtn:hover {
+  background: var(--gold-400);
+}
+
+.resetBtn {
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.resetBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ── Graph ───────────────────────────────────────────────────────────────── */
+
+.graph {
+  width: 100%;
+  min-height: 400px;
+}
+
+/* ── Last selected node strip ────────────────────────────────────────────── */
+
+.lastSelected {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+}
+
+.lastSelectedLabel {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.lastSelectedMeta {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.drillBtn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--gold-600);
+  border-radius: var(--radius-sm);
+  color: var(--gold-400);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.9rem;
+  transition: background 0.2s;
+}
+
+.drillBtn:hover {
+  background: var(--gold-glow);
+}
+
+@media (max-width: 640px) {
+  .page { padding: 1.25rem 1rem 3rem; }
+  .searchInput { max-width: 100%; }
+  .drillBtn { margin-left: 0; }
+}
