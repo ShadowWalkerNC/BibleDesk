@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: fadeIn 0.4s var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.track {
+  height: 3px;
+  background: var(--glass-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s var(--ease-out);
+}
+
+/* Colour variants — fill bar */
+.green { background: linear-gradient(90deg, var(--gold-600), var(--gold-400)); }
+.amber { background: #f59e0b; }
+.red   { background: #ef4444; }
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Colour variants — label text */
+.green { color: var(--text-muted); }
+.amber { color: #fbbf24; }
+.red   { color: #f87171; }

@@ -9,6 +9,11 @@ export interface StageProgress {
   duration_ms: number;
 }
 
+export interface RateLimitInfo {
+  remaining: number;
+  limit: number;
+}
+
 export type StreamStatus = 'idle' | 'loading' | 'done' | 'error';
 
 export interface StreamingAskState {
@@ -17,6 +22,7 @@ export interface StreamingAskState {
   answer: BibleAnswer | null;
   shareSlug: string | null;
   error: string | null;
+  rateLimit: RateLimitInfo | null;
 }
 
 export interface UseStreamingAskReturn extends StreamingAskState {
@@ -40,6 +46,7 @@ export function useStreamingAsk(): UseStreamingAskReturn {
     answer: null,
     shareSlug: null,
     error: null,
+    rateLimit: null,
   });
 
   const [lastQ, setLastQ] = useState('');
@@ -49,7 +56,15 @@ export function useStreamingAsk(): UseStreamingAskReturn {
     setLastQ(question);
     setLastT(translation);
 
-    setState({ status: 'loading', stages: [], answer: null, shareSlug: null, error: null });
+    setState((prev) => ({
+      status: 'loading',
+      stages: [],
+      answer: null,
+      shareSlug: null,
+      error: null,
+      // preserve previous rateLimit so bar doesn’t disappear while loading
+      rateLimit: prev.rateLimit,
+    }));
 
     fetch('/api/ask/stream', {
       method: 'POST',
@@ -61,7 +76,7 @@ export function useStreamingAsk(): UseStreamingAskReturn {
         return;
       }
 
-      const reader = res.body.getReader();
+      const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -76,7 +91,7 @@ export function useStreamingAsk(): UseStreamingAskReturn {
 
         for (const part of parts) {
           const eventMatch = part.match(/^event: (\w+)/);
-          const dataMatch = part.match(/^data: (.+)$/m);
+          const dataMatch  = part.match(/^data: (.+)$/m);
           if (!eventMatch || !dataMatch) continue;
 
           const eventType = eventMatch[1];
@@ -94,17 +109,23 @@ export function useStreamingAsk(): UseStreamingAskReturn {
               }],
             }));
           } else if (eventType === 'answer') {
-            const a = payload as BibleAnswer & { shareSlug?: string };
-            const { shareSlug, ...answer } = a;
+            const a = payload as BibleAnswer & { shareSlug?: string; rateLimit?: RateLimitInfo };
+            const { shareSlug, rateLimit, ...answer } = a;
             setState((prev) => ({
               ...prev,
               status: 'done',
               answer: answer as BibleAnswer,
               shareSlug: shareSlug ?? null,
+              rateLimit: rateLimit ?? prev.rateLimit,
             }));
           } else if (eventType === 'error') {
-            const e = payload as { message: string };
-            setState((prev) => ({ ...prev, status: 'error', error: e.message }));
+            const e = payload as { message: string; rateLimit?: RateLimitInfo };
+            setState((prev) => ({
+              ...prev,
+              status: 'error',
+              error: e.message,
+              rateLimit: e.rateLimit ?? prev.rateLimit,
+            }));
           }
         }
       }

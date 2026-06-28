@@ -5,12 +5,13 @@ import Header from '@/components/Header/Header';
 import SearchBar from '@/components/SearchBar/SearchBar';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import StreamingProgress from '@/components/StreamingProgress/StreamingProgress';
+import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
 import styles from './page.module.css';
 
 export default function HomePage() {
-  const { status, stages, answer, shareSlug, error, ask, retry } = useStreamingAsk();
+  const { status, stages, answer, shareSlug, error, rateLimit, ask, retry } = useStreamingAsk();
   const answerRef = useRef<HTMLDivElement>(null);
 
   function handleAsk(question: string, translation: import('@/types').TranslationId) {
@@ -20,7 +21,7 @@ export default function HomePage() {
     }, 100);
   }
 
-  const isLoading = status === 'loading';
+  const isLoading  = status === 'loading';
   const hasContent = isLoading || answer !== null || error !== null;
 
   return (
@@ -44,6 +45,11 @@ export default function HomePage() {
 
             <div className={styles.searchWrapper}>
               <SearchBar onSubmit={handleAsk} isLoading={isLoading} />
+              {rateLimit && (
+                <div className={styles.rateLimitWrapper}>
+                  <RateLimitBar rateLimit={rateLimit} />
+                </div>
+              )}
             </div>
           </div>
         </section>
