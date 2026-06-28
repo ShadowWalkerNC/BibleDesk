@@ -1,62 +1,99 @@
 # BibleDesk — TODO
 
-> **Current phase:** Phase 1 — AI Study Core (MVP)
-> **Last updated:** 2026-06-27
-> **Session:** Initial build — Next.js scaffold + all Phase 1 source files
+> **Current phase:** Phase 2 — Knowledge Graph + RAG pipeline live
+> **Last updated:** 2026-06-28
+> **Session:** Steps 1-6 complete — schema-v3, graph.ts, /api/graph, GraphView, Obsidian export, Electron desktop
 
 ---
 
-## Phase 1 — AI Study Core
+## 🔴 Known Gaps (fix before going live)
 
-### 🟡 Deploy Blockers (must do before first public URL)
+- [ ] **Wire graph writer** — add `writeGraphFromAnswer(answer, answer.id)` call inside `saveAnswer()` in `src/lib/supabase.ts` (non-blocking, `.catch()` swallowed)
+- [ ] **Install openai package** — `npm install openai` (required by `src/lib/rag.ts` for embeddings)
+- [ ] **Add `OPENAI_API_KEY`** — to `.env.local` and Render/Vercel project settings
+- [ ] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2)
+- [ ] **Set `GRAPH_WRITE_SECRET`** — `openssl rand -hex 32` → add to env
+
+---
+
+## 🟡 Deploy Blockers (must do before first public URL)
 
 - [ ] **Create Supabase project** — run `supabase/schema.sql` in SQL editor
 - [ ] **Set environment variables** — copy `.env.example` → `.env.local`, fill all values
 - [ ] **Generate IP hash salt** — `openssl rand -hex 16` → `IP_HASH_SALT`
 - [ ] **Generate Sigil webhook secret** — `openssl rand -hex 32` → `BIBLEDESK_WEBHOOK_SECRET`
-- [ ] **Add to Sigil `.env`** — `BIBLEDESK_API_URL` + `BIBLEDESK_WEBHOOK_SECRET`
-- [ ] **Deploy to Vercel** — push GitHub → connect Vercel → add env vars in dashboard
-- [ ] **Set `NEXT_PUBLIC_APP_URL`** — to production Vercel URL
-- [ ] **Verify build passes** on Vercel with real env vars
+- [ ] **Deploy to Render** — Web Service, Node runtime, build: `npm install && npm run build`, start: `npm run start`
+- [ ] **Set `NEXT_PUBLIC_APP_URL`** — to production Render URL
+- [ ] **Upgrade Supabase to Pro** ($25/mo) — prevents project pause after 7 days inactivity
+- [ ] **Verify build passes** on Render with real env vars
 - [ ] **Test rate limiting** — confirm 429 fires after 15 requests/hour
+- [ ] **Test RAG pipeline** — ask a question twice, confirm second hit returns `X-RAG-Hit: exact`
 
-### ✅ Completed This Session
+---
 
-- [x] Scaffold Next.js 16 (App Router, TypeScript, CSS Modules)
-- [x] `src/types/index.ts` — shared types (BibleAnswer, Dimension, DIMENSION_META)
-- [x] `src/lib/bible.ts` — bible-api.com client (free, no key, KJV/WEB/ASV)
-- [x] `src/lib/claude.ts` — Anthropic client + 5-dimension prompt (server-only)
-- [x] `src/lib/supabase.ts` — lazy-init Supabase client + typed helpers
-- [x] `src/lib/rate-limit.ts` — 15 req/hr/IP with SHA-256 hashed IPs
-- [x] `src/app/api/ask/route.ts` — main AI endpoint (validate → rate limit → Claude → save)
-- [x] `src/app/api/v1/bible/answer/route.ts` — Sigil webhook (HMAC auth)
-- [x] `src/app/globals.css` — full design system (dark navy/gold, glassmorphism)
-- [x] `src/app/layout.tsx` — root layout (SEO metadata, fonts, PWA)
-- [x] `src/app/page.tsx` — homepage (hero, search, answer flow, feature grid)
-- [x] `src/components/Header/` — sticky glass nav
-- [x] `src/components/SearchBar/` — question input + translation selector + examples
-- [x] `src/components/DimensionPanel/` — 5-tab answer display + citations + share
-- [x] `src/components/LoadingState/` — skeleton loaders + error state
-- [x] `supabase/schema.sql` — answers + rate_limits tables with RLS
-- [x] `public/manifest.json` — PWA manifest (installable)
-- [x] `.env.example` — all env vars documented
-- [x] `AGENTS.md` — all placeholders filled with real project values
-- [x] `README.md` — full project documentation
-- [x] `ARCHITECTURE.md` — system architecture document
-- [x] `package.json` — name/version corrected
-- [x] Production build: `npm run build` ✅ PASSING
+## ✅ Completed (Steps 1–6, 2026-06-28)
 
-### 🔧 Small Polish (Phase 1.1)
+- [x] `supabase/schema-v3.sql` — `graph_nodes` + `graph_edges` tables, RLS, `get_node_subgraph` RPC
+- [x] `src/lib/graph.ts` — 6 typed functions: upsertNode, upsertEdge, writeGraphFromAnswer, getFullGraph, getSubgraph, getNodeByKey
+- [x] `src/app/api/graph/route.ts` — GET (full/subgraph) + POST (secret-protected write)
+- [x] `src/components/GraphView/` — D3 force-directed viewer, zoom/pan, drag nodes, click-to-inspect, lazy D3 import
+- [x] `src/app/graph/page.tsx` — /graph explorer page with concept focus + drill-in
+- [x] `src/app/api/export/obsidian/route.ts` — Obsidian vault .zip export, zero external deps, PKZIP encoder
+- [x] `apps/desktop/` — Electron wrapper: vault IPC (pick/read/write/reveal), graphify rebuild, sync indicator, DesktopShell top bar
+- [x] Root `package.json` — workspaces + d3 + desktop:dev / desktop:dist scripts
 
-- [ ] Add PWA icons — `icon-192.png` and `icon-512.png` in `/public`
-- [ ] Add `favicon.ico` and `apple-touch-icon.png`
-- [ ] Add `answer/[id]` SSR page — shareable URL for each answer (SEO)
-- [ ] Add `robots.txt` and `sitemap.xml` for SEO
-- [ ] Rate limit UI — show questions remaining in the UI
-- [ ] Toast notification when answer is copied to clipboard
-- [ ] Dark/light mode toggle (currently dark-only)
-- [ ] Test with real Anthropic API key — verify 5-dimension JSON comes back correctly
-- [ ] Test Sigil webhook — verify HMAC signature works end-to-end
+---
+
+## 🛠 Custom MCP Tools (to build)
+
+### Bible lookup
+- [ ] `get_verse(book, chapter, verse, translation)` — fetch a specific verse
+- [ ] `search_scripture(query, translation)` — full-text search across verses
+- [ ] `get_cross_references(reference)` — return known cross-references for a passage
+
+### Graph tools
+- [ ] `get_concept_subgraph(node_key)` — 1-hop graph around any concept (wraps /api/graph)
+- [ ] `find_related_concepts(question)` — embed question, return nearest graph nodes via pgvector
+- [ ] `add_graph_node(label, category, description)` — manually inject a node
+
+### RAG / knowledge tools
+- [ ] `search_canonical_answers(question)` — surface approved moderator answers
+- [ ] `store_canonical_answer(question, answer)` — add approved answer to vector store
+
+### Study tools
+- [ ] `get_answer_history(limit)` — return recent BibleDesk answers from Supabase
+- [ ] `export_vault_zip()` — trigger Obsidian export, return download URL
+- [ ] `get_dimension(answer_id, dimension)` — pull one dimension from a stored answer
+
+### MCP server implementation options
+- [ ] **Next.js HTTP MCP server** — new `/api/mcp/route.ts` exposing tools as JSON-RPC (works on Render)
+- [ ] **Local stdio MCP server** — `apps/desktop/mcp/server.js` for Electron app (no network needed)
+
+---
+
+## 🎨 Customizations & Enhancements
+
+### High value, low effort
+- [ ] **Shareable answer links** — `/share/[slug]` page (slug already saved by `saveAnswer()`)
+- [ ] **Answer history page** — `/history` listing past questions with search/filter
+- [ ] **Link /graph in Header nav** — graph page exists but has no nav link yet
+- [ ] **Bible translation switcher UI** — backend accepts `translation` param, no frontend picker yet
+- [ ] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown
+- [ ] **Toast on clipboard copy** — answer share button copies but gives no feedback
+
+### Medium effort
+- [ ] **Streaming answers** — switch /api/ask to `ReadableStream` so answer appears word-by-word
+- [ ] **Bookmarks** — save favourite answers to localStorage or Supabase `bookmarks` table
+- [ ] **Dark/light mode toggle** — design system uses CSS vars, single class swap on `<html>`
+- [ ] **PWA icons** — `icon-192.png` and `icon-512.png` in `/public` (currently 404)
+- [ ] **`robots.txt` + `sitemap.xml`** — SEO basics
+
+### Larger features
+- [ ] **User accounts** — Supabase Auth (Google/email) to tie answers, bookmarks, graph to a user
+- [ ] **Moderation dashboard UI** — proper `/mod` frontend (route exists, no UI)
+- [ ] **Mobile PWA** — `next-pwa` wrapper + manifest for iOS/Android install
+- [ ] **Devotional mode** — daily verse + auto-generated 5-dimension study note via Render cron
+- [ ] **Electron desktop icon** — `apps/desktop/public/icon.png` referenced in main.js but not yet created
 
 ---
 
@@ -122,9 +159,11 @@
 
 ## Tech Debt & Known Issues
 
-- [ ] `bibledesk-temp` name in scaffold — fixed in `package.json`, double-check no references remain
+- [ ] `openai` package not in `package.json` — run `npm install openai`
+- [ ] `writeGraphFromAnswer` not called from `saveAnswer` — graph tables will stay empty
+- [ ] No `/graph` link in Header nav
+- [ ] No Electron desktop icon (`apps/desktop/public/icon.png` missing)
 - [ ] Turbopack root warning — suppressed in `next.config.ts`, may resurface after Node upgrade
-- [ ] `uuid` ships own types — remove `@types/uuid` from devDependencies (stub)
 - [ ] No PWA icons yet — `icon-192.png` 404 in dev logs
 
 ---
@@ -140,7 +179,11 @@
 | 2026-06-27 | CSS Modules over Tailwind | Full design system control, no runtime overhead |
 | 2026-06-27 | Lazy-init Supabase client | Prevents build-time failures when env vars not set |
 | 2026-06-27 | HMAC over Bearer token for Sigil | Matches existing Sigil webhook pattern, tamper-proof |
+| 2026-06-28 | pgvector RAG via OpenAI embeddings | Anthropic has no embeddings API; text-embedding-3-small is standard |
+| 2026-06-28 | Zero-dep PKZIP for Obsidian export | No extra npm packages; Node.js zlib built-in sufficient |
+| 2026-06-28 | Render + Supabase Pro stack | Render Web Service ($7) + Supabase Pro ($25) = always-on with pgvector |
+| 2026-06-28 | Electron contextBridge IPC | Security best practice; no nodeIntegration in renderer |
 
 ---
 
-*Updated: 2026-06-27 | See [ARCHITECTURE.md](ARCHITECTURE.md) for system design details*
+*Updated: 2026-06-28 | See [ARCHITECTURE.md](ARCHITECTURE.md) for system design details*
