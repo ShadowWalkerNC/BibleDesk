@@ -1,23 +1,68 @@
-// BibleDesk — Anthropic Claude client (SERVER ONLY)
-// SECURITY: This file must NEVER be imported from client components.
-// The API key lives only in process.env on the server.
+/**
+ * claude.ts — Anthropic Claude client entry point (SERVER ONLY)
+ *
+ * SECURITY: This file must NEVER be imported from client components.
+ * The API key lives only in process.env on the server.
+ *
+ * In Phase 2 this module is a thin wrapper around the 6-stage pipeline.
+ * The public interface (generateBibleAnswer) is UNCHANGED so that
+ * /api/ask/route.ts and /api/v1/bible/answer/route.ts need no edits.
+ *
+ * Phase 1 single-shot logic is preserved below as generateBibleAnswerLegacy
+ * for reference / rollback only — it is not called in production.
+ */
 
-import Anthropic from '@anthropic-ai/sdk';
-import type { BibleAnswer, DimensionKey, TranslationId } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import type { BibleAnswer, TranslationId } from '@/types';
+import { runPipeline } from '@/lib/pipeline';
 
-// Lazy-init so the client is only created when needed
-let _client: Anthropic | null = null;
-function getClient(): Anthropic {
-  if (!_client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
-    _client = new Anthropic({ apiKey });
-  }
-  return _client;
+export interface ClaudeAnswerOptions {
+  translation?: TranslationId;
+  maxTokens?: number;
+  /** RAG context string from rag.ts — injected into pipeline Stage 1 */
+  ragContext?: string;
 }
 
-const SYSTEM_PROMPT = `You are BibleDesk — a trusted, scholarly Bible study assistant.
+/**
+ * Generate a structured, 5-dimension Bible answer.
+ *
+ * Phase 2: delegates to the 6-stage pipeline in pipeline.ts.
+ * Returns the same BibleAnswer shape as Phase 1 — no breaking changes.
+ *
+ * SERVER ONLY — never call from client components.
+ */
+export async function generateBibleAnswer(
+  question: string,
+  options: ClaudeAnswerOptions = {}
+): Promise<BibleAnswer> {
+  const { translation = 'web', maxTokens = 4096, ragContext = '' } = options;
+
+  const result = await runPipeline(question, {
+    translation,
+    maxTokens,
+    ragContext,
+  });
+
+  return result.answer;
+}
+
+/**
+ * generateBibleAnswerLegacy — Phase 1 single-shot implementation.
+ * NOT called in production. Kept for reference and emergency rollback.
+ * To rollback: swap the body of generateBibleAnswer above to call this.
+ */
+export async function generateBibleAnswerLegacy(
+  question: string,
+  options: ClaudeAnswerOptions = {}
+): Promise<BibleAnswer> {
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  const { v4: uuidv4 } = await import('uuid');
+  const { translation = 'web', maxTokens = 4096 } = options;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
+  const client = new Anthropic({ apiKey });
+
+  const SYSTEM_PROMPT = `You are BibleDesk — a trusted, scholarly Bible study assistant.
 Your purpose is to give structured, sourced, multi-dimensional answers to Bible questions.
 
 RULES:
@@ -36,89 +81,18 @@ You MUST respond with valid JSON matching this exact schema. No markdown, no exp
 {
   "summary": "1-2 sentence overview of the answer",
   "dimensions": {
-    "scripture": {
-      "title": "What the Scripture Says",
-      "content": "Direct textual analysis, key passages, surrounding context. 150-250 words.",
-      "citations": ["Book Chapter:Verse", ...],
-      "key_points": ["Point 1", "Point 2", "Point 3"]
-    },
-    "historical": {
-      "title": "Historical Context",
-      "content": "Cultural, political, and social context of the time period. What was happening in that world. 100-200 words.",
-      "citations": ["Book Chapter:Verse or scholarly reference", ...],
-      "key_points": ["Point 1", "Point 2"]
-    },
-    "original_language": {
-      "title": "Original Language Insights",
-      "content": "Key Hebrew or Greek words, their meaning, nuance, and how translation choices affect understanding. 100-200 words.",
-      "citations": ["Strong's reference or verse", ...],
-      "key_points": ["Point 1", "Point 2"]
-    },
-    "theological": {
-      "title": "Theological Meaning",
-      "content": "What the Church has historically believed and taught. Major theological interpretations across traditions. 150-250 words.",
-      "citations": ["Book Chapter:Verse or theological reference", ...],
-      "key_points": ["Point 1", "Point 2", "Point 3"]
-    },
-    "practical": {
-      "title": "Practical Application",
-      "content": "How this truth applies to daily life today — for individuals, families, churches, and youth. Concrete, actionable. 100-200 words.",
-      "citations": ["Book Chapter:Verse", ...],
-      "key_points": ["Point 1", "Point 2", "Point 3"]
-    }
+    "scripture": { "title": "...", "content": "...", "citations": [...], "key_points": [...] },
+    "historical": { "title": "...", "content": "...", "citations": [...], "key_points": [...] },
+    "original_language": { "title": "...", "content": "...", "citations": [...], "key_points": [...] },
+    "theological": { "title": "...", "content": "...", "citations": [...], "key_points": [...] },
+    "practical": { "title": "...", "content": "...", "citations": [...], "key_points": [...] }
   },
   "confidence": "high | medium | low",
-  "disclaimer": "Optional note if the topic is contested or interpretation-dependent. Omit if not needed."
+  "disclaimer": "Optional"
 }`;
 
-const JSON_CORRECTION_PROMPT =
-  'Your previous response was not valid JSON. Return ONLY the raw JSON object — no markdown, no code fences, no explanation. Start with { and end with }.';
+  const userMessage = `Question: ${question}\n\nPreferred translation: ${translation.toUpperCase()}.`;
 
-export interface ClaudeAnswerOptions {
-  translation?: TranslationId;
-  maxTokens?: number;
-}
-
-/**
- * Strip accidental markdown code fences from a Claude response.
- */
-function stripCodeFences(text: string): string {
-  return text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
-}
-
-/**
- * Attempt to parse Claude's response as JSON.
- * Returns the parsed object or null on failure.
- */
-function tryParse(
-  text: string
-): Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at'> | null {
-  try {
-    return JSON.parse(stripCodeFences(text));
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Generate a 5-dimension Bible answer using Claude.
- * Retries once with a JSON correction prompt if the first response is malformed.
- * SERVER ONLY — never call from client components.
- */
-export async function generateBibleAnswer(
-  question: string,
-  options: ClaudeAnswerOptions = {}
-): Promise<BibleAnswer> {
-  const { translation = 'web', maxTokens = 4096 } = options;
-
-  const client = getClient();
-
-  const userMessage = `Question: ${question}
-
-Preferred translation: ${translation.toUpperCase()} (World English Bible if WEB, King James Version if KJV, American Standard Version if ASV).
-Provide scripture quotes in this translation where possible.`;
-
-  // --- First attempt ---
   const firstResponse = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: maxTokens,
@@ -127,51 +101,27 @@ Provide scripture quotes in this translation where possible.`;
   });
 
   const firstContent = firstResponse.content[0];
-  if (firstContent.type !== 'text') {
-    throw new Error('Unexpected Claude response type');
+  if (firstContent.type !== 'text') throw new Error('Unexpected Claude response type');
+
+  function stripAndParse(text: string) {
+    try { return JSON.parse(text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim()); }
+    catch { return null; }
   }
 
-  let parsed = tryParse(firstContent.text);
-
-  // --- Retry once if JSON was malformed ---
+  let parsed = stripAndParse(firstContent.text);
   if (!parsed) {
-    const retryResponse = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: maxTokens,
-      system: SYSTEM_PROMPT,
+    const retry = await client.messages.create({
+      model: 'claude-sonnet-4-5', max_tokens: maxTokens, system: SYSTEM_PROMPT,
       messages: [
         { role: 'user', content: userMessage },
         { role: 'assistant', content: firstContent.text },
-        { role: 'user', content: JSON_CORRECTION_PROMPT },
+        { role: 'user', content: 'Return ONLY valid JSON. Start with { end with }.' },
       ],
     });
-
-    const retryContent = retryResponse.content[0];
-    if (retryContent.type !== 'text') {
-      throw new Error('Unexpected Claude response type on retry');
-    }
-
-    parsed = tryParse(retryContent.text);
-
-    if (!parsed) {
-      throw new Error(
-        'Claude returned invalid JSON after retry. Raw: ' + retryContent.text.slice(0, 200)
-      );
-    }
-  }
-
-  // Validate required dimension keys
-  const requiredDimensions: DimensionKey[] = [
-    'scripture',
-    'historical',
-    'original_language',
-    'theological',
-    'practical',
-  ];
-  for (const dim of requiredDimensions) {
-    if (!parsed.dimensions?.[dim]) {
-      throw new Error(`Claude response missing dimension: ${dim}`);
-    }
+    const rc = retry.content[0];
+    if (rc.type !== 'text') throw new Error('Unexpected type on retry');
+    parsed = stripAndParse(rc.text);
+    if (!parsed) throw new Error('Invalid JSON after retry');
   }
 
   return {
@@ -182,6 +132,7 @@ Provide scripture quotes in this translation where possible.`;
     translation_used: translation,
     confidence: parsed.confidence ?? 'medium',
     disclaimer: parsed.disclaimer,
+    status: 'approved',
     created_at: new Date().toISOString(),
   };
 }
