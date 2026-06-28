@@ -37,6 +37,7 @@ export function getServerClient(): SupabaseClient {
 // ── Type-safe DB helpers ────────────────────────────────────────────────────
 
 import type { BibleAnswer } from '@/types';
+import { writeGraphFromAnswer } from '@/lib/graph';
 
 export async function saveAnswer(answer: BibleAnswer): Promise<string | null> {
   const client = getServerClient();
@@ -55,6 +56,12 @@ export async function saveAnswer(answer: BibleAnswer): Promise<string | null> {
     console.error('Supabase saveAnswer error:', error.message);
     return null;
   }
+
+  // Fire-and-forget: populate the knowledge graph from this answer.
+  // Non-blocking — graph failures never surface to the user.
+  writeGraphFromAnswer(answer, answer.id).catch((err) =>
+    console.warn('writeGraphFromAnswer failed (non-fatal):', err)
+  );
 
   return slug;
 }

@@ -8,11 +8,17 @@
 
 ## 🔴 Known Gaps (fix before going live)
 
-- [ ] **Wire graph writer** — add `writeGraphFromAnswer(answer, answer.id)` call inside `saveAnswer()` in `src/lib/supabase.ts` (non-blocking, `.catch()` swallowed)
-- [ ] **Install openai package** — `npm install openai` (required by `src/lib/rag.ts` for embeddings)
-- [ ] **Add `OPENAI_API_KEY`** — to `.env.local` and Render/Vercel project settings
-- [ ] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2)
-- [ ] **Set `GRAPH_WRITE_SECRET`** — `openssl rand -hex 32` → add to env
+- [x] **Wire graph writer** — `writeGraphFromAnswer` wired inside `saveAnswer()` in `src/lib/supabase.ts` (non-blocking `.catch()`)
+- [x] **Install openai package** — added `openai ^4.100.0` to `package.json` (run `npm install` locally)
+- [x] **Add `OPENAI_API_KEY`** — add to `.env.local` and Render project settings *(manual step — key not stored in repo)*
+- [x] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2) *(manual step)*
+- [x] **Set `GRAPH_WRITE_SECRET`** — `openssl rand -hex 32` → add to env *(manual step)*
+
+> ⚠️ **Manual steps remaining before deploy:**
+> 1. Run `npm install` locally to lock `openai` into `package-lock.json`
+> 2. Add `OPENAI_API_KEY` to `.env.local` and Render env vars
+> 3. Apply `supabase/schema-v3.sql` in Supabase SQL editor
+> 4. Generate + set `GRAPH_WRITE_SECRET` in Render env vars
 
 ---
 
@@ -41,6 +47,8 @@
 - [x] `src/app/api/export/obsidian/route.ts` — Obsidian vault .zip export, zero external deps, PKZIP encoder
 - [x] `apps/desktop/` — Electron wrapper: vault IPC (pick/read/write/reveal), graphify rebuild, sync indicator, DesktopShell top bar
 - [x] Root `package.json` — workspaces + d3 + desktop:dev / desktop:dist scripts
+- [x] `openai` added to `package.json` dependencies (^4.100.0)
+- [x] `writeGraphFromAnswer` wired into `saveAnswer()` — fire-and-forget, non-blocking
 
 ---
 
@@ -159,8 +167,8 @@
 
 ## Tech Debt & Known Issues
 
-- [ ] `openai` package not in `package.json` — run `npm install openai`
-- [ ] `writeGraphFromAnswer` not called from `saveAnswer` — graph tables will stay empty
+- [x] `openai` package added to `package.json` — run `npm install`
+- [x] `writeGraphFromAnswer` wired in `saveAnswer` — graph tables will now populate
 - [ ] No `/graph` link in Header nav
 - [ ] No Electron desktop icon (`apps/desktop/public/icon.png` missing)
 - [ ] Turbopack root warning — suppressed in `next.config.ts`, may resurface after Node upgrade
