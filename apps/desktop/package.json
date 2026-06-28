@@ -1,0 +1,66 @@
+{
+  "name": "bibledesk-desktop",
+  "version": "1.0.0",
+  "description": "BibleDesk — local Electron desktop application",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev":       "concurrently -k \"next dev -p 3001\" \"wait-on http://localhost:3001 && electron .\"",
+    "build":     "next build && electron-builder --dir",
+    "dist":      "next build && electron-builder",
+    "start":     "electron .",
+    "web:dev":   "next dev -p 3001",
+    "web:build": "next build"
+  },
+  "build": {
+    "appId":       "com.bibledesk.desktop",
+    "productName": "BibleDesk",
+    "copyright":   "BibleDesk",
+    "directories": {
+      "buildResources": "assets",
+      "output":         "dist"
+    },
+    "files": [
+      "electron/**/*",
+      ".next/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target":   ["dmg", "zip"],
+      "category": "public.app-category.reference"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"]
+    },
+    "extraMetadata": {
+      "main": "electron/main.js"
+    }
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk":     "^0.106.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "d3":                    "^7.9.0",
+    "next":                  "16.2.9",
+    "react":                 "19.2.4",
+    "react-dom":             "19.2.4",
+    "uuid":                  "^14.0.1"
+  },
+  "devDependencies": {
+    "@types/d3":          "^7.4.3",
+    "@types/node":        "^20",
+    "@types/react":       "^19",
+    "@types/react-dom":   "^19",
+    "concurrently":       "^9.1.2",
+    "electron":           "^35.0.0",
+    "electron-builder":   "^25.1.8",
+    "eslint":             "^9",
+    "eslint-config-next": "16.2.9",
+    "typescript":         "^5",
+    "wait-on":            "^8.0.3"
+  }
+}
