@@ -55,16 +55,34 @@
 }
 
 .navLink {
+  position: relative;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.2s var(--ease-out);
+  padding-bottom: 2px;
 }
 
 .navLink:hover {
   color: var(--text-primary);
   text-decoration: none;
+}
+
+/* Gold underline for active route */
+.navLinkActive {
+  color: var(--text-primary) !important;
+}
+
+.navLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-400);
+  border-radius: 1px;
 }
 
 .badge {

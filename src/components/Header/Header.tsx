@@ -1,7 +1,17 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import styles from './Header.module.css';
 
+const NAV_LINKS = [
+  { href: '/',      label: 'Study' },
+  { href: '/graph', label: '🕸️ Graph' },
+];
+
 export default function Header() {
+  const pathname = usePathname();
+
   return (
     <header className={styles.header} role="banner">
       <div className={styles.inner}>
@@ -13,7 +23,22 @@ export default function Header() {
         </Link>
 
         <nav className={styles.nav} aria-label="Main navigation">
-          <Link href="/" className={styles.navLink}>Study</Link>
+          {NAV_LINKS.map(({ href, label }) => {
+            const isActive = href === '/'
+              ? pathname === '/'
+              : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            );
+          })}
+
           <a
             href="https://discord.gg/7c89HKrVe"
             className={styles.navLink}
@@ -22,6 +47,7 @@ export default function Header() {
           >
             Community
           </a>
+
           <span className={styles.badge}>Free</span>
         </nav>
       </div>
