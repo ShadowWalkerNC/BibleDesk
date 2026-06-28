@@ -71,20 +71,45 @@ You MUST respond with valid JSON matching this exact schema. No markdown, no exp
   "disclaimer": "Optional note if the topic is contested or interpretation-dependent. Omit if not needed."
 }`;
 
+const JSON_CORRECTION_PROMPT =
+  'Your previous response was not valid JSON. Return ONLY the raw JSON object — no markdown, no code fences, no explanation. Start with { and end with }.';
+
 export interface ClaudeAnswerOptions {
   translation?: TranslationId;
   maxTokens?: number;
 }
 
 /**
+ * Strip accidental markdown code fences from a Claude response.
+ */
+function stripCodeFences(text: string): string {
+  return text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
+}
+
+/**
+ * Attempt to parse Claude's response as JSON.
+ * Returns the parsed object or null on failure.
+ */
+function tryParse(
+  text: string
+): Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at'> | null {
+  try {
+    return JSON.parse(stripCodeFences(text));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Generate a 5-dimension Bible answer using Claude.
+ * Retries once with a JSON correction prompt if the first response is malformed.
  * SERVER ONLY — never call from client components.
  */
 export async function generateBibleAnswer(
   question: string,
   options: ClaudeAnswerOptions = {}
 ): Promise<BibleAnswer> {
-  const { translation = 'web', maxTokens = 2048 } = options;
+  const { translation = 'web', maxTokens = 4096 } = options;
 
   const client = getClient();
 
@@ -93,31 +118,55 @@ export async function generateBibleAnswer(
 Preferred translation: ${translation.toUpperCase()} (World English Bible if WEB, King James Version if KJV, American Standard Version if ASV).
 Provide scripture quotes in this translation where possible.`;
 
-  const response = await client.messages.create({
+  // --- First attempt ---
+  const firstResponse = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: maxTokens,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userMessage }],
   });
 
-  const rawContent = response.content[0];
-  if (rawContent.type !== 'text') {
+  const firstContent = firstResponse.content[0];
+  if (firstContent.type !== 'text') {
     throw new Error('Unexpected Claude response type');
   }
 
-  // Parse and validate the JSON response
-  let parsed: Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at'>;
-  try {
-    // Strip any accidental markdown code fences
-    const json = rawContent.text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
-    parsed = JSON.parse(json);
-  } catch {
-    throw new Error('Claude returned invalid JSON. Raw: ' + rawContent.text.slice(0, 200));
+  let parsed = tryParse(firstContent.text);
+
+  // --- Retry once if JSON was malformed ---
+  if (!parsed) {
+    const retryResponse = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens,
+      system: SYSTEM_PROMPT,
+      messages: [
+        { role: 'user', content: userMessage },
+        { role: 'assistant', content: firstContent.text },
+        { role: 'user', content: JSON_CORRECTION_PROMPT },
+      ],
+    });
+
+    const retryContent = retryResponse.content[0];
+    if (retryContent.type !== 'text') {
+      throw new Error('Unexpected Claude response type on retry');
+    }
+
+    parsed = tryParse(retryContent.text);
+
+    if (!parsed) {
+      throw new Error(
+        'Claude returned invalid JSON after retry. Raw: ' + retryContent.text.slice(0, 200)
+      );
+    }
   }
 
   // Validate required dimension keys
   const requiredDimensions: DimensionKey[] = [
-    'scripture', 'historical', 'original_language', 'theological', 'practical'
+    'scripture',
+    'historical',
+    'original_language',
+    'theological',
+    'practical',
   ];
   for (const dim of requiredDimensions) {
     if (!parsed.dimensions?.[dim]) {
