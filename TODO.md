@@ -2,7 +2,7 @@
 
 > **Current phase:** Phase 2 — Knowledge Graph + RAG pipeline live
 > **Last updated:** 2026-06-28
-> **Session:** Steps 1-6 + shareable links + /graph nav complete
+> **Session:** MCP server + /history page + header nav complete
 
 ---
 
@@ -22,7 +22,7 @@
 - [ ] **Create Supabase project** — run `supabase/schema.sql` then `supabase/schema-v3.sql` in SQL editor
 - [ ] **Set environment variables** — copy `.env.example` → `.env.local`, fill all values
 - [ ] **Generate IP hash salt** — `openssl rand -hex 16` → `IP_HASH_SALT`
-- [ ] **Generate secrets** — `openssl rand -hex 32` → `GRAPH_WRITE_SECRET` and `BIBLEDESK_WEBHOOK_SECRET`
+- [ ] **Generate secrets** — `openssl rand -hex 32` → `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, and `MCP_SECRET`
 - [ ] **Deploy to Render** — Web Service, Node runtime, build: `npm install && npm run build`, start: `npm run start`
 - [ ] **Set `NEXT_PUBLIC_APP_URL`** — to production Render URL
 - [ ] **Upgrade Supabase to Pro** ($25/mo) — prevents project pause after 7 days inactivity
@@ -31,6 +31,7 @@
 - [ ] **Test RAG pipeline** — ask a question twice, confirm second hit returns `X-RAG-Hit: exact`
 - [ ] **Test graph population** — after first answer, confirm rows appear in `graph_nodes` + `graph_edges`
 - [ ] **Test share links** — confirm `/share/[slug]` renders answer + OG preview on Discord/iMessage
+- [ ] **Test MCP server** — `GET /api/mcp` returns tool manifest; `POST` with `tools/call` executes `get_verse`
 
 ---
 
@@ -51,18 +52,22 @@
 - [x] **Shareable answer links** — `/share/[slug]` SSR page with OG metadata, permalink badge, 🔗 Copy link button
 - [x] **`shareSlug` in API response** — `AskResponse.shareSlug` added to types + `/api/ask` returns it
 - [x] **`/graph` in Header nav** — active route highlight with gold underline via `usePathname`
+- [x] **HTTP MCP server** — `/api/mcp` JSON-RPC 2.0, `tools/list` + `tools/call`, 6 tools: `get_verse`, `search_scripture`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`; optional `MCP_SECRET` bearer auth; GET health check; Claude Desktop setup in README
+- [x] **Answer history page** — `/history` with search, confidence filter, skeleton loading, pagination (20/page), View Answer + ↺ Re-ask actions
+- [x] **`GET /api/history`** — paginated Supabase query, `ilike` search, confidence filter, `Content-Range` total count
+- [x] **History link in Header nav** — 📜 History added to `NAV_LINKS`, active-route highlight included
 
 ---
 
 ## 🛠 Custom MCP Tools (to build)
 
 ### Bible lookup
-- [ ] `get_verse(book, chapter, verse, translation)` — fetch a specific verse
-- [ ] `search_scripture(query, translation)` — full-text search across verses
+- [x] `get_verse(reference, translation)` — fetch a specific verse ✔
+- [x] `search_scripture(query, translation)` — full-text search across verses ✔
 - [ ] `get_cross_references(reference)` — return known cross-references for a passage
 
 ### Graph tools
-- [ ] `get_concept_subgraph(node_key)` — 1-hop graph around any concept (wraps /api/graph)
+- [x] `get_concept_subgraph(node_key)` — 1-hop graph around any concept (wraps /api/graph) ✔
 - [ ] `find_related_concepts(question)` — embed question, return nearest graph nodes via pgvector
 - [ ] `add_graph_node(label, category, description)` — manually inject a node
 
@@ -71,12 +76,12 @@
 - [ ] `store_canonical_answer(question, answer)` — add approved answer to vector store
 
 ### Study tools
-- [ ] `get_answer_history(limit)` — return recent BibleDesk answers from Supabase
+- [x] `get_answer_history(limit)` — return recent BibleDesk answers from Supabase ✔
 - [ ] `export_vault_zip()` — trigger Obsidian export, return download URL
-- [ ] `get_dimension(answer_id, dimension)` — pull one dimension from a stored answer
+- [x] `get_dimension(answer_id, dimension)` — pull one dimension from a stored answer ✔
 
 ### MCP server implementation options
-- [ ] **Next.js HTTP MCP server** — new `/api/mcp/route.ts` exposing tools as JSON-RPC (works on Render)
+- [x] **Next.js HTTP MCP server** — `/api/mcp/route.ts` exposing tools as JSON-RPC (works on Render) ✔
 - [ ] **Local stdio MCP server** — `apps/desktop/mcp/server.js` for Electron app (no network needed)
 
 ---
@@ -86,7 +91,7 @@
 ### High value, low effort
 - [x] **Shareable answer links** — `/share/[slug]` ✔
 - [x] **Link /graph in Header nav** — ✔
-- [ ] **Answer history page** — `/history` listing past questions with search/filter
+- [x] **Answer history page** — `/history` listing past questions with search/filter ✔
 - [ ] **Bible translation switcher UI** — backend accepts `translation` param, no frontend picker yet
 - [ ] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown
 - [ ] **Toast on clipboard copy** — answer share button copies but gives no feedback
@@ -192,6 +197,8 @@
 | 2026-06-28 | Electron contextBridge IPC | Security best practice; no nodeIntegration in renderer |
 | 2026-06-28 | shareSlug from UUID prefix | Slug computed client-side from answer.id — no extra DB read needed |
 | 2026-06-28 | usePathname for active nav | Header converted to client component for route-aware highlighting |
+| 2026-06-28 | HTTP MCP over stdio | Render hosting makes HTTP natural; mcp-remote bridges to Claude Desktop |
+| 2026-06-28 | Content-Range for history total | Single Supabase REST request returns both rows + total count via Prefer: count=exact |
 
 ---
 
