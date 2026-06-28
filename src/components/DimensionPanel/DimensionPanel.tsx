@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import type { BibleAnswer, DimensionKey } from '@/types';
 import { DIMENSION_META } from '@/types';
+import { useToast } from '@/components/Toast/Toast';
+import { useState } from 'react';
 import styles from './DimensionPanel.module.css';
 
 interface DimensionPanelProps {
   answer:     BibleAnswer;
-  /** Short slug for /share/[slug] — present on new answers, absent on cached RAG hits */
   shareSlug?: string;
 }
 
@@ -20,20 +20,14 @@ const DIMENSION_COLORS: Record<DimensionKey, string> = {
   practical:         'var(--dim-practical)',
 };
 
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text).catch(() => {});
-}
-
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
-  const [activeTab,   setActiveTab]   = useState<DimensionKey>('scripture');
-  const [copied,      setCopied]      = useState(false);
-  const [linkCopied,  setLinkCopied]  = useState(false);
+  const toast = useToast();
+  const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
 
   const activeDim   = answer.dimensions[activeTab];
   const activeMeta  = DIMENSION_META.find((m) => m.key === activeTab)!;
   const accentColor = DIMENSION_COLORS[activeTab];
 
-  // Build the canonical share URL
   const shareUrl = shareSlug
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareSlug}`
     : typeof window !== 'undefined' ? window.location.href : '';
@@ -50,17 +44,17 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
       }),
       '',
       shareUrl ? `🔗 ${shareUrl}` : '',
-    ].filter((l) => l !== undefined).join('\n\n');
+    ].filter(Boolean).join('\n\n');
 
-    copyToClipboard(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(text)
+      .then(() => toast('Answer copied to clipboard'))
+      .catch(() => toast('Could not copy — please copy manually', 'error'));
   }
 
   function handleCopyLink() {
-    copyToClipboard(shareUrl);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000);
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => toast('Link copied to clipboard'))
+      .catch(() => toast('Could not copy link', 'error'));
   }
 
   return (
@@ -157,17 +151,15 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
       <div className={styles.shareBar} aria-label="Share options">
         <span className={styles.shareLabel}>Share this study</span>
         <div className={styles.shareActions}>
-          {/* Copy full text */}
           <button
             className={styles.shareBtn}
             onClick={handleCopyText}
             aria-label="Copy full answer to clipboard"
             type="button"
           >
-            {copied ? '✓ Copied!' : '⍘ Copy'}
+            ⫘ Copy
           </button>
 
-          {/* Copy share link */}
           {shareSlug && (
             <button
               className={`${styles.shareBtn} ${styles.shareBtnLink}`}
@@ -175,11 +167,10 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
               aria-label="Copy shareable link"
               type="button"
             >
-              {linkCopied ? '✓ Link copied!' : '🔗 Copy link'}
+              🔗 Copy link
             </button>
           )}
 
-          {/* Native share sheet (mobile) */}
           {typeof navigator !== 'undefined' && 'share' in navigator && (
             <button
               className={styles.shareBtn}
