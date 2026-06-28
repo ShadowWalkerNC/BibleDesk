@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS canonical_answers (
   question_hash  TEXT          UNIQUE NOT NULL, -- SHA-256 of normalized question
   question       TEXT          NOT NULL,
   answer_json    JSONB         NOT NULL,         -- approved BibleAnswer
-  embedding      vector(1536)  NOT NULL,         -- Anthropic text-embedding-3-small
+  embedding      vector(1536)  NOT NULL,         -- OpenAI text-embedding-3-small (1536 dims)
   approved_by    UUID          REFERENCES moderators(id) ON DELETE SET NULL,
   vote_count     INT           NOT NULL DEFAULT 0,
   created_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
