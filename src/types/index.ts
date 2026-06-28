@@ -15,7 +15,7 @@ export const TRANSLATIONS: Translation[] = [
   { id: 'asv', name: 'American Standard Version', description: 'Literal, public domain' },
 ];
 
-// ── Bible API ──────────────────────────────────────────────────────────────
+// ── Bible API ────────────────────────────────────────────────────────────
 
 export interface BibleVerse {
   book_id: string;
@@ -34,7 +34,7 @@ export interface BiblePassage {
   translation_note: string;
 }
 
-// ── AI Answer ─────────────────────────────────────────────────────────────
+// ── AI Answer ────────────────────────────────────────────────────────────
 
 export interface Dimension {
   title: string;
@@ -49,7 +49,7 @@ export interface BibleAnswer {
   summary: string;           // 1–2 sentence overview shown above tabs
   dimensions: {
     scripture: Dimension;         // 📖 What the text says
-    historical: Dimension;        // 🏛️ Cultural/historical context
+    historical: Dimension;        // 🏗️ Cultural/historical context
     original_language: Dimension; // 🔤 Hebrew/Greek word meanings
     theological: Dimension;       // ✝️ Church teaching & interpretation
     practical: Dimension;         // 🌱 Application to life today
@@ -57,6 +57,13 @@ export interface BibleAnswer {
   translation_used: TranslationId;
   confidence: 'high' | 'medium' | 'low';
   disclaimer?: string;
+  /**
+   * Moderation status set by the pipeline.
+   * - 'approved'      — ready to display
+   * - 'under_review'  — auto-flagged by Stage 1 (sensitivity_level high or auto_flag true)
+   * - 'rejected'      — manually rejected by a moderator
+   */
+  status: 'approved' | 'under_review' | 'rejected';
   created_at: string;
 }
 
@@ -70,14 +77,14 @@ export interface DimensionMeta {
 }
 
 export const DIMENSION_META: DimensionMeta[] = [
-  { key: 'scripture',         emoji: '📖', label: 'Scripture',         color: '--dim-scripture' },
-  { key: 'historical',        emoji: '🏛️', label: 'Historical Context', color: '--dim-historical' },
-  { key: 'original_language', emoji: '🔤', label: 'Original Language',  color: '--dim-language' },
+  { key: 'scripture',         emoji: '📖', label: 'Scripture',           color: '--dim-scripture' },
+  { key: 'historical',        emoji: '🏗️', label: 'Historical Context', color: '--dim-historical' },
+  { key: 'original_language', emoji: '🔤', label: 'Original Language',   color: '--dim-language' },
   { key: 'theological',       emoji: '✝️', label: 'Theological Meaning', color: '--dim-theological' },
   { key: 'practical',         emoji: '🌱', label: 'Practical Application', color: '--dim-practical' },
 ];
 
-// ── API Request/Response ───────────────────────────────────────────────────
+// ── API Request/Response ───────────────────────────────────────────────
 
 export interface AskRequest {
   question: string;
