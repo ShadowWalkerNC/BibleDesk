@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { href: '/',      label: 'Study' },
-  { href: '/graph', label: '🕸️ Graph' },
+  { href: '/',        label: 'Study' },
+  { href: '/graph',   label: '🕸️ Graph' },
+  { href: '/history', label: '📜 History' },
 ];
 
 export default function Header() {
