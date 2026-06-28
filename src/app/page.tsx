@@ -1,60 +1,27 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import Header from '@/components/Header/Header';
 import SearchBar from '@/components/SearchBar/SearchBar';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
-import { LoadingSkeleton, ErrorState } from '@/components/LoadingState/LoadingState';
-import type { BibleAnswer, TranslationId, ApiResponse } from '@/types';
+import StreamingProgress from '@/components/StreamingProgress/StreamingProgress';
+import { ErrorState } from '@/components/LoadingState/LoadingState';
+import { useStreamingAsk } from '@/hooks/useStreamingAsk';
 import styles from './page.module.css';
 
 export default function HomePage() {
-  const [answer,          setAnswer]          = useState<BibleAnswer | null>(null);
-  const [shareSlug,       setShareSlug]       = useState<string | null>(null);
-  const [isLoading,       setIsLoading]       = useState(false);
-  const [error,           setError]           = useState<string | null>(null);
-  const [lastQuestion,    setLastQuestion]    = useState('');
-  const [lastTranslation, setLastTranslation] = useState<TranslationId>('web');
+  const { status, stages, answer, shareSlug, error, ask, retry } = useStreamingAsk();
   const answerRef = useRef<HTMLDivElement>(null);
 
-  async function handleAsk(question: string, translation: TranslationId) {
-    setIsLoading(true);
-    setError(null);
-    setAnswer(null);
-    setShareSlug(null);
-    setLastQuestion(question);
-    setLastTranslation(translation);
-
+  function handleAsk(question: string, translation: import('@/types').TranslationId) {
+    ask(question, translation);
     setTimeout(() => {
       answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-
-    try {
-      const res  = await fetch('/api/ask', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ question, translation }),
-      });
-
-      const data: ApiResponse = await res.json();
-
-      if (!data.success) {
-        setError(data.error);
-        return;
-      }
-
-      setAnswer(data.answer);
-      if (data.shareSlug) setShareSlug(data.shareSlug);
-    } catch {
-      setError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
-    }
   }
 
-  function handleRetry() {
-    if (lastQuestion) handleAsk(lastQuestion, lastTranslation);
-  }
+  const isLoading = status === 'loading';
+  const hasContent = isLoading || answer !== null || error !== null;
 
   return (
     <>
@@ -83,14 +50,14 @@ export default function HomePage() {
 
         {/* Answer area */}
         <div ref={answerRef}>
-          {(isLoading || answer || error) && (
+          {hasContent && (
             <section className={styles.answerSection} aria-label="Study answer" aria-live="polite">
               <div className="container">
-                {isLoading && <LoadingSkeleton />}
+                {isLoading && <StreamingProgress completedStages={stages} />}
                 {error && !isLoading && (
-                  <ErrorState message={error} onRetry={handleRetry} />
+                  <ErrorState message={error} onRetry={retry} />
                 )}
-                {answer && !isLoading && (
+                {answer && status === 'done' && (
                   <DimensionPanel answer={answer} shareSlug={shareSlug ?? undefined} />
                 )}
               </div>
@@ -104,12 +71,12 @@ export default function HomePage() {
             <div className="container">
               <div className={styles.featureGrid}>
                 {[
-                  { emoji: '📖', label: 'Scripture',           desc: 'Direct verse analysis and cross-references in your preferred translation' },
-                  { emoji: '🏗️', label: 'Historical Context', desc: 'Cultural, political, and historical background of the time period' },
-                  { emoji: '🔤', label: 'Original Language',   desc: 'Hebrew and Greek word meanings, nuance, and translation insights' },
-                  { emoji: '✝️', label: 'Theological Meaning', desc: 'What scholars and traditions have taught across church history' },
+                  { emoji: '📖', label: 'Scripture',             desc: 'Direct verse analysis and cross-references in your preferred translation' },
+                  { emoji: '🏗️', label: 'Historical Context',   desc: 'Cultural, political, and historical background of the time period' },
+                  { emoji: '🔤', label: 'Original Language',     desc: 'Hebrew and Greek word meanings, nuance, and translation insights' },
+                  { emoji: '✝️', label: 'Theological Meaning',   desc: 'What scholars and traditions have taught across church history' },
                   { emoji: '🌱', label: 'Practical Application', desc: 'Concrete ways to apply these truths to daily life, family, and faith' },
-                  { emoji: '🔗', label: 'Discord Integration', desc: 'Connected to Sigil — prayer requests and sermons go right to your server' },
+                  { emoji: '🔗', label: 'Discord Integration',   desc: 'Connected to Sigil — prayer requests and sermons go right to your server' },
                 ].map((f, i) => (
                   <div key={i} className={styles.featureCard} style={{ animationDelay: `${i * 0.06}s` }}>
                     <div className={styles.featureEmoji} aria-hidden="true">{f.emoji}</div>

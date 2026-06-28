@@ -26,20 +26,20 @@ import { v4 as uuidv4 } from 'uuid';
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ClassificationResult {
-  topic_type: string;           // e.g. 'salvation', 'creation', 'prayer'
-  testaments: string[];         // ['Old Testament', 'New Testament']
-  books: string[];              // ['Genesis', 'John', 'Romans']
-  doctrine_area: string;        // e.g. 'soteriology', 'eschatology'
+  topic_type: string;
+  testaments: string[];
+  books: string[];
+  doctrine_area: string;
   sensitivity_level: 'low' | 'medium' | 'high';
-  auto_flag: boolean;           // true if topic matches flagged_topics
-  candidate_verses: string[];   // e.g. ['John 3:16', 'Romans 5:8']
+  auto_flag: boolean;
+  candidate_verses: string[];
 }
 
 export interface VerifiedVerse {
-  reference: string;  // e.g. 'John 3:16'
-  text: string;       // actual verse text from bible-api.com
-  relevant: boolean;  // Claude judged it relevant after accuracy check
-  context_note?: string; // warning if verse was being proof-texted
+  reference: string;
+  text: string;
+  relevant: boolean;
+  context_note?: string;
 }
 
 export interface PipelineStageResult {
@@ -58,8 +58,10 @@ export interface PipelineResult {
 
 export interface PipelineOptions {
   translation?: TranslationId;
-  ragContext?: string;  // injected from rag.ts if similar answers exist
+  ragContext?: string;
   maxTokens?: number;
+  /** Called after each stage completes — used by the SSE stream route */
+  onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
 }
 
 // ─── Claude client ───────────────────────────────────────────────────────────
@@ -255,7 +257,6 @@ async function runStage2(
 ): Promise<VerifiedVerse[]> {
   const t0 = Date.now();
 
-  // Fetch actual verse text from bible-api.com for candidate verses
   const fetched = await Promise.allSettled(
     classification.candidate_verses.map(async (ref) => {
       const passages = await fetchPassages([ref], translation);
@@ -271,7 +272,7 @@ async function runStage2(
     .map((r) => ({
       reference: r.value.ref,
       text: r.value.text as string,
-      relevant: true, // Stage 3 will verify relevance
+      relevant: true,
     }));
 
   console.log(
@@ -307,12 +308,10 @@ async function runStage3(
 
   const parsed = tryParseJSON<Stage3Response>(raw);
   if (!parsed?.verified_verses) {
-    // Degrade gracefully: return all verses as-is
     console.warn('[Pipeline] Stage 3 parse failed, using all fetched verses');
     return verses;
   }
 
-  // Merge accuracy check results back into VerifiedVerse objects
   const verifiedMap = new Map(
     parsed.verified_verses.map((v) => [v.reference, v])
   );
@@ -427,7 +426,6 @@ async function runStage6(
   type RawAnswer = Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at' | 'status'>;
   let parsed = tryParseJSON<RawAnswer>(raw);
 
-  // Retry once on JSON failure
   if (!parsed) {
     const retryRaw = await callClaude(
       STAGE6_SYSTEM,
@@ -438,7 +436,6 @@ async function runStage6(
     if (!parsed) throw new Error(`Stage 6 (Assembly) returned invalid JSON after retry`);
   }
 
-  // Validate all 5 dimensions are present
   const required = ['scripture', 'historical', 'original_language', 'theological', 'practical'] as const;
   for (const dim of required) {
     if (!parsed.dimensions?.[dim]) throw new Error(`Stage 6 missing dimension: ${dim}`);
@@ -461,38 +458,30 @@ async function runStage6(
 
 // ─── Pipeline Orchestrator ────────────────────────────────────────────────────
 
-/**
- * Run the full 6-stage pipeline for a Bible question.
- *
- * @param question   The user's question text
- * @param options    Translation, RAG context string, maxTokens
- * @returns          PipelineResult with the BibleAnswer and stage telemetry
- */
 export async function runPipeline(
   question: string,
   options: PipelineOptions = {}
 ): Promise<PipelineResult> {
-  const { translation = 'web', ragContext = '', maxTokens = 4096 } = options;
-  void maxTokens; // Stage 6 uses its own token budget
+  const { translation = 'web', ragContext = '', maxTokens, onStageComplete } = options;
+  void maxTokens;
 
   const pipelineStart = Date.now();
   const stages: PipelineStageResult[] = [];
 
   function record(stage: number, name: string, start: number, output: Record<string, unknown>) {
-    stages.push({ stage, name, duration_ms: Date.now() - start, output });
+    const duration_ms = Date.now() - start;
+    stages.push({ stage, name, duration_ms, output });
+    onStageComplete?.(stage, name, duration_ms);
   }
 
-  // ─ Stage 1: Classify ────────────────────────────────────────────────────
   const s1Start = Date.now();
   const classification = await runStage1(question, ragContext);
   record(1, 'Classify', s1Start, classification as unknown as Record<string, unknown>);
 
-  // ─ Stage 2: Scripture Search ───────────────────────────────────────────
   const s2Start = Date.now();
   const fetchedVerses = await runStage2(classification, translation);
   record(2, 'Scripture Search', s2Start, { verse_count: fetchedVerses.length });
 
-  // ─ Stage 3: Accuracy Check ────────────────────────────────────────────
   const s3Start = Date.now();
   const verifiedVerses = await runStage3(question, fetchedVerses);
   record(3, 'Accuracy Check', s3Start, {
@@ -500,17 +489,14 @@ export async function runPipeline(
     passed: verifiedVerses.length,
   });
 
-  // ─ Stage 4: Historical & Doctrinal ──────────────────────────────────
   const s4Start = Date.now();
   const historicalAnalysis = await runStage4(question, verifiedVerses);
   record(4, 'Historical & Doctrinal', s4Start, historicalAnalysis);
 
-  // ─ Stage 5: Theological Synthesis ──────────────────────────────────
   const s5Start = Date.now();
   const synthesis = await runStage5(question, verifiedVerses, historicalAnalysis);
   record(5, 'Theological Synthesis', s5Start, synthesis);
 
-  // ─ Stage 6: Final Assembly ────────────────────────────────────────────
   const s6Start = Date.now();
   const answer = await runStage6(
     question,
