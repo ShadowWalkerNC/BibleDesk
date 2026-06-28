@@ -19,7 +19,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
-  const [question, setQuestion] = useState('');
+  const [question,    setQuestion]    = useState('');
   const [translation, setTranslation] = useState<TranslationId>('web');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const MAX = 500;
@@ -37,7 +37,7 @@ export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
   }
 
   const remaining = MAX - question.length;
-  const isWarn = remaining < 80;
+  const isWarn    = remaining < 80;
 
   return (
     <div className={styles.wrapper}>
@@ -67,21 +67,27 @@ export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
         </div>
 
         <div className={styles.controls}>
-          <div className={styles.translationRow}>
-            <label htmlFor="translation-select" className={styles.translationLabel}>Translation:</label>
-            <select
-              id="translation-select"
-              className={styles.translationSelect}
-              value={translation}
-              onChange={(e) => setTranslation(e.target.value as TranslationId)}
-              disabled={isLoading}
-            >
+          {/* Translation pill switcher */}
+          <div className={styles.translationRow} role="group" aria-label="Bible translation">
+            <span className={styles.translationLabel}>Translation</span>
+            <div className={styles.translationPills}>
               {TRANSLATIONS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.id.toUpperCase()} — {t.name}
-                </option>
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`${styles.translationPill} ${translation === t.id ? styles.translationPillActive : ''}`}
+                  onClick={() => setTranslation(t.id)}
+                  disabled={isLoading}
+                  aria-pressed={translation === t.id}
+                  title={t.name}
+                >
+                  {t.id.toUpperCase()}
+                </button>
               ))}
-            </select>
+            </div>
+            <span className={styles.translationName}>
+              {TRANSLATIONS.find((t) => t.id === translation)?.name}
+            </span>
           </div>
 
           <button
