@@ -1,0 +1,419 @@
+/* BibleDesk — Moderator Dashboard Styles
+   Inherits design tokens from globals.css (navy/gold/glass palette).
+   All layout is CSS Grid + Flexbox; no external UI lib dependencies. */
+
+/* ─── Layout ──────────────────────────────────────────────────────────── */
+
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--navy-950);
+}
+
+/* ─── Top bar ────────────────────────────────────────────────────────── */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topBarLogo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold-400);
+  letter-spacing: 0.02em;
+}
+
+.topBarTitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.refreshBtn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: 0.3rem 0.6rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  line-height: 1;
+}
+.refreshBtn:hover:not(:disabled) {
+  color: var(--gold-400);
+  border-color: var(--gold-400);
+}
+.refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Tabs ───────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.75rem 2rem 0;
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--navy-900);
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 0.5rem 1.25rem 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px; /* align border-bottom with nav border */
+}
+.tabBtn:hover { color: var(--text-primary); }
+
+.tabBtnActive {
+  color: var(--gold-400);
+  border-bottom-color: var(--gold-400);
+}
+
+/* ─── Content ────────────────────────────────────────────────────────── */
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ─── Flag queue list ────────────────────────────────────────────────── */
+
+.flagList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ─── Flag card ───────────────────────────────────────────────────────── */
+
+.flagCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  transition: border-color 0.2s;
+}
+.flagCard:hover {
+  border-color: rgba(245, 200, 66, 0.2);
+}
+
+.flagCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dimBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid currentColor;
+  opacity: 0.9;
+}
+
+.flagReason {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.flagTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.answerBody {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--gold-600);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0.75rem 1rem;
+}
+.answerBody p {
+  font-family: var(--font-serif);
+  font-size: 0.925rem;
+  color: var(--text-primary);
+  line-height: 1.65;
+}
+.answerSource {
+  margin-top: 0.4rem;
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  color: var(--text-muted) !important;
+}
+
+/* Vote tally */
+.voteTally {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  align-items: center;
+}
+.voteAccurate   { color: var(--dim-theological); }
+.voteInaccurate { color: var(--dim-practical); }
+.voteTotal      { color: var(--text-muted); }
+
+/* Vote form */
+.voteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.voteButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.voteBtn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.voteBtn:hover { color: var(--text-primary); }
+
+.voteBtnAccurate.voteBtnActive {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: var(--dim-theological);
+  color: var(--dim-theological);
+}
+.voteBtnInaccurate.voteBtnActive {
+  background: rgba(251, 113, 133, 0.12);
+  border-color: var(--dim-practical);
+  color: var(--dim-practical);
+}
+
+.correctionInput,
+.refsInput {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  padding: 0.55rem 0.75rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.correctionInput:focus,
+.refsInput:focus {
+  outline: none;
+  border-color: var(--gold-400);
+}
+
+.submitVoteBtn {
+  align-self: flex-start;
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.submitVoteBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.submitVoteBtn:hover:not(:disabled) { opacity: 0.88; }
+
+/* Feedback */
+.feedbackOk  { font-size: 0.8rem; color: var(--dim-theological); }
+.feedbackErr { font-size: 0.8rem; color: var(--dim-practical); }
+
+/* ─── Generic panel (Approve / Invite) ────────────────────────────── */
+
+.panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 520px;
+}
+
+.panelTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.panelDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+
+.simpleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fieldLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.textInput,
+.selectInput {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  transition: border-color 0.2s;
+}
+.textInput:focus,
+.selectInput:focus {
+  outline: none;
+  border-color: var(--gold-400);
+}
+.selectInput option {
+  background: var(--navy-800);
+  color: var(--text-primary);
+}
+
+.primaryBtn {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+}
+.primaryBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.primaryBtn:hover:not(:disabled) { opacity: 0.88; }
+
+/* ─── States ───────────────────────────────────────────────────────────── */
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.skeletonCard {
+  height: 200px;
+  border-radius: var(--radius-md);
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--dim-practical);
+  font-size: 0.9rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+.emptyIcon { font-size: 2.5rem; }
+
+/* ─── Access denied ─────────────────────────────────────────────────── */
+
+.accessDenied {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-950);
+}
+
+.accessDeniedCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 380px;
+  animation: fadeInUp 0.4s var(--ease-out) both;
+}
+
+.accessDeniedIcon {
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.accessDeniedCard h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.accessDeniedCard p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .topBar    { padding: 0.75rem 1rem; }
+  .tabs      { padding: 0.5rem 1rem 0; }
+  .content   { padding: 1.25rem 1rem; }
+  .panel     { padding: 1.25rem 1rem; }
+  .flagCard  { padding: 1rem 1.125rem; }
+  .tabBtn    { padding: 0.4rem 0.75rem 0.5rem; font-size: 0.8rem; }
+  .voteButtons { flex-direction: column; }
+}
