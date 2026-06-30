@@ -260,19 +260,22 @@ async function handleGetConceptSubgraph(args: Record<string, unknown>) {
 
     // Filter to the requested node and its immediate neighbours
     const { nodes, edges } = data;
-    const rootNode = nodes.find((n) => n.key === nodeKey);
+    const rootNode = nodes.find((n) => n.node_key === nodeKey);
     if (!rootNode) return { error: `Concept node not found: ${nodeKey}`, available_hint: 'Use get_concept_subgraph with an exact concept key from the graph' };
 
-    const connectedKeys = new Set<string>();
-    connectedKeys.add(nodeKey);
+    const rootId = rootNode.id;
+    if (!rootId) return { error: 'Root node has no database ID' };
+
+    const connectedIds = new Set<string>();
+    connectedIds.add(rootId);
     for (const edge of edges) {
-      if (edge.source_key === nodeKey) connectedKeys.add(edge.target_key);
-      if (edge.target_key === nodeKey) connectedKeys.add(edge.source_key);
+      if (edge.source_id === rootId) connectedIds.add(edge.target_id);
+      if (edge.target_id === rootId) connectedIds.add(edge.source_id);
     }
 
-    const subNodes = nodes.filter((n) => connectedKeys.has(n.key));
+    const subNodes = nodes.filter((n) => n.id && connectedIds.has(n.id));
     const subEdges = edges.filter(
-      (e) => connectedKeys.has(e.source_key) && connectedKeys.has(e.target_key)
+      (e) => connectedIds.has(e.source_id) && connectedIds.has(e.target_id)
     );
 
     return {

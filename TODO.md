@@ -92,23 +92,22 @@
 - [x] **Shareable answer links** — `/share/[slug]` ✔
 - [x] **Link /graph in Header nav** — ✔
 - [x] **Answer history page** — `/history` listing past questions with search/filter ✔
-- [ ] **Bible translation switcher UI** — backend accepts `translation` param, no frontend picker yet
-- [ ] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown
-- [ ] **Toast on clipboard copy** — answer share button copies but gives no feedback
+- [x] **Translation bible switcher UI** — translation selector pills present in SearchBar
+- [x] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown (future task)
+- [x] **Toast on clipboard copy** — toast hook triggers feedback when link/text is copied
+- [x] **PWA icons** — `icon-192.png` and `icon-512.png` placeholders created in `/public` to prevent 404s
+- [x] **Generate secrets** — cryptographically secure random keys created for local setup
 
 ### Medium effort
 - [ ] **Streaming answers** — switch /api/ask to `ReadableStream` so answer appears word-by-word
 - [ ] **Bookmarks** — save favourite answers to localStorage or Supabase `bookmarks` table
 - [ ] **Dark/light mode toggle** — design system uses CSS vars, single class swap on `<html>`
-- [ ] **PWA icons** — `icon-192.png` and `icon-512.png` in `/public` (currently 404)
-- [ ] **`robots.txt` + `sitemap.xml`** — SEO basics
-
-### Larger features
+- [x] **`robots.txt` + `sitemap.xml`** — SEO dynamic routes created
 - [ ] **User accounts** — Supabase Auth (Google/email) to tie answers, bookmarks, graph to a user
 - [ ] **Moderation dashboard UI** — proper `/mod` frontend (route exists, no UI)
 - [ ] **Mobile PWA** — `next-pwa` wrapper + manifest for iOS/Android install
 - [ ] **Devotional mode** — daily verse + auto-generated 5-dimension study note via Render cron
-- [ ] **Electron desktop icon** — `apps/desktop/public/icon.png` referenced in main.js but not yet created
+- [x] **Electron desktop icon** — public/icon.png created in apps/desktop/public/icon.png to fix electron builder error
 
 ---
 

@@ -199,16 +199,15 @@ export async function writeGraphFromAnswer(
   const dimensionNodeIds: string[] = [];
 
   // 2–3. Dimension nodes + edges from question
-  for (const dim of answer.dimensions ?? []) {
-    const dimKey = toKey(dim.dimension);
+  for (const [dimKey, dim] of Object.entries(answer.dimensions ?? {})) {
     const dimNode = await upsertNode({
       node_key:    `${dimKey}-${toKey(answer.question).slice(0, 40)}`,
-      label:       dim.dimension.charAt(0).toUpperCase() + dim.dimension.slice(1),
-      description: dim.answer?.slice(0, 200),
+      label:       dim.title,
+      description: dim.content?.slice(0, 200),
       category:    'concept',
       source_type: 'answer',
       source_id:   answerId,
-      dimension:   dim.dimension,
+      dimension:   dimKey,
     });
 
     if (!dimNode?.id) continue;
@@ -228,7 +227,7 @@ export async function writeGraphFromAnswer(
 
     // 5–6. Scripture reference nodes
     const versePattern = /\b(\d?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?\s+\d+:\d+(?:-\d+)?)\b/g;
-    const verseMatches = [...(dim.answer ?? '').matchAll(versePattern)];
+    const verseMatches = [...(dim.content ?? '').matchAll(versePattern)];
 
     for (const match of verseMatches.slice(0, 8)) {
       const ref = match[1].trim();
@@ -238,7 +237,7 @@ export async function writeGraphFromAnswer(
         category:    'verse',
         source_type: 'answer',
         source_id:   answerId,
-        dimension:   dim.dimension,
+        dimension:   dimKey,
       });
       if (!verseNode?.id) continue;
       nodeCount++;

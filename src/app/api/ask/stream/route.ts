@@ -15,7 +15,7 @@
 import { NextRequest } from 'next/server';
 import type { TranslationId } from '@/types';
 import { runPipeline, type PipelineOptions } from '@/lib/pipeline';
-import { getRagContext } from '@/lib/rag';
+import { runRAG } from '@/lib/rag';
 import { saveAnswer } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/rate-limit';
 
@@ -84,9 +84,9 @@ export async function POST(req: NextRequest) {
       function emit(event: string, data: unknown) {
         controller.enqueue(encoder.encode(sse(event, data)));
       }
-
       try {
-        const ragContext = await getRagContext(question).catch(() => '');
+        const ragResult = await runRAG(question).catch(() => null);
+        const ragContext = ragResult?.contextPrompt || '';
 
         const options: PipelineOptions & {
           onStageComplete?: (stage: number, name: string, duration_ms: number) => void;

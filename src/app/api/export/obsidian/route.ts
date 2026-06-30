@@ -251,7 +251,7 @@ export async function GET(req: NextRequest) {
     const zip = buildZip(files);
     const timestamp = new Date().toISOString().slice(0, 10);
 
-    return new NextResponse(zip, {
+    return new NextResponse(new Uint8Array(zip), {
       status: 200,
       headers: {
         'Content-Type':        'application/zip',
