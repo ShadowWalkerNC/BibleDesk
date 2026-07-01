@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Free AI-powered Bible study platform — 5-dimension sourced answers",
   "private": true,
-  "workspaces": [
-    "apps/desktop"
-  ],
   "scripts": {
     "dev":           "next dev",
     "build":         "next build",
