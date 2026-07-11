@@ -1,133 +1,271 @@
-/* Hero */
+/* ═══════════════════════════════════════════════════════════════
+   HOMEPAGE — elevated visual treatment
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Hero ─────────────────────────────────────────────────── */
+
 .hero {
-  padding: 5rem 0 3rem;
+  position: relative;
+  padding: 6rem 0 4rem;
   text-align: center;
+  overflow: hidden;
+}
+
+/* Ambient glow orbs behind the hero */
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+}
+
+/* Left-centre gold orb */
+.hero::before {
+  width: 520px;
+  height: 320px;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(245, 200, 66, 0.13) 0%, transparent 70%);
+  animation: heroGlowPulse 6s ease-in-out infinite alternate;
+}
+
+/* Bottom navy accent orb */
+.hero::after {
+  width: 700px;
+  height: 400px;
+  bottom: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(46, 61, 138, 0.35) 0%, transparent 70%);
+}
+
+@keyframes heroGlowPulse {
+  from { opacity: 0.7; transform: translateX(-50%) scale(1); }
+  to   { opacity: 1;   transform: translateX(-50%) scale(1.08); }
 }
 
 .heroInner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .heroTag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
-  background: var(--gold-glow);
-  border: 1px solid rgba(245, 200, 66, 0.25);
+  padding: 6px 18px;
+  background: linear-gradient(135deg, rgba(245, 200, 66, 0.12), rgba(245, 200, 66, 0.06));
+  border: 1px solid rgba(245, 200, 66, 0.3);
   border-radius: 99px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--gold-400);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(245, 200, 66, 0.08), inset 0 1px 0 rgba(245, 200, 66, 0.1);
+  animation: fadeUp 0.5s var(--ease-out) both;
 }
 
 .heroTitle {
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-size: clamp(2.25rem, 5.5vw, 3.75rem);
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
   color: var(--text-primary);
-  max-width: 680px;
+  max-width: 720px;
+  animation: fadeUp 0.5s var(--ease-out) 0.08s both;
 }
 
 .heroSubtitle {
   font-size: clamp(1rem, 2vw, 1.15rem);
   color: var(--text-secondary);
-  max-width: 560px;
-  line-height: 1.65;
+  max-width: 540px;
+  line-height: 1.7;
+  animation: fadeUp 0.5s var(--ease-out) 0.14s both;
+}
+
+/* Decorative verse divider below subtitle */
+.heroDivider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  animation: fadeUp 0.5s var(--ease-out) 0.18s both;
+}
+
+.heroDivider::before,
+.heroDivider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+  max-width: 80px;
 }
 
 .searchWrapper {
   width: 100%;
-  max-width: 700px;
+  max-width: 720px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  animation: fadeUp 0.5s var(--ease-out) 0.2s both;
 }
 
 .rateLimitWrapper {
   padding: 0 2px;
 }
 
-/* Answer section */
+/* ── Answer section ───────────────────────────────────────── */
+
 .answerSection {
-  padding: 2rem 0 4rem;
+  padding: 2rem 0 5rem;
 }
 
-/* Features grid */
+/* ── Features grid ────────────────────────────────────────── */
+
 .features {
-  padding: 3rem 0 5rem;
+  padding: 2rem 0 6rem;
+  position: relative;
+}
+
+/* Faint section label */
+.featuresLabel {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
 }
 
 .featureGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 1rem;
-  margin-top: 1rem;
 }
 
 .featureCard {
-  padding: 1.5rem;
-  background: var(--surface-1);
+  position: relative;
+  padding: 1.75rem 1.5rem;
+  background: linear-gradient(145deg, rgba(17, 24, 64, 0.7), rgba(11, 15, 46, 0.5));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   animation: fadeUp 0.5s var(--ease-out) both;
-  transition: border-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  transition: border-color 0.25s var(--ease-out),
+              transform 0.25s var(--ease-out),
+              box-shadow 0.25s var(--ease-out);
+  overflow: hidden;
+}
+
+/* Top-edge gradient shimmer on hover */
+.featureCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(245, 200, 66, 0.07) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
 }
 
 .featureCard:hover {
-  border-color: rgba(245, 200, 66, 0.2);
-  transform: translateY(-2px);
+  border-color: rgba(245, 200, 66, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(245, 200, 66, 0.08);
+}
+
+.featureCard:hover::before {
+  opacity: 1;
 }
 
 .featureEmoji {
-  font-size: 1.75rem;
-  margin-bottom: 0.75rem;
+  font-size: 1.9rem;
+  margin-bottom: 1rem;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(245, 200, 66, 0.2));
 }
 
 .featureLabel {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
 .featureDesc {
   font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-/* Footer */
+/* ── Footer ───────────────────────────────────────────────── */
+
 .footer {
   border-top: 1px solid var(--glass-border);
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   text-align: center;
   font-size: 0.82rem;
   color: var(--text-muted);
+  background: linear-gradient(to top, rgba(6, 8, 26, 0.8), transparent);
 }
 
 .footer a {
   color: var(--gold-400);
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .footer a:hover {
+  color: var(--gold-500);
   text-decoration: underline;
 }
 
 .footerSub {
-  margin-top: 0.4rem;
+  margin-top: 0.5rem;
   font-size: 0.75rem;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
+/* ── Shared keyframe ──────────────────────────────────────── */
+
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 4rem 0 2.5rem;
+  }
+  .featureGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .featureCard {
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
 }
