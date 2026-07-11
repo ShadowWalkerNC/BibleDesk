@@ -11,7 +11,6 @@
   overflow: hidden;
 }
 
-/* Ambient glow orbs behind the hero */
 .hero::before,
 .hero::after {
   content: '';
@@ -22,7 +21,6 @@
   filter: blur(80px);
 }
 
-/* Left-centre gold orb */
 .hero::before {
   width: 520px;
   height: 320px;
@@ -33,7 +31,6 @@
   animation: heroGlowPulse 6s ease-in-out infinite alternate;
 }
 
-/* Bottom navy accent orb */
 .hero::after {
   width: 700px;
   height: 400px;
@@ -92,7 +89,6 @@
   animation: fadeUp 0.5s var(--ease-out) 0.14s both;
 }
 
-/* Decorative verse divider below subtitle */
 .heroDivider {
   display: flex;
   align-items: center;
@@ -122,6 +118,22 @@
   animation: fadeUp 0.5s var(--ease-out) 0.2s both;
 }
 
+/* Rotating prompt hint above the search bar */
+.placeholderHint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  min-height: 1.2em;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.placeholderHint[data-visible='false'] {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 .rateLimitWrapper {
   padding: 0 2px;
 }
@@ -135,11 +147,10 @@
 /* ── Features grid ────────────────────────────────────────── */
 
 .features {
-  padding: 2rem 0 6rem;
+  padding: 2rem 0 3rem;
   position: relative;
 }
 
-/* Faint section label */
 .featuresLabel {
   text-align: center;
   font-size: 0.72rem;
@@ -171,7 +182,6 @@
   overflow: hidden;
 }
 
-/* Top-edge gradient shimmer on hover */
 .featureCard::before {
   content: '';
   position: absolute;
@@ -193,9 +203,24 @@
   opacity: 1;
 }
 
+.featureBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-bottom: 0.85rem;
+  background: rgba(245, 200, 66, 0.08);
+  border: 1px solid rgba(245, 200, 66, 0.18);
+  border-radius: 99px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold-400);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
 .featureEmoji {
   font-size: 1.9rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
   display: block;
   filter: drop-shadow(0 2px 8px rgba(245, 200, 66, 0.2));
 }
@@ -214,6 +239,127 @@
   line-height: 1.6;
 }
 
+/* ── Study Destinations ───────────────────────────────────── */
+
+.destinations {
+  padding: 0 0 6rem;
+}
+
+.destinationGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.destinationCard {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.4rem 1.5rem;
+  background: linear-gradient(135deg, rgba(17, 24, 64, 0.5), rgba(11, 15, 46, 0.35));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-decoration: none;
+  color: inherit;
+  animation: fadeUp 0.5s var(--ease-out) both;
+  transition: border-color 0.22s var(--ease-out),
+              transform 0.22s var(--ease-out),
+              box-shadow 0.22s var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.destinationCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(245, 200, 66, 0.05) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out);
+  pointer-events: none;
+}
+
+.destinationCard:hover {
+  border-color: rgba(245, 200, 66, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(245, 200, 66, 0.06);
+  text-decoration: none;
+  color: inherit;
+}
+
+.destinationCard:hover::before {
+  opacity: 1;
+}
+
+.destIconWrap {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(245, 200, 66, 0.07);
+  border: 1px solid rgba(245, 200, 66, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.destIcon {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 1px 6px rgba(245, 200, 66, 0.25));
+}
+
+.destBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.destBadge {
+  display: inline-block;
+  padding: 2px 7px;
+  margin-bottom: 0.3rem;
+  background: rgba(245, 200, 66, 0.07);
+  border: 1px solid rgba(245, 200, 66, 0.15);
+  border-radius: 99px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold-400);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.destTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem;
+}
+
+.destDesc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.destArrow {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--text-muted);
+  transition: color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.destinationCard:hover .destArrow {
+  color: var(--gold-400);
+  transform: translateX(3px);
+}
+
 /* ── Footer ───────────────────────────────────────────────── */
 
 .footer {
@@ -223,6 +369,30 @@
   font-size: 0.82rem;
   color: var(--text-muted);
   background: linear-gradient(to top, rgba(6, 8, 26, 0.8), transparent);
+}
+
+.footerNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+}
+
+.footerNav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerNav a:hover {
+  color: var(--gold-400);
+  text-decoration: none;
+}
+
+.footerNav span {
+  opacity: 0.3;
 }
 
 .footer a {
@@ -261,6 +431,19 @@
   }
   .featureCard {
     padding: 1.25rem 1rem;
+  }
+  .destinationGrid {
+    grid-template-columns: 1fr;
+  }
+  .destinationCard {
+    padding: 1.1rem 1.1rem;
+  }
+  .destDesc {
+    white-space: normal;
+  }
+  .footerNav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
 
