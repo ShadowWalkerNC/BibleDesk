@@ -118,22 +118,6 @@
   animation: fadeUp 0.5s var(--ease-out) 0.2s both;
 }
 
-/* Rotating prompt hint above the search bar */
-.placeholderHint {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-style: italic;
-  min-height: 1.2em;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.placeholderHint[data-visible='false'] {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
 .rateLimitWrapper {
   padding: 0 2px;
 }
@@ -147,7 +131,7 @@
 /* ── Features grid ────────────────────────────────────────── */
 
 .features {
-  padding: 2rem 0 3rem;
+  padding: 2rem 0 4rem;
   position: relative;
 }
 
@@ -205,22 +189,20 @@
 
 .featureBadge {
   display: inline-block;
-  padding: 2px 8px;
-  margin-bottom: 0.85rem;
-  background: rgba(245, 200, 66, 0.08);
-  border: 1px solid rgba(245, 200, 66, 0.18);
-  border-radius: 99px;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--gold-400);
   text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 99px;
+  padding: 2px 8px;
+  margin-bottom: 0.85rem;
   opacity: 0.85;
 }
 
 .featureEmoji {
   font-size: 1.9rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
   display: block;
   filter: drop-shadow(0 2px 8px rgba(245, 200, 66, 0.2));
 }
@@ -239,125 +221,77 @@
   line-height: 1.6;
 }
 
-/* ── Study Destinations ───────────────────────────────────── */
+/* ── Coming Soon teaser ───────────────────────────────────── */
 
-.destinations {
+.teaser {
   padding: 0 0 6rem;
 }
 
-.destinationGrid {
+.teaserLabel {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.teaserGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
 }
 
-.destinationCard {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.4rem 1.5rem;
-  background: linear-gradient(135deg, rgba(17, 24, 64, 0.5), rgba(11, 15, 46, 0.35));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  text-decoration: none;
-  color: inherit;
-  animation: fadeUp 0.5s var(--ease-out) both;
-  transition: border-color 0.22s var(--ease-out),
-              transform 0.22s var(--ease-out),
-              box-shadow 0.22s var(--ease-out);
+.teaserCard {
   position: relative;
-  overflow: hidden;
-}
-
-.destinationCard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(120deg, rgba(245, 200, 66, 0.05) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.25s var(--ease-out);
-  pointer-events: none;
-}
-
-.destinationCard:hover {
-  border-color: rgba(245, 200, 66, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(245, 200, 66, 0.06);
-  text-decoration: none;
-  color: inherit;
-}
-
-.destinationCard:hover::before {
-  opacity: 1;
-}
-
-.destIconWrap {
-  flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: rgba(245, 200, 66, 0.07);
-  border: 1px solid rgba(245, 200, 66, 0.14);
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(145deg, rgba(17, 24, 64, 0.4), rgba(11, 15, 46, 0.3));
+  border: 1px dashed rgba(159, 168, 212, 0.18);
+  border-radius: var(--radius-lg);
+  text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 
-.destIcon {
-  font-size: 1.6rem;
-  filter: drop-shadow(0 1px 6px rgba(245, 200, 66, 0.25));
+.teaserCard:hover {
+  opacity: 0.9;
 }
 
-.destBody {
-  flex: 1;
-  min-width: 0;
+.teaserEmoji {
+  font-size: 1.75rem;
+  filter: grayscale(0.3);
 }
 
-.destBadge {
-  display: inline-block;
-  padding: 2px 7px;
-  margin-bottom: 0.3rem;
-  background: rgba(245, 200, 66, 0.07);
-  border: 1px solid rgba(245, 200, 66, 0.15);
-  border-radius: 99px;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--gold-400);
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-
-.destTitle {
-  font-size: 0.95rem;
+.teaserCardLabel {
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
-  margin-bottom: 0.25rem;
 }
 
-.destDesc {
+.teaserCardDesc {
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.destArrow {
-  flex-shrink: 0;
-  font-size: 1rem;
+.teaserPill {
+  margin-top: 0.5rem;
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(159, 168, 212, 0.1);
+  border: 1px solid rgba(159, 168, 212, 0.2);
+  border-radius: 99px;
+  padding: 2px 10px;
   color: var(--text-muted);
-  transition: color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
-}
-
-.destinationCard:hover .destArrow {
-  color: var(--gold-400);
-  transform: translateX(3px);
 }
 
 /* ── Footer ───────────────────────────────────────────────── */
@@ -373,26 +307,22 @@
 
 .footerNav {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.8rem;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .footerNav a {
   color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .footerNav a:hover {
   color: var(--gold-400);
-  text-decoration: none;
-}
-
-.footerNav span {
-  opacity: 0.3;
 }
 
 .footer a {
@@ -432,23 +362,17 @@
   .featureCard {
     padding: 1.25rem 1rem;
   }
-  .destinationGrid {
-    grid-template-columns: 1fr;
-  }
-  .destinationCard {
-    padding: 1.1rem 1.1rem;
-  }
-  .destDesc {
-    white-space: normal;
-  }
-  .footerNav {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  .teaserGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
   }
 }
 
 @media (max-width: 400px) {
   .featureGrid {
+    grid-template-columns: 1fr;
+  }
+  .teaserGrid {
     grid-template-columns: 1fr;
   }
 }
