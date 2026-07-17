@@ -10,63 +10,42 @@ import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
 import styles from './page.module.css';
 
-const PLACEHOLDER_PROMPTS = [
+const PLACEHOLDERS = [
   'What did Jesus mean by "born again"?',
   'Explain the armor of God in Ephesians 6',
   'Who wrote the book of Hebrews?',
-  'What is the significance of the number 7 in Revelation?',
-  'How should Christians understand the Sabbath today?',
-  'What does it mean to be made in the image of God?',
-  'Explain the parable of the prodigal son',
-  'What happened at Pentecost?',
+  'What is the significance of the number 40 in the Bible?',
+  'What does "selah" mean in the Psalms?',
+  'Why did God harden Pharaoh\'s heart?',
+  'What is the Sermon on the Mount about?',
+  'Explain the Trinity in Scripture',
 ];
 
-const STUDY_DESTINATIONS = [
-  {
-    icon: '📖',
-    title: 'Read a Chapter',
-    desc: 'Browse any book and chapter in your preferred translation',
-    badge: 'READING',
-    href: '#',
-  },
-  {
-    icon: '⚖️',
-    title: 'Compare Translations',
-    desc: 'See KJV, NIV, ESV, and more side by side for any passage',
-    badge: 'STUDY',
-    href: '#',
-  },
-  {
-    icon: '🔤',
-    title: 'Word Study',
-    desc: "Dig into original Hebrew and Greek with Strong's concordance",
-    badge: 'LANGUAGE',
-    href: '#',
-  },
-  {
-    icon: '🌅',
-    title: 'Daily Verse',
-    desc: 'A curated verse each morning with context and reflection',
-    badge: 'DEVOTIONAL',
-    href: '#',
-  },
+const TEASER_ITEMS = [
+  { emoji: '📖', label: 'Read a Chapter',        desc: 'Open any book, chapter by chapter' },
+  { emoji: '⚖️', label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side' },
+  { emoji: '🔍', label: 'Word Study',            desc: 'Dig into Hebrew & Greek originals' },
+  { emoji: '🌅', label: 'Daily Verse',           desc: 'A fresh verse each morning' },
 ];
+
+const FEATURE_BADGES: Record<string, { label: string; color: string }> = {
+  'Scripture':             { label: 'STUDY',    color: 'var(--dim-scripture)' },
+  'Historical Context':    { label: 'CHURCH',   color: 'var(--dim-historical)' },
+  'Original Language':     { label: 'LANGUAGE', color: 'var(--dim-language)' },
+  'Theology':              { label: 'DOCTRINE', color: 'var(--dim-theological)' },
+  'Practical Application': { label: 'LIFE',     color: 'var(--dim-practical)' },
+};
 
 export default function HomePage() {
   const { status, stages, answer, shareSlug, error, rateLimit, ask, retry } = useStreamingAsk();
   const answerRef = useRef<HTMLDivElement>(null);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderVisible(false);
-      setTimeout(() => {
-        setPlaceholderIndex(i => (i + 1) % PLACEHOLDER_PROMPTS.length);
-        setPlaceholderVisible(true);
-      }, 300);
+    const id = setInterval(() => {
+      setPlaceholderIdx(i => (i + 1) % PLACEHOLDERS.length);
     }, 3500);
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, []);
 
   function handleAsk(question: string, translation: import('@/types').TranslationId) {
@@ -107,14 +86,11 @@ export default function HomePage() {
             </div>
 
             <div className={styles.searchWrapper}>
-              <div
-                className={styles.placeholderHint}
-                aria-hidden="true"
-                data-visible={placeholderVisible}
-              >
-                {PLACEHOLDER_PROMPTS[placeholderIndex]}
-              </div>
-              <SearchBar onSubmit={handleAsk} isLoading={isLoading} />
+              <SearchBar
+                onSubmit={handleAsk}
+                isLoading={isLoading}
+                placeholder={PLACEHOLDERS[placeholderIdx]}
+              />
               {rateLimit && (
                 <div className={styles.rateLimitWrapper}>
                   <RateLimitBar rateLimit={rateLimit} />
@@ -142,7 +118,7 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* ── Features + Destinations — shown when no answer ── */}
+        {/* ── Features + Teaser — shown when no answer ──────── */}
         {!answer && !isLoading && !error && (
           <>
             <section className={styles.features} aria-label="Features">
@@ -150,46 +126,49 @@ export default function HomePage() {
                 <p className={styles.featuresLabel}>What you get with every answer</p>
                 <div className={styles.featureGrid}>
                   {[
-                    { emoji: '📖', label: 'Scripture',             badge: 'STUDY',    desc: 'Direct verse analysis and cross-references in your preferred translation' },
-                    { emoji: '🏛️', label: 'Historical Context',   badge: 'HISTORY',  desc: 'Cultural, political, and historical background of the time period' },
-                    { emoji: '🔤', label: 'Original Language',     badge: 'LANGUAGE', desc: 'Hebrew and Greek word meanings, nuance, and translation insights' },
-                    { emoji: '✝️', label: 'Theological Meaning',   badge: 'THEOLOGY', desc: 'What scholars and traditions have taught across church history' },
-                    { emoji: '🌱', label: 'Practical Application', badge: 'LIFE',     desc: 'Concrete ways to apply these truths to daily life, family, and faith' },
-                    { emoji: '🔗', label: 'Discord Integration',   badge: 'CHURCH',   desc: 'Connected to Sigil — prayer requests and sermons go right to your server' },
-                  ].map((f, i) => (
-                    <div key={i} className={styles.featureCard} style={{ animationDelay: `${i * 0.07}s` }}>
-                      <span className={styles.featureBadge}>{f.badge}</span>
-                      <span className={styles.featureEmoji} aria-hidden="true">{f.emoji}</span>
-                      <h3 className={styles.featureLabel}>{f.label}</h3>
-                      <p className={styles.featureDesc}>{f.desc}</p>
-                    </div>
-                  ))}
+                    { emoji: '📖', label: 'Scripture',               desc: 'Direct verse analysis and cross-references in your preferred translation' },
+                    { emoji: '🏛️', label: 'Historical Context',     desc: 'Cultural, political, and historical background of the time period' },
+                    { emoji: '🔤', label: 'Original Language',       desc: 'Hebrew and Greek word meanings, nuance, and translational choices' },
+                    { emoji: '✝️', label: 'Theology',                desc: 'Doctrinal implications, denominational perspectives, and creeds' },
+                    { emoji: '🌿', label: 'Practical Application',   desc: 'How this truth applies to daily life, decisions, and discipleship' },
+                  ].map(({ emoji, label, desc }, i) => {
+                    const badge = FEATURE_BADGES[label];
+                    return (
+                      <div
+                        key={label}
+                        className={styles.featureCard}
+                        style={{ animationDelay: `${i * 0.06}s` }}
+                      >
+                        {badge && (
+                          <span
+                            className={styles.featureBadge}
+                            style={{ color: badge.color, borderColor: badge.color }}
+                          >
+                            {badge.label}
+                          </span>
+                        )}
+                        <span className={styles.featureEmoji}>{emoji}</span>
+                        <p className={styles.featureLabel}>{label}</p>
+                        <p className={styles.featureDesc}>{desc}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>
 
-            <section className={styles.destinations} aria-label="Study tools">
+            {/* ── Coming Soon teaser ────────────────────────── */}
+            <section className={styles.teaser} aria-label="Coming soon">
               <div className="container">
-                <p className={styles.featuresLabel}>Open a Bible</p>
-                <div className={styles.destinationGrid}>
-                  {STUDY_DESTINATIONS.map((d, i) => (
-                    <a
-                      key={i}
-                      href={d.href}
-                      className={styles.destinationCard}
-                      style={{ animationDelay: `${i * 0.08}s` }}
-                      aria-label={d.title}
-                    >
-                      <div className={styles.destIconWrap}>
-                        <span className={styles.destIcon} aria-hidden="true">{d.icon}</span>
-                      </div>
-                      <div className={styles.destBody}>
-                        <span className={styles.destBadge}>{d.badge}</span>
-                        <h3 className={styles.destTitle}>{d.title}</h3>
-                        <p className={styles.destDesc}>{d.desc}</p>
-                      </div>
-                      <span className={styles.destArrow} aria-hidden="true">→</span>
-                    </a>
+                <p className={styles.teaserLabel}>Coming to BibleDesk</p>
+                <div className={styles.teaserGrid}>
+                  {TEASER_ITEMS.map(({ emoji, label, desc }) => (
+                    <div key={label} className={styles.teaserCard}>
+                      <span className={styles.teaserEmoji}>{emoji}</span>
+                      <p className={styles.teaserCardLabel}>{label}</p>
+                      <p className={styles.teaserCardDesc}>{desc}</p>
+                      <span className={styles.teaserPill}>Soon</span>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -199,25 +178,16 @@ export default function HomePage() {
 
       </main>
 
+      {/* ── Footer ────────────────────────────────────────── */}
       <footer className={styles.footer}>
         <div className="container">
           <nav className={styles.footerNav} aria-label="Footer navigation">
-            <a href="#">About</a>
-            <span aria-hidden="true">·</span>
+            <a href="/about">About</a>
             <a href="https://github.com/ShadowWalkerNC/BibleDesk" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <span aria-hidden="true">·</span>
-            <a href="#">Discord</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://bible-api.com" target="_blank" rel="noopener noreferrer">Bible API</a>
+            <a href="https://scripture.api.bible" target="_blank" rel="noopener noreferrer">Bible API</a>
           </nav>
-          <p>
-            BibleDesk is free. Built with ✦ for churches, pastors, and seekers.
-          </p>
-          <p className={styles.footerSub}>
-            Scripture via{' '}
-            <a href="https://bible-api.com" target="_blank" rel="noopener noreferrer">bible-api.com</a>
-            {' '}· AI by Anthropic Claude · Powered by Supabase
-          </p>
+          <p>Built with care for serious Bible study · Powered by <a href="https://scripture.api.bible" target="_blank" rel="noopener noreferrer">API.Bible</a></p>
+          <p className={styles.footerSub}>BibleDesk is not affiliated with any denomination or publisher.</p>
         </div>
       </footer>
     </>
