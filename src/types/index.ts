@@ -13,6 +13,9 @@ export const TRANSLATIONS: Translation[] = [
   { id: 'web', name: 'World English Bible', description: 'Modern, public domain' },
   { id: 'kjv', name: 'King James Version', description: 'Classic, public domain' },
   { id: 'asv', name: 'American Standard Version', description: 'Literal, public domain' },
+  { id: 'darby', name: 'Darby Bible', description: '9th Century Translation, public domain' },
+  { id: 'bbe', name: 'Bible in Basic English', description: 'Simple English vocabulary, public domain' },
+  { id: 'ylt', name: 'Young\'s Literal Translation', description: 'Strict word-for-word, public domain' },
 ];
 
 // ── Bible API ────────────────────────────────────────────────────────────────

@@ -1,0 +1,761 @@
+'use client';
+
+import { useState, useEffect, useRef, useTransition } from 'react';
+import Header from '@/components/Header/Header';
+import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter } from '@/lib/books';
+import { TRANSLATIONS, type TranslationId, type BibleVerse, type BiblePassage } from '@/types';
+import styles from './page.module.css';
+
+interface OriginalWordStudy {
+  word: string;
+  originalWord: string;
+  strongsNumber: string;
+  pronunciation: string;
+  definition: string;
+}
+
+interface CrossReference {
+  reference: string;
+  text: string;
+  connectionReason: string;
+}
+
+interface AIStudyData {
+  reference: string;
+  translation: string;
+  selectedWordStudy?: OriginalWordStudy | null;
+  originalLanguageWords: OriginalWordStudy[];
+  commentary: string;
+  crossReferences: CrossReference[];
+  practicalApplication: string;
+}
+
+export default function BibleReaderPage() {
+  // Navigation states
+  const [selectedBook, setSelectedBook] = useState('John');
+  const [selectedChapter, setSelectedChapter] = useState(3);
+  const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>('web');
+  const [parallelMode, setParallelMode] = useState(false);
+  const [translationB, setTranslationB] = useState<TranslationId>('kjv');
+
+  // Content states
+  const [verses, setVerses] = useState<BibleVerse[]>([]);
+  const [versesB, setVersesB] = useState<BibleVerse[]>([]);
+  const [loadingChapter, setLoadingChapter] = useState(true);
+  const [chapterError, setChapterError] = useState<string | null>(null);
+
+  // AI Study states
+  const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes'>('study');
+  const [studyData, setStudyData] = useState<AIStudyData | null>(null);
+  const [loadingStudy, setLoadingStudy] = useState(false);
+  const [studyError, setStudyError] = useState<string | null>(null);
+
+  // Translation comparison state
+  const [comparedVerses, setComparedVerses] = useState<Array<{ translation: string; text: string }>>([]);
+  const [loadingCompare, setLoadingCompare] = useState(false);
+
+  // Personal notes state
+  const [notes, setNotes] = useState('');
+
+  // UI state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const readerScrollRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
+
+  // 1. Fetch Chapter Verses (support parallel loading)
+  useEffect(() => {
+    let active = true;
+    async function fetchChapter() {
+      setLoadingChapter(true);
+      setChapterError(null);
+      try {
+        const urlA = `/api/bible/chapter?book=${encodeURIComponent(selectedBook)}&chapter=${selectedChapter}&translation=${selectedTranslation}`;
+        const urlB = `/api/bible/chapter?book=${encodeURIComponent(selectedBook)}&chapter=${selectedChapter}&translation=${translationB}`;
+
+        const promises = [fetch(urlA)];
+        if (parallelMode) {
+          promises.push(fetch(urlB));
+        }
+
+        const responses = await Promise.all(promises);
+        const dataA = await responses[0].json();
+        const dataB = responses[1] ? await responses[1].json() : null;
+
+        if (!active) return;
+
+        if (!responses[0].ok || !dataA.success) {
+          setChapterError(dataA.error || 'Failed to load chapter.');
+          setVerses([]);
+          setVersesB([]);
+        } else {
+          setVerses(dataA.passage.verses);
+          if (dataB && dataB.success) {
+            setVersesB(dataB.passage.verses);
+          } else {
+            setVersesB([]);
+          }
+
+          // Auto select first verse if none selected
+          if (dataA.passage.verses.length > 0) {
+            const firstVerse = dataA.passage.verses[0];
+            setSelectedVerse(firstVerse);
+            setSelectedWord(null);
+          }
+        }
+      } catch (err) {
+        if (active) {
+          setChapterError('Connection error. Could not fetch chapter data.');
+        }
+      } finally {
+        if (active) setLoadingChapter(false);
+      }
+    }
+
+    fetchChapter();
+    return () => {
+      active = false;
+    };
+  }, [selectedBook, selectedChapter, selectedTranslation, translationB, parallelMode]);
+
+  // 2. Fetch AI Study Data when selectedVerse or selectedWord changes
+  useEffect(() => {
+    if (!selectedVerse) return;
+    const verse = selectedVerse;
+
+    let active = true;
+    async function fetchStudy() {
+      setLoadingStudy(true);
+      setStudyError(null);
+      try {
+        const res = await fetch('/api/bible/study', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reference: `${verse.book_name} ${verse.chapter}:${verse.verse}`,
+            verseText: verse.text,
+            translation: selectedTranslation,
+            selectedWord: selectedWord || undefined,
+          }),
+        });
+        const data = await res.json();
+
+        if (!active) return;
+
+        if (!res.ok || !data.success) {
+          setStudyError(data.error || 'Failed to generate AI study guide.');
+          setStudyData(null);
+        } else {
+          setStudyData(data.study);
+        }
+      } catch (err) {
+        if (active) {
+          setStudyError('Network error. Failed to load AI companion analysis.');
+        }
+      } finally {
+        if (active) setLoadingStudy(false);
+      }
+    }
+
+    fetchStudy();
+    return () => {
+      active = false;
+    };
+  }, [selectedVerse, selectedWord, selectedTranslation]);
+
+  // 3. Fetch Comparison Translations
+  useEffect(() => {
+    if (!selectedVerse || activeTab !== 'compare') return;
+    const verse = selectedVerse;
+
+    let active = true;
+    async function fetchComparison() {
+      setLoadingCompare(true);
+      try {
+        const ref = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
+        const promises = TRANSLATIONS.map(async (t) => {
+          const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${t.id}`);
+          if (!res.ok) return { translation: t.name, text: 'Unavailable' };
+          const data = await res.json();
+          return {
+            translation: t.name,
+            text: data.text?.trim() || 'Verse not found in this translation.',
+          };
+        });
+
+        const results = await Promise.all(promises);
+        if (active) {
+          setComparedVerses(results);
+        }
+      } catch (err) {
+        if (active) {
+          showToast('Failed to load other translations.', 'error');
+        }
+      } finally {
+        if (active) setLoadingCompare(false);
+      }
+    }
+
+    fetchComparison();
+    return () => {
+      active = false;
+    };
+  }, [selectedVerse, activeTab]);
+
+  // 4. Load Personal Notes from LocalStorage
+  useEffect(() => {
+    if (!selectedVerse) return;
+    const key = `biblenote:${selectedVerse.book_name}:${selectedVerse.chapter}:${selectedVerse.verse}`;
+    const savedNote = localStorage.getItem(key) || '';
+    setNotes(savedNote);
+  }, [selectedVerse]);
+
+  // 5. Save Note Helper
+  const handleSaveNote = (val: string) => {
+    if (!selectedVerse) return;
+    setNotes(val);
+    const key = `biblenote:${selectedVerse.book_name}:${selectedVerse.chapter}:${selectedVerse.verse}`;
+    if (val.trim()) {
+      localStorage.setItem(key, val);
+    } else {
+      localStorage.removeItem(key);
+    }
+  };
+
+  // Toast helper
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Copy verse helper
+  const handleCopyVerse = (v: BibleVerse) => {
+    const formatted = `"${v.text.trim()}" — ${v.book_name} ${v.chapter}:${v.verse} (${selectedTranslation.toUpperCase()})`;
+    navigator.clipboard.writeText(formatted)
+      .then(() => showToast('Verse copied to clipboard!'))
+      .catch(() => showToast('Failed to copy text.', 'error'));
+  };
+
+  // Chapter navigation handlers
+  const handleNext = () => {
+    const next = getNextChapter(selectedBook, selectedChapter);
+    if (next) {
+      startTransition(() => {
+        setSelectedBook(next.book);
+        setSelectedChapter(next.chapter);
+        if (readerScrollRef.current) {
+          readerScrollRef.current.scrollTop = 0;
+        }
+      });
+    } else {
+      showToast('You are at the end of the Bible.');
+    }
+  };
+
+  const handlePrev = () => {
+    const prev = getPrevChapter(selectedBook, selectedChapter);
+    if (prev) {
+      startTransition(() => {
+        setSelectedBook(prev.book);
+        setSelectedChapter(prev.chapter);
+        if (readerScrollRef.current) {
+          readerScrollRef.current.scrollTop = 0;
+        }
+      });
+    } else {
+      showToast('You are at the beginning of the Bible.');
+    }
+  };
+
+  // Jump to cross reference handler
+  const handleJumpToReference = (refStr: string) => {
+    // Parse reference string like "Romans 5:8" or "1 John 3:16" or "Matthew 1:1"
+    const match = refStr.match(/^((?:\d\s+)?[A-Za-z\s]+?)\s+(\d+):(\d+)/);
+    if (match) {
+      const bookName = match[1].trim();
+      const chapterNum = parseInt(match[2], 10);
+      const verseNum = parseInt(match[3], 10);
+
+      // Verify book exists
+      const bookExists = BIBLE_BOOKS.some(b => b.name.toLowerCase() === bookName.toLowerCase());
+      if (bookExists) {
+        startTransition(() => {
+          setSelectedBook(bookName);
+          setSelectedChapter(chapterNum);
+          setActiveTab('study');
+          setSelectedWord(null);
+          // Temporary listener to highlight the target verse after it loads
+          const selectVerseAfterLoad = (e: Event) => {
+            document.removeEventListener('bibledesk:chapter-loaded', selectVerseAfterLoad);
+          };
+          document.addEventListener('bibledesk:chapter-loaded', selectVerseAfterLoad);
+        });
+      } else {
+        showToast(`Could not navigate to "${refStr}"`, 'error');
+      }
+    }
+  };
+
+  // Clean words helper (splits sentence and strips punctuation)
+  const renderInteractiveVerseText = (v: BibleVerse) => {
+    const words = v.text.trim().split(/\s+/);
+    return words.map((w, idx) => {
+      // Strip punctuation to find the clean word base for analysis
+      const cleanWord = w.replace(/[^\w\s\']/g, '').trim();
+      const isSelected = selectedVerse?.verse === v.verse && selectedWord?.toLowerCase() === cleanWord.toLowerCase();
+      
+      return (
+        <span
+          key={idx}
+          className={`${styles.interactiveWord} ${isSelected ? styles.selectedWord : ''}`}
+          onClick={(e) => {
+            e.stopPropagation(); // Stop selecting the row
+            setSelectedVerse(v);
+            setSelectedWord(cleanWord);
+            setActiveTab('study');
+          }}
+        >
+          {w}{' '}
+        </span>
+      );
+    });
+  };
+
+  // Trigger custom event once chapter finishes loading
+  useEffect(() => {
+    if (!loadingChapter && verses.length > 0) {
+      document.dispatchEvent(new CustomEvent('bibledesk:chapter-loaded'));
+    }
+  }, [loadingChapter, verses]);
+
+  const maxChapters = getBookChapters(selectedBook);
+
+  return (
+    <>
+      <Header />
+      
+      {/* Toast Alert */}
+      {toast && (
+        <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`} role="alert">
+          {toast.message}
+        </div>
+      )}
+
+      <main className={styles.mainContainer}>
+        {/* Navigation Selector Bar */}
+        <div className={`${styles.selectorBar} glass-card`}>
+          <div className={styles.selectors}>
+            <div className={styles.selectGroup}>
+              <label htmlFor="book-select" className={styles.selectLabel}>Book</label>
+              <select
+                id="book-select"
+                value={selectedBook}
+                onChange={(e) => {
+                  setSelectedBook(e.target.value);
+                  setSelectedChapter(1);
+                }}
+                className={styles.select}
+              >
+                {BIBLE_BOOKS.map((b) => (
+                  <option key={b.name} value={b.name}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.selectGroup}>
+              <label htmlFor="chapter-select" className={styles.selectLabel}>Chapter</label>
+              <select
+                id="chapter-select"
+                value={selectedChapter}
+                onChange={(e) => setSelectedChapter(Number(e.target.value))}
+                className={styles.select}
+              >
+                {Array.from({ length: maxChapters }, (_, i) => i + 1).map((ch) => (
+                  <option key={ch} value={ch}>{ch}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.selectGroup}>
+              <label htmlFor="translation-select" className={styles.selectLabel}>Translation</label>
+              <select
+                id="translation-select"
+                value={selectedTranslation}
+                onChange={(e) => setSelectedTranslation(e.target.value as TranslationId)}
+                className={styles.select}
+              >
+                {TRANSLATIONS.map((t) => (
+                  <option key={t.id} value={t.id}>{t.id.toUpperCase()} - {t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.checkboxGroup}>
+              <input
+                type="checkbox"
+                id="parallel-toggle"
+                checked={parallelMode}
+                onChange={(e) => setParallelMode(e.target.checked)}
+                className={styles.checkbox}
+              />
+              <label htmlFor="parallel-toggle" className={styles.checkboxLabel}>Parallel View</label>
+            </div>
+
+            {parallelMode && (
+              <div className={styles.selectGroup}>
+                <label htmlFor="translation-b-select" className={styles.selectLabel}>Translation B</label>
+                <select
+                  id="translation-b-select"
+                  value={translationB}
+                  onChange={(e) => setTranslationB(e.target.value as TranslationId)}
+                  className={styles.select}
+                >
+                  {TRANSLATIONS.map((t) => (
+                    <option key={t.id} value={t.id}>{t.id.toUpperCase()} - {t.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.navButtons}>
+            <button onClick={handlePrev} className={styles.navBtn} aria-label="Previous Chapter">
+              ◀ Prev
+            </button>
+            <button onClick={handleNext} className={styles.navBtn} aria-label="Next Chapter">
+              Next ▶
+            </button>
+          </div>
+        </div>
+
+        {/* Reader Layout Split Grid */}
+        <div className={styles.splitGrid}>
+          
+          {/* Left Column: Bible Text Reader */}
+          <div className={`${styles.textPanel} glass-card`} ref={readerScrollRef}>
+            {loadingChapter ? (
+              <div className={styles.loadingWrapper}>
+                <div className="skeleton" style={{ height: '30px', width: '200px', marginBottom: '20px' }} />
+                {Array.from({ length: 15 }).map((_, i) => (
+                  <div key={i} className="skeleton" style={{ height: '20px', width: '100%', marginBottom: '12px' }} />
+                ))}
+              </div>
+            ) : chapterError ? (
+              <div className={styles.errorBox}>
+                <p>⚠️ {chapterError}</p>
+                <button onClick={() => window.location.reload()} className={styles.retryBtn}>Retry</button>
+              </div>
+            ) : (
+              <div className={styles.versesList}>
+                <h1 className={`${styles.chapterHeader} text-serif`}>
+                  {selectedBook} {selectedChapter}
+                </h1>
+                <div className={styles.versesWrapper}>
+                  {parallelMode && (
+                    <div className={styles.parallelHeaderRow}>
+                      <div className={styles.parallelHeader}>{selectedTranslation.toUpperCase()}</div>
+                      <div className={styles.parallelHeader}>{translationB.toUpperCase()}</div>
+                    </div>
+                  )}
+                  {verses.map((v) => {
+                    const isSelected = selectedVerse?.verse === v.verse;
+                    const vB = parallelMode ? versesB.find((x) => x.verse === v.verse) : null;
+                    return (
+                      <div
+                        key={v.verse}
+                        className={`${styles.verseRow} ${isSelected ? styles.activeVerseRow : ''} ${parallelMode ? styles.parallelVerseRow : ''}`}
+                        onClick={() => {
+                          setSelectedVerse(v);
+                          setSelectedWord(null);
+                        }}
+                      >
+                        <span className={styles.verseNumber}>{v.verse}</span>
+                        {parallelMode ? (
+                          <div className={styles.parallelColumns}>
+                            <div className={`${styles.verseText} text-serif`}>
+                              {renderInteractiveVerseText(v)}
+                            </div>
+                            <div className={`${styles.verseText} text-serif`}>
+                              {vB ? renderInteractiveVerseText(vB) : <span className={styles.missingVerse}>—</span>}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className={`${styles.verseText} text-serif`}>
+                            {renderInteractiveVerseText(v)}
+                          </p>
+                        )}
+                        
+                        {/* Hover Quick Actions */}
+                        <div className={styles.rowActions}>
+                          <button
+                            title="Perform AI Study on this verse"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedVerse(v);
+                              setSelectedWord(null);
+                              setActiveTab('study');
+                            }}
+                            className={styles.actionBtn}
+                          >
+                            ✦ Study
+                          </button>
+                          <button
+                            title="Compare translations side-by-side"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedVerse(v);
+                              setSelectedWord(null);
+                              setActiveTab('compare');
+                            }}
+                            className={styles.actionBtn}
+                          >
+                            ⚖️ Compare
+                          </button>
+                          <button
+                            title="Copy verse reference"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyVerse(v);
+                            }}
+                            className={styles.actionBtn}
+                          >
+                            📋 Copy
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: AI Study & Tools Panel */}
+          <div className={`${styles.studyPanel} glass-card`}>
+            {selectedVerse ? (
+              <div className={styles.toolboxWrapper}>
+                
+                {/* Tabs bar */}
+                <div className={styles.tabsHeader} role="tablist">
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'study'}
+                    aria-controls="study-tab"
+                    className={`${styles.tabLink} ${activeTab === 'study' ? styles.activeTabLink : ''}`}
+                    onClick={() => setActiveTab('study')}
+                  >
+                    ✦ AI Study
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'compare'}
+                    aria-controls="compare-tab"
+                    className={`${styles.tabLink} ${activeTab === 'compare' ? styles.activeTabLink : ''}`}
+                    onClick={() => setActiveTab('compare')}
+                  >
+                    ⚖️ Compare
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'references'}
+                    aria-controls="references-tab"
+                    className={`${styles.tabLink} ${activeTab === 'references' ? styles.activeTabLink : ''}`}
+                    onClick={() => setActiveTab('references')}
+                  >
+                    🔗 Cross-Refs
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'notes'}
+                    aria-controls="notes-tab"
+                    className={`${styles.tabLink} ${activeTab === 'notes' ? styles.activeTabLink : ''}`}
+                    onClick={() => setActiveTab('notes')}
+                  >
+                    ✍️ Notes
+                  </button>
+                </div>
+
+                <div className={styles.tabContent}>
+                  {/* Selected Verse Info Bar */}
+                  <div className={styles.verseInfoBanner}>
+                    <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
+                    {selectedWord && (
+                      <span className={styles.selectedWordBadge}>
+                        Word: "{selectedWord}"
+                      </span>
+                    )}
+                  </div>
+
+                  {/* TAB 1: AI Study */}
+                  {activeTab === 'study' && (
+                    <div id="study-tab" role="tabpanel" className={styles.tabPanel}>
+                      {loadingStudy ? (
+                        <div className={styles.tabLoading}>
+                          <span className={styles.pulseGlow} />
+                          <p>AI analyzing original languages & context…</p>
+                        </div>
+                      ) : studyError ? (
+                        <div className={styles.errorBox}>
+                          <p>⚠️ {studyError}</p>
+                          <button
+                            onClick={() => {
+                              const v = selectedVerse;
+                              setSelectedVerse(null);
+                              setTimeout(() => setSelectedVerse(v), 50);
+                            }}
+                            className={styles.retryBtn}
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      ) : studyData ? (
+                        <div className={styles.studyBody}>
+                          
+                          {/* Selected Word Concordance study */}
+                          {selectedWord && studyData?.selectedWordStudy && (
+                            <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
+                              <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
+                                🔤 Original Language: "{selectedWord}"
+                              </h3>
+                              <div className={styles.lexiconCard}>
+                                <div className={styles.lexiconHeader}>
+                                  <span className={styles.originalWord}>{studyData.selectedWordStudy.originalWord}</span>
+                                  <span className={styles.strongsBadge}>{studyData.selectedWordStudy.strongsNumber}</span>
+                                </div>
+                                <p className={styles.pronunciation}>Pronunciation: <em>{studyData.selectedWordStudy.pronunciation}</em></p>
+                                <p className={styles.definition}>{studyData.selectedWordStudy.definition}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Verse Key Words */}
+                          {!selectedWord && (studyData?.originalLanguageWords?.length ?? 0) > 0 && (
+                            <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
+                              <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
+                                🔤 Key Original Words (Strong's)
+                              </h3>
+                              <div className={styles.concordanceList}>
+                                {studyData?.originalLanguageWords?.map((wordStudy, i) => (
+                                  <div key={i} className={styles.concordanceItem}>
+                                    <div className={styles.lexiconHeader}>
+                                      <strong>{wordStudy.word}</strong> → <span className={styles.originalWord}>{wordStudy.originalWord}</span>
+                                      <span className={styles.strongsBadge}>{wordStudy.strongsNumber}</span>
+                                    </div>
+                                    <p className={styles.definitionText}>{wordStudy.definition}</p>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className={styles.hintText}>💡 Click any word in the verse text to run a specific original language lookup.</p>
+                            </div>
+                          )}
+
+                          {/* Commentary */}
+                          <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-theological)' }}>
+                            <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-theological)' }}>
+                              📖 Theological Commentary
+                            </h3>
+                            <p className={styles.commentaryText}>{studyData.commentary}</p>
+                          </div>
+
+                          {/* Practical Application */}
+                          <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-practical)' }}>
+                            <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-practical)' }}>
+                              🌱 Life Application
+                            </h3>
+                            <p className={styles.applicationText}>{studyData.practicalApplication}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className={styles.emptyState}>No study guide loaded.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 2: Compare translations */}
+                  {activeTab === 'compare' && (
+                    <div id="compare-tab" role="tabpanel" className={styles.tabPanel}>
+                      {loadingCompare ? (
+                        <div className={styles.tabLoading}>
+                          <span className={styles.pulseGlow} />
+                          <p>Fetching translation comparisons…</p>
+                        </div>
+                      ) : (
+                        <div className={styles.comparisonList}>
+                          {comparedVerses.map((cv, i) => (
+                            <div key={i} className={styles.comparisonItem}>
+                              <span className={styles.compareTranslationName}>{cv.translation}</span>
+                              <p className={`${styles.compareText} text-serif`}>{cv.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 3: Cross-References */}
+                  {activeTab === 'references' && (
+                    <div id="references-tab" role="tabpanel" className={styles.tabPanel}>
+                      {loadingStudy ? (
+                        <div className={styles.tabLoading}>
+                          <span className={styles.pulseGlow} />
+                          <p>Finding cross-references…</p>
+                        </div>
+                      ) : (studyData?.crossReferences?.length ?? 0) > 0 ? (
+                        <div className={styles.crossReferencesList}>
+                          {studyData?.crossReferences?.map((ref, i) => (
+                            <div key={i} className={styles.crossReferenceCard}>
+                              <div className={styles.crossRefHeader}>
+                                <button
+                                  className={styles.crossRefLink}
+                                  onClick={() => handleJumpToReference(ref.reference)}
+                                  title={`Jump to ${ref.reference} in the reader`}
+                                >
+                                  🔗 {ref.reference}
+                                </button>
+                              </div>
+                              <p className={`${styles.crossRefText} text-serif`}>"{ref.text}"</p>
+                              <p className={styles.crossRefReason}><strong>Link:</strong> {ref.connectionReason}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className={styles.emptyState}>No cross-references loaded.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 4: Notes */}
+                  {activeTab === 'notes' && (
+                    <div id="notes-tab" role="tabpanel" className={styles.tabPanel}>
+                      <div className={styles.notesContainer}>
+                        <label htmlFor="notes-textarea" className={styles.notesLabel}>
+                          Personal Study Notes (Saved locally)
+                        </label>
+                        <textarea
+                          id="notes-textarea"
+                          value={notes}
+                          onChange={(e) => handleSaveNote(e.target.value)}
+                          placeholder={`Write study notes, thoughts, or sermon outlines for ${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse} here...`}
+                          className={styles.notesTextarea}
+                        />
+                        <div className={styles.notesFooter}>
+                          <span>Saved to Local Storage</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.noSelection}>
+                <p>📖 Select a verse in the reader to view original language study and commentaries.</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </main>
+    </>
+  );
+}

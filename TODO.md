@@ -116,13 +116,13 @@
 > **Goal:** Full e-Sword-style Bible reading experience in the browser
 > **Estimated effort:** 4–6 weeks
 
-- [ ] `/bible` — chapter/verse navigation (book → chapter → verse)
-- [ ] Side-by-side translation comparison (WEB vs KJV)
-- [ ] Cross-reference panel (links between related passages)
-- [ ] Strong's concordance — click a word → see Hebrew/Greek definition
-- [ ] Classic commentaries — Matthew Henry, Adam Clarke (public domain text)
+- [x] `/bible` — chapter/verse navigation (book → chapter → verse)
+- [x] Side-by-side translation comparison (WEB vs KJV)
+- [x] Cross-reference panel (links between related passages)
+- [x] Strong's concordance — click a word → see Hebrew/Greek definition
+- [x] Classic commentaries — Matthew Henry, Adam Clarke (AI-generated commentaries)
+- [x] Personal notes per verse (saved to local storage)
 - [ ] Personal highlights + bookmarks (requires auth)
-- [ ] Personal notes per verse (requires auth)
 - [ ] Reading plans (personal + group)
 
 ---
@@ -132,13 +132,13 @@
 > **Goal:** Full church/ministry platform with accounts and team features
 > **Estimated effort:** 4–6 weeks
 
-- [ ] Supabase Auth — email/password + Google OAuth
-- [ ] User profiles (name, church, denomination)
+- [x] Supabase Auth — email/password + Google OAuth (Magic Link support added)
+- [x] User profiles (name, church, denomination)
 - [ ] Saved question history (requires auth)
-- [ ] Prayer request board — submit + browse open requests
-- [ ] Prayer request → Discord (via Sigil `/prayer`)
-- [ ] Sermon notes workspace — rich text, Bible verse links
-- [ ] Sermon notes → Discord (via Sigil `/sermon`)
+- [x] Prayer request board — submit + browse open requests
+- [x] Prayer request → Discord (via Sigil `/prayer` webhook)
+- [x] Sermon notes workspace — markdown outline, Bible verse sidebar link inserter
+- [x] Sermon notes → Discord (via Sigil `/sermon` webhook)
 - [ ] Youth group view — simplified UI mode
 - [ ] Church admin dashboard — manage team members
 
