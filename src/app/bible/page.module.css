@@ -162,7 +162,7 @@
 }
 
 .activeVerseRow {
-  background: rgba(245, 200, 66, 0.035);
+  background: rgba(181, 137, 19, 0.08);
   border-left: 2.5px solid var(--gold-400);
   padding-left: calc(1rem - 2.5px);
 }

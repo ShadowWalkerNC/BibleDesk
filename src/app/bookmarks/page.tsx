@@ -68,8 +68,9 @@ export default function BookmarksPage() {
     }
   }, [page, search]);
 
-  useEffect(() => { fetchBookmarks(); }, [fetchBookmarks]);
-  useEffect(() => { setPage(1); }, [search]);
+  useEffect(() => {
+    fetchBookmarks();
+  }, [fetchBookmarks]);
 
   async function removeBookmark(answerId: string) {
     setRemoving(answerId);
@@ -118,11 +119,11 @@ export default function BookmarksPage() {
                 type="search"
                 placeholder="Search bookmarks…"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 aria-label="Search bookmarks"
               />
               {search && (
-                <button className={styles.clearSearch} onClick={() => setSearch('')} aria-label="Clear search">
+                <button className={styles.clearSearch} onClick={() => { setSearch(''); setPage(1); }} aria-label="Clear search">
                   ✕
                 </button>
               )}

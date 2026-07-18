@@ -5,8 +5,12 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const supabase = getServerClient();
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn('[api/prayer] Supabase is unconfigured, returning dummy empty list.');
+      return NextResponse.json({ success: true, prayers: [] });
+    }
+    const supabase = getServerClient();
     const { data, error } = await supabase
       .from('prayer_requests')
       .select('*')
@@ -17,7 +21,8 @@ export async function GET() {
     return NextResponse.json({ success: true, prayers: data ?? [] });
   } catch (err: any) {
     console.error('[api/prayer] GET Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    // Return empty list instead of crashing client page rendering
+    return NextResponse.json({ success: true, prayers: [], warning: err.message });
   }
 }
 

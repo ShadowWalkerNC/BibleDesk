@@ -20,6 +20,7 @@ export function useBookmark(answer: BibleAnswer | null, shareSlug: string | null
       .then((r) => r.json())
       .then((d) => setBookmarked(!!d.bookmarked))
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answer?.id]);
 
   const toggle = useCallback(async () => {

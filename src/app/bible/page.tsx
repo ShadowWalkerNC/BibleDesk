@@ -246,10 +246,10 @@ export default function BibleReaderPage() {
   };
 
   // Toast helper
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+  function showToast(message: string, type: 'success' | 'error' = 'success') {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
-  };
+  }
 
   // Copy verse helper
   const handleCopyVerse = (v: BibleVerse) => {
@@ -492,7 +492,7 @@ export default function BibleReaderPage() {
                 onChange={(e) => setShowInlineStrongs(e.target.checked)}
                 className={styles.checkbox}
               />
-              <label htmlFor="strongs-toggle" className={styles.checkboxLabel}>Inline Strong's</label>
+              <label htmlFor="strongs-toggle" className={styles.checkboxLabel}>Inline Strong&apos;s</label>
             </div>
 
             {parallelMode && (
@@ -637,7 +637,7 @@ export default function BibleReaderPage() {
                   className={`${styles.tabLink} ${activeTab === 'search' ? styles.activeTabLink : ''}`}
                   onClick={() => setActiveTab('search')}
                 >
-                  🔍 Search
+                  Search
                 </button>
                 <button
                   role="tab"
@@ -646,7 +646,7 @@ export default function BibleReaderPage() {
                   className={`${styles.tabLink} ${activeTab === 'study' ? styles.activeTabLink : ''}`}
                   onClick={() => setActiveTab('study')}
                 >
-                  ✦ AI Study
+                  AI Study
                 </button>
                 <button
                   role="tab"
@@ -655,7 +655,7 @@ export default function BibleReaderPage() {
                   className={`${styles.tabLink} ${activeTab === 'compare' ? styles.activeTabLink : ''}`}
                   onClick={() => setActiveTab('compare')}
                 >
-                  ⚖️ Compare
+                  Compare
                 </button>
                 <button
                   role="tab"
@@ -664,7 +664,7 @@ export default function BibleReaderPage() {
                   className={`${styles.tabLink} ${activeTab === 'references' ? styles.activeTabLink : ''}`}
                   onClick={() => setActiveTab('references')}
                 >
-                  🔗 Cross-Refs
+                  Cross-Refs
                 </button>
                 <button
                   role="tab"
@@ -673,7 +673,7 @@ export default function BibleReaderPage() {
                   className={`${styles.tabLink} ${activeTab === 'notes' ? styles.activeTabLink : ''}`}
                   onClick={() => setActiveTab('notes')}
                 >
-                  ✍️ Notes
+                  Notes
                 </button>
               </div>
 
@@ -714,13 +714,13 @@ export default function BibleReaderPage() {
                               title={`Jump to ${res.reference} in the reader`}
                             >
                               <span className={styles.searchRef}>🔗 {res.reference}</span>
-                              <p className={`${styles.searchText} text-serif`}>"{res.text}"</p>
+                              <p className={`${styles.searchText} text-serif`}>&quot;{res.text}&quot;</p>
                             </div>
                           ))}
                         </div>
                       ) : (
                         <p className={styles.searchHint}>
-                          💡 Type a keyword (e.g. "covenant", "repent") or a Strong's concordance tag (e.g. "G746", "H430") to run a full-text search.
+                          💡 Type a keyword (e.g. &quot;covenant&quot;, &quot;repent&quot;) or a Strong&apos;s concordance tag (e.g. &quot;G746&quot;, &quot;H430&quot;) to run a full-text search.
                         </p>
                       )}
                     </div>
@@ -741,7 +741,7 @@ export default function BibleReaderPage() {
                       <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
                       {selectedWord && (
                         <span className={styles.selectedWordBadge}>
-                          Word: "{selectedWord}"
+                          Word: &quot;{selectedWord}&quot;
                         </span>
                       )}
                     </div>
@@ -775,7 +775,7 @@ export default function BibleReaderPage() {
                           {selectedWord && studyData?.selectedWordStudy && (
                             <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
                               <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                🔤 Original Language: "{selectedWord}"
+                                🔤 Original Language: &quot;{selectedWord}&quot;
                               </h3>
                               <div className={styles.lexiconCard}>
                                 <div className={styles.lexiconHeader}>
@@ -792,7 +792,7 @@ export default function BibleReaderPage() {
                           {!selectedWord && (studyData?.originalLanguageWords?.length ?? 0) > 0 && (
                             <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
                               <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                🔤 Key Original Words (Strong's)
+                                🔤 Key Original Words (Strong&apos;s)
                               </h3>
                               <div className={styles.concordanceList}>
                                 {studyData?.originalLanguageWords?.map((wordStudy, i) => (
@@ -873,7 +873,7 @@ export default function BibleReaderPage() {
                                   🔗 {ref.reference}
                                 </button>
                               </div>
-                              <p className={`${styles.crossRefText} text-serif`}>"{ref.text}"</p>
+                              <p className={`${styles.crossRefText} text-serif`}>&quot;{ref.text}&quot;</p>
                               <p className={styles.crossRefReason}><strong>Link:</strong> {ref.connectionReason}</p>
                             </div>
                           ))}

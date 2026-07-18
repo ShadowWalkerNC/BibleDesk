@@ -22,10 +22,10 @@ const PLACEHOLDERS = [
 ];
 
 const TEASER_ITEMS = [
-  { emoji: '📖', label: 'Read a Chapter',        desc: 'Open any book, chapter by chapter' },
-  { emoji: '⚖️', label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side' },
-  { emoji: '🔍', label: 'Word Study',            desc: 'Dig into Hebrew & Greek originals' },
-  { emoji: '🌅', label: 'Daily Verse',           desc: 'A fresh verse each morning' },
+  { label: 'Read a Chapter',        desc: 'Open any book, chapter by chapter' },
+  { label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side' },
+  { label: 'Word Study',            desc: 'Dig into Hebrew & Greek originals' },
+  { label: 'Daily Verse',           desc: 'A fresh verse each morning' },
 ];
 
 const FEATURE_BADGES: Record<string, { label: string; color: string }> = {
@@ -126,12 +126,12 @@ export default function HomePage() {
                 <p className={styles.featuresLabel}>What you get with every answer</p>
                 <div className={styles.featureGrid}>
                   {[
-                    { emoji: '📖', label: 'Scripture',               desc: 'Direct verse analysis and cross-references in your preferred translation' },
-                    { emoji: '🏛️', label: 'Historical Context',     desc: 'Cultural, political, and historical background of the time period' },
-                    { emoji: '🔤', label: 'Original Language',       desc: 'Hebrew and Greek word meanings, nuance, and translational choices' },
-                    { emoji: '✝️', label: 'Theology',                desc: 'Doctrinal implications, denominational perspectives, and creeds' },
-                    { emoji: '🌿', label: 'Practical Application',   desc: 'How this truth applies to daily life, decisions, and discipleship' },
-                  ].map(({ emoji, label, desc }, i) => {
+                    { label: 'Scripture',               desc: 'Direct verse analysis and cross-references in your preferred translation' },
+                    { label: 'Historical Context',     desc: 'Cultural, political, and historical background of the time period' },
+                    { label: 'Original Language',       desc: 'Hebrew and Greek word meanings, nuance, and translational choices' },
+                    { label: 'Theology',                desc: 'Doctrinal implications, denominational perspectives, and creeds' },
+                    { label: 'Practical Application',   desc: 'How this truth applies to daily life, decisions, and discipleship' },
+                  ].map(({ label, desc }, i) => {
                     const badge = FEATURE_BADGES[label];
                     return (
                       <div
@@ -147,7 +147,6 @@ export default function HomePage() {
                             {badge.label}
                           </span>
                         )}
-                        <span className={styles.featureEmoji}>{emoji}</span>
                         <p className={styles.featureLabel}>{label}</p>
                         <p className={styles.featureDesc}>{desc}</p>
                       </div>
@@ -162,9 +161,8 @@ export default function HomePage() {
               <div className="container">
                 <p className={styles.teaserLabel}>Coming to BibleDesk</p>
                 <div className={styles.teaserGrid}>
-                  {TEASER_ITEMS.map(({ emoji, label, desc }) => (
+                  {TEASER_ITEMS.map(({ label, desc }) => (
                     <div key={label} className={styles.teaserCard}>
-                      <span className={styles.teaserEmoji}>{emoji}</span>
                       <p className={styles.teaserCardLabel}>{label}</p>
                       <p className={styles.teaserCardDesc}>{desc}</p>
                       <span className={styles.teaserPill}>Soon</span>

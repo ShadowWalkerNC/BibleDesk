@@ -19,9 +19,13 @@ export interface RateLimitResult {
 }
 
 export async function checkRateLimit(rawIp: string): Promise<RateLimitResult> {
+  const now = new Date();
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.log('[rate-limit] Supabase is unconfigured. Allowing request offline.');
+    return { allowed: true, remaining: LIMIT - 1, resetAt: new Date(now.getTime() + WINDOW_MS) };
+  }
   const ipHash = hashIp(rawIp);
   const client = getServerClient();
-  const now = new Date();
   const windowStart = new Date(now.getTime() - WINDOW_MS);
 
   // Upsert pattern: get existing record or create it

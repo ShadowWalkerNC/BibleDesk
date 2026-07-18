@@ -6,39 +6,39 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Core palette */
-  --navy-950: #06081a;
-  --navy-900: #0b0f2e;
-  --navy-800: #111840;
-  --navy-700: #1a2456;
-  --navy-600: #243070;
-  --navy-500: #2e3d8a;
+  /* Core palette - Premium Light Theme (Parchment & Warm Slate) */
+  --navy-950: #fbf9f4; /* Main background parchment tint */
+  --navy-900: #f3eedf; /* Sidebar/Card surface card */
+  --navy-800: #eae3d0; /* Borders, dividers, elements */
+  --navy-700: #dad0b9;
+  --navy-600: #bfb093;
+  --navy-500: #9e8d6e;
 
-  --gold-400: #f5c842;
-  --gold-500: #e8b320;
-  --gold-600: #c99a10;
-  --gold-glow: rgba(245, 200, 66, 0.15);
+  --gold-400: #b58913; /* Deep scholarly gold */
+  --gold-500: #946f0b;
+  --gold-600: #735605;
+  --gold-glow: rgba(181, 137, 19, 0.08);
 
-  --parchment-100: #fdf8f0;
-  --parchment-200: #f7eed9;
-  --parchment-300: #edd9b0;
+  --parchment-100: #1a1815; /* Map text primary */
+  --parchment-200: #2d2a24; /* Map text primary */
+  --parchment-300: #5c5549; /* Map text secondary */
 
-  --text-primary: #f0eefd;
-  --text-secondary: #9fa8d4;
-  --text-muted: #6070a8;
-  --text-inverse: #0b0f2e;
+  --text-primary: #2d2a24; /* Soft dark charcoal text */
+  --text-secondary: #5c5549; /* Scholarly bronze/slate gray */
+  --text-muted: #6e6556;
+  --text-inverse: #fbf9f4;
 
-  /* Dimension accent colors */
-  --dim-scripture:    #4f9cf9;
-  --dim-historical:   #e67e42;
-  --dim-language:     #a78bfa;
-  --dim-theological:  #34d399;
-  --dim-practical:    #fb7185;
+  /* Dimension accent colors (slightly darkened/saturated for premium light contrast) */
+  --dim-scripture:    #1c6fc8;
+  --dim-historical:   #c8561c;
+  --dim-language:     #7c3aed;
+  --dim-theological:  #0f9c6c;
+  --dim-practical:    #db2777;
 
   /* Glass surfaces */
-  --glass-bg: rgba(17, 24, 64, 0.6);
-  --glass-border: rgba(159, 168, 212, 0.12);
-  --glass-hover: rgba(245, 200, 66, 0.06);
+  --glass-bg: rgba(255, 254, 252, 0.85);
+  --glass-border: rgba(142, 135, 119, 0.22);
+  --glass-hover: rgba(181, 137, 19, 0.04);
 
   /* Spacing */
   --radius-sm: 8px;
@@ -77,8 +77,8 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(46, 61, 138, 0.4), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(11, 15, 46, 0.6), transparent);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 238, 220, 0.8), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(243, 238, 223, 0.4), transparent);
 }
 
 a {

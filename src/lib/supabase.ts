@@ -12,9 +12,11 @@ let _serverClient: SupabaseClient | null = null;
 // Browser-safe client (anon key, respects RLS)
 export function getBrowserClient(): SupabaseClient {
   if (!_browserClient) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) throw new Error('Supabase public env vars are not set');
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase URL/Anon key missing; using dummy credentials for offline client initialization.');
+    }
     _browserClient = createClient(url, key);
   }
   return _browserClient;

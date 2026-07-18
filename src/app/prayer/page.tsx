@@ -28,6 +28,27 @@ export default function PrayerBoardPage() {
   // Track which requests the user clicked "Prayed" for in this session to prevent spamming
   const [prayedSession, setPrayedSession] = useState<Record<string, boolean>>({});
 
+  async function fetchPrayers() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/prayer');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if (!text.trim()) {
+        setPrayers([]);
+        return;
+      }
+      const data = JSON.parse(text);
+      if (data.success) {
+        setPrayers(data.prayers);
+      }
+    } catch (err) {
+      console.error('Failed to fetch prayers:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     // 1. Fetch user session to set default display name
     const supabase = getBrowserClient();
@@ -42,21 +63,6 @@ export default function PrayerBoardPage() {
     // 2. Fetch prayer requests
     fetchPrayers();
   }, []);
-
-  async function fetchPrayers() {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/prayer');
-      const data = await res.json();
-      if (data.success) {
-        setPrayers(data.prayers);
-      }
-    } catch (err) {
-      console.error('Failed to fetch prayers:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -190,7 +196,7 @@ export default function PrayerBoardPage() {
             <div className={styles.boardHeader}>
               <h1 className={`${styles.title} text-serif`}>🙏 Church Prayer Board</h1>
               <p className={styles.subtitle}>
-                "Bear one another's burdens, and so fulfill the law of Christ." — Galatians 6:2
+                &quot;Bear one another&apos;s burdens, and so fulfill the law of Christ.&quot; — Galatians 6:2
               </p>
             </div>
 

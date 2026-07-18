@@ -25,7 +25,7 @@
   min-height: 72px;
   max-height: 200px;
   padding: 1rem 1.25rem;
-  background: rgba(17, 24, 64, 0.8);
+  background: var(--glass-bg);
   border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -89,7 +89,7 @@
 .translationPills {
   display: flex;
   gap: 4px;
-  background: rgba(17, 24, 64, 0.7);
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 99px;
   padding: 3px;
@@ -121,14 +121,14 @@
 }
 
 .translationPillActive {
-  background: linear-gradient(135deg, var(--gold-600), var(--gold-500));
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
   color: var(--text-inverse) !important;
-  box-shadow: 0 1px 6px rgba(232, 179, 32, 0.3);
+  box-shadow: 0 1px 6px rgba(181, 137, 19, 0.15);
 }
 
 .translationName {
   font-size: 0.75rem;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-style: italic;
   white-space: nowrap;
 }
@@ -154,7 +154,7 @@
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(232, 179, 32, 0.35);
+  box-shadow: 0 8px 24px rgba(181, 137, 19, 0.25);
 }
 
 .submitBtn:active:not(:disabled) {
@@ -189,7 +189,7 @@
   font-size: 0.78rem;
   color: var(--text-muted);
   margin-bottom: 0.6rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -203,7 +203,7 @@
 .chip {
   display: inline-block;
   padding: 5px 12px;
-  background: rgba(17, 24, 64, 0.7);
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 99px;
   font-size: 0.8rem;

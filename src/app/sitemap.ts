@@ -15,20 +15,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch shareable answers from Supabase to include in sitemap
   let answersSitemap: MetadataRoute.Sitemap = [];
   try {
-    const supabase = getServerClient();
-    const { data: answers } = await supabase
-      .from('answers')
-      .select('share_slug, created_at')
-      .order('created_at', { ascending: false })
-      .limit(1000);
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('Skipping sitemap answer generation: SUPABASE_SERVICE_ROLE_KEY is not set.');
+    } else {
+      const supabase = getServerClient();
+      const { data: answers } = await supabase
+        .from('answers')
+        .select('share_slug, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1000);
 
-    if (answers) {
-      answersSitemap = answers.map((answer) => ({
-        url: `${baseUrl}/share/${answer.share_slug}`,
-        lastModified: new Date(answer.created_at),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      }));
+      if (answers) {
+        answersSitemap = answers.map((answer) => ({
+          url: `${baseUrl}/share/${answer.share_slug}`,
+          lastModified: new Date(answer.created_at),
+          changeFrequency: 'weekly' as const,
+          priority: 0.6,
+        }));
+      }
     }
   } catch (error) {
     console.error('Sitemap answer generation failed:', error);

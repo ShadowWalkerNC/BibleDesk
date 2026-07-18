@@ -32,7 +32,7 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
     onSubmit(q, translation);
   }
 
-  function useExample(q: string) {
+  function handleUseExample(q: string) {
     setQuestion(q);
     textareaRef.current?.focus();
   }
@@ -74,7 +74,7 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
             <div className={styles.translationPills}>
               {TRANSLATIONS.map((t) => (
                 <button
-                  key={t.id}
+                   key={t.id}
                   type="button"
                   className={`${styles.translationPill} ${translation === t.id ? styles.translationPillActive : ''}`}
                   onClick={() => setTranslation(t.id)}
@@ -117,7 +117,7 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
               key={q}
               role="listitem"
               className={styles.chip}
-              onClick={() => useExample(q)}
+              onClick={() => handleUseExample(q)}
               type="button"
               disabled={isLoading}
               aria-label={`Use example: ${q}`}

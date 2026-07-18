@@ -41,22 +41,11 @@ export default function SermonWorkspacePage() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 1. Session check
-  useEffect(() => {
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setCheckingSession(false);
-      if (session?.user) {
-        fetchOutlines(session.user.id);
-      }
-    });
-  }, []);
-
-  // 2. Fetch sidebar Bible text
-  useEffect(() => {
-    fetchSidebarVerses();
-  }, [sidebarBook, sidebarChapter, sidebarTranslation]);
+  // Toast Helper
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   async function fetchSidebarVerses() {
     setLoadingBible(true);
@@ -91,11 +80,23 @@ export default function SermonWorkspacePage() {
     }
   }
 
-  // Toast Helper
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  // 1. Session check
+  useEffect(() => {
+    const supabase = getBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setCheckingSession(false);
+      if (session?.user) {
+        fetchOutlines(session.user.id);
+      }
+    });
+  }, []);
+
+  // 2. Fetch sidebar Bible text
+  useEffect(() => {
+    fetchSidebarVerses();
+  }, [sidebarBook, sidebarChapter, sidebarTranslation]);
+
 
   // 3. Save outline
   async function handleSave(publishToDiscord = false) {

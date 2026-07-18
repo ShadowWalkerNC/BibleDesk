@@ -73,10 +73,9 @@ export default function HistoryPage() {
     }
   }, [page, search, filterConf]);
 
-  useEffect(() => { fetchHistory(); }, [fetchHistory]);
-
-  // Reset to page 1 on filter/search change
-  useEffect(() => { setPage(1); }, [search, filterConf]);
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -108,11 +107,11 @@ export default function HistoryPage() {
                 type="search"
                 placeholder="Search questions…"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 aria-label="Search history"
               />
               {search && (
-                <button className={styles.clearSearch} onClick={() => setSearch('')} aria-label="Clear search">
+                <button className={styles.clearSearch} onClick={() => { setSearch(''); setPage(1); }} aria-label="Clear search">
                   ✕
                 </button>
               )}
@@ -124,7 +123,7 @@ export default function HistoryPage() {
                 id="conf-filter"
                 className={styles.filterSelect}
                 value={filterConf}
-                onChange={(e) => setFilterConf(e.target.value)}
+                onChange={(e) => { setFilterConf(e.target.value); setPage(1); }}
               >
                 <option value="">All</option>
                 <option value="high">High</option>

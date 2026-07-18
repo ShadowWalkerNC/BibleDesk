@@ -8,11 +8,11 @@ import styles from './Header.module.css';
 
 const NAV_LINKS = [
   { href: '/',        label: 'Study' },
-  { href: '/bible',   label: '📖 Bible Reader' },
-  { href: '/prayer',  label: '🙏 Prayers' },
-  { href: '/sermons', label: '📝 Sermon Prep' },
-  { href: '/graph',   label: '🕸️ Graph' },
-  { href: '/history', label: '📜 History' },
+  { href: '/bible',   label: 'Bible Reader' },
+  { href: '/prayer',  label: 'Prayers' },
+  { href: '/sermons', label: 'Sermon Prep' },
+  { href: '/graph',   label: 'Graph' },
+  { href: '/history', label: 'History' },
 ];
 
 export default function Header() {
@@ -72,19 +72,10 @@ export default function Header() {
             );
           })}
 
-          <a
-            href="https://discord.gg/7c89HKrVe"
-            className={styles.navLink}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Community
-          </a>
-
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>
-                👤 {user.user_metadata?.name || user.email?.split('@')[0]}
+                {user.user_metadata?.name || user.email?.split('@')[0]}
               </span>
               <button onClick={handleSignOut} className={styles.signOutBtn}>
                 Sign Out

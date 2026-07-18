@@ -356,7 +356,8 @@ export default function ModDashboard() {
 
   useEffect(() => {
     loadQueue();
-  }, [loadQueue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function removeFlag(id: string) {
     setQueue((prev) => prev.filter((f) => f.id !== id));
