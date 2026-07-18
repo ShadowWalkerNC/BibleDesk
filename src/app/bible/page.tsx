@@ -47,10 +47,19 @@ export default function BibleReaderPage() {
   // AI Study states
   const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes'>('study');
+  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search'>('search');
   const [studyData, setStudyData] = useState<AIStudyData | null>(null);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [studyError, setStudyError] = useState<string | null>(null);
+
+  // e-Sword parity states
+  const [showInlineStrongs, setShowInlineStrongs] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [pendingVerseTarget, setPendingVerseTarget] = useState<number | null>(null);
 
   // Translation comparison state
   const [comparedVerses, setComparedVerses] = useState<Array<{ translation: string; text: string }>>([]);
@@ -97,11 +106,24 @@ export default function BibleReaderPage() {
             setVersesB([]);
           }
 
-          // Auto select first verse if none selected
+          // Auto select target or first verse
           if (dataA.passage.verses.length > 0) {
-            const firstVerse = dataA.passage.verses[0];
-            setSelectedVerse(firstVerse);
+            const targetVerse = pendingVerseTarget
+              ? dataA.passage.verses.find((x: BibleVerse) => x.verse === pendingVerseTarget) || dataA.passage.verses[0]
+              : dataA.passage.verses[0];
+            setSelectedVerse(targetVerse);
             setSelectedWord(null);
+            setPendingVerseTarget(null); // Reset after select
+
+            // Scroll to the targeted verse if page loaded in dynamic search context
+            if (pendingVerseTarget) {
+              setTimeout(() => {
+                const element = document.getElementById(`verse-${pendingVerseTarget}`);
+                if (element && readerScrollRef.current) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 150);
+            }
           }
         }
       } catch (err) {
@@ -268,6 +290,44 @@ export default function BibleReaderPage() {
     }
   };
 
+  // Concordance Search Handlers
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const res = await fetch(`/api/bible/search?query=${encodeURIComponent(searchQuery)}&translation=${selectedTranslation}`);
+      const data = await res.json();
+      if (data.success) {
+        setSearchResults(data.results);
+        setSearchTotal(data.total);
+      } else {
+        setSearchError(data.error || 'Search query failed.');
+        setSearchResults([]);
+        setSearchTotal(0);
+      }
+    } catch (err) {
+      setSearchError('Search request timed out or failed.');
+      setSearchResults([]);
+      setSearchTotal(0);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleNavigateFromSearch = (res: any) => {
+    setPendingVerseTarget(res.verse);
+    startTransition(() => {
+      setSelectedBook(res.book);
+      setSelectedChapter(res.chapter);
+      setSelectedWord(null);
+      // Auto switch to study tab when navigating to target verse
+      setActiveTab('study');
+    });
+  };
+
   // Jump to cross reference handler
   const handleJumpToReference = (refStr: string) => {
     // Parse reference string like "Romans 5:8" or "1 John 3:16" or "Matthew 1:1"
@@ -304,19 +364,41 @@ export default function BibleReaderPage() {
       // Strip punctuation to find the clean word base for analysis
       const cleanWord = w.replace(/[^\w\s\']/g, '').trim();
       const isSelected = selectedVerse?.verse === v.verse && selectedWord?.toLowerCase() === cleanWord.toLowerCase();
-      
+
+      // e-Sword matching: check if this word matches an entry in our loaded AI concordance dictionary for this verse
+      const isSameVerse = selectedVerse?.verse === v.verse;
+      const wordMatch = showInlineStrongs && isSameVerse && studyData?.originalLanguageWords?.find(
+        (olw) => olw.word.toLowerCase() === cleanWord.toLowerCase()
+      );
+
       return (
-        <span
-          key={idx}
-          className={`${styles.interactiveWord} ${isSelected ? styles.selectedWord : ''}`}
-          onClick={(e) => {
-            e.stopPropagation(); // Stop selecting the row
-            setSelectedVerse(v);
-            setSelectedWord(cleanWord);
-            setActiveTab('study');
-          }}
-        >
-          {w}{' '}
+        <span key={idx} className={styles.wordWrapper}>
+          <span
+            className={`${styles.interactiveWord} ${isSelected ? styles.selectedWord : ''}`}
+            onClick={(e) => {
+              e.stopPropagation(); // Stop selecting the row
+              setSelectedVerse(v);
+              setSelectedWord(cleanWord);
+              setActiveTab('study');
+            }}
+          >
+            {w}
+          </span>
+          {wordMatch && (
+            <sup
+              className={`${styles.inlineStrongsBadge} ${isSelected ? styles.activeInlineStrongs : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedVerse(v);
+                setSelectedWord(cleanWord);
+                setActiveTab('study');
+              }}
+              title={`${wordMatch.originalWord} - Pronunciation: ${wordMatch.pronunciation} | Click to study`}
+            >
+              {wordMatch.strongsNumber}
+            </sup>
+          )}
+          {' '}
         </span>
       );
     });
@@ -400,6 +482,17 @@ export default function BibleReaderPage() {
                 className={styles.checkbox}
               />
               <label htmlFor="parallel-toggle" className={styles.checkboxLabel}>Parallel View</label>
+            </div>
+
+            <div className={styles.checkboxGroup}>
+              <input
+                type="checkbox"
+                id="strongs-toggle"
+                checked={showInlineStrongs}
+                onChange={(e) => setShowInlineStrongs(e.target.checked)}
+                className={styles.checkbox}
+              />
+              <label htmlFor="strongs-toggle" className={styles.checkboxLabel}>Inline Strong's</label>
             </div>
 
             {parallelMode && (
@@ -533,62 +626,128 @@ export default function BibleReaderPage() {
 
           {/* Right Column: AI Study & Tools Panel */}
           <div className={`${styles.studyPanel} glass-card`}>
-            {selectedVerse ? (
-              <div className={styles.toolboxWrapper}>
+            <div className={styles.toolboxWrapper}>
+              
+              {/* Tabs bar */}
+              <div className={styles.tabsHeader} role="tablist">
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'search'}
+                  aria-controls="search-tab"
+                  className={`${styles.tabLink} ${activeTab === 'search' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('search')}
+                >
+                  🔍 Search
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'study'}
+                  aria-controls="study-tab"
+                  className={`${styles.tabLink} ${activeTab === 'study' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('study')}
+                >
+                  ✦ AI Study
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'compare'}
+                  aria-controls="compare-tab"
+                  className={`${styles.tabLink} ${activeTab === 'compare' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('compare')}
+                >
+                  ⚖️ Compare
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'references'}
+                  aria-controls="references-tab"
+                  className={`${styles.tabLink} ${activeTab === 'references' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('references')}
+                >
+                  🔗 Cross-Refs
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'notes'}
+                  aria-controls="notes-tab"
+                  className={`${styles.tabLink} ${activeTab === 'notes' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('notes')}
+                >
+                  ✍️ Notes
+                </button>
+              </div>
+
+              <div className={styles.tabContent}>
                 
-                {/* Tabs bar */}
-                <div className={styles.tabsHeader} role="tablist">
-                  <button
-                    role="tab"
-                    aria-selected={activeTab === 'study'}
-                    aria-controls="study-tab"
-                    className={`${styles.tabLink} ${activeTab === 'study' ? styles.activeTabLink : ''}`}
-                    onClick={() => setActiveTab('study')}
-                  >
-                    ✦ AI Study
-                  </button>
-                  <button
-                    role="tab"
-                    aria-selected={activeTab === 'compare'}
-                    aria-controls="compare-tab"
-                    className={`${styles.tabLink} ${activeTab === 'compare' ? styles.activeTabLink : ''}`}
-                    onClick={() => setActiveTab('compare')}
-                  >
-                    ⚖️ Compare
-                  </button>
-                  <button
-                    role="tab"
-                    aria-selected={activeTab === 'references'}
-                    aria-controls="references-tab"
-                    className={`${styles.tabLink} ${activeTab === 'references' ? styles.activeTabLink : ''}`}
-                    onClick={() => setActiveTab('references')}
-                  >
-                    🔗 Cross-Refs
-                  </button>
-                  <button
-                    role="tab"
-                    aria-selected={activeTab === 'notes'}
-                    aria-controls="notes-tab"
-                    className={`${styles.tabLink} ${activeTab === 'notes' ? styles.activeTabLink : ''}`}
-                    onClick={() => setActiveTab('notes')}
-                  >
-                    ✍️ Notes
-                  </button>
-                </div>
+                {/* TAB 0: Concordance Keyword / Strongs Search (Always Active) */}
+                {activeTab === 'search' && (
+                  <div id="search-tab" role="tabpanel" className={styles.tabPanel}>
+                    <div className={styles.searchContainer}>
+                      <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search word, phrase, or Strong's tag (e.g. grace, G2889)..."
+                          className={styles.searchInput}
+                        />
+                        <button type="submit" disabled={searching} className={styles.searchBtn}>
+                          {searching ? '...' : 'Search'}
+                        </button>
+                      </form>
 
-                <div className={styles.tabContent}>
-                  {/* Selected Verse Info Bar */}
-                  <div className={styles.verseInfoBanner}>
-                    <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
-                    {selectedWord && (
-                      <span className={styles.selectedWordBadge}>
-                        Word: "{selectedWord}"
-                      </span>
-                    )}
+                      {searchError && <p className={styles.searchError}>⚠️ {searchError}</p>}
+
+                      {searching ? (
+                        <div className={styles.tabLoading}>
+                          <span className={styles.pulseGlow} />
+                          <p>Searching the scriptures…</p>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <div className={styles.searchResultsList}>
+                          <p className={styles.searchCount}>Found {searchTotal} occurrences (showing top {searchResults.length}):</p>
+                          {searchResults.map((res, i) => (
+                            <div
+                              key={i}
+                              className={styles.searchCard}
+                              onClick={() => handleNavigateFromSearch(res)}
+                              title={`Jump to ${res.reference} in the reader`}
+                            >
+                              <span className={styles.searchRef}>🔗 {res.reference}</span>
+                              <p className={`${styles.searchText} text-serif`}>"{res.text}"</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className={styles.searchHint}>
+                          💡 Type a keyword (e.g. "covenant", "repent") or a Strong's concordance tag (e.g. "G746", "H430") to run a full-text search.
+                        </p>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  {/* TAB 1: AI Study */}
-                  {activeTab === 'study' && (
+                {/* Other study tabs require a selected verse */}
+                {activeTab !== 'search' && !selectedVerse && (
+                  <div className={styles.noSelection}>
+                    <p>📖 Select a verse in the reader to view original language study, comparisons, cross-references, and write notes.</p>
+                  </div>
+                )}
+
+                {activeTab !== 'search' && selectedVerse && (
+                  <>
+                    {/* Selected Verse Info Bar */}
+                    <div className={styles.verseInfoBanner}>
+                      <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
+                      {selectedWord && (
+                        <span className={styles.selectedWordBadge}>
+                          Word: "{selectedWord}"
+                        </span>
+                      )}
+                    </div>
+
+                    {/* TAB 1: AI Study */}
+                    {activeTab === 'study' && (
                     <div id="study-tab" role="tabpanel" className={styles.tabPanel}>
                       {loadingStudy ? (
                         <div className={styles.tabLoading}>
@@ -745,13 +904,10 @@ export default function BibleReaderPage() {
                       </div>
                     </div>
                   )}
-                </div>
+                  </>
+                )}
               </div>
-            ) : (
-              <div className={styles.noSelection}>
-                <p>📖 Select a verse in the reader to view original language study and commentaries.</p>
-              </div>
-            )}
+            </div>
           </div>
 
         </div>

@@ -16,9 +16,10 @@ const EXAMPLE_QUESTIONS = [
 interface SearchBarProps {
   onSubmit: (question: string, translation: TranslationId) => void;
   isLoading: boolean;
+  placeholder?: string;
 }
 
-export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
+export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBarProps) {
   const [question,    setQuestion]    = useState('');
   const [translation, setTranslation] = useState<TranslationId>('web');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -50,7 +51,7 @@ export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
               className={styles.textarea}
               value={question}
               onChange={(e) => setQuestion(e.target.value.slice(0, MAX))}
-              placeholder="Ask anything about the Bible… What does God say about forgiveness? Who wrote the Psalms? What is the Great Commission?"
+              placeholder={placeholder || "Ask anything about the Bible… What does God say about forgiveness? Who wrote the Psalms? What is the Great Commission?"}
               rows={3}
               maxLength={MAX}
               aria-label="Your Bible question"

@@ -754,3 +754,143 @@
   color: var(--text-muted);
   font-style: italic;
 }
+
+/* Inline Strong's Badges */
+.wordWrapper {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.inlineStrongsBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold-400);
+  background: rgba(245, 200, 66, 0.12);
+  border: 1.5px solid rgba(245, 200, 66, 0.25);
+  border-radius: 4px;
+  padding: 0px 4px;
+  margin-left: 2px;
+  margin-right: 2px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease-out;
+}
+
+.inlineStrongsBadge:hover {
+  background: rgba(245, 200, 66, 0.3);
+  color: var(--text-primary);
+  box-shadow: 0 0 5px var(--gold-glow);
+}
+
+.activeInlineStrongs {
+  background: var(--gold-500) !important;
+  color: var(--navy-950) !important;
+  border-color: var(--gold-400) !important;
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* Concordance Search Panel */
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.searchForm {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.searchInput {
+  flex: 1;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 2px var(--gold-glow);
+}
+
+.searchBtn {
+  background: var(--gold-500);
+  color: var(--navy-950);
+  border: 1px solid var(--gold-400);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.searchBtn:hover {
+  background: var(--gold-400);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+.searchError {
+  font-size: 0.82rem;
+  color: #fb7185;
+  margin: 0;
+}
+
+.searchResultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.searchCount {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 600;
+}
+
+.searchCard {
+  background: rgba(6, 8, 26, 0.25);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.searchCard:hover {
+  background: var(--glass-hover);
+  border-color: var(--gold-400);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.searchRef {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold-400);
+}
+
+.searchText {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--parchment-200);
+  margin: 0;
+}
+
+.searchHint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  text-align: center;
+  margin: 1.5rem 0;
+}

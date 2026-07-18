@@ -119,7 +119,8 @@
 - [x] `/bible` — chapter/verse navigation (book → chapter → verse)
 - [x] Side-by-side translation comparison (WEB vs KJV)
 - [x] Cross-reference panel (links between related passages)
-- [x] Strong's concordance — click a word → see Hebrew/Greek definition
+- [x] Strong's concordance — click a word or view inline tags → see Hebrew/Greek definition
+- [x] Concordance keyword search — lookup words or Strong's numbers across the Bible
 - [x] Classic commentaries — Matthew Henry, Adam Clarke (AI-generated commentaries)
 - [x] Personal notes per verse (saved to local storage)
 - [ ] Personal highlights + bookmarks (requires auth)
