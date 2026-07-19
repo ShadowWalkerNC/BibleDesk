@@ -21,7 +21,7 @@ function getGeminiClient(): GoogleGenAI {
 }
 
 /**
- * Common call helper to complete a text prompt using Gemini 2.5 Flash
+ * Common call helper to complete a text prompt using Gemini 2.0 Flash
  */
 export async function callGemini(
   systemInstruction: string,
@@ -29,7 +29,7 @@ export async function callGemini(
 ): Promise<string> {
   const ai = getGeminiClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.5-flash',
     contents: prompt,
     config: {
       systemInstruction: systemInstruction,
