@@ -124,3 +124,81 @@ CREATE POLICY "graph_edges_public_read"
   USING (true);
 
 -- Writes are service_role only (no INSERT/UPDATE/DELETE policy = deny for anon)
+
+-- ─── 6. Phase 2: PrayerAtlas Schema ─────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS prayer_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  schema_version INT NOT NULL DEFAULT 1,
+  key_version INT,
+  text_ciphertext TEXT,
+  wrapped_dek TEXT,
+  nonce TEXT,
+  text_plain TEXT,
+  location_tier TEXT NOT NULL DEFAULT 'country_only',
+  location_label TEXT,
+  is_restricted_region BOOLEAN NOT NULL DEFAULT false,
+  urgency TEXT DEFAULT 'normal',
+  category TEXT DEFAULT 'general',
+  status TEXT NOT NULL DEFAULT 'pending',
+  submitter_hash TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS missionary_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  display_name TEXT,
+  is_restricted_region BOOLEAN DEFAULT false,
+  location_tier TEXT DEFAULT 'country_only',
+  location_label TEXT,
+  bio TEXT,
+  photo_url TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS prayer_engagements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id UUID REFERENCES prayer_requests(id),
+  action TEXT NOT NULL,
+  user_hash TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS prayer_updates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id UUID REFERENCES prayer_requests(id),
+  update_text TEXT,
+  is_answered BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE prayer_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE missionary_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prayer_engagements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prayer_updates ENABLE ROW LEVEL SECURITY;
+
+-- Policies for prayer_requests
+DROP POLICY IF EXISTS "public can read published requests" ON prayer_requests;
+CREATE POLICY "public can read published requests"
+  ON prayer_requests FOR SELECT
+  USING (status = 'published' AND deleted_at IS NULL);
+
+DROP POLICY IF EXISTS "moderators can read all" ON prayer_requests;
+CREATE POLICY "moderators can read all"
+  ON prayer_requests FOR SELECT
+  USING (auth.role() = 'moderator');
+
+DROP POLICY IF EXISTS "anyone can insert pending" ON prayer_requests;
+CREATE POLICY "anyone can insert pending"
+  ON prayer_requests FOR INSERT
+  WITH CHECK (status = 'pending');
+
+DROP POLICY IF EXISTS "only moderators can update status" ON prayer_requests;
+CREATE POLICY "only moderators can update status"
+  ON prayer_requests FOR UPDATE
+  USING (auth.role() = 'moderator');
+

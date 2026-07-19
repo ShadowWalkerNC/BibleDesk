@@ -15,11 +15,13 @@
     "@anthropic-ai/sdk": "^0.106.0",
     "@google/genai": "^2.12.0",
     "@supabase/supabase-js": "^2.108.2",
+    "@types/topojson-client": "^3.1.5",
     "d3": "^7.9.0",
     "next": "16.2.9",
     "openai": "^4.100.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "topojson-client": "^3.1.0",
     "uuid": "^14.0.1"
   },
   "devDependencies": {

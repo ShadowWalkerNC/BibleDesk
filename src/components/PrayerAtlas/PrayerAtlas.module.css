@@ -1,0 +1,118 @@
+.atlasContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--parchment-100);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  min-height: 520px;
+}
+
+.canvasWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.globeCanvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 50%;
+  transition: transform 0.1s var(--ease-out);
+}
+
+.controls {
+  margin-top: 1rem;
+  z-index: 10;
+}
+
+.controlBtn {
+  background: var(--parchment-200);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+
+.controlBtn:hover {
+  background: var(--parchment-300);
+  border-color: var(--text-muted);
+}
+
+.hoverTooltip {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 380px;
+  background: var(--parchment-200);
+  border: 1px solid var(--gold-400);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  animation: fadeIn 0.2s var(--ease-out) forwards;
+  z-index: 15;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.tooltipLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tooltipText {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.restrictedBadge {
+  background: #fecaca;
+  color: #b91c1c;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.openBadge {
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

@@ -18,7 +18,6 @@
  * SERVER ONLY — never import from client components.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import type { BibleAnswer, TranslationId } from '@/types';
 import { fetchPassages } from '@/lib/bible';
 import { v4 as uuidv4 } from 'uuid';
@@ -64,33 +63,24 @@ export interface PipelineOptions {
   onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
 }
 
-// ─── Claude client ───────────────────────────────────────────────────────────
+// ─── Gemini Client Integration ───────────────────────────────────────────────
 
-let _client: Anthropic | null = null;
-function getClient(): Anthropic {
-  if (!_client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
-    _client = new Anthropic({ apiKey });
-  }
-  return _client;
-}
+import { callGemini } from './gemini';
 
 async function callClaude(
   system: string,
   userMessage: string,
   maxTokens = 1024
 ): Promise<string> {
-  const client = getClient();
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: maxTokens,
-    system,
-    messages: [{ role: 'user', content: userMessage }],
-  });
-  const content = response.content[0];
-  if (content.type !== 'text') throw new Error('Unexpected Claude response type');
-  return content.text;
+  void maxTokens;
+  try {
+    return await callGemini(system, userMessage);
+  } catch (err: any) {
+    if (err.message && err.message.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error('AI Assistant is currently offline due to rate-limits or depleted credits. Please try again later.');
+    }
+    throw err;
+  }
 }
 
 function tryParseJSON<T>(text: string): T | null {

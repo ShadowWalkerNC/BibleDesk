@@ -16,8 +16,30 @@
 .formCard {
   padding: 2.25rem;
   border-radius: var(--radius-lg);
-  position: sticky;
-  top: 84px; /* sticky beneath main header */
+  margin-bottom: 2rem;
+}
+
+.atlasWrapper {
+  margin-top: 1.5rem;
+}
+
+.atlasHeader {
+  margin-bottom: 0.75rem;
+}
+
+.atlasTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.atlasSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
 }
 
 .formTitle {
@@ -61,6 +83,58 @@
   gap: 1.25rem;
 }
 
+/* Location section */
+.locationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+}
+
+.locationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.locationHint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.select {
+  background: var(--navy-950);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 2px var(--gold-glow);
+}
+
+/* RAN Warning banner */
+.ranWarning {
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: #c8413e;
+  line-height: 1.5;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -76,7 +150,7 @@
 }
 
 .input, .textarea {
-  background: var(--navy-900);
+  background: var(--navy-950);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -180,6 +254,8 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .author {
@@ -187,8 +263,99 @@
   color: var(--gold-400);
 }
 
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mapBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(79, 156, 249, 0.12);
+  color: #4f9cf9;
+  border: 1px solid rgba(79, 156, 249, 0.3);
+}
+
 .date {
   color: var(--text-muted);
+}
+
+/* Pin detail panel below globe */
+.pinDetail {
+  margin-top: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pinDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.restrictedTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.openTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(79, 156, 249, 0.12);
+  color: #4f9cf9;
+  border: 1px solid rgba(79, 156, 249, 0.3);
+}
+
+.pinLabel {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.pinText {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.pinDismiss {
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pinDismiss:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-400);
 }
 
 .requestText {

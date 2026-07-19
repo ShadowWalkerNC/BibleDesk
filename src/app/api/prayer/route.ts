@@ -27,8 +27,24 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = getServerClient();
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn('[api/prayer] Supabase is unconfigured, bypass write and return mock successful write.');
+      const body = await req.json();
+      const mockResult = {
+        id: crypto.randomUUID ? crypto.randomUUID() : 'dummy-uuid-376',
+        display_name: body.anonymous ? 'Anonymous' : (body.display_name || 'Anonymous'),
+        request: body.request.trim(),
+        likes_count: 0,
+        created_at: new Date().toISOString(),
+        country_code: body.country_code ?? null,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
+        is_restricted: body.is_restricted ?? false,
+      };
+      return NextResponse.json({ success: true, prayer: mockResult });
+    }
+    const supabase = getServerClient();
     const body = await req.json();
     const { request, display_name = 'Anonymous', anonymous = false, user_id = null } = body;
 
@@ -103,12 +119,18 @@ export async function POST(req: NextRequest) {
 
 // Support updating prayers likes / "I prayed for this" count
 export async function PUT(req: NextRequest) {
-  const supabase = getServerClient();
   try {
     const { id } = await req.json();
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
     }
+
+    // Offline / unconfigured Supabase — acknowledge silently
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ success: true });
+    }
+
+    const supabase = getServerClient();
 
     // Call RPC to increment count to prevent race conditions or fetch-modify races
     // But since it's simple, we can do a increment selection:

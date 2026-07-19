@@ -245,7 +245,7 @@ export default function SermonWorkspacePage() {
         <Header />
         <main className={styles.authGate}>
           <div className={`${styles.authGateCard} glass-card`}>
-            <h2 className="text-serif">📝 Sermon Workspace Prep</h2>
+            <h2 className="text-serif">Sermon Workspace Prep</h2>
             <p>
               Please sign in to access your study outlines, sermon workspace, and sync scriptures directly into your journals.
             </p>
@@ -297,7 +297,7 @@ export default function SermonWorkspacePage() {
 
               <div className={styles.navActions}>
                 <button onClick={handleNewOutline} className={styles.secondaryBtn}>
-                  ➕ New Outline
+                  New Outline
                 </button>
                 {selectedOutlineId && (
                   <button onClick={handleDelete} disabled={deleting} className={styles.deleteBtn}>
@@ -334,10 +334,10 @@ export default function SermonWorkspacePage() {
               <span>Support Markdown Outlines</span>
               <div className={styles.footerBtns}>
                 <button onClick={() => handleSave(false)} disabled={saving} className={styles.saveBtn}>
-                  {saving ? 'Saving...' : '💾 Save Outline'}
+                  {saving ? 'Saving...' : 'Save Outline'}
                 </button>
                 <button onClick={() => handleSave(true)} disabled={publishing} className={styles.publishBtn}>
-                  {publishing ? 'Publishing...' : '📢 Publish to Discord'}
+                  {publishing ? 'Publishing...' : 'Publish to Discord'}
                 </button>
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function SermonWorkspacePage() {
           {/* Right panel: e-Sword Scripture Sidebar */}
           <div className={`${styles.bibleCol} glass-card`}>
             <div className={styles.sidebarHeader}>
-              <h2 className={`${styles.sidebarTitle} text-serif`}>📖 e-Sword Scripture Sidebar</h2>
+              <h2 className={`${styles.sidebarTitle} text-serif`}>e-Sword Scripture Sidebar</h2>
               
               {/* Dropdowns */}
               <div className={styles.sidebarSelectors}>
