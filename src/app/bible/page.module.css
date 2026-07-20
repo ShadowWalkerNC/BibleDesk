@@ -303,7 +303,7 @@
 }
 
 .verseInfoBanner {
-  background: rgba(6, 8, 26, 0.4);
+  background: rgba(210, 200, 185, 0.25);
   border-bottom: 1px solid var(--glass-border);
   padding: 0.75rem 1.25rem;
   font-size: 0.85rem;
@@ -362,7 +362,7 @@
 
 .sectionBox {
   padding: 1.25rem;
-  background: rgba(6, 8, 26, 0.25);
+  background: rgba(210, 200, 185, 0.15);
   border: 1px solid var(--glass-border);
   border-left: 4px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -467,7 +467,7 @@
 
 .comparisonItem {
   padding: 1rem;
-  background: rgba(6, 8, 26, 0.25);
+  background: rgba(210, 200, 185, 0.15);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
 }
@@ -499,7 +499,7 @@
 
 .crossReferenceCard {
   padding: 1rem 1.25rem;
-  background: rgba(6, 8, 26, 0.25);
+  background: rgba(210, 200, 185, 0.15);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   display: flex;
@@ -631,13 +631,13 @@
 }
 
 .toastSuccess {
-  background: #0f2e1f;
+  background: rgba(52, 211, 153, 0.1);
   color: #34d399;
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
 
 .toastError {
-  background: #2e0f17;
+  background: rgba(239, 68, 68, 0.08);
   color: #fb7185;
   border: 1px solid rgba(251, 113, 133, 0.3);
 }
@@ -856,7 +856,7 @@
 }
 
 .searchCard {
-  background: rgba(6, 8, 26, 0.25);
+  background: rgba(210, 200, 185, 0.15);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 1rem;

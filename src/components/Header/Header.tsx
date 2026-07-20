@@ -7,12 +7,13 @@ import { getBrowserClient } from '@/lib/supabase';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { href: '/',        label: 'Study' },
-  { href: '/bible',   label: 'Bible Reader' },
-  { href: '/prayer',  label: 'Prayers' },
-  { href: '/sermons', label: 'Sermon Prep' },
-  { href: '/graph',   label: 'Graph' },
-  { href: '/history', label: 'History' },
+  { href: '/',            label: 'Study' },
+  { href: '/bible',       label: 'Bible Reader' },
+  { href: '/catechism',   label: 'Catechism' },
+  { href: '/prayer',      label: 'Prayers' },
+  { href: '/sermons',     label: 'Sermon Prep' },
+  { href: '/graph',       label: 'Graph' },
+  { href: '/history',     label: 'History' },
 ];
 
 export default function Header() {

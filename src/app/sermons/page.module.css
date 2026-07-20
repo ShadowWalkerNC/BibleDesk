@@ -377,13 +377,13 @@
 }
 
 .toastSuccess {
-  background: #0f2e1f;
+  background: rgba(52, 211, 153, 0.1);
   color: #34d399;
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
 
 .toastError {
-  background: #2e0f17;
+  background: rgba(239, 68, 68, 0.08);
   color: #fb7185;
   border: 1px solid rgba(251, 113, 133, 0.3);
 }

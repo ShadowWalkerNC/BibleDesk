@@ -14,7 +14,7 @@ const EXAMPLE_QUESTIONS = [
 ];
 
 interface SearchBarProps {
-  onSubmit: (question: string, translation: TranslationId) => void;
+  onSubmit: (question: string, translation: TranslationId, isNonAI?: boolean) => void;
   isLoading: boolean;
   placeholder?: string;
 }
@@ -22,6 +22,7 @@ interface SearchBarProps {
 export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBarProps) {
   const [question,    setQuestion]    = useState('');
   const [translation, setTranslation] = useState<TranslationId>('web');
+  const [isNonAI,      setIsNonAI]     = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const MAX = 500;
 
@@ -29,7 +30,7 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
     e.preventDefault();
     const q = question.trim();
     if (!q || isLoading) return;
-    onSubmit(q, translation);
+    onSubmit(q, translation, isNonAI);
   }
 
   function handleUseExample(q: string) {
@@ -74,7 +75,7 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
             <div className={styles.translationPills}>
               {TRANSLATIONS.map((t) => (
                 <button
-                   key={t.id}
+                  key={t.id}
                   type="button"
                   className={`${styles.translationPill} ${translation === t.id ? styles.translationPillActive : ''}`}
                   onClick={() => setTranslation(t.id)}
@@ -91,17 +92,40 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
             </span>
           </div>
 
+          {/* Mode switch: AI vs Direct Concordance */}
+          <div className={styles.modeToggleRow}>
+            <button
+              type="button"
+              className={`${styles.modeToggleBtn} ${!isNonAI ? styles.modeToggleActive : ''}`}
+              onClick={() => setIsNonAI(false)}
+              disabled={isLoading}
+            >
+              ✦ AI 5-Stage Study
+            </button>
+            <button
+              type="button"
+              className={`${styles.modeToggleBtn} ${isNonAI ? styles.modeToggleActive : ''}`}
+              onClick={() => setIsNonAI(true)}
+              disabled={isLoading}
+              title="Direct Scripture & Concordance Search without AI calls"
+            >
+              📖 Non-AI Search
+            </button>
+          </div>
+
           <button
             type="submit"
             className={styles.submitBtn}
-            disabled={isLoading || question.trim().length < 5}
-            aria-label={isLoading ? 'Generating answer…' : 'Study this question'}
+            disabled={isLoading || question.trim().length < 3}
+            aria-label={isLoading ? 'Searching…' : 'Study this question'}
           >
             {isLoading ? (
               <>
                 <span className={styles.spinner} aria-hidden="true" />
-                Studying…
+                Searching…
               </>
+            ) : isNonAI ? (
+              <>📖 Concordance Search</>
             ) : (
               <>✦ Study This</>
             )}

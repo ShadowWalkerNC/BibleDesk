@@ -94,7 +94,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   border-bottom: 1px solid var(--glass-border);
-  background: rgba(11, 15, 46, 0.3);
+  background: var(--navy-900);
 }
 
 .tabBar::-webkit-scrollbar { display: none; }
@@ -167,7 +167,7 @@
   gap: 0.4rem;
   margin-bottom: 1.25rem;
   padding: 0.85rem 1rem;
-  background: rgba(17, 24, 64, 0.4);
+  background: var(--navy-900);
   border-radius: var(--radius-md);
   border-left: 3px solid var(--gold-600);
 }
@@ -254,7 +254,7 @@
   gap: 0.75rem;
   padding: 1rem 1.75rem;
   border-top: 1px solid var(--glass-border);
-  background: rgba(11, 15, 46, 0.3);
+  background: var(--navy-900);
 }
 
 .shareLabel {
@@ -270,7 +270,7 @@
 }
 
 .shareBtn {
-  background: var(--navy-700);
+  background: var(--navy-950);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
@@ -281,7 +281,7 @@
 }
 
 .shareBtn:hover {
-  background: var(--navy-600);
+  background: var(--navy-900);
   color: var(--text-primary);
 }
 

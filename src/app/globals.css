@@ -26,6 +26,8 @@
   --text-primary: #2d2a24; /* Soft dark charcoal text */
   --text-secondary: #5c5549; /* Scholarly bronze/slate gray */
   --text-muted: #6e6556;
+  --text-tertiary: #8a806f;
+  --surface-2: var(--navy-900);
   --text-inverse: #fbf9f4;
 
   /* Dimension accent colors (slightly darkened/saturated for premium light contrast) */

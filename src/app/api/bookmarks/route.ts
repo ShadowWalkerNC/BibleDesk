@@ -5,6 +5,13 @@ import { addBookmark, removeBookmark, getBookmarks, isBookmarked } from '@/lib/b
 
 // GET /api/bookmarks?page=1&limit=20&search=&check=<answerId>
 export async function GET(req: NextRequest) {
+  // Offline guard — Supabase not configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { searchParams } = new URL(req.url);
+    if (searchParams.get('check')) return NextResponse.json({ bookmarked: false });
+    return NextResponse.json({ bookmarks: [], total: 0, page: 1, totalPages: 0 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const check = searchParams.get('check');
@@ -26,6 +33,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
 
 // POST /api/bookmarks — body: { answerId, shareSlug, question, summary, translation, confidence }
 export async function POST(req: NextRequest) {

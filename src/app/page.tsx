@@ -22,10 +22,10 @@ const PLACEHOLDERS = [
 ];
 
 const TEASER_ITEMS = [
-  { label: 'Read a Chapter',        desc: 'Open any book, chapter by chapter' },
-  { label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side' },
-  { label: 'Word Study',            desc: 'Dig into Hebrew & Greek originals' },
-  { label: 'Daily Verse',           desc: 'A fresh verse each morning' },
+  { label: 'Bible Reader',         desc: 'Read chapter by chapter with AI verse study', href: '/bible' },
+  { label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side',          href: '/bible' },
+  { label: 'Catechism',            desc: 'Westminster & Heidelberg Q&A with quiz mode',   href: '/catechism' },
+  { label: 'Prayer Board',         desc: 'Community prayer requests on a live globe map', href: '/prayer' },
 ];
 
 const FEATURE_BADGES: Record<string, { label: string; color: string }> = {
@@ -156,17 +156,16 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* ── Coming Soon teaser ────────────────────────── */}
-            <section className={styles.teaser} aria-label="Coming soon">
+            <section className={styles.teaser} aria-label="Explore BibleDesk features">
               <div className="container">
-                <p className={styles.teaserLabel}>Coming to BibleDesk</p>
+                <p className={styles.teaserLabel}>Explore BibleDesk</p>
                 <div className={styles.teaserGrid}>
-                  {TEASER_ITEMS.map(({ label, desc }) => (
-                    <div key={label} className={styles.teaserCard}>
+                  {TEASER_ITEMS.map(({ label, desc, href }) => (
+                    <a key={label} href={href} className={styles.teaserCard}>
                       <p className={styles.teaserCardLabel}>{label}</p>
                       <p className={styles.teaserCardDesc}>{desc}</p>
-                      <span className={styles.teaserPill}>Soon</span>
-                    </div>
+                      <span className={styles.teaserPill}>Open</span>
+                    </a>
                   ))}
                 </div>
               </div>
