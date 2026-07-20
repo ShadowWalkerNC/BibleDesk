@@ -68,10 +68,92 @@ export default function BibleReaderPage() {
   // Personal notes state
   const [notes, setNotes] = useState('');
 
+  // Highlights state (localStorage)
+  const [highlights, setHighlights] = useState<Record<string, string>>({});
+
+  // Web Speech TTS state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingVerse, setSpeakingVerse] = useState<number | null>(null);
+
   // UI state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const readerScrollRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Load verse highlights from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('bibledesk_verse_highlights');
+      if (saved) setHighlights(JSON.parse(saved));
+    } catch (e) {
+      console.error('Failed to load highlights from localStorage', e);
+    }
+  }, []);
+
+  const handleSetHighlight = (vKey: string, color: string | null) => {
+    setHighlights((prev) => {
+      const next = { ...prev };
+      if (!color) {
+        delete next[vKey];
+      } else {
+        next[vKey] = color;
+      }
+      try {
+        localStorage.setItem('bibledesk_verse_highlights', JSON.stringify(next));
+      } catch (e) {
+        console.error('Failed to save highlight to localStorage', e);
+      }
+      return next;
+    });
+  };
+
+  const handlePlayChapterAudio = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setToast({ message: 'Text-to-Speech is not supported in this browser.', type: 'error' });
+      return;
+    }
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSpeakingVerse(null);
+      return;
+    }
+
+    if (!verses.length) return;
+
+    const fullText = verses.map((v) => `${v.verse}. ${v.text}`).join(' ');
+    const utterance = new SpeechSynthesisUtterance(`${selectedBook} chapter ${selectedChapter}. ${fullText}`);
+    utterance.rate = 0.95;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setSpeakingVerse(null);
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setSpeakingVerse(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handlePlaySingleVerseAudio = (v: BibleVerse) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setToast({ message: 'Text-to-Speech is not supported in this browser.', type: 'error' });
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(`${v.book_name} ${v.chapter} verse ${v.verse}. ${v.text}`);
+    utterance.rate = 0.95;
+    setSpeakingVerse(v.verse);
+
+    utterance.onend = () => setSpeakingVerse(null);
+    utterance.onerror = () => setSpeakingVerse(null);
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   // 1. Fetch Chapter Verses (support parallel loading)
   useEffect(() => {
@@ -541,9 +623,18 @@ export default function BibleReaderPage() {
               </div>
             ) : (
               <div className={styles.versesList}>
-                <h1 className={`${styles.chapterHeader} text-serif`}>
-                  {selectedBook} {selectedChapter}
-                </h1>
+                <div className={styles.headerAudioControls}>
+                  <h1 className={`${styles.chapterHeader} text-serif`}>
+                    {selectedBook} {selectedChapter}
+                  </h1>
+                  <button
+                    onClick={handlePlayChapterAudio}
+                    className={`${styles.audioBtn} ${isSpeaking ? styles.audioBtnActive : ''}`}
+                    title="Listen to full chapter using Text-to-Speech"
+                  >
+                    {isSpeaking ? '⏹ Stop Audio' : '🔊 Listen Chapter'}
+                  </button>
+                </div>
                 <div className={styles.versesWrapper}>
                   {parallelMode && (
                     <div className={styles.parallelHeaderRow}>
@@ -552,12 +643,19 @@ export default function BibleReaderPage() {
                     </div>
                   )}
                   {verses.map((v) => {
+                    const vKey = `${selectedBook}-${selectedChapter}-${v.verse}`;
+                    const hlColor = highlights[vKey];
+                    const hlClass = hlColor === 'yellow' ? styles.highlightYellow :
+                                    hlColor === 'green'  ? styles.highlightGreen :
+                                    hlColor === 'blue'   ? styles.highlightBlue :
+                                    hlColor === 'red'    ? styles.highlightRed : '';
                     const isSelected = selectedVerse?.verse === v.verse;
                     const vB = parallelMode ? versesB.find((x) => x.verse === v.verse) : null;
                     return (
                       <div
                         key={v.verse}
-                        className={`${styles.verseRow} ${isSelected ? styles.activeVerseRow : ''} ${parallelMode ? styles.parallelVerseRow : ''}`}
+                        id={`verse-${v.verse}`}
+                        className={`${styles.verseRow} ${isSelected ? styles.activeVerseRow : ''} ${hlClass} ${parallelMode ? styles.parallelVerseRow : ''}`}
                         onClick={() => {
                           setSelectedVerse(v);
                           setSelectedWord(null);
@@ -581,6 +679,45 @@ export default function BibleReaderPage() {
                         
                         {/* Hover Quick Actions */}
                         <div className={styles.rowActions}>
+                          <div className={styles.colorPicker} onClick={(e) => e.stopPropagation()}>
+                            <span
+                              className={`${styles.colorDot} ${styles.colorDotYellow}`}
+                              title="Highlight Yellow"
+                              onClick={() => handleSetHighlight(vKey, 'yellow')}
+                            />
+                            <span
+                              className={`${styles.colorDot} ${styles.colorDotGreen}`}
+                              title="Highlight Green"
+                              onClick={() => handleSetHighlight(vKey, 'green')}
+                            />
+                            <span
+                              className={`${styles.colorDot} ${styles.colorDotBlue}`}
+                              title="Highlight Blue"
+                              onClick={() => handleSetHighlight(vKey, 'blue')}
+                            />
+                            <span
+                              className={`${styles.colorDot} ${styles.colorDotRed}`}
+                              title="Highlight Red"
+                              onClick={() => handleSetHighlight(vKey, 'red')}
+                            />
+                            {hlColor && (
+                              <span
+                                className={`${styles.colorDot} ${styles.colorDotClear}`}
+                                title="Clear Highlight"
+                                onClick={() => handleSetHighlight(vKey, null)}
+                              />
+                            )}
+                          </div>
+                          <button
+                            title="Listen to verse audio"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlaySingleVerseAudio(v);
+                            }}
+                            className={styles.actionBtn}
+                          >
+                            🔊 Listen
+                          </button>
                           <button
                             title="Perform AI Study on this verse"
                             onClick={(e) => {

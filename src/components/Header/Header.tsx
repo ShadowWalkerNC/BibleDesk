@@ -9,6 +9,7 @@ import styles from './Header.module.css';
 const NAV_LINKS = [
   { href: '/',            label: 'Study' },
   { href: '/bible',       label: 'Bible Reader' },
+  { href: '/daily',       label: 'Daily Verse' },
   { href: '/catechism',   label: 'Catechism' },
   { href: '/prayer',      label: 'Prayers' },
   { href: '/sermons',     label: 'Sermon Prep' },

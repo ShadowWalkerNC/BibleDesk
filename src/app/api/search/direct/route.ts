@@ -75,10 +75,11 @@ export async function POST(req: NextRequest) {
     }
 
     const primaryPassage = passagesToUse[0];
+    const primaryText = primaryPassage?.text || '';
     const summaryText = topicData
       ? topicData.summary
       : primaryPassage
-      ? `Direct Scripture Search: "${primaryPassage.reference}" — ${primaryPassage.text.replace(/\s+/g, ' ').slice(0, 250)}...`
+      ? `Direct Scripture Search: "${primaryPassage.reference}" — ${primaryText.replace(/\s+/g, ' ').slice(0, 250)}...`
       : `Scripture search results for "${cleanQuery}".`;
 
     const citations = passagesToUse.map(p => p.reference);
@@ -89,13 +90,15 @@ export async function POST(req: NextRequest) {
       question: cleanQuery,
       summary: summaryText,
       confidence: 'high',
+      status: 'approved',
+      created_at: new Date().toISOString(),
       translation_used: transId,
       disclaimer: 'This answer was generated via direct Scripture Concordance search (Non-AI Mode).',
       dimensions: {
         scripture: {
           title: 'Scripture Passages',
-          content: passagesToUse.map(p => `**${p.reference}**\n"${p.text.trim()}"`).join('\n\n'),
-          key_points: passagesToUse.map(p => `${p.reference}: ${p.text.trim().slice(0, 100)}...`),
+          content: passagesToUse.map(p => `**${p.reference}**\n"${(p.text || '').trim()}"`).join('\n\n'),
+          key_points: passagesToUse.map(p => `${p.reference}: ${(p.text || '').trim().slice(0, 100)}...`),
           citations: citations,
         },
         historical: {

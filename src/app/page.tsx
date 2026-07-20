@@ -48,8 +48,8 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  function handleAsk(question: string, translation: import('@/types').TranslationId) {
-    ask(question, translation);
+  function handleAsk(question: string, translation: import('@/types').TranslationId, isNonAI = false) {
+    ask(question, translation, isNonAI);
     setTimeout(() => {
       answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);

@@ -171,6 +171,8 @@
   flex: 1;
   min-height: 0;
   margin-bottom: 1.25rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .editorTextarea {
@@ -193,6 +195,82 @@
 .editorTextarea:focus {
   border-color: var(--gold-400);
   box-shadow: 0 0 0 2px var(--gold-glow);
+}
+
+.markdownPreview {
+  width: 100%;
+  height: 100%;
+  background: var(--navy-950);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 1.25rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  line-height: 1.7;
+}
+
+.mdH1 {
+  font-size: 1.5rem;
+  color: var(--gold-400);
+  margin: 1rem 0 0.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 0.25rem;
+}
+
+.mdH2 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin: 0.85rem 0 0.4rem;
+}
+
+.mdH3 {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0.75rem 0 0.3rem;
+}
+
+.mdLi {
+  margin-left: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.mdQuote {
+  border-left: 3px solid var(--gold-400);
+  padding-left: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+.mdP {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.viewModeToggle {
+  display: flex;
+  gap: 2px;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.viewModeBtn {
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.viewModeBtnActive {
+  background: var(--navy-950);
+  color: var(--gold-400);
 }
 
 .editorFooter {

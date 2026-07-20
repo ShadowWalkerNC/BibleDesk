@@ -26,18 +26,9 @@ export interface StreamingAskState {
 }
 
 export interface UseStreamingAskReturn extends StreamingAskState {
-  ask: (question: string, translation: TranslationId) => void;
+  ask: (question: string, translation: TranslationId, isNonAI?: boolean) => void;
   retry: () => void;
 }
-
-const STAGE_NAMES: Record<number, string> = {
-  1: 'Classifying question',
-  2: 'Searching Scripture',
-  3: 'Checking accuracy',
-  4: 'Researching history',
-  5: 'Synthesising theology',
-  6: 'Assembling answer',
-};
 
 export function useStreamingAsk(): UseStreamingAskReturn {
   const [state, setState] = useState<StreamingAskState>({
@@ -51,10 +42,12 @@ export function useStreamingAsk(): UseStreamingAskReturn {
 
   const [lastQ, setLastQ] = useState('');
   const [lastT, setLastT] = useState<TranslationId>('web');
+  const [lastIsNonAI, setLastIsNonAI] = useState(false);
 
-  const ask = useCallback((question: string, translation: TranslationId) => {
+  const ask = useCallback((question: string, translation: TranslationId, isNonAI = false) => {
     setLastQ(question);
     setLastT(translation);
+    setLastIsNonAI(isNonAI);
 
     setState((prev) => ({
       status: 'loading',
@@ -62,10 +55,43 @@ export function useStreamingAsk(): UseStreamingAskReturn {
       answer: null,
       shareSlug: null,
       error: null,
-      // preserve previous rateLimit so bar doesn’t disappear while loading
       rateLimit: prev.rateLimit,
     }));
 
+    if (isNonAI) {
+      // Direct Non-AI search mode
+      fetch('/api/search/direct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: question, translation }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.answer) {
+            setState((s) => ({
+              ...s,
+              status: 'done',
+              answer: data.answer,
+            }));
+          } else {
+            setState((s) => ({
+              ...s,
+              status: 'error',
+              error: data.error || 'Failed to complete direct concordance search.',
+            }));
+          }
+        })
+        .catch(() => {
+          setState((s) => ({
+            ...s,
+            status: 'error',
+            error: 'Failed to complete direct concordance search.',
+          }));
+        });
+      return;
+    }
+
+    // AI Streaming Mode
     fetch('/api/ask/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -98,45 +124,46 @@ export function useStreamingAsk(): UseStreamingAskReturn {
           let payload: unknown;
           try { payload = JSON.parse(dataMatch[1]); } catch { continue; }
 
-          if (eventType === 'stage') {
-            const s = payload as { stage: number; name: string; duration_ms: number };
-            setState((prev) => ({
-              ...prev,
-              stages: [...prev.stages, {
-                stage: s.stage,
-                name: STAGE_NAMES[s.stage] ?? s.name,
-                duration_ms: s.duration_ms,
-              }],
-            }));
-          } else if (eventType === 'answer') {
-            const a = payload as BibleAnswer & { shareSlug?: string; rateLimit?: RateLimitInfo };
-            const { shareSlug, rateLimit, ...answer } = a;
-            setState((prev) => ({
-              ...prev,
-              status: 'done',
-              answer: answer as BibleAnswer,
-              shareSlug: shareSlug ?? null,
-              rateLimit: rateLimit ?? prev.rateLimit,
-            }));
-          } else if (eventType === 'error') {
-            const e = payload as { message: string; rateLimit?: RateLimitInfo };
-            setState((prev) => ({
-              ...prev,
-              status: 'error',
-              error: e.message,
-              rateLimit: e.rateLimit ?? prev.rateLimit,
-            }));
+          switch (eventType) {
+            case 'stage': {
+              const p = payload as StageProgress;
+              setState((s) => ({ ...s, stages: [...s.stages, p] }));
+              break;
+            }
+            case 'answer': {
+              const p = payload as { answer: BibleAnswer; shareSlug: string };
+              setState((s) => ({
+                ...s,
+                answer: p.answer,
+                shareSlug: p.shareSlug,
+              }));
+              break;
+            }
+            case 'rate_limit': {
+              const p = payload as RateLimitInfo;
+              setState((s) => ({ ...s, rateLimit: p }));
+              break;
+            }
+            case 'done': {
+              setState((s) => ({ ...s, status: 'done' }));
+              break;
+            }
+            case 'error': {
+              const p = payload as { message: string };
+              setState((s) => ({ ...s, status: 'error', error: p.message }));
+              break;
+            }
           }
         }
       }
     }).catch(() => {
-      setState((s) => ({ ...s, status: 'error', error: 'Network error. Please check your connection.' }));
+      setState((s) => ({ ...s, status: 'error', error: 'Network error. Please try again.' }));
     });
   }, []);
 
   const retry = useCallback(() => {
-    if (lastQ) ask(lastQ, lastT);
-  }, [ask, lastQ, lastT]);
+    if (lastQ) ask(lastQ, lastT, lastIsNonAI);
+  }, [ask, lastQ, lastT, lastIsNonAI]);
 
   return { ...state, ask, retry };
 }

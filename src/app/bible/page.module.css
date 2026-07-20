@@ -167,6 +167,89 @@
   padding-left: calc(1rem - 2.5px);
 }
 
+/* ─── Verse Highlighting ─────────────────────────────────────────── */
+.highlightYellow {
+  background: rgba(255, 235, 59, 0.22) !important;
+  border-left: 3px solid #fbc02d;
+  padding-left: calc(1rem - 3px);
+}
+
+.highlightGreen {
+  background: rgba(76, 175, 80, 0.2) !important;
+  border-left: 3px solid #388e3c;
+  padding-left: calc(1rem - 3px);
+}
+
+.highlightBlue {
+  background: rgba(33, 150, 243, 0.2) !important;
+  border-left: 3px solid #1976d2;
+  padding-left: calc(1rem - 3px);
+}
+
+.highlightRed {
+  background: rgba(244, 67, 54, 0.18) !important;
+  border-left: 3px solid #d32f2f;
+  padding-left: calc(1rem - 3px);
+}
+
+.colorPicker {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.colorDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.colorDot:hover {
+  transform: scale(1.2);
+}
+
+.colorDotYellow { background: #fbc02d; }
+.colorDotGreen  { background: #388e3c; }
+.colorDotBlue   { background: #1976d2; }
+.colorDotRed    { background: #d32f2f; }
+.colorDotClear  { background: var(--text-muted); opacity: 0.5; }
+
+/* ─── TTS Audio Controls Header ───────────────────────────────────── */
+.headerAudioControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.audioBtn {
+  background: rgba(181, 137, 19, 0.1);
+  border: 1px solid var(--gold-500);
+  color: var(--gold-400);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.audioBtn:hover {
+  background: rgba(181, 137, 19, 0.2);
+}
+
+.audioBtnActive {
+  background: var(--gold-500) !important;
+  color: var(--navy-950) !important;
+}
+
 .verseNumber {
   font-size: 0.85rem;
   font-weight: 700;

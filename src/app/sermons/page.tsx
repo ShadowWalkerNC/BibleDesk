@@ -33,13 +33,39 @@ export default function SermonWorkspacePage() {
   const [sidebarVerses, setSidebarVerses] = useState<BibleVerse[]>([]);
   const [loadingBible, setLoadingBible] = useState(false);
 
-  // UI feedback states
+  // UI feedback & view mode states
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [viewMode, setViewMode] = useState<'edit' | 'split' | 'preview'>('edit');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function renderMarkdownPreview(markdown: string) {
+    const lines = markdown.split('\n');
+    return lines.map((line, idx) => {
+      if (line.startsWith('# ')) {
+        return <h1 key={idx} className={styles.mdH1}>{line.slice(2)}</h1>;
+      }
+      if (line.startsWith('## ')) {
+        return <h2 key={idx} className={styles.mdH2}>{line.slice(3)}</h2>;
+      }
+      if (line.startsWith('### ')) {
+        return <h3 key={idx} className={styles.mdH3}>{line.slice(4)}</h3>;
+      }
+      if (line.startsWith('- ')) {
+        return <li key={idx} className={styles.mdLi}>{line.slice(2)}</li>;
+      }
+      if (line.startsWith('> ')) {
+        return <blockquote key={idx} className={styles.mdQuote}>{line.slice(2)}</blockquote>;
+      }
+      if (!line.trim()) {
+        return <div key={idx} style={{ height: '0.4rem' }} />;
+      }
+      return <p key={idx} className={styles.mdP}>{line}</p>;
+    });
+  }
 
   // Toast Helper
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -318,20 +344,53 @@ export default function SermonWorkspacePage() {
               />
             </div>
 
-            {/* Markdown Text Editor */}
+            {/* Markdown Text Editor & Live Preview */}
             <div className={styles.textareaWrapper}>
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Compose your sermon outline or study journal here... Use # headers for points. Click the sidebar to insert scriptures directly."
-                className={styles.editorTextarea}
-              />
+              {(viewMode === 'edit' || viewMode === 'split') && (
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Compose your sermon outline or study journal here... Use # headers for points. Click the sidebar to insert scriptures directly."
+                  className={styles.editorTextarea}
+                />
+              )}
+              {(viewMode === 'preview' || viewMode === 'split') && (
+                <div className={styles.markdownPreview}>
+                  {content ? (
+                    renderMarkdownPreview(content)
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Markdown preview will appear here...</span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Bottom Actions */}
             <div className={styles.editorFooter}>
-              <span>Support Markdown Outlines</span>
+              <div className={styles.viewModeToggle}>
+                <button
+                  type="button"
+                  className={`${styles.viewModeBtn} ${viewMode === 'edit' ? styles.viewModeBtnActive : ''}`}
+                  onClick={() => setViewMode('edit')}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.viewModeBtn} ${viewMode === 'split' ? styles.viewModeBtnActive : ''}`}
+                  onClick={() => setViewMode('split')}
+                >
+                  Split View
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.viewModeBtn} ${viewMode === 'preview' ? styles.viewModeBtnActive : ''}`}
+                  onClick={() => setViewMode('preview')}
+                >
+                  Preview
+                </button>
+              </div>
               <div className={styles.footerBtns}>
                 <button onClick={() => handleSave(false)} disabled={saving} className={styles.saveBtn}>
                   {saving ? 'Saving...' : 'Save Outline'}
