@@ -33,8 +33,33 @@
   font-size: 1rem;
   color: var(--text-muted);
   max-width: 520px;
-  margin: 0 auto;
+  margin: 0 auto 1.25rem;
   line-height: 1.6;
+}
+
+.navBar {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.navBtn {
+  background: var(--navy-950);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navBtn:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-400);
+  background: var(--navy-900);
 }
 
 .card {

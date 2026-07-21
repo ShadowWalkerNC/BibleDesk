@@ -392,6 +392,9 @@ export default function SermonWorkspacePage() {
                 </button>
               </div>
               <div className={styles.footerBtns}>
+                <button type="button" onClick={() => window.print()} className={styles.secondaryBtn} title="Print clean sermon outline notes">
+                  🖨️ Print Notes
+                </button>
                 <button onClick={() => handleSave(false)} disabled={saving} className={styles.saveBtn}>
                   {saving ? 'Saving...' : 'Save Outline'}
                 </button>

@@ -67,15 +67,52 @@ const CURATED_DAILY_VERSES: Array<Omit<DailyVerse, 'date'>> = [
     reflection: 'In a restless world, Jesus is the Good Shepherd who provides contentment, guidance, and deep rest for weary souls.',
     prayer: 'Good Shepherd, lead my heart to Your quiet waters of peace and restoration today.',
   },
+  {
+    reference: 'Hebrews 11:1',
+    text: 'Now faith is assurance of things hoped for, a conviction of things not seen.',
+    translation: 'WEB',
+    theme: 'Faith & Certainty',
+    reflection: 'Faith looks beyond physical circumstances to the immutable character and eternal promises of Almighty God.',
+    prayer: 'Lord, deepen my faith so I may stand firm in Your promises regardless of what I see.',
+  },
+  {
+    reference: 'Ephesians 2:8-9',
+    text: 'For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, that no one would boast.',
+    translation: 'WEB',
+    theme: 'Grace & Salvation',
+    reflection: 'Salvation is an unearned gift of pure divine love. We cannot earn it, nor can we lose what Christ fully purchased.',
+    prayer: 'Father, thank You for the gift of grace through Christ. Help me live a life of joyful gratitude.',
+  },
+  {
+    reference: 'Psalm 119:105',
+    text: 'Your word is a lamp to my feet, and a light for my path.',
+    translation: 'WEB',
+    theme: 'Scripture & Guidance',
+    reflection: 'God’s Word illuminates one step at a time, providing truth and moral clarity in an uncertain world.',
+    prayer: 'Lord, let Your Word guide my daily choices and direct my path.',
+  },
 ];
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const isRandom = searchParams.get('random') === 'true';
+    const indexParam = searchParams.get('index');
+
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
     
-    // Pick daily verse deterministically by day of year
-    const verseIndex = dayOfYear % CURATED_DAILY_VERSES.length;
+    let verseIndex = dayOfYear % CURATED_DAILY_VERSES.length;
+
+    if (isRandom) {
+      verseIndex = Math.floor(Math.random() * CURATED_DAILY_VERSES.length);
+    } else if (indexParam !== null) {
+      const parsed = parseInt(indexParam, 10);
+      if (!isNaN(parsed)) {
+        verseIndex = Math.abs(parsed) % CURATED_DAILY_VERSES.length;
+      }
+    }
+
     const selected = CURATED_DAILY_VERSES[verseIndex];
 
     const result: DailyVerse = {
@@ -83,7 +120,12 @@ export async function GET(req: NextRequest) {
       ...selected,
     };
 
-    return NextResponse.json({ success: true, dailyVerse: result });
+    return NextResponse.json({
+      success: true,
+      dailyVerse: result,
+      totalCount: CURATED_DAILY_VERSES.length,
+      currentIndex: verseIndex,
+    });
   } catch (err: unknown) {
     console.error('GET /api/daily error:', err);
     return NextResponse.json({ error: 'Failed to fetch daily verse' }, { status: 500 });

@@ -9,21 +9,27 @@ export default function DailyVersePage() {
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [totalCount, setTotalCount] = useState<number>(1);
+
+  async function fetchDaily(url = '/api/daily') {
+    setLoading(true);
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        setDailyVerse(data.dailyVerse);
+        if (data.currentIndex !== undefined) setCurrentIndex(data.currentIndex);
+        if (data.totalCount !== undefined) setTotalCount(data.totalCount);
+      }
+    } catch (err) {
+      console.error('Failed to fetch daily verse:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchDaily() {
-      try {
-        const res = await fetch('/api/daily');
-        const data = await res.json();
-        if (data.success) {
-          setDailyVerse(data.dailyVerse);
-        }
-      } catch (err) {
-        console.error('Failed to fetch daily verse:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchDaily();
   }, []);
 
@@ -33,6 +39,15 @@ export default function DailyVersePage() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  function handleNext() {
+    const nextIdx = (currentIndex + 1) % totalCount;
+    fetchDaily(`/api/daily?index=${nextIdx}`);
+  }
+
+  function handleRandom() {
+    fetchDaily('/api/daily?random=true');
   }
 
   return (
@@ -46,6 +61,14 @@ export default function DailyVersePage() {
             <p className={styles.subtitle}>
               Start your day grounded in God’s Word with curated scripture, commentary, and prayer.
             </p>
+            <div className={styles.navBar}>
+              <button onClick={handleNext} className={styles.navBtn}>
+                ⏭ Next Devotional
+              </button>
+              <button onClick={handleRandom} className={styles.navBtn}>
+                🎲 Shuffle Random
+              </button>
+            </div>
           </div>
 
           {loading ? (

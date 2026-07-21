@@ -466,6 +466,49 @@
   border: 1px solid rgba(251, 113, 133, 0.3);
 }
 
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  header,
+  .editorNav,
+  .viewModeToggle,
+  .footerBtns,
+  .bibleCol {
+    display: none !important;
+  }
+
+  .mainContainer,
+  .splitGrid,
+  .editorCol {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    display: block !important;
+  }
+
+  .titleInput {
+    border-bottom: 2px solid #000 !important;
+    font-size: 2rem !important;
+    color: #000 !important;
+  }
+
+  .markdownPreview {
+    border: none !important;
+    background: transparent !important;
+    color: #000 !important;
+    padding: 1rem 0 !important;
+  }
+
+  .mdH1, .mdH2, .mdH3, .mdP, .mdLi {
+    color: #000 !important;
+  }
+}
+
 @media (max-width: 900px) {
   .splitGrid {
     grid-template-columns: 1fr;

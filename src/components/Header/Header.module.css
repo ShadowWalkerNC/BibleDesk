@@ -97,9 +97,28 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 480px) {
-  .nav { gap: 1rem; }
-  .navLink { display: none; }
+@media (max-width: 768px) {
+  .inner {
+    padding: 0 1rem;
+    height: 56px;
+  }
+  .nav {
+    gap: 0.85rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-right: 0.5rem;
+  }
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+  .navLink {
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+  .badge {
+    display: none;
+  }
 }
 
 .authBtn {

@@ -22,10 +22,14 @@ const PLACEHOLDERS = [
 ];
 
 const TEASER_ITEMS = [
-  { label: 'Bible Reader',         desc: 'Read chapter by chapter with AI verse study', href: '/bible' },
-  { label: 'Compare Translations', desc: 'KJV · ESV · NIV · NASB side by side',          href: '/bible' },
-  { label: 'Catechism',            desc: 'Westminster & Heidelberg Q&A with quiz mode',   href: '/catechism' },
-  { label: 'Prayer Board',         desc: 'Community prayer requests on a live globe map', href: '/prayer' },
+  { label: 'Bible Reader',         desc: 'Chapter reading, Strong’s concordance, color highlights & audio', href: '/bible' },
+  { label: 'Daily Devotional',     desc: 'Curated daily verse, reflection, prayer & shuffle controls',       href: '/daily' },
+  { label: 'Reading Plans',        desc: 'Interactive 30 & 90-day reading schedules with progress tracking', href: '/plans' },
+  { label: 'Catechism',            desc: 'Westminster & Heidelberg Q&A with interactive Quiz Mode',          href: '/catechism' },
+  { label: 'Historic Creeds',      desc: 'Apostles’, Nicene, Chalcedonian & Athanasian confessions',         href: '/creeds' },
+  { label: 'Verse Memory',         desc: 'Flashcards, word-masking & first-letter memory prompts',            href: '/memory' },
+  { label: 'Prayer Board',         desc: 'Global prayer requests plotted on an interactive 3D globe',         href: '/prayer' },
+  { label: 'Sermon Prep',          desc: 'Outline editor with live Markdown preview & print export',          href: '/sermons' },
 ];
 
 const FEATURE_BADGES: Record<string, { label: string; color: string }> = {

@@ -101,7 +101,7 @@ a:hover {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, var(--gold-400) 0%, #fff5c0 50%, var(--gold-500) 100%);
+  background: linear-gradient(135deg, #8a6500 0%, #b58913 50%, #7c5c00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -115,6 +115,8 @@ a:hover {
   border-radius: var(--radius-lg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(181, 137, 19, 0.03), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */

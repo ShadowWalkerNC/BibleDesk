@@ -1,0 +1,213 @@
+.main {
+  padding: 2.5rem 0 4rem;
+  min-height: 100vh;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold-500);
+  background: rgba(181, 137, 19, 0.08);
+  border: 1px solid rgba(181, 137, 19, 0.25);
+  padding: 0.25rem 0.85rem;
+  border-radius: 99px;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.planSelector {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.planBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--navy-950);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.planBtn:hover {
+  border-color: var(--gold-400);
+  background: var(--navy-900);
+}
+
+.planBtnActive {
+  border-color: var(--gold-400) !important;
+  background: rgba(181, 137, 19, 0.08) !important;
+}
+
+.planBtnName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.planBtnMeta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.planCard {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.planHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.planTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.planDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.progressBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.progressPct {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold-400);
+  line-height: 1;
+}
+
+.progressLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--navy-900);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-600), var(--gold-400));
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.daysList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dayRow {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  background: var(--navy-900);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.dayRow:hover {
+  border-color: var(--gold-400);
+}
+
+.dayRowDone {
+  opacity: 0.6;
+  background: var(--navy-950);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--gold-500);
+}
+
+.dayNum {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--gold-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 3.5rem;
+  flex-shrink: 0;
+}
+
+.dayTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.readLink {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold-400);
+  text-decoration: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(181, 137, 19, 0.3);
+  background: rgba(181, 137, 19, 0.08);
+  transition: all 0.2s;
+}
+
+.readLink:hover {
+  background: rgba(181, 137, 19, 0.2);
+  border-color: var(--gold-400);
+}
