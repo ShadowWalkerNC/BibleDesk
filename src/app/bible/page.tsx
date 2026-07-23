@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useTransition } from 'react';
 import Header from '@/components/Header/Header';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter } from '@/lib/books';
-import { TRANSLATIONS, type TranslationId, type BibleVerse, type BiblePassage } from '@/types';
+import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
 import styles from './page.module.css';
 
 interface OriginalWordStudy {
@@ -78,7 +78,7 @@ export default function BibleReaderPage() {
   // UI state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const readerScrollRef = useRef<HTMLDivElement>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Load verse highlights from localStorage on mount
   useEffect(() => {
@@ -209,6 +209,7 @@ export default function BibleReaderPage() {
           }
         }
       } catch (err) {
+        console.error('[bible] chapter fetch error:', err);
         if (active) {
           setChapterError('Connection error. Could not fetch chapter data.');
         }
@@ -221,7 +222,7 @@ export default function BibleReaderPage() {
     return () => {
       active = false;
     };
-  }, [selectedBook, selectedChapter, selectedTranslation, translationB, parallelMode]);
+  }, [selectedBook, selectedChapter, selectedTranslation, translationB, parallelMode, pendingVerseTarget]);
 
   // 2. Fetch AI Study Data when selectedVerse or selectedWord changes
   useEffect(() => {
@@ -254,6 +255,7 @@ export default function BibleReaderPage() {
           setStudyData(data.study);
         }
       } catch (err) {
+        console.error('[bible] study fetch error:', err);
         if (active) {
           setStudyError('Network error. Failed to load AI companion analysis.');
         }
@@ -293,6 +295,7 @@ export default function BibleReaderPage() {
           setComparedVerses(results);
         }
       } catch (err) {
+        console.error('[bible] compare fetch error:', err);
         if (active) {
           showToast('Failed to load other translations.', 'error');
         }
@@ -391,6 +394,7 @@ export default function BibleReaderPage() {
         setSearchTotal(0);
       }
     } catch (err) {
+      console.error('[bible] search query error:', err);
       setSearchError('Search request timed out or failed.');
       setSearchResults([]);
       setSearchTotal(0);
@@ -422,13 +426,14 @@ export default function BibleReaderPage() {
       // Verify book exists
       const bookExists = BIBLE_BOOKS.some(b => b.name.toLowerCase() === bookName.toLowerCase());
       if (bookExists) {
+        setPendingVerseTarget(verseNum);
         startTransition(() => {
           setSelectedBook(bookName);
           setSelectedChapter(chapterNum);
           setActiveTab('study');
           setSelectedWord(null);
           // Temporary listener to highlight the target verse after it loads
-          const selectVerseAfterLoad = (e: Event) => {
+          const selectVerseAfterLoad = () => {
             document.removeEventListener('bibledesk:chapter-loaded', selectVerseAfterLoad);
           };
           document.addEventListener('bibledesk:chapter-loaded', selectVerseAfterLoad);
@@ -650,6 +655,7 @@ export default function BibleReaderPage() {
                                     hlColor === 'blue'   ? styles.highlightBlue :
                                     hlColor === 'red'    ? styles.highlightRed : '';
                     const isSelected = selectedVerse?.verse === v.verse;
+                    const isCurrentlySpeaking = speakingVerse === v.verse;
                     const vB = parallelMode ? versesB.find((x) => x.verse === v.verse) : null;
                     return (
                       <div
@@ -661,7 +667,9 @@ export default function BibleReaderPage() {
                           setSelectedWord(null);
                         }}
                       >
-                        <span className={styles.verseNumber}>{v.verse}</span>
+                        <span className={styles.verseNumber}>
+                          {isCurrentlySpeaking ? '🔊' : v.verse}
+                        </span>
                         {parallelMode ? (
                           <div className={styles.parallelColumns}>
                             <div className={`${styles.verseText} text-serif`}>

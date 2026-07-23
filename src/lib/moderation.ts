@@ -478,7 +478,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
 
 async function getAnswerIdForFlag(
   flagId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   supabase: any
 ): Promise<string | null> {
   const { data } = await supabase

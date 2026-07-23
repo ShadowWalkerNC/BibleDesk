@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { TranslationId } from '@/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -157,7 +156,7 @@ Analyze this verse and generate the structured JSON study guide. Ensure original
       const stripped = responseText.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
       parsedData = JSON.parse(stripped);
     } catch (parseErr) {
-      console.error('Failed to parse Gemini output as JSON. Raw text:', responseText);
+      console.error('Failed to parse Gemini output as JSON. Raw text:', responseText, parseErr);
       return NextResponse.json(
         { error: 'Failed to generate a clean structured study guide. Please try again.' },
         { status: 500 }

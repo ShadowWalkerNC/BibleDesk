@@ -73,21 +73,6 @@ export default function SermonWorkspacePage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  async function fetchSidebarVerses() {
-    setLoadingBible(true);
-    try {
-      const res = await fetch(`/api/bible/chapter?book=${encodeURIComponent(sidebarBook)}&chapter=${sidebarChapter}&translation=${sidebarTranslation}`);
-      const data = await res.json();
-      if (data.success) {
-        setSidebarVerses(data.passage.verses);
-      }
-    } catch (err) {
-      console.error('Failed to load sidebar scripture:', err);
-    } finally {
-      setLoadingBible(false);
-    }
-  }
-
   async function fetchOutlines(userId: string) {
     try {
       const res = await fetch(`/api/sermons?userId=${userId}`);
@@ -120,6 +105,20 @@ export default function SermonWorkspacePage() {
 
   // 2. Fetch sidebar Bible text
   useEffect(() => {
+    async function fetchSidebarVerses() {
+      setLoadingBible(true);
+      try {
+        const res = await fetch(`/api/bible/chapter?book=${encodeURIComponent(sidebarBook)}&chapter=${sidebarChapter}&translation=${sidebarTranslation}`);
+        const data = await res.json();
+        if (data.success) {
+          setSidebarVerses(data.passage.verses);
+        }
+      } catch (err) {
+        console.error('Failed to load sidebar scripture:', err);
+      } finally {
+        setLoadingBible(false);
+      }
+    }
     fetchSidebarVerses();
   }, [sidebarBook, sidebarChapter, sidebarTranslation]);
 

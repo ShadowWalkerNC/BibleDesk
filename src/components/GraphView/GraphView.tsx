@@ -138,7 +138,7 @@ export default function GraphView({
 
   useEffect(() => {
     fetchGraph();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [fetchGraph]);
 
   // ── D3 simulation ───────────────────────────────────────────────────────────

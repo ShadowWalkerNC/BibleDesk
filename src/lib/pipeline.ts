@@ -45,7 +45,7 @@ export interface PipelineStageResult {
   stage: number;
   name: string;
   duration_ms: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   output: Record<string, any>;
 }
 
@@ -324,7 +324,7 @@ async function runStage3(
 async function runStage4(
   question: string,
   verifiedVerses: VerifiedVerse[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
 ): Promise<Record<string, any>> {
   const t0 = Date.now();
 
@@ -338,7 +338,7 @@ async function runStage4(
     1024
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const parsed = tryParseJSON<Record<string, any>>(raw) ?? {
     church_fathers: raw,
     traditions: '',
@@ -353,9 +353,9 @@ async function runStage4(
 async function runStage5(
   question: string,
   verifiedVerses: VerifiedVerse[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   historicalAnalysis: Record<string, any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
 ): Promise<Record<string, any>> {
   const t0 = Date.now();
 
@@ -373,7 +373,7 @@ async function runStage5(
     1024
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const parsed = tryParseJSON<Record<string, any>>(raw) ?? {
     synthesis: raw,
     tensions: '',
@@ -389,9 +389,9 @@ async function runStage6(
   question: string,
   classification: ClassificationResult,
   verifiedVerses: VerifiedVerse[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   historicalAnalysis: Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   synthesis: Record<string, any>,
   translation: TranslationId
 ): Promise<BibleAnswer> {

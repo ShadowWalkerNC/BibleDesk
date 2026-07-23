@@ -25,7 +25,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchPassage, fetchPassages } from '@/lib/bible';
+import { fetchPassage } from '@/lib/bible';
 import { getFullGraph, getSubgraph } from '@/lib/graph';
 import { generateBibleAnswer } from '@/lib/claude';
 import { TRANSLATIONS, type TranslationId } from '@/types';
