@@ -467,12 +467,12 @@
 }
 
 @media print {
-  body {
+  :global(body) {
     background: #ffffff !important;
     color: #000000 !important;
   }
 
-  header,
+  :global(header),
   .editorNav,
   .viewModeToggle,
   .footerBtns,
