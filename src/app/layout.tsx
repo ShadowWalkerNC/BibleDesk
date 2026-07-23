@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   description: 'Ask any Bible question and get a deep, sourced answer covering scripture, history, original languages, theology, and practical application. Free.',
   keywords:    ['Bible study', 'Bible questions', 'theology', 'scripture', 'Christian'],
   authors:     [{ name: 'BibleDesk' }],
+  manifest:    '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'BibleDesk',
+    statusBarStyle: 'black-translucent',
+  },
   openGraph: {
     title:       'BibleDesk — AI Bible Study',
     description: 'Five dimensions of truth for every Bible question.',
@@ -22,7 +28,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#06081a',
+  themeColor: '#0b0f2e',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
