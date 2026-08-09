@@ -1,8 +1,8 @@
 # AGENTS.md — BibleDesk
 
-> **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.
-> **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf
-> **Updated:** 2026-06-27
+> **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
+> **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
+> **Updated:** 2026-08-09
 
 ---
 
@@ -10,10 +10,11 @@
 
 ```
 Project:      BibleDesk
-Description:  Free AI-powered Bible study platform — 5-dimension sourced answers
+Description:  Bible-first study platform — local Scripture foundation,
+              AI assistant for 5-dimension sourced answers
               Scripture · Historical · Original Language · Theological · Practical Application
 Status:       in development
-Phase:        Phase 1 — AI Study Core (MVP)
+Phase:        Phase 0 — Local-first Bible foundation
 ```
 
 ---
@@ -21,13 +22,16 @@ Phase:        Phase 1 — AI Study Core (MVP)
 ## Tech Stack
 
 ```
-Language:   TypeScript
-Framework:  Next.js 15 (App Router) · React 19
-Database:   Supabase (PostgreSQL + RLS)
-AI:         Anthropic Claude (claude-sonnet-4-5) — server-only
-Bible API:  bible-api.com (free, no key, public domain translations)
-Hosting:    Vercel (planned)
-PWA:        Yes — manifest.json, installable
+Language:     TypeScript
+Framework:    Next.js 16 (App Router) · React 19
+Database:     Supabase (PostgreSQL + pgvector + RLS)
+AI answers:   Anthropic Claude — server-only
+Embeddings:   OpenAI text-embedding-3-small — server-only
+Study AI:     Google Gemini (verse study companion) — server-only, optional
+Bible data:   bible-api.com today → local Midvash/OpenScriptures modules (Phase 0)
+Hosting:      Vercel preferred (Render also viable)
+PWA:          manifest.json + icons (placeholders until real assets)
+Desktop:      Electron wrapper in apps/desktop/
 ```
 
 ---
@@ -39,6 +43,7 @@ BibleDesk is a node in the ShadowRealm Network alongside Sigil.
 - Exposes: `GET /api/v1/bible/answer` (health check)
 - Integrates with: Sigil `faith` package (/bible /devotional /sermon /prayer)
 - Auth contract: `x-bibledesk-signature: sha256=<HMAC>` matching Sigil webhook pattern
+- Share URLs use `/share/[slug]` (8-char slug), not `/answer/...`
 
 ---
 
@@ -53,35 +58,40 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 
 ## Project-Specific Rules
 
-1. **API keys are server-only.** `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must NEVER appear in client bundles. Verify with `next build` output before every deploy.
-2. **Bible text is public domain only.** Only use bible-api.com public domain translations (KJV, WEB, ASV, etc.). No copyrighted translations without a license review.
-3. **All AI answers must be grounded.** Claude must cite specific scripture references. Hallucination-free is the product promise.
-4. **Rate limiting is non-negotiable.** Every API route that calls Claude must be gated by the rate-limit middleware.
-5. **5 Dimensions are locked.** The five answer dimensions are: Scripture · Historical · Original Language · Theological · Practical Application. Do not add or remove without a full UPA review.
-6. **Sigil compatibility maintained.** The `/api/v1/bible/answer` endpoint must maintain HMAC signature compatibility with Sigil's webhook pattern.
-7. **Docs follow code.** README.md, ARCHITECTURE.md, and TODO.md must be updated every session that changes behavior.
+1. **API keys are server-only.** `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
+2. **Bible text is public domain only** unless a license review lands. Prefer local modules; bible-api.com is interim.
+3. **All AI answers must be grounded.** Cite specific scripture references. Do not invent lexicon facts — use structured Strong’s/morphology data when claiming original-language detail.
+4. **Rate limiting is non-negotiable.** Every API route that calls Claude (or other paid AI) must be gated by rate-limit middleware.
+5. **5 Dimensions are locked** for assistant answers: Scripture · Historical · Original Language · Theological · Practical Application. Do not add or remove without a full UPA review.
+6. **Sigil compatibility maintained** on `/api/v1/bible/answer` (HMAC pattern).
+7. **Docs follow code.** Update `README.md`, `ARCHITECTURE.md`, and `TODO.md` every session that changes behavior. Keep phase labels consistent across all four docs (including this file).
+8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
+9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
 
 ---
 
 ## Current Phase Context
 
 ```
-Phase goal:         Ship a working AI Bible study MVP
-                    User asks question → gets 5-dimension AI answer with citations
+Phase goal:     Local-first Bible foundation
+                Read + search + compare installed public-domain text without bible-api.com
 
-Definition of done:
-  ✓ Question input with translation selector
-  ✓ 5-dimension tabbed answer display
-  ✓ Scripture citations (bible-api.com)
-  ✓ Rate limiting (15 questions/hour/IP)
-  ✓ Supabase answer persistence
-  ✓ Sigil webhook endpoint (/api/v1/bible/answer)
-  ✓ PWA manifest
-  ✓ Deployed to Vercel
+Already shipped (keep; do not rip out):
+  ✓ AI 5-dimension pipeline + streaming
+  ✓ Rate limiting, RAG, share pages, history
+  ✓ /bible UI (still online-backed)
+  ✓ Graph, MCP, prayer, sermons, catechism/creeds/memory/plans
+  ✓ Moderation UI, login wiring, Electron shell
 
-Next phase:         Phase 2 — Bible Reader
-                    Full chapter/verse browser, Strong's concordance,
-                    classic commentaries, highlights/notes
+Active work (Phase 0):
+  □ Module format + Midvash/public-domain ingest
+  □ Local read + search path
+  □ Lexicon-backed word study
+  □ Offline personal study sync model
+
+Deploy (parallel):
+  □ Apply supabase schemas v1→v4
+  □ Env vars + host + smoke tests (see TODO.md)
 ```
 
 ---
@@ -91,30 +101,28 @@ Next phase:         Phase 2 — Bible Reader
 ```
 src/
   app/
-    api/ask/route.ts          ← Main AI endpoint (POST, rate-limited)
-    api/v1/bible/answer/      ← Sigil-compatible webhook
-    page.tsx                  ← Homepage
-    layout.tsx                ← Root layout + SEO
-    globals.css               ← Design system tokens
-  components/
-    Header/                   ← Sticky nav
-    SearchBar/                ← Question input + examples
-    DimensionPanel/           ← 5-tab answer display
-    LoadingState/             ← Skeleton + error states
+    page.tsx                     ← Homepage (Bible-first hero + assistant)
+    bible/                       ← Reader UI
+    daily|plans|catechism|creeds|memory|prayer|sermons|bookmarks|history|graph|mod|login|share/
+    api/
+      ask/                       ← AI answer (+ stream/)
+      bible/                     ← chapter, search, study
+      graph|history|bookmarks|daily|mcp|mod|prayer|sermons|export/
+      v1/bible/answer/           ← Sigil webhook
+  components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
   lib/
-    claude.ts                 ← Anthropic client (SERVER ONLY)
-    bible.ts                  ← bible-api.com client
-    supabase.ts               ← DB client (server + browser)
-    rate-limit.ts             ← IP rate limiting
+    bible.ts                     ← bible-api.com client (interim)
+    claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|…
+  hooks/                         ← useStreamingAsk, useBookmark
   types/
-    index.ts                  ← Shared TypeScript types
+apps/desktop/                    ← Electron wrapper
 supabase/
-  schema.sql                  ← Run in Supabase SQL editor
-.env.example                  ← All env vars documented
+  schema.sql → schema-v4.sql     ← Apply in order
 public/
-  manifest.json               ← PWA manifest
+  manifest.json, icon-*.png
+TODO.md · README.md · ARCHITECTURE.md · .env.example
 ```
 
 ---
 
-*Updated: 2026-06-27 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-08-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

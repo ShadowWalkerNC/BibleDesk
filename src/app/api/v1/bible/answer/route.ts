@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
           { title: dim.title, content: dim.content.slice(0, 400), citations: dim.citations },
         ])
       ),
-      share_url: `${process.env.NEXT_PUBLIC_APP_URL}/answer/${answer.id}`,
+      share_url: `${process.env.NEXT_PUBLIC_APP_URL}/share/${answer.id.slice(0, 8)}`,
       confidence: answer.confidence,
     });
   } catch (err) {

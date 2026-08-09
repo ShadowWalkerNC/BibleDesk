@@ -1,379 +1,164 @@
 # BibleDesk ✦
 
-**Bible-first study platform with AI as an assistant, not the product.**
+**Bible-first study platform. AI is an assistant, not the product.**
 
-BibleDesk is being rebuilt around a simple principle: the main feature is **studying the Bible**. AI is useful, but it should sit on top of a real study foundation instead of replacing it. Phase 0 focuses on offline-capable Bible reading, search, original-language study, and personal study tools before advanced AI, sharing, or community features are expanded.
+BibleDesk helps churches, pastors, teachers, and individual readers study Scripture with a real reading foundation — then optionally use AI for explanation, comparison, and teaching help.
+
+---
+
+## Current Status (2026-08-09)
+
+| | |
+|---|---|
+| **Active phase** | **Phase 0 — Local-first Bible foundation** |
+| **What exists in code** | Reader UI, AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, catechism/creeds/memory/plans, Electron shell, moderation UI |
+| **Critical gap** | Bible text still fetched from **bible-api.com**. Offline modules + lexicon-backed Strong’s are **not** shipped yet |
+| **Deploy** | Not production-live — see [TODO.md](TODO.md) deploy blockers |
+| **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [AGENTS.md](AGENTS.md) for agent rules |
+
+Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) (obsolete “empty stub / reset” note).
 
 ---
 
 ## Vision
 
-BibleDesk should remain useful even if the AI layer is unavailable. The foundation is a real Bible study experience: read Scripture locally, search quickly, compare translations, inspect Hebrew and Greek roots, and save notes, highlights, and bookmarks. The assistant layer is added only after the core study workflow works on its own.
+Someone can open BibleDesk, **read** Scripture, **search**, **compare** translations, study **Hebrew/Greek from real data**, save notes, and keep going **without internet**. AI makes that workflow better — it must not replace it.
 
 ---
 
-## What BibleDesk Is
+## What’s Built Today
 
-BibleDesk is a Bible study platform for churches, pastors, youth groups, teachers, and individual readers who want deeper study tools without making AI the center of the experience.
+### Study surfaces
+- `/bible` — chapter reader, compare, notes/highlights (localStorage), AI study panel
+- `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
+- `/bookmarks`, `/history`, `/graph`, `/share/[slug]`
 
-### Core product direction
+### AI assistant
+- Homepage assistant + `POST /api/ask` / `/api/ask/stream`
+- 5 dimensions: Scripture · Historical · Original Language · Theological · Practical Application
+- Rate limit: 15 questions/hour/IP
+- RAG over canonical answers (OpenAI embeddings + pgvector)
 
-- **Bible-first**: reading, search, comparison, notes, and word study come before AI.
-- **Offline-capable**: installed Bible content should remain available without network access.
-- **Source-grounded**: Hebrew and Greek study should come from structured lexical and morphology data, not AI guesses.
-- **Modular**: Bible texts and study packs should be installable as versioned data modules.
-- **AI-assisted**: AI helps explain, summarize, compare, and teach, but does not replace direct study.
+### Platform / network
+- Sigil webhook: `POST /api/v1/bible/answer` (HMAC)
+- HTTP MCP: `/api/mcp`
+- Prayer board, sermon prep, moderation (`/mod`), login
+- Electron app under `apps/desktop/`
+
+### Temporary data dependency
+| Source | Role | Limitation |
+|---|---|---|
+| bible-api.com | Current verse fetch | Online-only; not the long-term foundation |
+| Gemini (`GEMINI_API_KEY`) | `/bible` study companion | Must not be sold as offline lexicon |
+| Claude + OpenAI | Answers + embeddings | Server-only; optional when offline |
 
 ---
 
 ## Phase 0 Goal
 
-Phase 0 establishes the Bible study foundation. The app should still be valuable if the AI endpoint is removed.
-
-### Phase 0 must deliver
+Establish the Bible study foundation. The app should still be valuable if AI endpoints are removed.
 
 | Area | Deliverable |
 |---|---|
-| Reading | Book/chapter/verse reader with translation picker |
-| Search | Local full-text Bible search across installed public-domain translations |
-| Compare | Side-by-side translation comparison |
-| Original language | Hebrew/Greek word lookup with Strong's, lemma, transliteration, and morphology where available |
-| Study tools | Notes, highlights, bookmarks, verse collections |
-| Offline | Installed Bible modules work without internet |
-| AI boundary | Assistant actions exist inside study views, not as the homepage focus |
+| Reading | Book/chapter/verse reader from **installed** public-domain modules |
+| Search | Local full-text search |
+| Compare | Side-by-side installed translations |
+| Original language | Strong’s / lemma / morphology from **structured data** |
+| Study tools | Notes, highlights, bookmarks, collections (local-first) |
+| Offline | Installed modules work without internet |
+| AI boundary | Assistant lives inside study views — not as the only product |
+
+See staged roadmap in [TODO.md](TODO.md) (Stages 0A–0D).
 
 ---
 
-## Why the Plan Changed
+## Data Sources (Phase 0 target)
 
-The earlier direction leaned too heavily on "ask AI a Bible question" as the main product flow. That approach creates a Bible-themed chatbot rather than a true study platform.
-
-The new direction treats AI as a secondary layer because the Bible foundation was missing key essentials:
-
-- No true offline mode.
-- No locally installed Bible corpus.
-- No real Hebrew/Greek word study implementation.
-- No grounded lexicon-backed original-language workflow.
-- Too much scaffolding around future AI features before the core study experience was complete.
-
----
-
-## Data Sources
-
-BibleDesk Phase 0 should use offline-friendly and legally redistributable sources.
-
-### Primary text datasets
-
-| Dataset | Purpose | Notes |
-|---|---|---|
-| Midvash `bible-data` | Main offline Bible corpus | Provides 33 versions across 22 languages in JSON and SQLite, with OSIS identifiers and per-version metadata |
-| KJV / ASV / WEB / other public-domain editions | Default install set | Good starting base for offline reading and comparison |
-| Westminster Leningrad Codex / Hebrew sources | Hebrew OT study | Available through Midvash and OpenScriptures-compatible resources |
-| Textus Receptus / public-domain Greek text | Greek NT study | Supports New Testament word study |
-
-### Language and lexicon datasets
-
-| Dataset | Purpose | Notes |
-|---|---|---|
-| OpenScriptures Hebrew Bible | Hebrew lemmas and morphology | Based on the Westminster Leningrad Codex and adds lemma and morphology data |
-| OpenScriptures `strongs` | Strong's dictionaries | Open-source Strong's Hebrew and Greek dictionary data |
-| OSHB morphology resources | Morphology interpretation | Supports readable parsing and word-level study interactions |
-
-### Temporary external fallback
-
-| Source | Role | Limitation |
-|---|---|---|
-| `bible-api.com` | Development fallback only | Rate-limited and not suitable as the long-term foundation for full Bible access |
-
-### Translation policy
-
-Phase 0 should not advertise copyrighted translations such as NIV, ESV, or NLT unless a real licensing path exists.
-
----
-
-## Product Priorities
-
-### Must come first
-
-1. Bible reader.
-2. Chapter and verse navigation.
-3. Local search.
-4. Translation comparison.
-5. Hebrew and Greek lookup.
-6. Notes, highlights, bookmarks.
-7. Reading plans.
-8. Offline module support.
-
-### Comes after the foundation
-
-- AI-generated multi-dimensional answers.
-- Public share pages.
-- Knowledge graph visualizations.
-- Community and moderation systems.
-- Discord bot integrations.
-- Marketing-first launch features.
-
----
-
-## Phase 0 Architecture
-
-BibleDesk can still use Next.js and Supabase, but the content architecture should become **local-first**.
-
-### Application layers
-
-| Layer | Responsibility |
+### Primary text
+| Dataset | Purpose |
 |---|---|
-| Reader UI | Reading, navigation, compare mode |
-| Search UI | Searching installed Bible content |
-| Word study UI | Strong's, lemma, transliteration, morphology popovers and drawers |
-| Study tools | Notes, highlights, bookmarks, collections |
-| Local data layer | Bible corpus, lexicon, search index, reading state |
-| Optional sync layer | User study data backup and sync |
-| AI assistant layer | Passage explanation, comparison, summarization, teaching help |
+| Midvash `bible-data` | Offline corpus (JSON/SQLite, OSIS IDs) |
+| KJV / ASV / WEB (public domain) | Default install set |
 
-### Storage model
-
-| Layer | Responsibility |
+### Language / lexicon
+| Dataset | Purpose |
 |---|---|
-| Local database | Bible texts, lexicon data, cross references, reading plans, offline study state |
-| Supabase | Optional sync for user-generated study data |
-| Static module hosting | Versioned downloadable Bible and lexicon packs |
+| OpenScriptures Hebrew Bible | Lemmas + morphology |
+| OpenScriptures `strongs` | Strong’s dictionaries |
 
-### Design rule
-
-The Bible corpus should never require a live third-party API call just to read John 3 or search Romans. That is the line between a study app and a thin client over someone else's service.
+**Policy:** Do not advertise NIV/ESV/NLT (or other copyrighted editions) without a real license.
 
 ---
 
-## Recommended Data Model
+## Quick Start
 
-At minimum, BibleDesk should separate content data from user study data.
+```bash
+cp .env.example .env.local
+# Fill keys documented in .env.example
 
-### Content tables
+npm install
+npm run dev
+```
 
-- `translations`
-- `books`
-- `chapters`
-- `verses`
-- `verse_tokens`
-- `strongs_entries`
-- `morphology_entries`
-- `cross_references`
-- `reading_plans`
+Apply Supabase SQL in order before enabling persistence/RAG/graph:
 
-### User study tables
+1. `supabase/schema.sql`
+2. `supabase/schema-v2.sql`
+3. `supabase/schema-v3.sql`
+4. `supabase/schema-v4.sql`
 
-- `notes`
-- `highlights`
-- `bookmarks`
-- `collections`
-- `reading_progress`
+```bash
+npm run build   # production build
+npm run lint
+```
 
-### Key principle
+Desktop (optional):
 
-Bible content is versioned reference data. Notes and highlights are user data. They should not be modeled the same way.
-
----
-
-## User Experience Direction
-
-### Primary navigation
-
-The main app navigation should be Bible-first:
-
-- Read
-- Search
-- Compare
-- Study
-- Plans
-- Library
-- Assistant
-
-### Reader requirements
-
-- Book/chapter selector.
-- Translation switcher.
-- Scroll and focused verse navigation.
-- Compare mode for installed public-domain versions.
-- Verse actions: note, highlight, bookmark, copy, share, study word.
-- Word-level interaction for source-language datasets.
-
-### Word study requirements
-
-Selecting a Hebrew or Greek word should show:
-
-- Surface form.
-- Transliteration.
-- Lemma.
-- Strong's number.
-- Basic gloss.
-- Expanded definition.
-- Morphology or parsing.
-- Related occurrences.
-
-This is one of the features that turns BibleDesk into an actual study platform instead of a Bible chatbot.
+```bash
+npm run desktop:dev
+```
 
 ---
 
-## Offline-First Requirements
+## Environment Variables
 
-Offline is not an enhancement. It is a core requirement for BibleDesk.
+All variables are documented in [`.env.example`](.env.example).
 
-### Required behavior
+**Server-only (never expose to the browser):**
+`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GRAPH_WRITE_SECRET`, `IP_HASH_SALT`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`, Discord webhook URLs.
 
-- Installed Bible modules remain readable offline.
-- Search works offline for installed modules.
-- Word study works offline when lexicon modules are installed.
-- Notes, highlights, and bookmarks can be created offline.
-- Sync happens later when a connection is available.
-- AI is the only feature allowed to degrade when offline.
-
----
-
-## AI's Role
-
-AI should exist as an optional study assistant inside the Bible workflow.
-
-### Good AI use cases
-
-- Explain this passage.
-- Summarize this chapter.
-- Compare these two translations.
-- Show key themes in this section.
-- Help build a devotional or youth lesson from this passage.
-
-### Bad AI use cases
-
-- Replacing the Bible reader.
-- Guessing at Hebrew or Greek without real lexical data.
-- Acting as the homepage before the user can read Scripture.
-
-AI should be context-aware and grounded in the currently selected passage, translation text, and installed lexical resources.
+**Public:**
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`.
 
 ---
 
 ## Development Stages
 
-This section is intended to be the project's repeatable roadmap reference during development.
-
-### Stage 0 — Bible foundation
-
-**Goal:** Build the real study core without relying on AI.
-
-Deliverables:
-- Define module/package format for Bible data.
-- Ingest Midvash SQLite datasets.
-- Normalize OSIS identifiers and canon ordering.
-- Build the reader UI.
-- Build chapter/verse navigation.
-- Add translation switching.
-- Add local search.
-
-Exit criteria:
-- A user can install BibleDesk and read and search Scripture locally without a remote verse API.
-
-### Stage 1 — Study tools
-
-**Goal:** Make reading become studying.
-
-Deliverables:
-- Notes.
-- Highlights.
-- Bookmarks.
-- Verse collections.
-- Reading plans.
-- Reading progress tracking.
-- Compare mode.
-
-Exit criteria:
-- A user can maintain an entire study workflow without signing in.
-
-### Stage 2 — Original language layer
-
-**Goal:** Add real Hebrew and Greek study tools.
-
-Deliverables:
-- Integrate OpenScriptures Hebrew Bible data.
-- Integrate Strong's dictionaries.
-- Build token-level interaction.
-- Add transliteration, lemma, gloss, and morphology display.
-- Add related-word navigation.
-
-Exit criteria:
-- A user can click a word and perform a grounded word study using structured data instead of AI summaries.
-
-### Stage 3 — Offline hardening and sync
-
-**Goal:** Make the app resilient and portable.
-
-Deliverables:
-- Versioned downloadable content modules.
-- Local persistence improvements.
-- Sync for notes, highlights, bookmarks, and progress.
-- Background updates for content packs.
-- Conflict handling rules for synced study data.
-
-Exit criteria:
-- Installed content works offline, and study data syncs when online.
-
-### Stage 4 — AI assistant
-
-**Goal:** Add AI only after the study core is solid.
-
-Deliverables:
-- Passage-based assistant entry points.
-- Ground AI with selected verses and lexical context.
-- Summaries, explanations, comparisons, and teaching assistance.
-- Token and usage guardrails.
-- Clear UI distinction between source data and assistant output.
-
-Exit criteria:
-- The assistant improves study without replacing the Bible-first workflow.
-
-### Stage 5 — Expanded platform features
-
-**Goal:** Add platform-level capabilities after the Bible foundation is stable.
-
-Deliverables:
-- Share pages.
-- Public links.
-- Moderation systems.
-- Team or church features.
-- Discord or external integrations.
-- Marketing site and launch tooling.
-
-Exit criteria:
-- Expansion features sit on top of a mature study platform instead of compensating for a missing core.
+| Stage | Goal | Status |
+|---|---|---|
+| **0** | Local Bible modules, search, compare | **Active** |
+| **1** | Notes, highlights, bookmarks, plans (local-first) | Partial (UI exists; not offline-module-backed) |
+| **2** | Lexicon-backed original language | Not started (AI placeholder today) |
+| **3** | Offline hardening + sync | Not started |
+| **4** | AI assistant grounded in local passage + lexicon | Pipeline exists; needs re-grounding on local data |
+| **5** | Platform expansion (share, mod, Discord, SaaS) | Largely prototyped — polish after foundation |
 
 ---
 
-## Current Guardrails
-
-These rules should stay visible during development:
+## Guardrails
 
 - Do not market features that are not implemented.
 - Do not advertise copyrighted translations without licensing.
 - Do not depend on AI for original-language claims.
-- Do not depend on a third-party verse API as the product foundation.
-- Do not ship study features that stop working offline if they are supposed to be part of the core product.
-
----
-
-## Suggested Future README Sections
-
-After implementation advances, expand this README with:
-
-- Installation and local setup.
-- Module ingestion pipeline.
-- Content licensing notes.
-- Offline storage strategy.
-- Search indexing approach.
-- Original-language implementation details.
-- AI grounding rules.
-- Contribution workflow.
+- Do not treat bible-api.com as the permanent product foundation.
+- Core study features that claim offline support must work offline.
 
 ---
 
 ## Working Product Definition
 
-BibleDesk is successful when someone can open it, read Scripture, search deeply, study Hebrew and Greek roots, save notes, and keep going even without internet. The AI assistant should make that workflow better, not be mistaken for the workflow itself.
+BibleDesk succeeds when someone can open it, read Scripture, search deeply, study Hebrew and Greek roots from real data, save notes, and continue without internet. The AI assistant improves that workflow — it is not mistaken for the workflow itself.
+
+---
+
+*Updated: 2026-08-09 · Repo: [ShadowWalkerNC/BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

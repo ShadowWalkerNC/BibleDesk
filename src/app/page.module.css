@@ -54,21 +54,90 @@
   gap: 1.75rem;
 }
 
-.heroTag {
+.brandMark {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+.brandMark span {
+  color: var(--gold-400);
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  animation: fadeUp 0.5s var(--ease-out) 0.2s both;
+}
+
+.ctaPrimary,
+.ctaSecondary {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 18px;
-  background: linear-gradient(135deg, rgba(245, 200, 66, 0.12), rgba(245, 200, 66, 0.06));
-  border: 1px solid rgba(245, 200, 66, 0.3);
-  border-radius: 99px;
-  font-size: 0.75rem;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md, 10px);
+  transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out),
+              background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.ctaPrimary {
+  background: linear-gradient(135deg, var(--gold-400), #d4a017);
+  color: #0b0f2e;
+  border: 1px solid transparent;
+}
+
+.ctaPrimary:hover {
+  transform: translateY(-1px);
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.ctaSecondary:hover {
+  color: var(--text-primary);
+  border-color: var(--gold-400);
+}
+
+.assistant {
+  padding: 3rem 0 4rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.assistantInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.assistantTitle {
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
   font-weight: 700;
-  color: var(--gold-400);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  box-shadow: 0 0 20px rgba(245, 200, 66, 0.08), inset 0 1px 0 rgba(245, 200, 66, 0.1);
-  animation: fadeUp 0.5s var(--ease-out) both;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  max-width: 560px;
+}
+
+.assistantSubtitle {
+  font-size: 0.98rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.65;
+  margin-bottom: 0.5rem;
 }
 
 .heroTitle {
