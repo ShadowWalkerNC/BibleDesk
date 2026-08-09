@@ -7,15 +7,15 @@ import { getBrowserClient } from '@/lib/supabase';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { href: '/',            label: 'Study' },
-  { href: '/bible',       label: 'Bible Reader' },
-  { href: '/daily',       label: 'Daily Verse' },
+  { href: '/bible',       label: 'Bible' },
   { href: '/plans',       label: 'Plans' },
+  { href: '/daily',       label: 'Daily' },
+  { href: '/#assistant',  label: 'Assistant' },
   { href: '/catechism',   label: 'Catechism' },
   { href: '/creeds',      label: 'Creeds' },
   { href: '/memory',      label: 'Memory' },
   { href: '/prayer',      label: 'Prayers' },
-  { href: '/sermons',     label: 'Sermon Prep' },
+  { href: '/sermons',     label: 'Sermons' },
   { href: '/graph',       label: 'Graph' },
   { href: '/history',     label: 'History' },
 ];
@@ -62,9 +62,10 @@ export default function Header() {
 
         <nav className={styles.nav} aria-label="Main navigation">
           {NAV_LINKS.map(({ href, label }) => {
-            const isActive = href === '/'
-              ? pathname === '/'
-              : pathname.startsWith(href);
+            const pathOnly = href.split('#')[0] || '/';
+            const isActive = pathOnly === '/'
+              ? pathname === '/' && href.includes('#')
+              : pathname.startsWith(pathOnly);
             return (
               <Link
                 key={href}

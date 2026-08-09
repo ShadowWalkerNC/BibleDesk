@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title:       'BibleDesk — AI Bible Study',
-  description: 'Ask any Bible question and get a deep, sourced answer covering scripture, history, original languages, theology, and practical application. Free.',
-  keywords:    ['Bible study', 'Bible questions', 'theology', 'scripture', 'Christian'],
+  title:       'BibleDesk — Bible-first study',
+  description: 'Read Scripture, follow plans, and study with notes. Optional AI assistant for five-dimension, citation-grounded answers.',
+  keywords:    ['Bible study', 'Bible reader', 'theology', 'scripture', 'Christian', 'reading plans'],
   authors:     [{ name: 'BibleDesk' }],
   manifest:    '/manifest.json',
   appleWebApp: {
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
   },
   openGraph: {
-    title:       'BibleDesk — AI Bible Study',
-    description: 'Five dimensions of truth for every Bible question.',
+    title:       'BibleDesk — Bible-first study',
+    description: 'Read Scripture first. AI assists when you want it.',
     type:        'website',
   },
 };

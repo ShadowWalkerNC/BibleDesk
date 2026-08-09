@@ -1,7 +1,7 @@
 {
   "name": "bibledesk",
   "version": "1.0.0",
-  "description": "Free AI-powered Bible study platform — 5-dimension sourced answers",
+  "description": "Bible-first study platform with optional 5-dimension AI assistant",
   "private": true,
   "scripts": {
     "dev": "next dev",

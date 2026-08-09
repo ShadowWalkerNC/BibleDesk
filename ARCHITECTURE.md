@@ -1,8 +1,9 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 1 complete → Phase 2 in progress (Pipeline + RAG + Moderation)
-> **Last updated:** 2026-06-27
-> **Stack:** Next.js 16 · TypeScript · Supabase · Anthropic Claude · bible-api.com
+> **Status:** Phase 0 active (local-first Bible foundation) · AI/platform layers already prototyped in-repo  
+> **Last updated:** 2026-08-09  
+> **Stack:** Next.js 16 · TypeScript · Supabase · Anthropic Claude · OpenAI embeddings · Gemini study · bible-api.com (interim)  
+> **Work tracker:** [TODO.md](TODO.md) · **Product vision:** [README.md](README.md)
 
 ---
 
@@ -10,73 +11,28 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         USER (Browser / PWA)                        │
+│                    USER (Browser / PWA / Electron)                  │
 │                                                                     │
-│   Next.js React App (App Router)                                    │
-│   ┌───────────────────────────────────────────────────────────┐     │
-│   │  / (HomePage)                                             │     │
-│   │  ├── SearchBar     — question input + translation select  │     │
-│   │  ├── LoadingSkeleton — animated while Claude responds     │     │
-│   │  └── DimensionPanel — 5-tab answer display + citations    │     │
-│   └───────────────────────────────────────────────────────────┘     │
-│                   │ fetch POST /api/ask                             │
-│                   │ (no API key in browser)                         │
-└───────────────────┼─────────────────────────────────────────────────┘
-                    │
-                    ▼
+│   Next.js App Router                                                │
+│   · /bible · plans · study tools          ← product core            │
+│   · / (home): Bible-first hero + AI assistant                       │
+│   · /graph · /history · /share/[slug] · prayer · sermons · mod …    │
+│        │ /api/bible/*              │ /api/ask[/stream]              │
+└────────┼───────────────────────────┼────────────────────────────────┘
+         ▼                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    NEXT.JS SERVER LAYER                             │
-│                                                                     │
-│   src/app/api/ask/route.ts          (main endpoint)                 │
-│   ┌─────────────────────────────────────────────────────────┐       │
-│   │  1. Parse & sanitize question (max 500 chars)           │       │
-│   │  2. Hash IP → check rate_limits table (15/hr)          │       │
-│   │  3. Generate embedding → vector search canonical_answers│       │
-│   │  4. Run 6-stage pipeline (with RAG context if matched)  │       │
-│   │  5. Auto-flag check → notify moderators if flagged      │       │
-│   │  6. Save answer + embedding to Supabase                 │       │
-│   │  7. Return structured BibleAnswer JSON                  │       │
-│   └─────────────────────────────────────────────────────────┘       │
-│                                                                     │
-│   src/app/api/v1/bible/answer/route.ts  (Sigil webhook)             │
-│   ┌─────────────────────────────────────────────────────────┐       │
-│   │  1. Verify HMAC-SHA256 x-bibledesk-signature           │       │
-│   │  2. Run pipeline                                        │       │
-│   │  3. Return compact JSON for Discord embeds             │       │
-│   └─────────────────────────────────────────────────────────┘       │
-│                                                                     │
-│   src/app/api/mod/  (moderator routes — auth-gated)                 │
-│   ┌─────────────────────────────────────────────────────────┐       │
-│   │  GET  /api/mod/queue     — pending flags                │       │
-│   │  POST /api/mod/vote      — submit vote + correction     │       │
-│   │  POST /api/mod/approve   — promote to canonical         │       │
-│   │  POST /api/mod/invite    — invite a new moderator       │       │
-│   └─────────────────────────────────────────────────────────┘       │
+│  Bible today: bible-api.com (lib/bible.ts) — Phase 0 → local modules│
+│  AI: rate limit → OpenAI embed RAG → 6-stage Claude pipeline        │
+│  Study: /api/bible/study (Gemini, optional offline stub)            │
+│  Sigil: /api/v1/bible/answer (HMAC) · MCP: /api/mcp                 │
+│  Also: graph · history · bookmarks · prayer · sermons · export · mod│
 └────────────────┬──────────────────────┬─────────────────────────────┘
-                 │                      │
                  ▼                      ▼
-   ┌─────────────────────┐   ┌─────────────────────────────────┐
-   │    Anthropic API    │   │           Supabase               │
-   │  claude-sonnet-4-5  │   │  PostgreSQL + pgvector + RLS     │
-   │                     │   │  ┌──────────────────────────┐    │
-   │  6-stage pipeline   │   │  │ answers                  │    │
-   │  RAG context inject │   │  │ rate_limits              │    │
-   │  Scripture grounded │   │  │ canonical_answers + vec  │    │
-   │                     │   │  │ flags                    │    │
-   │  Embeddings API     │   │  │ moderation_votes         │    │
-   │  (question vectors) │   │  │ moderators               │    │
-   └─────────────────────┘   │  │ flagged_topics           │    │
-                              │  └──────────────────────────┘    │
-                              └─────────────────────────────────┘
+        Claude / OpenAI / Gemini     Supabase (Postgres + pgvector + RLS)
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                   SIGIL DISCORD BOT (separate repo)                 │
-│                                                                     │
-│   faith package: /bible /devotional /sermon /prayer                 │
-│   ─────────────────────────────────────────────────────────────     │
-│   Sigil → POST /api/v1/bible/answer (HMAC signed)                   │
-│         ← compact answer JSON → Discord embed                       │
-└─────────────────────────────────────────────────────────────────────┘
+Sigil Discord bot → HMAC POST /api/v1/bible/answer
+Share URLs: {APP_URL}/share/{8-char-slug}
 ```
 
 ---
@@ -85,15 +41,18 @@
 
 | Layer | Technology | Rationale |
 |---|---|---|
-| **Framework** | Next.js 16 (App Router) | SSR for SEO on public answer pages; Server Actions/Routes keep secrets server-side |
-| **Language** | TypeScript 5 | Full type safety across client and server |
-| **AI** | Anthropic Claude Sonnet 4.5 | Best quality/cost balance; structured JSON output; ~$0.03–0.12/question (pipeline) |
-| **Embeddings** | Anthropic Embeddings API | Question vectorization for RAG similarity search |
-| **Bible Data** | bible-api.com | Free, no API key, public domain (KJV/WEB/ASV), clean JSON |
-| **Database** | Supabase (PostgreSQL + pgvector) | Managed, free tier, RLS built-in, vector similarity search |
-| **Hosting** | Vercel (planned) | Best Next.js DX, free tier, edge functions |
-| **PWA** | Web App Manifest | Installable on mobile without app stores |
-| **Styling** | CSS Modules + CSS custom properties | Zero runtime cost, scoped styles, full design system control |
+| **Framework** | Next.js 16 (App Router) | SSR for SEO; secrets stay server-side |
+| **Language** | TypeScript 5 | Full type safety |
+| **AI answers** | Anthropic Claude | Structured JSON; 6-stage grounded pipeline |
+| **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |
+| **Study companion** | Google Gemini | Optional `/api/bible/study` |
+| **Bible Data (today)** | bible-api.com | Interim public-domain fetch |
+| **Bible Data (target)** | Midvash + OpenScriptures | Offline read/search + lexicon word study |
+| **Database** | Supabase (PostgreSQL + pgvector) | RLS, vectors, auth |
+| **Hosting** | Vercel preferred | Next.js DX; Render also viable |
+| **PWA** | Manifest + icons | Replace placeholder PNGs before launch |
+| **Desktop** | Electron (`apps/desktop`) | Vault/graph shell |
+| **Styling** | CSS Modules + custom properties | Scoped design system |
 
 ---
 
@@ -104,60 +63,31 @@ BibleDesk/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── ask/route.ts              ← POST: main AI endpoint (rate-limited)
-│   │   │   ├── mod/
-│   │   │   │   ├── queue/route.ts        ← GET: pending moderation flags
-│   │   │   │   ├── vote/route.ts         ← POST: submit vote + correction
-│   │   │   │   ├── approve/route.ts      ← POST: promote to canonical answer
-│   │   │   │   └── invite/route.ts       ← POST: invite a new moderator
-│   │   │   └── v1/bible/answer/route.ts  ← POST: Sigil webhook (HMAC auth)
-│   │   │                                   GET:  health check
-│   │   ├── mod/                          ← Moderator dashboard UI (Phase 3)
-│   │   │   ├── page.tsx                  ← Moderation queue view
-│   │   │   └── page.module.css
-│   │   ├── globals.css                   ← Design system tokens + global styles
-│   │   ├── layout.tsx                    ← Root layout (metadata, fonts, PWA)
-│   │   ├── page.tsx                      ← Homepage (client component, interactive)
-│   │   └── page.module.css
-│   │
-│   ├── components/
-│   │   ├── Header/
-│   │   │   ├── Header.tsx                ← Sticky glass nav
-│   │   │   └── Header.module.css
-│   │   ├── SearchBar/
-│   │   │   ├── SearchBar.tsx             ← Question input, translation selector, examples
-│   │   │   └── SearchBar.module.css
-│   │   ├── DimensionPanel/
-│   │   │   ├── DimensionPanel.tsx        ← 5-tab answer display
-│   │   │   └── DimensionPanel.module.css
-│   │   └── LoadingState/
-│   │       ├── LoadingState.tsx          ← Skeleton + error states
-│   │       └── LoadingState.module.css
-│   │
+│   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited)
+│   │   │   ├── ask/stream/route.ts       ← SSE streaming ask
+│   │   │   ├── bible/{chapter,search,study}/
+│   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|sermons/
+│   │   │   ├── export/obsidian/
+│   │   │   ├── mod/{queue,vote,approve,invite}/
+│   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
+│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|sermons/
+│   │   ├── bookmarks|history|graph|share/[slug]|mod|login/
+│   │   ├── page.tsx                      ← Homepage (Bible-first + assistant)
+│   │   ├── layout.tsx · globals.css · robots.ts · sitemap.ts
+│   ├── components/                       ← Header, SearchBar, DimensionPanel,
+│   │                                       GraphView, StreamingProgress, …
+│   ├── hooks/                            ← useStreamingAsk, useBookmark
 │   ├── lib/
-│   │   ├── claude.ts                     ← Anthropic client — calls pipeline (SERVER ONLY)
-│   │   ├── pipeline.ts                   ← 6-stage answer orchestrator (Phase 2)
-│   │   ├── rag.ts                        ← Embedding generation + vector search (Phase 2)
-│   │   ├── moderation.ts                 ← Flag detection, vote logic, canonical store (Phase 3)
-│   │   ├── bible.ts                      ← bible-api.com client (Stage 2 of pipeline)
-│   │   ├── supabase.ts                   ← Lazy-init DB client (server + browser)
-│   │   └── rate-limit.ts                 ← IP-based rate limiting (15/hr)
-│   │
+│   │   ├── bible.ts                      ← bible-api.com (interim)
+│   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
+│   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
+│   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
 │   └── types/
-│       └── index.ts                      ← Shared TypeScript types
-│
-├── supabase/
-│   └── schema.sql                        ← Run in Supabase SQL editor
-│
-├── public/
-│   └── manifest.json                     ← PWA manifest
-│
-├── AGENTS.md                             ← AI agent rules (this project)
-├── ARCHITECTURE.md                       ← This file
-├── README.md                             ← User-facing docs
-├── TODO.md                               ← Current work state
-├── .env.example                          ← All env vars documented
-└── next.config.ts                        ← Next.js config
+├── apps/desktop/                         ← Electron shell
+├── supabase/                             ← schema.sql → schema-v4.sql (+ rpc.sql)
+├── public/                               ← manifest + icons
+├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
+└── next.config.ts
 ```
 
 ---
@@ -178,7 +108,7 @@ SearchBar.tsx (client)
 src/app/api/ask/route.ts (server)
   1. Parse + sanitize question
   2. Get client IP → checkRateLimit() → 429 if exceeded
-  3. Generate question embedding (Anthropic)
+  3. Generate question embedding (OpenAI text-embedding-3-small)
   4. Vector search canonical_answers (pgvector cosine similarity)
      ├── Exact match  → return canonical instantly (no Claude call)
      ├── Close match  → collect top 3 as RAG context
@@ -594,14 +524,29 @@ Sigil also receives **moderator notifications** when a flagged answer enters the
 
 ## 13. Phase Roadmap
 
-| Phase | Scope | Status |
+Aligned with [TODO.md](TODO.md) and [README.md](README.md). Older “Phase 1–5 AI-first” labels are retired.
+
+| Stage | Scope | Status |
 |---|---|---|
-| **Phase 1** | Basic AI answer — 5 dimensions, rate limiting, Supabase storage, Sigil integration | ✅ Complete |
-| **Phase 2** | 6-stage pipeline + real verse lookup via bible-api.com + RAG infrastructure (embeddings + pgvector) | 🔨 In Progress |
-| **Phase 3** | Moderation system — invite-only auth, flag detection, voting UI at `/mod`, canonical answer store | 📋 Specced |
-| **Phase 4** | RAG fully active; Sigil moderator notifications; answer share pages at `/answer/:slug` | 📋 Planned |
-| **Phase 5** | Fine-tuning consideration once 1000+ canonical answers exist; SaaS tier evaluation | 🔭 Future |
+| **0 — Local Bible foundation** | Module format, Midvash/public-domain ingest, local read/search/compare | 🔨 **Active** |
+| **1 — Study tools** | Notes, highlights, bookmarks, plans (local-first + sync) | ◐ Partial (UI exists; not module-backed) |
+| **2 — Original language** | OpenScriptures + Strong’s data, token word study | ☐ Not started (Gemini placeholder today) |
+| **3 — Offline + sync** | Content packs, offline personal data, conflict rules | ☐ Not started |
+| **4 — AI assistant** | Passage-grounded assistant on local text + lexicon | ◐ Pipeline/RAG/streaming exist; needs re-grounding |
+| **5 — Platform** | Share, mod, MCP, Sigil, church tools, SaaS | ◐ Prototyped in-repo; polish after foundation |
+
+### Built ahead of Stage 0 (keep)
+
+- 6-stage pipeline, streaming ask, rate limits, RAG, share `/share/[slug]`
+- `/bible` UI, graph, MCP, history, prayer, sermons, catechism/creeds/memory/plans
+- Moderation APIs + `/mod`, login wiring, Electron desktop
+
+### Explicit non-goals until Stage 0 exits
+
+- Marketing “offline Strong’s” or Midvash modules
+- Treating bible-api.com as permanent architecture
+- SaaS monetization before foundation + deploy smoke tests
 
 ---
 
-*Architecture maintained by ShadowWalkerNC · Updated: 2026-06-27*
+*Architecture maintained by ShadowWalkerNC · Updated: 2026-08-09*

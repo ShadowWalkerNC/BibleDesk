@@ -1,182 +1,146 @@
 # BibleDesk — TODO
 
-> **Current phase:** Phase 2 — Knowledge Graph + RAG pipeline live
-> **Last updated:** 2026-06-28
-> **Session:** MCP server + /history page + header nav complete
+> **Current phase:** Phase 0 — Local-first Bible foundation  
+> **Last updated:** 2026-08-09  
+> **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
 
-## 🔴 Known Gaps (fix before going live)
+## Status Snapshot
 
-- [x] **Wire graph writer** — `writeGraphFromAnswer` already imported + called in `saveAnswer()` ✔
-- [x] **`openai` in package.json** — `"openai": "^4.100.0"` already present ✔
-- [x] **`GRAPH_WRITE_SECRET` in .env.example** — already documented ✔
-- [x] **Add `ANTHROPIC_API_KEY` + `OPENAI_API_KEY` to .env.example** — added 2026-06-28 ✔
-- [ ] **Apply schema-v3** — paste `supabase/schema-v3.sql` into Supabase SQL editor (after schema-v2)
-- [ ] **Set all env vars** — fill `.env.local` from `.env.example` (ANTHROPIC_API_KEY, OPENAI_API_KEY, Supabase keys, GRAPH_WRITE_SECRET, IP_HASH_SALT)
+| Area | Reality |
+|---|---|
+| Product direction | Bible-first study platform; AI is an assistant layer |
+| Codebase | Large feature surface already shipped in-repo (reader, AI pipeline, church tools) |
+| Bible data | Still depends on **bible-api.com** (online). Local Midvash/OpenScriptures corpus **not** built |
+| Original language | Reader “Strong’s / commentary” is **AI-assisted** (Gemini), not lexicon-backed offline data |
+| Deploy | **Not live** — Supabase schemas + env vars + host still need production setup |
+| Docs | Aligned as of 2026-08-09 (this file / README / ARCHITECTURE / AGENTS) |
 
----
-
-## 🟡 Deploy Blockers (must do before first public URL)
-
-- [ ] **Create Supabase project** — run `supabase/schema.sql` then `supabase/schema-v3.sql` in SQL editor
-- [ ] **Set environment variables** — copy `.env.example` → `.env.local`, fill all values
-- [ ] **Generate IP hash salt** — `openssl rand -hex 16` → `IP_HASH_SALT`
-- [ ] **Generate secrets** — `openssl rand -hex 32` → `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, and `MCP_SECRET`
-- [ ] **Deploy to Render** — Web Service, Node runtime, build: `npm install && npm run build`, start: `npm run start`
-- [ ] **Set `NEXT_PUBLIC_APP_URL`** — to production Render URL
-- [ ] **Upgrade Supabase to Pro** ($25/mo) — prevents project pause after 7 days inactivity
-- [ ] **Verify build passes** on Render with real env vars
-- [ ] **Test rate limiting** — confirm 429 fires after 15 requests/hour
-- [ ] **Test RAG pipeline** — ask a question twice, confirm second hit returns `X-RAG-Hit: exact`
-- [ ] **Test graph population** — after first answer, confirm rows appear in `graph_nodes` + `graph_edges`
-- [ ] **Test share links** — confirm `/share/[slug]` renders answer + OG preview on Discord/iMessage
-- [ ] **Test MCP server** — `GET /api/mcp` returns tool manifest; `POST` with `tools/call` executes `get_verse`
+**GitHub hygiene:** Close issue [#1 REPO RESET](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) — it describes an empty stub from 2026-06-15 and is obsolete.
 
 ---
 
-## ✅ Completed (2026-06-28)
+## 🔴 Deploy Blockers (before first public URL)
 
-### Steps 1–6 — Core infrastructure
-- [x] `supabase/schema-v3.sql` — `graph_nodes` + `graph_edges` tables, RLS, `get_node_subgraph` RPC
-- [x] `src/lib/graph.ts` — 6 typed functions: upsertNode, upsertEdge, writeGraphFromAnswer, getFullGraph, getSubgraph, getNodeByKey
-- [x] `src/app/api/graph/route.ts` — GET (full/subgraph) + POST (secret-protected write)
-- [x] `src/components/GraphView/` — D3 force-directed viewer, zoom/pan, drag nodes, click-to-inspect, lazy D3 import
-- [x] `src/app/graph/page.tsx` — /graph explorer page with concept focus + drill-in
-- [x] `src/app/api/export/obsidian/route.ts` — Obsidian vault .zip export, zero external deps, PKZIP encoder
-- [x] `apps/desktop/` — Electron wrapper: vault IPC (pick/read/write/reveal), graphify rebuild, sync indicator, DesktopShell top bar
-- [x] Root `package.json` — workspaces + d3 + openai + desktop:dev / desktop:dist scripts
-- [x] `.env.example` — all env vars documented with generation instructions
-
-### Enhancements
-- [x] **Shareable answer links** — `/share/[slug]` SSR page with OG metadata, permalink badge, 🔗 Copy link button
-- [x] **`shareSlug` in API response** — `AskResponse.shareSlug` added to types + `/api/ask` returns it
-- [x] **`/graph` in Header nav** — active route highlight with gold underline via `usePathname`
-- [x] **HTTP MCP server** — `/api/mcp` JSON-RPC 2.0, `tools/list` + `tools/call`, 6 tools: `get_verse`, `search_scripture`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`; optional `MCP_SECRET` bearer auth; GET health check; Claude Desktop setup in README
-- [x] **Answer history page** — `/history` with search, confidence filter, skeleton loading, pagination (20/page), View Answer + ↺ Re-ask actions
-- [x] **`GET /api/history`** — paginated Supabase query, `ilike` search, confidence filter, `Content-Range` total count
-- [x] **History link in Header nav** — 📜 History added to `NAV_LINKS`, active-route highlight included
+- [ ] Create Supabase project
+- [ ] Apply schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` (+ `rpc.sql` if needed)
+- [ ] Copy `.env.example` → `.env.local` and fill all required keys
+- [ ] Generate secrets: `IP_HASH_SALT`, `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`
+- [ ] Deploy (Vercel preferred for Next.js; Render also documented historically)
+- [ ] Set `NEXT_PUBLIC_APP_URL` to the production URL
+- [ ] Verify build with real env vars
+- [ ] Smoke tests:
+  - [ ] Rate limit returns 429 after 15/hour/IP
+  - [ ] RAG: second similar ask returns `X-RAG-Hit: exact` (or stream equivalent)
+  - [ ] Graph rows appear in `graph_nodes` / `graph_edges` after an answer
+  - [ ] `/share/[slug]` renders + OG preview
+  - [ ] `GET /api/mcp` returns tool manifest; `POST tools/call` works for `get_verse`
 
 ---
 
-## 🛠 Custom MCP Tools (to build)
+## Phase 0 — Local-first Bible foundation (ACTIVE)
 
-### Bible lookup
-- [x] `get_verse(reference, translation)` — fetch a specific verse ✔
-- [x] `search_scripture(query, translation)` — full-text search across verses ✔
-- [ ] `get_cross_references(reference)` — return known cross-references for a passage
+> Goal: App remains useful if AI is unavailable. Scripture reading must not require a live third-party verse API.
 
-### Graph tools
-- [x] `get_concept_subgraph(node_key)` — 1-hop graph around any concept (wraps /api/graph) ✔
-- [ ] `find_related_concepts(question)` — embed question, return nearest graph nodes via pgvector
-- [ ] `add_graph_node(label, category, description)` — manually inject a node
+### Stage 0A — Data modules
+- [ ] Define versioned Bible module package format
+- [ ] Ingest Midvash / public-domain corpora (KJV, ASV, WEB minimum)
+- [ ] Normalize OSIS identifiers + canon ordering
+- [ ] Ship installable static modules (or bundled default set)
 
-### RAG / knowledge tools
-- [ ] `search_canonical_answers(question)` — surface approved moderator answers
-- [ ] `store_canonical_answer(question, answer)` — add approved answer to vector store
+### Stage 0B — Reader + search (local)
+- [ ] Local chapter/verse read path (no bible-api.com for installed modules)
+- [ ] Local full-text search across installed translations
+- [ ] Translation switcher backed by installed modules
+- [ ] Side-by-side compare using local text
 
-### Study tools
-- [x] `get_answer_history(limit)` — return recent BibleDesk answers from Supabase ✔
-- [ ] `export_vault_zip()` — trigger Obsidian export, return download URL
-- [x] `get_dimension(answer_id, dimension)` — pull one dimension from a stored answer ✔
+### Stage 0C — Original language (structured data)
+- [ ] Integrate OpenScriptures Hebrew Bible + Strong’s dictionaries
+- [ ] Token-level word study (lemma, gloss, morphology) from data — not AI guesses
+- [ ] Keep Gemini/Claude study as optional assistant overlay only
 
-### MCP server implementation options
-- [x] **Next.js HTTP MCP server** — `/api/mcp/route.ts` exposing tools as JSON-RPC (works on Render) ✔
-- [ ] **Local stdio MCP server** — `apps/desktop/mcp/server.js` for Electron app (no network needed)
+### Stage 0D — Personal study (local-first)
+- [x] Verse notes (localStorage in `/bible`)
+- [x] Color highlights (localStorage in `/bible`)
+- [x] Bookmarks API + `/bookmarks` page (Supabase; needs auth hardening)
+- [ ] Offline-capable notes / highlights / bookmarks with later sync
+- [ ] Verse collections
+- [ ] Reading progress sync (plans UI exists with built-in plan data)
 
----
-
-## 🎨 Customizations & Enhancements
-
-### High value, low effort
-- [x] **Shareable answer links** — `/share/[slug]` ✔
-- [x] **Link /graph in Header nav** — ✔
-- [x] **Answer history page** — `/history` listing past questions with search/filter ✔
-- [x] **Translation bible switcher UI** — translation selector pills present in SearchBar
-- [x] **Rate limit remaining in UI** — `X-RateLimit-Remaining` header returned by /api/ask, not shown (future task)
-- [x] **Toast on clipboard copy** — toast hook triggers feedback when link/text is copied
-- [x] **PWA icons** — `icon-192.png` and `icon-512.png` placeholders created in `/public` to prevent 404s
-- [x] **Generate secrets** — cryptographically secure random keys created for local setup
-
-### Medium effort
-- [ ] **Streaming answers** — switch /api/ask to `ReadableStream` so answer appears word-by-word
-- [ ] **Bookmarks** — save favourite answers to localStorage or Supabase `bookmarks` table
-- [ ] **Dark/light mode toggle** — design system uses CSS vars, single class swap on `<html>`
-- [x] **`robots.txt` + `sitemap.xml`** — SEO dynamic routes created
-- [ ] **User accounts** — Supabase Auth (Google/email) to tie answers, bookmarks, graph to a user
-- [ ] **Moderation dashboard UI** — proper `/mod` frontend (route exists, no UI)
-- [ ] **Mobile PWA** — `next-pwa` wrapper + manifest for iOS/Android install
-- [ ] **Devotional mode** — daily verse + auto-generated 5-dimension study note via Render cron
-- [x] **Electron desktop icon** — public/icon.png created in apps/desktop/public/icon.png to fix electron builder error
+**Exit criteria:** Install BibleDesk → read + search Scripture offline without bible-api.com.
 
 ---
 
-## Phase 2 — Bible Reader
+## Already Built (do not re-build)
 
-> **Goal:** Full e-Sword-style Bible reading experience in the browser
-> **Estimated effort:** 4–6 weeks
+### AI study core
+- [x] Question input + translation selector (`SearchBar`)
+- [x] 5-dimension answer display (`DimensionPanel`)
+- [x] 6-stage pipeline (`pipeline.ts`) + Claude client
+- [x] Streaming ask (`/api/ask/stream` + `useStreamingAsk`)
+- [x] Rate limiting (15/hour/IP)
+- [x] RAG embeddings via OpenAI `text-embedding-3-small` (`rag.ts`)
+- [x] Answer persistence (Supabase)
+- [x] Share pages (`/share/[slug]`) + OG metadata
+- [x] Rate limit remaining UI (`RateLimitBar`)
+- [x] Clipboard toast feedback
 
-- [x] `/bible` — chapter/verse navigation (book → chapter → verse)
-- [x] Side-by-side translation comparison (WEB vs KJV)
-- [x] Cross-reference panel (links between related passages)
-- [x] Strong's concordance — click a word or view inline tags → see Hebrew/Greek definition
-- [x] Concordance keyword search — lookup words or Strong's numbers across the Bible
-- [x] Classic commentaries — Matthew Henry, Adam Clarke (AI-generated commentaries)
-- [x] Personal notes per verse (saved to local storage)
-- [ ] Personal highlights + bookmarks (requires auth)
-- [ ] Reading plans (personal + group)
+### Bible / study surfaces (online / hybrid today)
+- [x] `/bible` reader UI (chapter nav, compare, notes, highlights, audio hooks)
+- [x] AI study companion for selected verse (`/api/bible/study` via Gemini)
+- [x] `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
+- [x] PWA manifest + icon placeholders (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`)
+- [x] `robots.ts` + `sitemap.ts`
 
----
+### Knowledge graph + desktop
+- [x] `schema-v3` graph tables + `src/lib/graph.ts`
+- [x] `/api/graph` + `/graph` D3 explorer
+- [x] Obsidian zip export (`/api/export/obsidian`)
+- [x] Electron desktop wrapper (`apps/desktop/`) + `public/icon.png`
 
-## Phase 3 — Church Tools & Auth
+### History, MCP, moderation
+- [x] `/history` + `GET /api/history`
+- [x] HTTP MCP server (`/api/mcp`) — `get_verse`, `search_scripture`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`
+- [x] Moderation APIs + `/mod` UI
+- [x] Login / Supabase Auth wiring (`/login`)
 
-> **Goal:** Full church/ministry platform with accounts and team features
-> **Estimated effort:** 4–6 weeks
-
-- [x] Supabase Auth — email/password + Google OAuth (Magic Link support added)
-- [x] User profiles (name, church, denomination)
-- [ ] Saved question history (requires auth)
-- [x] Prayer request board — submit + browse open requests
-- [x] Prayer request → Discord (via Sigil `/prayer` webhook)
-- [x] Sermon notes workspace — markdown outline, Bible verse sidebar link inserter
-- [x] Sermon notes → Discord (via Sigil `/sermon` webhook)
-- [ ] Youth group view — simplified UI mode
-- [ ] Church admin dashboard — manage team members
-
----
-
-## Phase 4 — Full Sigil/Discord Integration
-
-> **Goal:** BibleDesk and Sigil work as a unified church platform
-> **Estimated effort:** 2–4 weeks
-
-- [ ] Upgrade Sigil `faith` package — `/bible` calls BibleDesk AI endpoint
-- [ ] Prayer request sync — Discord prayer → BibleDesk DB + vice versa
-- [ ] Sermon publish flow — BibleDesk → Discord channel post
-- [ ] Devotional scheduler — daily auto-post using BibleDesk content
-- [ ] Discord slash command for question shortcut (`/study <question>`)
+### Church tools
+- [x] Prayer board + atlas (`/prayer`, `/api/prayer`)
+- [x] Sermon prep workspace (`/sermons`, `/api/sermons`)
+- [x] schema-v4 profiles / verse_highlights / verse_notes (SQL ready; apply in Supabase)
 
 ---
 
-## Phase 5 — SaaS / Monetization
+## Next After Phase 0
 
-> **Goal:** Sustainable freemium platform with church packages
-> **Estimated effort:** 4–6 weeks
+### MCP gaps
+- [ ] `get_cross_references(reference)`
+- [ ] `find_related_concepts(question)` — pgvector nearest graph nodes
+- [ ] `add_graph_node(label, category, description)`
+- [ ] `search_canonical_answers` / `store_canonical_answer`
+- [ ] `export_vault_zip()` → download URL
+- [ ] Local stdio MCP for Electron (`apps/desktop/mcp/server.js`)
 
-- [ ] Stripe integration — subscription management
-- [ ] Free tier: 15 questions/day (anonymous or logged in)
-- [ ] Personal tier ($5/mo): unlimited AI questions + history + notes
-- [ ] Church package ($XX/mo): team seats + admin + Discord + sermon tools
-- [ ] Usage dashboard — questions used, billing, plan management
-- [ ] Invoicing for church accounts
+### Platform
+- [ ] Auth-scoped answer history
+- [ ] Youth group simplified UI
+- [ ] Church admin dashboard
+- [ ] Deep Sigil integration (faith package calls BibleDesk; prayer/sermon sync; `/study` slash command)
+- [ ] Stripe freemium tiers
+- [ ] Dark/light mode toggle
+- [ ] Replace AI Strong’s path with lexicon data (Phase 0C) then demote Gemini study to assistant-only
 
 ---
 
-## Tech Debt & Known Issues
+## Tech Debt (accurate)
 
-- [ ] No Electron desktop icon (`apps/desktop/public/icon.png` missing)
-- [ ] Turbopack root warning — suppressed in `next.config.ts`, may resurface after Node upgrade
-- [ ] No PWA icons yet — `icon-192.png` 404 in dev logs
+- [ ] PWA icons are **placeholder** 70-byte PNGs — replace with real designed assets
+- [ ] Electron icon is a placeholder — replace before desktop release
+- [ ] Turbopack root warning suppressed in `next.config.ts` — may resurface
+- [ ] Homepage / docs previously AI-first — product copy reoriented 2026-08-09; keep Bible-first
+- [ ] Strong’s / commentary in `/bible` must not be marketed as offline lexicon until Phase 0C ships
+- [ ] Footer and marketing must not claim API.Bible (we use bible-api.com + future local modules)
 
 ---
 
@@ -185,21 +149,17 @@
 | Date | Decision | Rationale |
 |---|---|---|
 | 2026-06-27 | Next.js over Vite SPA | SSR needed for SEO on public answer pages |
-| 2026-06-27 | bible-api.com over API.Bible | Free, no key, simpler — right for Phase 1 |
+| 2026-06-27 | bible-api.com over API.Bible | Free, no key — interim only until local modules |
 | 2026-06-27 | Claude Sonnet 4.5 | Best quality/cost for structured JSON answers |
-| 2026-06-27 | Anonymous-first | Auth adds scope — ship MVP first, add auth in Phase 3 |
-| 2026-06-27 | CSS Modules over Tailwind | Full design system control, no runtime overhead |
-| 2026-06-27 | Lazy-init Supabase client | Prevents build-time failures when env vars not set |
-| 2026-06-27 | HMAC over Bearer token for Sigil | Matches existing Sigil webhook pattern, tamper-proof |
-| 2026-06-28 | pgvector RAG via OpenAI embeddings | Anthropic has no embeddings API; text-embedding-3-small is standard |
-| 2026-06-28 | Zero-dep PKZIP for Obsidian export | No extra npm packages; Node.js zlib built-in sufficient |
-| 2026-06-28 | Render + Supabase Pro stack | Render Web Service ($7) + Supabase Pro ($25) = always-on with pgvector |
-| 2026-06-28 | Electron contextBridge IPC | Security best practice; no nodeIntegration in renderer |
-| 2026-06-28 | shareSlug from UUID prefix | Slug computed client-side from answer.id — no extra DB read needed |
-| 2026-06-28 | usePathname for active nav | Header converted to client component for route-aware highlighting |
-| 2026-06-28 | HTTP MCP over stdio | Render hosting makes HTTP natural; mcp-remote bridges to Claude Desktop |
-| 2026-06-28 | Content-Range for history total | Single Supabase REST request returns both rows + total count via Prefer: count=exact |
+| 2026-06-27 | CSS Modules over Tailwind | Full design system control |
+| 2026-06-27 | Lazy-init Supabase client | Prevents build-time failures when env vars missing |
+| 2026-06-27 | HMAC for Sigil | Matches Sigil webhook pattern |
+| 2026-06-28 | OpenAI embeddings for pgvector RAG | Anthropic has no embeddings API |
+| 2026-06-28 | Zero-dep PKZIP for Obsidian export | No extra npm packages |
+| 2026-06-28 | HTTP MCP over stdio (web) | Natural for hosted Next.js; mcp-remote bridges Claude Desktop |
+| 2026-08-09 | Phase 0 is active north star | Bible-first / local-first; AI stays valuable but secondary |
+| 2026-08-09 | Keep existing AI/church features | Do not delete; re-home under assistant/platform layers after foundation |
 
 ---
 
-*Updated: 2026-06-28 | See [ARCHITECTURE.md](ARCHITECTURE.md) for system design details*
+*Updated: 2026-08-09 | See [ARCHITECTURE.md](ARCHITECTURE.md) · [README.md](README.md)*
