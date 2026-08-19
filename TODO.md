@@ -44,16 +44,16 @@
 > Goal: App remains useful if AI is unavailable. Scripture reading must not require a live third-party verse API.
 
 ### Stage 0A — Data modules
-- [ ] Define versioned Bible module package format
-- [ ] Ingest Midvash / public-domain corpora (KJV, ASV, WEB minimum)
-- [ ] Normalize OSIS identifiers + canon ordering
-- [ ] Ship installable static modules (or bundled default set)
+- [x] Define versioned Bible module package format
+- [x] Ingest Midvash / public-domain corpora (KJV, ASV, WEB, BBE, Darby, YLT)
+- [x] Normalize OSIS identifiers + canon ordering
+- [x] Ship installable static modules (or bundled default set)
 
 ### Stage 0B — Reader + search (local)
-- [ ] Local chapter/verse read path (no bible-api.com for installed modules)
-- [ ] Local full-text search across installed translations
-- [ ] Translation switcher backed by installed modules
-- [ ] Side-by-side compare using local text
+- [x] Local chapter/verse read path (no bible-api.com for installed modules)
+- [x] Local full-text search across installed translations
+- [x] Translation switcher backed by installed modules
+- [x] Side-by-side compare using local text
 
 ### Stage 0C — Original language (structured data)
 - [ ] Integrate OpenScriptures Hebrew Bible + Strong’s dictionaries

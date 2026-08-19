@@ -163,7 +163,7 @@ export default function HomePage() {
             <Link href="/plans">Plans</Link>
             <a href="https://github.com/ShadowWalkerNC/BibleDesk" target="_blank" rel="noopener noreferrer">GitHub</a>
           </nav>
-          <p>Built for serious Bible study · Public-domain texts via bible-api.com (local modules coming)</p>
+          <p>Built for serious Bible study · Bundled public-domain texts (KJV, ASV, WEB, BBE, Darby, YLT)</p>
           <p className={styles.footerSub}>BibleDesk is not affiliated with any denomination or publisher.</p>
         </div>
       </footer>

@@ -281,12 +281,13 @@ export default function BibleReaderPage() {
       try {
         const ref = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
         const promises = TRANSLATIONS.map(async (t) => {
-          const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${t.id}`);
+          const res = await fetch(`/api/bible/chapter?book=${encodeURIComponent(verse.book_name)}&chapter=${verse.chapter}&translation=${t.id}`);
           if (!res.ok) return { translation: t.name, text: 'Unavailable' };
           const data = await res.json();
+          const targetVerse = data.passage?.verses?.find((v: BibleVerse) => v.verse === verse.verse);
           return {
             translation: t.name,
-            text: data.text?.trim() || 'Verse not found in this translation.',
+            text: targetVerse?.text?.trim() || 'Verse not found in this translation.',
           };
         });
 

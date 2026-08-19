@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TRANSLATIONS, type TranslationId } from '@/types';
+import { searchLocalBible } from '@/lib/bible-local';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,24 +17,46 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const slug = (TRANSLATIONS.some(t => t.id === translation) ? translation : 'web') as TranslationId;
-  const encoded = encodeURIComponent(query.trim());
-  const url = `https://bible-api.com/${encoded}?translation=${slug}`;
+  const slug = (TRANSLATIONS.some((t) => t.id === translation) ? translation : 'web') as TranslationId;
+  const trimmed = query.trim();
 
   try {
+    // 1. Try local full-text search first
+    const localResult = searchLocalBible(trimmed, slug, 30);
+    if (localResult && localResult.results.length > 0) {
+      return NextResponse.json({
+        success: true,
+        query: trimmed,
+        translation: slug,
+        results: localResult.results,
+        total: localResult.total,
+        source: 'local',
+      });
+    }
+
+    // 2. Fallback to bible-api.com if no local matches found
+    const encoded = encodeURIComponent(trimmed);
+    const url = `https://bible-api.com/${encoded}?translation=${slug}`;
+
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) {
-      return NextResponse.json({ success: false, error: `Search failed (HTTP ${res.status})` }, { status: res.status });
+      return NextResponse.json({
+        success: true,
+        query: trimmed,
+        translation: slug,
+        results: [],
+        total: 0,
+        source: 'local',
+      });
     }
 
     const data = await res.json();
     if (!data.verses || data.verses.length === 0) {
-      return NextResponse.json({ success: true, results: [], total: 0 });
+      return NextResponse.json({ success: true, results: [], total: 0, source: 'remote' });
     }
 
-    // Format matches to include full reference and text
     const results = (data.verses as Array<{ book_name: string; chapter: number; verse: number; text: string }>)
-      .slice(0, 30) // limit to top 30 matches to keep response size light
+      .slice(0, 30)
       .map((v) => ({
         book: v.book_name,
         chapter: v.chapter,
@@ -44,13 +67,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      query: query.trim(),
+      query: trimmed,
       translation: slug,
       results,
       total: data.verses.length,
+      source: 'remote',
     });
   } catch (err: any) {
     console.error('[api/bible/search] Error:', err);
-    return NextResponse.json({ success: false, error: 'Connection to search server timed out.' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Search failed.' }, { status: 500 });
   }
 }

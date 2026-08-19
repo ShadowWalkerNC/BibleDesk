@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getLocalChapter } from '@/lib/bible-local';
 import { fetchPassage } from '@/lib/bible';
 import { getBookChapters } from '@/lib/books';
 import type { TranslationId } from '@/types';
@@ -44,6 +45,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // 1. Try instant local chapter lookup
+    const localPassage = getLocalChapter(book, chapter, translation);
+    if (localPassage) {
+      return NextResponse.json({
+        success: true,
+        passage: localPassage,
+        maxChapters,
+        source: 'local',
+      });
+    }
+
+    // 2. Fallback to fetchPassage (remote if needed)
     const reference = `${book} ${chapter}`;
     const result = await fetchPassage(reference, translation);
 
@@ -58,6 +71,7 @@ export async function GET(req: NextRequest) {
       success: true,
       passage: result.passage,
       maxChapters,
+      source: 'remote',
     });
   } catch (err) {
     console.error('[bible/chapter] API Error:', err);

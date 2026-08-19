@@ -1,33 +1,8 @@
-/**
- * /api/mcp — BibleDesk HTTP MCP Server
- *
- * Implements the Model Context Protocol (MCP) over HTTP/JSON-RPC 2.0.
- * Usable from Claude Desktop via `mcp-remote`, Cursor, or any MCP client.
- *
- * Supported methods:
- *   tools/list  — returns the tool manifest
- *   tools/call  — executes a tool by name
- *
- * Authentication:
- *   Optional. Set MCP_SECRET in env. If set, requests must include:
- *     Authorization: Bearer <MCP_SECRET>
- *   If MCP_SECRET is unset, the endpoint is open (dev / internal use).
- *
- * Available tools:
- *   get_verse              — fetch a specific Bible verse
- *   search_scripture       — search verses by keyword
- *   get_concept_subgraph   — 1-hop theology graph around a concept
- *   get_answer_history     — recent BibleDesk answers from Supabase
- *   get_dimension          — one dimension from a stored answer
- *   ask_bible_question     — run the full 6-stage pipeline
- *
- * SERVER ONLY — all API keys stay server-side.
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPassage } from '@/lib/bible';
 import { getFullGraph, getSubgraph } from '@/lib/graph';
 import { generateBibleAnswer } from '@/lib/claude';
+import { searchLocalBible } from '@/lib/bible-local';
 import { TRANSLATIONS, type TranslationId } from '@/types';
 
 export const runtime = 'nodejs';
@@ -58,7 +33,7 @@ const VALID_TRANSLATIONS = TRANSLATIONS.map((t) => t.id);
 const TOOL_MANIFEST = [
   {
     name: 'get_verse',
-    description: 'Fetch the text of a specific Bible verse or passage from bible-api.com. Returns the verse text, reference, and translation used.',
+    description: 'Fetch the text of a specific Bible verse or passage from local Scripture modules. Returns the verse text, reference, and translation used.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -77,7 +52,7 @@ const TOOL_MANIFEST = [
   },
   {
     name: 'search_scripture',
-    description: 'Search for Bible verses containing a keyword or phrase. Returns up to 10 matching verses with their references and text.',
+    description: 'Search for Bible verses containing a keyword or phrase across local Scripture modules. Returns matching verses with their references and text.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -219,19 +194,32 @@ async function handleSearchScripture(args: Record<string, unknown>) {
     ? args.translation
     : 'web') as TranslationId;
 
-  // bible-api.com supports passage search by keyword phrase
+  // Search local modules first
+  const localRes = searchLocalBible(query, translation, 10);
+  if (localRes && localRes.results.length > 0) {
+    return {
+      query,
+      translation,
+      results: localRes.results.map((r) => ({
+        reference: r.reference,
+        text: r.text,
+      })),
+      total: localRes.total,
+      source: 'local',
+    };
+  }
+
+  // Fallback to bible-api.com
   const encoded = encodeURIComponent(query);
-  const slug = translation;
-  const url = `https://bible-api.com/${encoded}?translation=${slug}`;
+  const url = `https://bible-api.com/${encoded}?translation=${translation}`;
 
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) return { error: `Search failed (HTTP ${res.status})` };
 
     const data = await res.json();
-    if (!data.verses?.length) return { results: [], query };
+    if (!data.verses?.length) return { results: [], query, total: 0 };
 
-    // Return up to 10 verses
     const results = (data.verses as Array<{ book_name: string; chapter: number; verse: number; text: string }>)
       .slice(0, 10)
       .map((v) => ({
@@ -239,7 +227,7 @@ async function handleSearchScripture(args: Record<string, unknown>) {
         text: v.text.trim(),
       }));
 
-    return { query, translation, results, total: data.verses.length };
+    return { query, translation, results, total: data.verses.length, source: 'remote' };
   } catch {
     return { error: 'Search request failed' };
   }
@@ -258,7 +246,6 @@ async function handleGetConceptSubgraph(args: Record<string, unknown>) {
 
     if (!data) return { error: 'Graph data unavailable — Supabase may not be configured' };
 
-    // Filter to the requested node and its immediate neighbours
     const { nodes, edges } = data;
     const rootNode = nodes.find((n) => n.node_key === nodeKey);
     if (!rootNode) return { error: `Concept node not found: ${nodeKey}`, available_hint: 'Use get_concept_subgraph with an exact concept key from the graph' };
@@ -370,7 +357,6 @@ async function handleAskBibleQuestion(args: Record<string, unknown>) {
 // ─── Route handler ──────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // ─ Auth (optional) ──────────────────────────────────────────────────────
   const secret = process.env.MCP_SECRET;
   if (secret) {
     const auth = req.headers.get('authorization') ?? '';
@@ -382,7 +368,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ─ Parse JSON-RPC ────────────────────────────────────────────────────
   let body: JsonRpcRequest;
   try {
     body = await req.json();
@@ -397,7 +382,6 @@ export async function POST(req: NextRequest) {
   const { id, method, params = {} } = body;
   const args = (params.arguments ?? params) as Record<string, unknown>;
 
-  // ─ Dispatch ──────────────────────────────────────────────────────────────
   try {
     if (method === 'tools/list') {
       return ok(id, { tools: TOOL_MANIFEST });
@@ -418,7 +402,6 @@ export async function POST(req: NextRequest) {
           return err(id, -32601, `Tool not found: ${toolName}`);
       }
 
-      // MCP spec: tool results are wrapped in content array
       return ok(id, {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         isError: typeof result === 'object' && result !== null && 'error' in result,
@@ -433,7 +416,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET — health check + tool list for easy browser inspection
 export async function GET() {
   return NextResponse.json({
     name: 'BibleDesk MCP Server',
