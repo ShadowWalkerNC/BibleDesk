@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchPassage } from '@/lib/bible';
 import { getFullGraph, getSubgraph } from '@/lib/graph';
 import { generateBibleAnswer } from '@/lib/claude';
-import { searchLocalBible } from '@/lib/bible-local';
+import { searchLocalBible, getLocalPassage } from '@/lib/bible-local';
+import { getStrongsDefinition, getCrossReferences } from '@/lib/lexicon';
 import { TRANSLATIONS, type TranslationId } from '@/types';
 
 export const runtime = 'nodejs';
@@ -70,6 +71,39 @@ const TOOL_MANIFEST = [
     },
   },
   {
+    name: 'get_cross_references',
+    description: 'Get curated cross-references from the Treasury of Scripture Knowledge (TSK) for a given verse reference.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        reference: {
+          type: 'string',
+          description: 'The verse reference, e.g. "John 3:16" or "Genesis 1:1"',
+        },
+        translation: {
+          type: 'string',
+          enum: VALID_TRANSLATIONS,
+          description: 'Bible translation to populate verse text for.',
+        },
+      },
+      required: ['reference'],
+    },
+  },
+  {
+    name: 'get_strongs_lexicon',
+    description: 'Retrieve Strong\'s Greek or Hebrew lexicon entry (lemma, pronunciation, definition, KJV occurrences) by Strong\'s number tag (e.g. "G2889", "H7225").',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        strongs_tag: {
+          type: 'string',
+          description: 'Strong\'s number with prefix (e.g. "G2889" for Greek, "H7225" for Hebrew).',
+        },
+      },
+      required: ['strongs_tag'],
+    },
+  },
+  {
     name: 'get_concept_subgraph',
     description: 'Get the 1-hop theology knowledge graph around a concept node. Returns the node and all directly connected nodes and edges from the BibleDesk graph database.',
     inputSchema: {
@@ -121,7 +155,7 @@ const TOOL_MANIFEST = [
   },
   {
     name: 'ask_bible_question',
-    description: 'Run the full BibleDesk 6-stage pipeline on a Bible question. Returns a structured answer with five dimensions: scripture analysis, historical context, original language insights, theological perspectives, and practical application. This is the most powerful tool — use it when a thorough Bible study answer is needed.',
+    description: 'Run the full BibleDesk 6-stage pipeline on a Bible question. Returns a structured answer with five dimensions: scripture analysis, historical context, original language insights, theological perspectives, and practical application.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -194,7 +228,6 @@ async function handleSearchScripture(args: Record<string, unknown>) {
     ? args.translation
     : 'web') as TranslationId;
 
-  // Search local modules first
   const localRes = searchLocalBible(query, translation, 10);
   if (localRes && localRes.results.length > 0) {
     return {
@@ -209,7 +242,6 @@ async function handleSearchScripture(args: Record<string, unknown>) {
     };
   }
 
-  // Fallback to bible-api.com
   const encoded = encodeURIComponent(query);
   const url = `https://bible-api.com/${encoded}?translation=${translation}`;
 
@@ -233,6 +265,36 @@ async function handleSearchScripture(args: Record<string, unknown>) {
   }
 }
 
+async function handleGetCrossReferences(args: Record<string, unknown>) {
+  const reference = String(args.reference ?? '').trim();
+  if (!reference) return { error: 'reference is required' };
+
+  const translation = (VALID_TRANSLATIONS.includes(args.translation as TranslationId)
+    ? args.translation
+    : 'web') as TranslationId;
+
+  const refs = getCrossReferences(reference);
+  const enriched = refs.map((ref) => {
+    const p = getLocalPassage(ref, translation);
+    return {
+      reference: ref,
+      text: p?.text || '',
+    };
+  });
+
+  return { reference, cross_references: enriched, total: enriched.length };
+}
+
+async function handleGetStrongsLexicon(args: Record<string, unknown>) {
+  const tag = String(args.strongs_tag ?? '').trim();
+  if (!tag) return { error: 'strongs_tag is required' };
+
+  const def = getStrongsDefinition(tag);
+  if (!def) return { error: `Strong's entry not found for "${tag}"` };
+
+  return { strongs_tag: tag, definition: def };
+}
+
 async function handleGetConceptSubgraph(args: Record<string, unknown>) {
   const nodeKey = String(args.node_key ?? '').trim().toLowerCase().replace(/\s+/g, '_');
   if (!nodeKey) return { error: 'node_key is required' };
@@ -248,7 +310,7 @@ async function handleGetConceptSubgraph(args: Record<string, unknown>) {
 
     const { nodes, edges } = data;
     const rootNode = nodes.find((n) => n.node_key === nodeKey);
-    if (!rootNode) return { error: `Concept node not found: ${nodeKey}`, available_hint: 'Use get_concept_subgraph with an exact concept key from the graph' };
+    if (!rootNode) return { error: `Concept node not found: ${nodeKey}` };
 
     const rootId = rootNode.id;
     if (!rootId) return { error: 'Root node has no database ID' };
@@ -394,6 +456,8 @@ export async function POST(req: NextRequest) {
       switch (toolName) {
         case 'get_verse':            result = await handleGetVerse(args);            break;
         case 'search_scripture':     result = await handleSearchScripture(args);     break;
+        case 'get_cross_references': result = await handleGetCrossReferences(args);  break;
+        case 'get_strongs_lexicon':  result = await handleGetStrongsLexicon(args);   break;
         case 'get_concept_subgraph': result = await handleGetConceptSubgraph(args);  break;
         case 'get_answer_history':   result = await handleGetAnswerHistory(args);    break;
         case 'get_dimension':        result = await handleGetDimension(args);         break;

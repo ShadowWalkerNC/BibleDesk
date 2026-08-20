@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BibleDesk Companion</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-area">
+        <span class="logo-icon">📖</span>
+        <span class="logo-text">Bible<strong>Desk</strong></span>
+      </div>
+      <div class="settings-area">
+        <select id="translation-select" class="select-box">
+          <option value="web">WEB</option>
+          <option value="kjv">KJV</option>
+          <option value="asv">ASV</option>
+          <option value="bbe">BBE</option>
+          <option value="darby">Darby</option>
+          <option value="ylt">YLT</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Search / Ask Input -->
+    <div class="search-section">
+      <form id="search-form" class="search-form">
+        <input
+          type="text"
+          id="query-input"
+          class="query-input"
+          placeholder="Verse (John 3:16), Strong's (G2889), or topic..."
+          required
+        />
+        <button type="submit" id="submit-btn" class="submit-btn">Study</button>
+      </form>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="scripture">Scripture</button>
+      <button class="tab-btn" data-tab="dimensions">5-D Study</button>
+      <button class="tab-btn" data-tab="crossrefs">Cross-Refs</button>
+      <button class="tab-btn" data-tab="lexicon">Strong's</button>
+    </div>
+
+    <!-- Main Content Panels -->
+    <main class="content-area">
+      <!-- Loading State -->
+      <div id="loading-state" class="state-box hidden">
+        <div class="spinner"></div>
+        <p id="loading-message">Searching the scriptures…</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="error-state" class="state-box error-box hidden">
+        <p id="error-message">Error message</p>
+      </div>
+
+      <!-- Scripture / Passage Panel -->
+      <div id="panel-scripture" class="tab-panel active">
+        <div id="scripture-content" class="scripture-view">
+          <p class="welcome-text">
+            Type a reference (e.g. <em>Romans 8:28-30</em>), search keywords, or highlight any text on a webpage and right-click &quot;Study in BibleDesk&quot;.
+          </p>
+        </div>
+      </div>
+
+      <!-- 5-Dimensions AI Panel -->
+      <div id="panel-dimensions" class="tab-panel">
+        <div id="dimensions-content" class="dimensions-view">
+          <p class="empty-text">Run a question or study to view the 5 grounded theological dimensions.</p>
+        </div>
+      </div>
+
+      <!-- Cross References Panel -->
+      <div id="panel-crossrefs" class="tab-panel">
+        <div id="crossrefs-content" class="crossrefs-view">
+          <p class="empty-text">Enter a verse reference to view related Scripture connections.</p>
+        </div>
+      </div>
+
+      <!-- Strong's Lexicon Panel -->
+      <div id="panel-lexicon" class="tab-panel">
+        <div id="lexicon-content" class="lexicon-view">
+          <p class="empty-text">Enter a Strong's concordance tag (e.g. <em>G2889</em> or <em>H7225</em>) for original Greek/Hebrew definition.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Settings / Server URL -->
+    <footer class="footer">
+      <div class="server-config">
+        <label for="server-url">Server:</label>
+        <input type="text" id="server-url" value="http://localhost:3000" placeholder="https://your-bibledesk.vercel.app" />
+      </div>
+    </footer>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
