@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useTransition } from 'react';
+import { useState, useEffect, useRef, useTransition, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header/Header';
+import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter } from '@/lib/books';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
 import styles from './page.module.css';
@@ -30,7 +32,11 @@ interface AIStudyData {
   practicalApplication: string;
 }
 
-export default function BibleReaderPage() {
+function BibleReaderContent() {
+  const searchParams = useSearchParams();
+  const [isQuickJumpOpen, setIsQuickJumpOpen] = useState(false);
+  const [pendingVerseTarget, setPendingVerseTarget] = useState<number | null>(null);
+
   // Navigation states
   const [selectedBook, setSelectedBook] = useState('John');
   const [selectedChapter, setSelectedChapter] = useState(3);
@@ -59,7 +65,26 @@ export default function BibleReaderPage() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchTotal, setSearchTotal] = useState(0);
-  const [pendingVerseTarget, setPendingVerseTarget] = useState<number | null>(null);
+
+  // Sync URL query params (?book=...&chapter=...&verse=...)
+  useEffect(() => {
+    const bookParam = searchParams.get('book');
+    const chapterParam = searchParams.get('chapter');
+    const verseParam = searchParams.get('verse');
+
+    if (bookParam) {
+      const match = BIBLE_BOOKS.find(b => b.name.toLowerCase() === bookParam.toLowerCase());
+      if (match) setSelectedBook(match.name);
+    }
+    if (chapterParam) {
+      const ch = parseInt(chapterParam, 10);
+      if (!isNaN(ch) && ch > 0) setSelectedChapter(ch);
+    }
+    if (verseParam) {
+      const v = parseInt(verseParam, 10);
+      if (!isNaN(v) && v > 0) setPendingVerseTarget(v);
+    }
+  }, [searchParams]);
 
   // Translation comparison state
   const [comparedVerses, setComparedVerses] = useState<Array<{ translation: string; text: string }>>([]);
@@ -601,6 +626,13 @@ export default function BibleReaderPage() {
           </div>
 
           <div className={styles.navButtons}>
+            <button
+              onClick={() => setIsQuickJumpOpen(true)}
+              className={styles.readerJumpBtn}
+              title="Jump to book, chapter, or verse (Ctrl+K)"
+            >
+              📖 Jump / Browse...
+            </button>
             <button onClick={handlePrev} className={styles.navBtn} aria-label="Previous Chapter">
               ◀ Prev
             </button>
@@ -1058,6 +1090,26 @@ export default function BibleReaderPage() {
 
         </div>
       </main>
+
+      <QuickJumpModal
+        isOpen={isQuickJumpOpen}
+        onClose={() => setIsQuickJumpOpen(false)}
+        onSelect={(book, chapter, verse) => {
+          setSelectedBook(book);
+          setSelectedChapter(chapter);
+          if (verse) {
+            setPendingVerseTarget(verse);
+          }
+        }}
+      />
     </>
+  );
+}
+
+export default function BibleReaderPage() {
+  return (
+    <Suspense fallback={<div className="container" style={{ padding: '2rem', textAlign: 'center' }}>Loading reader…</div>}>
+      <BibleReaderContent />
+    </Suspense>
   );
 }

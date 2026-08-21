@@ -106,3 +106,26 @@ export function getPrevChapter(bookName: string, chapter: number): { book: strin
   }
   return null; // Start of Genesis
 }
+
+export function parseReference(reference: string): {
+  book: string;
+  chapter: number;
+  startVerse?: number;
+  endVerse?: number;
+} | null {
+  const clean = reference.trim();
+  const match = clean.match(/^((?:\d\s+)?[A-Za-z\s]+?)\s+(\d+)(?::(\d+)(?:-(\d+))?)?$/);
+  if (!match) return null;
+
+  const rawBook = match[1].trim();
+  const chapter = parseInt(match[2], 10);
+  const startVerse = match[3] ? parseInt(match[3], 10) : undefined;
+  const endVerse = match[4] ? parseInt(match[4], 10) : undefined;
+
+  return {
+    book: rawBook,
+    chapter,
+    startVerse,
+    endVerse,
+  };
+}

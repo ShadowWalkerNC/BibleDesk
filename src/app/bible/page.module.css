@@ -91,6 +91,31 @@
   transform: translateY(1px);
 }
 
+.readerJumpBtn {
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-400);
+  color: var(--gold-400);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s var(--ease-out);
+}
+
+.readerJumpBtn:hover {
+  background: rgba(181, 137, 19, 0.15);
+  box-shadow: 0 0 12px var(--gold-glow);
+  transform: translateY(-1px);
+}
+
+.readerJumpBtn:active {
+  transform: translateY(0);
+}
+
 /* ─── Split Grid Layout ────────────────────────────────────── */
 
 .splitGrid {

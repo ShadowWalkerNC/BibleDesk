@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getBrowserClient } from '@/lib/supabase';
+import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
@@ -24,6 +25,13 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [isJumpOpen, setIsJumpOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = () => setIsJumpOpen(true);
+    document.addEventListener('bibledesk:open-quick-jump', handleOpen);
+    return () => document.removeEventListener('bibledesk:open-quick-jump', handleOpen);
+  }, []);
 
   useEffect(() => {
     const supabase = getBrowserClient();
@@ -51,16 +59,27 @@ export default function Header() {
   }
 
   return (
-    <header className={styles.header} role="banner">
-      <div className={styles.inner}>
-        <Link href="/" className={styles.logo} aria-label="BibleDesk Home">
-          <div className={styles.logoIcon} aria-hidden="true">✦</div>
-          <span className={styles.logoText}>
-            Bible<span>Desk</span>
-          </span>
-        </Link>
+    <>
+      <header className={styles.header} role="banner">
+        <div className={styles.inner}>
+          <Link href="/" className={styles.logo} aria-label="BibleDesk Home">
+            <div className={styles.logoIcon} aria-hidden="true">✦</div>
+            <span className={styles.logoText}>
+              Bible<span>Desk</span>
+            </span>
+          </Link>
 
-        <nav className={styles.nav} aria-label="Main navigation">
+          <button
+            onClick={() => setIsJumpOpen(true)}
+            className={styles.quickJumpBtn}
+            title="Quick Jump to any book or chapter (Ctrl+K)"
+          >
+            <span className={styles.quickJumpIcon}>🔍</span>
+            <span className={styles.quickJumpText}>Jump to Book / Chapter...</span>
+            <kbd className={styles.quickJumpKbd}>Ctrl K</kbd>
+          </button>
+
+          <nav className={styles.nav} aria-label="Main navigation">
           {NAV_LINKS.map(({ href, label }) => {
             const pathOnly = href.split('#')[0] || '/';
             const isActive = pathOnly === '/'
@@ -97,5 +116,7 @@ export default function Header() {
         </nav>
       </div>
     </header>
+    <QuickJumpModal isOpen={isJumpOpen} onClose={() => setIsJumpOpen(false)} />
+  </>
   );
 }
