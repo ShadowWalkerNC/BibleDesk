@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header/Header';
+import { parseReference } from '@/lib/books';
 import { READING_PLANS, type ReadingPlan } from '@/lib/plansData';
 import styles from './page.module.css';
 
@@ -87,7 +88,10 @@ export default function ReadingPlansPage() {
               {activePlan.days.map((d) => {
                 const isDone = Boolean(completedDays[`${activePlan.id}-day-${d.day}`]);
                 const firstPassage = d.passages[0] || 'John 1';
-                const bookName = firstPassage.split(' ')[0];
+                const parsed = parseReference(firstPassage);
+                const bookName = parsed ? parsed.book : firstPassage.split(' ')[0];
+                const chapterNum = parsed ? parsed.chapter : 1;
+                const linkHref = `/bible?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}${parsed?.startVerse ? `&verse=${parsed.startVerse}` : ''}`;
                 return (
                   <div
                     key={d.day}
@@ -103,11 +107,11 @@ export default function ReadingPlansPage() {
                     <span className={styles.dayNum}>Day {d.day}</span>
                     <span className={styles.dayTitle}>{d.title}</span>
                     <a
-                      href={`/bible?book=${encodeURIComponent(bookName)}`}
+                      href={linkHref}
                       className={styles.readLink}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Read →
+                      Read ({firstPassage}) →
                     </a>
                   </div>
                 );
