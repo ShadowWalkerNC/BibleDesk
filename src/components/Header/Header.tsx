@@ -9,16 +9,12 @@ import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { href: '/bible',       label: 'Bible' },
+  { href: '/bible',       label: 'Study Desk' },
   { href: '/plans',       label: 'Plans' },
   { href: '/daily',       label: 'Daily' },
-  { href: '/#assistant',  label: 'Assistant' },
-  { href: '/catechism',   label: 'Catechism' },
-  { href: '/creeds',      label: 'Creeds' },
-  { href: '/memory',      label: 'Memory' },
-  { href: '/prayer',      label: 'Prayers' },
-  { href: '/sermons',     label: 'Sermons' },
-  { href: '/graph',       label: 'Graph' },
+  { href: '/#assistant',  label: '5D Assistant' },
+  { href: '/sermons',     label: 'Notes & Outlines' },
+  { href: '/prayer',      label: 'Prayer' },
   { href: '/history',     label: 'History' },
 ];
 

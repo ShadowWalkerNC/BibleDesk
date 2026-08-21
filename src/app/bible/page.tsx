@@ -16,11 +16,17 @@ import {
   RotateCcw,
   Languages,
   Church,
-  Heart
+  Heart,
+  Calendar,
+  Sun,
+  Bookmark,
+  Brain,
+  CheckCircle2
 } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
-import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter } from '@/lib/books';
+import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
+import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
 import styles from './page.module.css';
 
@@ -121,14 +127,23 @@ function BibleReaderContent() {
   const readerScrollRef = useRef<HTMLDivElement>(null);
   const [, startTransition] = useTransition();
 
-  // Load verse highlights from localStorage on mount
+  // Left Study Hub state
+  const [hubTab, setHubTab] = useState<'daily' | 'plans' | 'bookmarks'>('daily');
+  const [hubDaily, setHubDaily] = useState<any>(null);
+  const [hubPlansProgress, setHubPlansProgress] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
+    // Fetch daily devotional snippet
+    fetch('/api/daily')
+      .then(res => res.json())
+      .then(data => { if (data.success) setHubDaily(data.dailyVerse); })
+      .catch(() => {});
+
+    // Fetch plans progress
     try {
-      const saved = localStorage.getItem('bibledesk_verse_highlights');
-      if (saved) setHighlights(JSON.parse(saved));
-    } catch (e) {
-      console.error('Failed to load highlights from localStorage', e);
-    }
+      const saved = localStorage.getItem('bibledesk_reading_plans');
+      if (saved) setHubPlansProgress(JSON.parse(saved));
+    } catch {}
   }, []);
 
   const handleSetHighlight = (vKey: string, color: string | null) => {
@@ -661,10 +676,126 @@ function BibleReaderContent() {
           </div>
         </div>
 
-        {/* Reader Layout Split Grid */}
-        <div className={styles.splitGrid}>
+        {/* 3-Column Centralized Study Desk */}
+        <div className={styles.deskGrid}>
           
-          {/* Left Column: Bible Text Reader */}
+          {/* Left Column: Study Hub (Daily, Reading Plans, Bookmarks) */}
+          <div className={styles.leftHubPanel}>
+            <div className={styles.hubNavHeader}>
+              <button
+                className={`${styles.hubTabBtn} ${hubTab === 'daily' ? styles.hubTabBtnActive : ''}`}
+                onClick={() => setHubTab('daily')}
+              >
+                <Sun size={13} />
+                <span>Daily</span>
+              </button>
+              <button
+                className={`${styles.hubTabBtn} ${hubTab === 'plans' ? styles.hubTabBtnActive : ''}`}
+                onClick={() => setHubTab('plans')}
+              >
+                <Calendar size={13} />
+                <span>Plans</span>
+              </button>
+              <button
+                className={`${styles.hubTabBtn} ${hubTab === 'bookmarks' ? styles.hubTabBtnActive : ''}`}
+                onClick={() => setHubTab('bookmarks')}
+              >
+                <Bookmark size={13} />
+                <span>Saved</span>
+              </button>
+            </div>
+
+            <div className={styles.hubContent}>
+              {hubTab === 'daily' && (
+                <div>
+                  <div className={styles.hubSectionTitle}>Today&apos;s Devotional</div>
+                  {hubDaily ? (
+                    <div className={styles.hubDailyCard}>
+                      <p className={`${styles.hubDailyQuote} text-serif`}>&ldquo;{hubDaily.text}&rdquo;</p>
+                      <span className={styles.hubDailyRef}>— {hubDaily.reference} ({hubDaily.translation})</span>
+                      <button
+                        onClick={() => {
+                          const parsed = parseReference(hubDaily.reference);
+                          if (parsed) {
+                            setSelectedBook(parsed.book);
+                            setSelectedChapter(parsed.chapter);
+                            if (parsed.startVerse) setPendingVerseTarget(parsed.startVerse);
+                          }
+                        }}
+                        className={styles.actionBtn}
+                        style={{ marginTop: '0.5rem', alignSelf: 'flex-start' }}
+                      >
+                        Read in Reader →
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="skeleton" style={{ height: '80px' }} />
+                  )}
+                </div>
+              )}
+
+              {hubTab === 'plans' && (
+                <div>
+                  <div className={styles.hubSectionTitle}>Active Reading Schedule</div>
+                  <div className={styles.hubPlansList}>
+                    {READING_PLANS[0].days.slice(0, 7).map((d) => {
+                      const isDone = Boolean(hubPlansProgress[`${READING_PLANS[0].id}-day-${d.day}`]);
+                      const firstPassage = d.passages[0] || 'John 1';
+                      return (
+                        <div
+                          key={d.day}
+                          className={styles.hubPlanItem}
+                          onClick={() => {
+                            const parsed = parseReference(firstPassage);
+                            if (parsed) {
+                              setSelectedBook(parsed.book);
+                              setSelectedChapter(parsed.chapter);
+                              if (parsed.startVerse) setPendingVerseTarget(parsed.startVerse);
+                            }
+                          }}
+                        >
+                          <span>Day {d.day}: {firstPassage}</span>
+                          {isDone ? <CheckCircle2 size={13} style={{ color: 'var(--dim-theological)' }} /> : <span style={{ color: 'var(--text-muted)' }}>→</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {hubTab === 'bookmarks' && (
+                <div>
+                  <div className={styles.hubSectionTitle}>Recent Verse Highlights</div>
+                  {Object.keys(highlights).length > 0 ? (
+                    <div className={styles.hubPlansList}>
+                      {Object.entries(highlights).slice(0, 8).map(([key, color]) => {
+                        const parts = key.split('-');
+                        const refStr = `${parts[0]} ${parts[1]}:${parts[2]}`;
+                        return (
+                          <div
+                            key={key}
+                            className={styles.hubPlanItem}
+                            onClick={() => {
+                              setSelectedBook(parts[0]);
+                              setSelectedChapter(parseInt(parts[1], 10));
+                              setPendingVerseTarget(parseInt(parts[2], 10));
+                            }}
+                          >
+                            <span>{refStr}</span>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: color }} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No verse highlights saved yet.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Center Column: Bible Text Reader */}
           <div className={`${styles.textPanel} glass-card`} ref={readerScrollRef}>
             {loadingChapter ? (
               <div className={styles.loadingWrapper}>
