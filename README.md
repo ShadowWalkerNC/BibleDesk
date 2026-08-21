@@ -11,7 +11,7 @@ BibleDesk helps churches, pastors, teachers, and individual readers study Script
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation (Complete)** |
-| **What exists in code** | Local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Reader UI, AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, plans |
+| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel (Parchment-themed), Lucide SVG icon design system (emoji-free), AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, plans |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
 | **Deploy** | Production Next.js 16 build verified and deployed to Vercel |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [AGENTS.md](AGENTS.md) for agent rules |
@@ -22,16 +22,17 @@ Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues
 
 ## Vision
 
-Someone can open BibleDesk, **read** Scripture, **search**, **compare** translations, study **Hebrew/Greek from real data**, save notes, and keep going **without internet**. AI makes that workflow better — it must not replace it.
+Someone can open BibleDesk, **read** Scripture, **search**, **compare** translations, study **Hebrew/Greek from real data**, save notes, and keep going **without internet**. The unified **Centralized 3-Column Study Desk** brings the reader, study hub (daily, plans, bookmarks), and 5-dimension AI assistant into one focused workspace.
 
 ---
 
 ## What’s Built Today
 
 ### Study surfaces
-- `/bible` — chapter reader, compare, notes/highlights (localStorage), AI study panel
+- `/bible` — Centralized 3-Column Study Desk (Left Hub: Daily/Plans/Bookmarks, Center: Scripture Reader with TTS & word study, Right: 5D AI, Concordance, Strong's, Cross-Refs & Notes)
 - `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
 - `/bookmarks`, `/history`, `/graph`, `/share/[slug]`
+- `apps/extension` — Chrome MV3 side panel extension with full Parchment theme & instant lookup
 
 ### AI assistant
 - Homepage assistant + `POST /api/ask` / `/api/ask/stream`
