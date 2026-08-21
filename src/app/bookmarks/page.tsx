@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { Bookmark, Search, X, RotateCcw, ArrowRight, ArrowLeft, Plus, BookmarkCheck } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import styles from './bookmarks.module.css';
 
@@ -100,20 +101,20 @@ export default function BookmarksPage() {
           {/* Page header */}
           <div className={styles.pageHeader}>
             <div>
-              <h1 className={styles.pageTitle}>★ Bookmarks</h1>
+              <h1 className={styles.pageTitle}><Bookmark size={24} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--gold-400)' }} /> Bookmarks</h1>
               <p className={styles.pageSubtitle}>
                 {total > 0 ? `${total.toLocaleString()} saved answer${total !== 1 ? 's' : ''}` : 'Your saved Bible study answers'}
               </p>
             </div>
             <Link href="/" className={styles.newStudyBtn}>
-              ✦ New Study
+              <Plus size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> New Study
             </Link>
           </div>
 
           {/* Search */}
           <div className={styles.controls}>
             <div className={styles.searchWrapper}>
-              <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+              <Search size={16} className={styles.searchIcon} />
               <input
                 className={styles.searchInput}
                 type="search"
@@ -124,7 +125,7 @@ export default function BookmarksPage() {
               />
               {search && (
                 <button className={styles.clearSearch} onClick={() => { setSearch(''); setPage(1); }} aria-label="Clear search">
-                  ✕
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -202,7 +203,7 @@ export default function BookmarksPage() {
                           aria-label="Remove bookmark"
                           title="Remove bookmark"
                         >
-                          {removing === b.answer_id ? '…' : '★'}
+                          {removing === b.answer_id ? '…' : <BookmarkCheck size={14} />}
                         </button>
                       </div>
                     </li>

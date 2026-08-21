@@ -2,6 +2,16 @@
 
 import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
+import { 
+  BookOpen, 
+  Calendar, 
+  Sun, 
+  Brain, 
+  Scroll, 
+  Church, 
+  Sparkles,
+  ArrowRight
+} from 'lucide-react';
 import Header from '@/components/Header/Header';
 import SearchBar from '@/components/SearchBar/SearchBar';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
@@ -23,12 +33,12 @@ const PLACEHOLDERS = [
 ];
 
 const STUDY_TOOLS = [
-  { label: 'Bible Reader',     desc: 'Chapter reading, compare mode, notes & highlights', href: '/bible' },
-  { label: 'Reading Plans',    desc: '30- and 90-day schedules with progress tracking',   href: '/plans' },
-  { label: 'Daily Verse',      desc: 'A daily passage with reflection prompts',           href: '/daily' },
-  { label: 'Verse Memory',     desc: 'Flashcards and word-masking drills',                href: '/memory' },
-  { label: 'Catechism',        desc: 'Westminster & Heidelberg Q&A with quiz mode',      href: '/catechism' },
-  { label: 'Historic Creeds',  desc: 'Apostles’, Nicene, Chalcedonian & Athanasian',     href: '/creeds' },
+  { label: 'Bible Reader',     desc: 'Chapter reading, compare mode, notes & highlights', href: '/bible', icon: BookOpen },
+  { label: 'Reading Plans',    desc: '30- and 90-day schedules with progress tracking',   href: '/plans', icon: Calendar },
+  { label: 'Daily Verse',      desc: 'A daily passage with reflection prompts',           href: '/daily', icon: Sun },
+  { label: 'Verse Memory',     desc: 'Flashcards and word-masking drills',                href: '/memory', icon: Brain },
+  { label: 'Catechism',        desc: 'Westminster & Heidelberg Q&A with quiz mode',      href: '/catechism', icon: Church },
+  { label: 'Historic Creeds',  desc: 'Apostles’, Nicene, Chalcedonian & Athanasian',     href: '/creeds', icon: Scroll },
 ];
 
 export default function HomePage() {
@@ -98,8 +108,11 @@ export default function HomePage() {
             <div className="container">
               <p className={styles.teaserLabel}>Study tools</p>
               <div className={styles.teaserGrid}>
-                {STUDY_TOOLS.map(({ label, desc, href }) => (
+                {STUDY_TOOLS.map(({ label, desc, href, icon: CardIcon }) => (
                   <Link key={label} href={href} className={styles.teaserCard}>
+                    <div className={styles.teaserIconWrapper}>
+                      <CardIcon size={20} style={{ color: 'var(--gold-400)' }} />
+                    </div>
                     <p className={styles.teaserCardLabel}>{label}</p>
                     <p className={styles.teaserCardDesc}>{desc}</p>
                     <span className={styles.teaserPill}>Open</span>

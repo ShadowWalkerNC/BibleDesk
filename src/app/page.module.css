@@ -334,6 +334,25 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
+.teaserIconWrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(181, 137, 19, 0.08);
+  border: 1px solid rgba(181, 137, 19, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease-out;
+}
+
+.teaserCard:hover .teaserIconWrapper {
+  background: rgba(181, 137, 19, 0.16);
+  border-color: var(--gold-400);
+  transform: scale(1.05);
+}
+
 .teaserCardLabel {
   font-size: 0.95rem;
   font-weight: 700;

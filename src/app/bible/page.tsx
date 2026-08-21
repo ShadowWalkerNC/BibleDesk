@@ -2,6 +2,22 @@
 
 import { useState, useEffect, useRef, useTransition, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { 
+  BookOpen, 
+  Volume2, 
+  Sparkles, 
+  Scale, 
+  Copy, 
+  Search, 
+  ChevronLeft, 
+  ChevronRight, 
+  ExternalLink,
+  BookMarked,
+  RotateCcw,
+  Languages,
+  Church,
+  Heart
+} from 'lucide-react';
 import Header from '@/components/Header/Header';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter } from '@/lib/books';
@@ -631,13 +647,16 @@ function BibleReaderContent() {
               className={styles.readerJumpBtn}
               title="Jump to book, chapter, or verse (Ctrl+K)"
             >
-              📖 Jump / Browse...
+              <BookOpen size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              Jump / Browse...
             </button>
             <button onClick={handlePrev} className={styles.navBtn} aria-label="Previous Chapter">
-              ◀ Prev
+              <ChevronLeft size={16} style={{ marginRight: '2px', verticalAlign: 'middle' }} />
+              Prev
             </button>
             <button onClick={handleNext} className={styles.navBtn} aria-label="Next Chapter">
-              Next ▶
+              Next
+              <ChevronRight size={16} style={{ marginLeft: '2px', verticalAlign: 'middle' }} />
             </button>
           </div>
         </div>
@@ -757,7 +776,8 @@ function BibleReaderContent() {
                             }}
                             className={styles.actionBtn}
                           >
-                            🔊 Listen
+                            <Volume2 size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                            Listen
                           </button>
                           <button
                             title="Perform AI Study on this verse"
@@ -769,7 +789,8 @@ function BibleReaderContent() {
                             }}
                             className={styles.actionBtn}
                           >
-                            ✦ Study
+                            <Sparkles size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                            Study
                           </button>
                           <button
                             title="Compare translations side-by-side"
@@ -781,7 +802,8 @@ function BibleReaderContent() {
                             }}
                             className={styles.actionBtn}
                           >
-                            ⚖️ Compare
+                            <Scale size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                            Compare
                           </button>
                           <button
                             title="Copy verse reference"
@@ -791,7 +813,8 @@ function BibleReaderContent() {
                             }}
                             className={styles.actionBtn}
                           >
-                            📋 Copy
+                            <Copy size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                            Copy
                           </button>
                         </div>
                       </div>
@@ -891,14 +914,14 @@ function BibleReaderContent() {
                               onClick={() => handleNavigateFromSearch(res)}
                               title={`Jump to ${res.reference} in the reader`}
                             >
-                              <span className={styles.searchRef}>🔗 {res.reference}</span>
+                              <span className={styles.searchRef}><BookOpen size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />{res.reference}</span>
                               <p className={`${styles.searchText} text-serif`}>&quot;{res.text}&quot;</p>
                             </div>
                           ))}
                         </div>
                       ) : (
                         <p className={styles.searchHint}>
-                          💡 Type a keyword (e.g. &quot;covenant&quot;, &quot;repent&quot;) or a Strong&apos;s concordance tag (e.g. &quot;G746&quot;, &quot;H430&quot;) to run a full-text search.
+                          Type a keyword (e.g. &quot;covenant&quot;, &quot;repent&quot;) or a Strong&apos;s concordance tag (e.g. &quot;G746&quot;, &quot;H430&quot;) to run a full-text search.
                         </p>
                       )}
                     </div>
@@ -908,7 +931,8 @@ function BibleReaderContent() {
                 {/* Other study tabs require a selected verse */}
                 {activeTab !== 'search' && !selectedVerse && (
                   <div className={styles.noSelection}>
-                    <p>📖 Select a verse in the reader to view original language study, comparisons, cross-references, and write notes.</p>
+                    <BookOpen size={24} style={{ color: 'var(--gold-400)', marginBottom: '8px' }} />
+                    <p>Select a verse in the reader to view original language study, comparisons, cross-references, and write notes.</p>
                   </div>
                 )}
 
@@ -953,7 +977,8 @@ function BibleReaderContent() {
                           {selectedWord && studyData?.selectedWordStudy && (
                             <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
                               <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                🔤 Original Language: &quot;{selectedWord}&quot;
+                                <Languages size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                Original Language: &quot;{selectedWord}&quot;
                               </h3>
                               <div className={styles.lexiconCard}>
                                 <div className={styles.lexiconHeader}>
@@ -970,7 +995,8 @@ function BibleReaderContent() {
                           {!selectedWord && (studyData?.originalLanguageWords?.length ?? 0) > 0 && (
                             <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
                               <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                🔤 Key Original Words (Strong&apos;s)
+                                <Languages size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                Key Original Words (Strong&apos;s)
                               </h3>
                               <div className={styles.concordanceList}>
                                 {studyData?.originalLanguageWords?.map((wordStudy, i) => (
@@ -983,14 +1009,15 @@ function BibleReaderContent() {
                                   </div>
                                 ))}
                               </div>
-                              <p className={styles.hintText}>💡 Click any word in the verse text to run a specific original language lookup.</p>
+                              <p className={styles.hintText}>Click any word in the verse text to run a specific original language lookup.</p>
                             </div>
                           )}
 
                           {/* Commentary */}
                           <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-theological)' }}>
                             <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-theological)' }}>
-                              📖 Theological Commentary
+                              <Church size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                              Theological Commentary
                             </h3>
                             <p className={styles.commentaryText}>{studyData.commentary}</p>
                           </div>
@@ -998,7 +1025,8 @@ function BibleReaderContent() {
                           {/* Practical Application */}
                           <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-practical)' }}>
                             <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-practical)' }}>
-                              🌱 Life Application
+                              <Heart size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                              Life Application
                             </h3>
                             <p className={styles.applicationText}>{studyData.practicalApplication}</p>
                           </div>
@@ -1048,7 +1076,8 @@ function BibleReaderContent() {
                                   onClick={() => handleJumpToReference(ref.reference)}
                                   title={`Jump to ${ref.reference} in the reader`}
                                 >
-                                  🔗 {ref.reference}
+                                  <BookOpen size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                                  {ref.reference}
                                 </button>
                               </div>
                               <p className={`${styles.crossRefText} text-serif`}>&quot;{ref.text}&quot;</p>

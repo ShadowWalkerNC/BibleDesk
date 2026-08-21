@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { Search, X, RotateCcw, ArrowRight, ArrowLeft, Plus, History, BookOpen } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import styles from './history.module.css';
 
@@ -88,20 +89,23 @@ export default function HistoryPage() {
           {/* Page header */}
           <div className={styles.pageHeader}>
             <div>
-              <h1 className={styles.pageTitle}>Study History</h1>
+              <h1 className={styles.pageTitle}>
+                <History size={24} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--gold-400)' }} />
+                Study History
+              </h1>
               <p className={styles.pageSubtitle}>
                 {total > 0 ? `${total.toLocaleString()} saved answer${total !== 1 ? 's' : ''}` : 'Your previous Bible study sessions'}
               </p>
             </div>
             <Link href="/" className={styles.newStudyBtn}>
-              ✦ New Study
+              <Plus size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> New Study
             </Link>
           </div>
 
           {/* Controls */}
           <div className={styles.controls}>
             <div className={styles.searchWrapper}>
-              <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+              <Search size={16} className={styles.searchIcon} />
               <input
                 className={styles.searchInput}
                 type="search"
@@ -112,7 +116,7 @@ export default function HistoryPage() {
               />
               {search && (
                 <button className={styles.clearSearch} onClick={() => { setSearch(''); setPage(1); }} aria-label="Clear search">
-                  ✕
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -144,14 +148,14 @@ export default function HistoryPage() {
 
           {error && !loading && (
             <div className={styles.errorState}>
-              <p className={styles.errorMsg}>⚠ {error}</p>
+              <p className={styles.errorMsg}>{error}</p>
               <button className={styles.retryBtn} onClick={fetchHistory}>Try again</button>
             </div>
           )}
 
           {!loading && !error && answers.length === 0 && (
             <div className={styles.emptyState}>
-              <div className={styles.emptyEmoji}>📖</div>
+              <div className={styles.emptyEmoji}><BookOpen size={36} style={{ color: 'var(--gold-400)' }} /></div>
               <h2 className={styles.emptyTitle}>
                 {search || filterConf ? 'No matches found' : 'No study history yet'}
               </h2>
@@ -193,7 +197,7 @@ export default function HistoryPage() {
 
                       <div className={styles.cardFooter}>
                         <Link href={`/share/${slug}`} className={styles.viewBtn}>
-                          View Answer →
+                          View Answer <ArrowRight size={13} style={{ marginLeft: '3px', verticalAlign: 'middle' }} />
                         </Link>
                         <button
                           className={styles.reaskBtn}
@@ -203,7 +207,7 @@ export default function HistoryPage() {
                           }}
                           title="Ask this question again"
                         >
-                          ↺ Re-ask
+                          <RotateCcw size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Re-ask
                         </button>
                       </div>
                     </li>
@@ -220,7 +224,7 @@ export default function HistoryPage() {
                     disabled={page === 1}
                     aria-label="Previous page"
                   >
-                    ← Prev
+                    <ArrowLeft size={13} style={{ marginRight: '3px', verticalAlign: 'middle' }} /> Prev
                   </button>
 
                   <span className={styles.pageInfo}>
@@ -233,7 +237,7 @@ export default function HistoryPage() {
                     disabled={page === totalPages}
                     aria-label="Next page"
                   >
-                    Next →
+                    Next <ArrowRight size={13} style={{ marginLeft: '3px', verticalAlign: 'middle' }} />
                   </button>
                 </nav>
               )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Printer, Send, Plus, BookOpen } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import { getBrowserClient } from '@/lib/supabase';
 import { BIBLE_BOOKS, getBookChapters } from '@/lib/books';
@@ -392,12 +393,13 @@ export default function SermonWorkspacePage() {
               </div>
               <div className={styles.footerBtns}>
                 <button type="button" onClick={() => window.print()} className={styles.secondaryBtn} title="Print clean sermon outline notes">
-                  🖨️ Print Notes
+                  <Printer size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Print Notes
                 </button>
                 <button onClick={() => handleSave(false)} disabled={saving} className={styles.saveBtn}>
                   {saving ? 'Saving...' : 'Save Outline'}
                 </button>
                 <button onClick={() => handleSave(true)} disabled={publishing} className={styles.publishBtn}>
+                  <Send size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
                   {publishing ? 'Publishing...' : 'Publish to Discord'}
                 </button>
               </div>
@@ -408,7 +410,10 @@ export default function SermonWorkspacePage() {
           {/* Right panel: e-Sword Scripture Sidebar */}
           <div className={`${styles.bibleCol} glass-card`}>
             <div className={styles.sidebarHeader}>
-              <h2 className={`${styles.sidebarTitle} text-serif`}>e-Sword Scripture Sidebar</h2>
+              <h2 className={`${styles.sidebarTitle} text-serif`}>
+                <BookOpen size={16} style={{ marginRight: '6px', verticalAlign: 'middle', color: 'var(--gold-400)' }} />
+                Scripture Sidebar
+              </h2>
               
               {/* Dropdowns */}
               <div className={styles.sidebarSelectors}>
@@ -466,7 +471,7 @@ export default function SermonWorkspacePage() {
                           className={styles.insertBtn}
                           title="Insert this verse into the current cursor position in your outline"
                         >
-                          ➕ Insert
+                          <Plus size={12} style={{ marginRight: '3px', verticalAlign: 'middle' }} /> Insert
                         </button>
                       </div>
                       <p className={`${styles.verseText} text-serif`}>{v.text.trim()}</p>

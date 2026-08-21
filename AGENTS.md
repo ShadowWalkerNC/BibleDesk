@@ -83,11 +83,12 @@ Already shipped (keep; do not rip out):
   ✓ Graph, MCP, prayer, sermons, catechism/creeds/memory/plans
   ✓ Moderation UI, login wiring, Electron shell
 
-Active work (Phase 0):
-  □ Module format + Midvash/public-domain ingest
-  □ Local read + search path
-  □ Lexicon-backed word study
-  □ Offline personal study sync model
+Active work (Phase 0 Complete):
+  ✓ Module format + 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT)
+  ✓ Local read + concordance search path
+  ✓ Strong's Greek (5.5k) & Hebrew (8.6k) lexicon data + TSK cross-refs
+  ✓ Quick Jump modal (Ctrl+K) & Chrome Extension MV3 side panel
+  ✓ Modernized Bible-themed UI with clean Lucide icons across desktop & mobile
 
 Deploy (parallel):
   □ Apply supabase schemas v1→v4

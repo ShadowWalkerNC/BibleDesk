@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { Search, BookOpen, LogIn, LogOut } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
@@ -74,7 +75,7 @@ export default function Header() {
             className={styles.quickJumpBtn}
             title="Quick Jump to any book or chapter (Ctrl+K)"
           >
-            <span className={styles.quickJumpIcon}>🔍</span>
+            <Search size={15} className={styles.quickJumpIcon} />
             <span className={styles.quickJumpText}>Jump to Book / Chapter...</span>
             <kbd className={styles.quickJumpKbd}>Ctrl K</kbd>
           </button>
@@ -102,13 +103,15 @@ export default function Header() {
               <span className={styles.userName}>
                 {user.user_metadata?.name || user.email?.split('@')[0]}
               </span>
-              <button onClick={handleSignOut} className={styles.signOutBtn}>
-                Sign Out
+              <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
+                <LogOut size={14} />
+                <span>Sign Out</span>
               </button>
             </div>
           ) : (
-            <Link href="/login" className={styles.authBtn}>
-              Sign In
+            <Link href="/login" className={styles.authBtn} title="Sign In">
+              <LogIn size={14} />
+              <span>Sign In</span>
             </Link>
           )}
 

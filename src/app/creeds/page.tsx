@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Scroll } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import { CREEDS, type Creed } from '@/lib/creedsData';
 import styles from './page.module.css';
@@ -16,7 +17,7 @@ export default function CreedsPage() {
 
           {/* Header */}
           <div className={styles.pageHeader}>
-            <span className={styles.tag}>✦ Historical Christian Theology</span>
+            <span className={styles.tag}><Scroll size={13} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Historical Christian Theology</span>
             <h1 className={`${styles.title} text-serif`}>Creeds &amp; Confessions</h1>
             <p className={styles.subtitle}>
               Foundational statements of Christian faith formulated by the early Church to summarize apostolic doctrine.

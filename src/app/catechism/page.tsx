@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import {
   ALL_CATECHISMS,
@@ -171,7 +172,7 @@ export default function CatechismPage() {
                       <span className={styles.qText}>{q.question}</span>
                       <span className={styles.qCategory}>{q.category}</span>
                       <span className={styles.chevron} aria-hidden="true">
-                        {expandedId === q.id ? '▲' : '▼'}
+                        {expandedId === q.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </span>
                     </button>
 

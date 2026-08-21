@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, FormEvent } from 'react';
+import { Sparkles, BookOpen, Search } from 'lucide-react';
 import { TRANSLATIONS, type TranslationId } from '@/types';
 import styles from './SearchBar.module.css';
 
@@ -100,7 +101,8 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
               onClick={() => setIsNonAI(false)}
               disabled={isLoading}
             >
-              ✦ AI 5-Stage Study
+              <Sparkles size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              AI 5-Stage Study
             </button>
             <button
               type="button"
@@ -109,7 +111,8 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
               disabled={isLoading}
               title="Direct Scripture & Concordance Search without AI calls"
             >
-              📖 Non-AI Search
+              <BookOpen size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              Concordance Search
             </button>
           </div>
 
@@ -125,9 +128,15 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
                 Searching…
               </>
             ) : isNonAI ? (
-              <>📖 Concordance Search</>
+              <>
+                <Search size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                Search Text
+              </>
             ) : (
-              <>✦ Study This</>
+              <>
+                <Sparkles size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                Study This
+              </>
             )}
           </button>
         </div>

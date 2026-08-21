@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Brain, Eye, EyeOff, Layers, Type, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import { MEMORY_VERSES, type MemoryVerse } from '@/lib/memoryData';
 import styles from './page.module.css';
@@ -52,7 +53,7 @@ export default function VerseMemoryPage() {
 
           {/* Header */}
           <div className={styles.pageHeader}>
-            <span className={styles.tag}>✦ Scripture Memorization</span>
+            <span className={styles.tag}><Brain size={13} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Scripture Memorization</span>
             <h1 className={`${styles.title} text-serif`}>Verse Memory &amp; Flashcards</h1>
             <p className={styles.subtitle}>
               Hide it in your heart. Practice top memory verses with interactive flashcards, word-hiding, and first-letter prompts.
@@ -65,19 +66,22 @@ export default function VerseMemoryPage() {
               className={`${styles.modeBtn} ${practiceMode === 'flashcard' ? styles.activeModeBtn : ''}`}
               onClick={() => { setPracticeMode('flashcard'); setRevealed(false); }}
             >
-              🃏 Flashcards
+              <Layers size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              Flashcards
             </button>
             <button
               className={`${styles.modeBtn} ${practiceMode === 'hide' ? styles.activeModeBtn : ''}`}
               onClick={() => { setPracticeMode('hide'); setRevealed(false); }}
             >
-              🙈 Hide Words
+              <EyeOff size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              Hide Words
             </button>
             <button
               className={`${styles.modeBtn} ${practiceMode === 'firstLetter' ? styles.activeModeBtn : ''}`}
               onClick={() => { setPracticeMode('firstLetter'); setRevealed(false); }}
             >
-              🔤 First Letter Prompt
+              <Type size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              First Letter Prompt
             </button>
           </div>
 
@@ -104,7 +108,11 @@ export default function VerseMemoryPage() {
                     </div>
                   )}
                   <button className={styles.revealBtn} onClick={() => setRevealed(!revealed)}>
-                    {revealed ? '🙈 Hide Verse' : '👁 Reveal Verse'}
+                    {revealed ? (
+                      <><EyeOff size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Hide Verse</>
+                    ) : (
+                      <><Eye size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Reveal Verse</>
+                    )}
                   </button>
                 </div>
               )}
@@ -130,7 +138,11 @@ export default function VerseMemoryPage() {
                   </p>
 
                   <button className={styles.revealBtn} onClick={() => setRevealed(!revealed)}>
-                    {revealed ? '🙈 Apply Hide Mask' : '👁 Reveal Full Verse'}
+                    {revealed ? (
+                      <><EyeOff size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Apply Hide Mask</>
+                    ) : (
+                      <><Eye size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Reveal Full Verse</>
+                    )}
                   </button>
                 </div>
               )}
@@ -142,7 +154,11 @@ export default function VerseMemoryPage() {
                     {revealed ? `"${currentVerse.text}"` : formatFirstLetterText(currentVerse.text)}
                   </p>
                   <button className={styles.revealBtn} onClick={() => setRevealed(!revealed)}>
-                    {revealed ? '🔤 Show First Letters Only' : '👁 Reveal Full Verse'}
+                    {revealed ? (
+                      <><Type size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Show First Letters Only</>
+                    ) : (
+                      <><Eye size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Reveal Full Verse</>
+                    )}
                   </button>
                 </div>
               )}
@@ -150,10 +166,10 @@ export default function VerseMemoryPage() {
               {/* Navigation Footer */}
               <div className={styles.cardFooter}>
                 <button onClick={handlePrev} className={styles.navBtn}>
-                  ◀ Previous
+                  <ChevronLeft size={16} style={{ marginRight: '3px', verticalAlign: 'middle' }} /> Previous
                 </button>
                 <button onClick={handleNext} className={styles.navBtn}>
-                  Next Verse ▶
+                  Next Verse <ChevronRight size={16} style={{ marginLeft: '3px', verticalAlign: 'middle' }} />
                 </button>
               </div>
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { SkipForward, Shuffle, Copy, Check, BookOpen, Heart, Sun } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import type { DailyVerse } from '@/app/api/daily/route';
 import styles from './page.module.css';
@@ -56,17 +57,17 @@ export default function DailyVersePage() {
       <main className={styles.main}>
         <div className="container">
           <div className={styles.pageHeader}>
-            <span className={styles.todayBadge}>✦ Daily Devotional</span>
+            <span className={styles.todayBadge}><Sun size={13} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Daily Devotional</span>
             <h1 className={`${styles.title} text-serif`}>Daily Scripture &amp; Reflection</h1>
             <p className={styles.subtitle}>
               Start your day grounded in God’s Word with curated scripture, commentary, and prayer.
             </p>
             <div className={styles.navBar}>
               <button onClick={handleNext} className={styles.navBtn}>
-                ⏭ Next Devotional
+                <SkipForward size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Next Devotional
               </button>
               <button onClick={handleRandom} className={styles.navBtn}>
-                🎲 Shuffle Random
+                <Shuffle size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Shuffle Random
               </button>
             </div>
           </div>
@@ -93,24 +94,28 @@ export default function DailyVersePage() {
               </div>
 
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>✦ Morning Reflection</h3>
+                <h3 className={styles.sectionTitle}><Sun size={15} style={{ marginRight: '6px', verticalAlign: 'middle', color: 'var(--gold-400)' }} /> Morning Reflection</h3>
                 <p className={styles.sectionBody}>{dailyVerse.reflection}</p>
               </div>
 
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>🙏 Daily Prayer</h3>
+                <h3 className={styles.sectionTitle}><Heart size={15} style={{ marginRight: '6px', verticalAlign: 'middle', color: 'var(--dim-practical)' }} /> Daily Prayer</h3>
                 <p className={`${styles.sectionBody} text-serif`}>&ldquo;{dailyVerse.prayer}&rdquo;</p>
               </div>
 
               <div className={styles.cardFooter}>
                 <button onClick={handleCopy} className={styles.copyBtn}>
-                  {copied ? '✓ Copied to Clipboard' : '📋 Share Daily Verse'}
+                  {copied ? (
+                    <><Check size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Copied to Clipboard</>
+                  ) : (
+                    <><Copy size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Share Daily Verse</>
+                  )}
                 </button>
                 <a
                   href={`/bible?book=${encodeURIComponent(dailyVerse.reference.split(' ')[0])}`}
                   className={styles.readMoreLink}
                 >
-                  📖 Open in Bible Reader →
+                  <BookOpen size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Open in Bible Reader →
                 </a>
               </div>
             </div>

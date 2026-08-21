@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { BookOpen, Search, ArrowLeft } from 'lucide-react';
 import { BIBLE_BOOKS, getBookChapters, parseReference } from '@/lib/books';
 import styles from './QuickJumpModal.module.css';
 
@@ -101,7 +102,7 @@ export default function QuickJumpModal({ isOpen, onClose, onSelect }: QuickJumpM
         {/* Header Search Input */}
         <div className={styles.modalHeader}>
           <div className={styles.searchBar}>
-            <span className={styles.searchIcon}>📖</span>
+            <Search size={18} className={styles.searchIcon} />
             <form onSubmit={handleDirectSubmit} className={styles.form}>
               <input
                 ref={inputRef}
@@ -147,7 +148,7 @@ export default function QuickJumpModal({ isOpen, onClose, onSelect }: QuickJumpM
             <div className={styles.chaptersView}>
               <div className={styles.chapterHeader}>
                 <button onClick={() => setSelectedBook(null)} className={styles.backBtn}>
-                  ← All Books
+                  <ArrowLeft size={16} style={{ marginRight: '6px' }} /> All Books
                 </button>
                 <h3 className={styles.selectedBookTitle}>{selectedBook}</h3>
                 <span className={styles.chaptersCount}>

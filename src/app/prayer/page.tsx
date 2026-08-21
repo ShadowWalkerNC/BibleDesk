@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { Heart, MapPin, Globe } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import { getBrowserClient } from '@/lib/supabase';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
@@ -350,6 +351,7 @@ export default function PrayerBoardPage() {
                           className={`${styles.prayBtn} ${hasPrayed ? styles.prayBtnActive : ''}`}
                           title="Pray for this request"
                         >
+                          <Heart size={14} style={{ marginRight: '6px', verticalAlign: 'middle', fill: hasPrayed ? 'currentColor' : 'none' }} />
                           {p.likes_count > 0 ? (
                             <span>{p.likes_count} {p.likes_count === 1 ? 'person' : 'people'} prayed for this</span>
                           ) : (

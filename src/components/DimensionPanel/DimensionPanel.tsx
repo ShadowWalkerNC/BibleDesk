@@ -5,6 +5,18 @@ import { DIMENSION_META } from '@/types';
 import { useToast } from '@/components/Toast/Toast';
 import { useBookmark } from '@/hooks/useBookmark';
 import { useState } from 'react';
+import { 
+  BookOpen, 
+  Landmark, 
+  Languages, 
+  Church, 
+  Heart, 
+  Copy, 
+  Link as LinkIcon, 
+  Bookmark, 
+  BookmarkCheck, 
+  Share2 
+} from 'lucide-react';
 import styles from './DimensionPanel.module.css';
 
 interface DimensionPanelProps {
@@ -21,6 +33,14 @@ const DIMENSION_COLORS: Record<DimensionKey, string> = {
   practical:         'var(--dim-practical)',
 };
 
+const DIMENSION_ICONS: Record<DimensionKey, any> = {
+  scripture:         BookOpen,
+  historical:        Landmark,
+  original_language: Languages,
+  theological:       Church,
+  practical:         Heart,
+};
+
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
@@ -32,6 +52,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
   const activeDim   = answer.dimensions[activeTab];
   const activeMeta  = DIMENSION_META.find((m) => m.key === activeTab)!;
   const accentColor = DIMENSION_COLORS[activeTab];
+  const ActiveIcon  = DIMENSION_ICONS[activeTab];
 
   const shareUrl = shareSlug
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareSlug}`
@@ -45,10 +66,10 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
       '',
       ...DIMENSION_META.map((m) => {
         const dim = answer.dimensions[m.key];
-        return `${m.emoji} ${dim.title}\n${dim.content}\n\nCitations: ${dim.citations.join(', ')}`;
+        return `[${m.label}] ${dim.title}\n${dim.content}\n\nCitations: ${dim.citations.join(', ')}`;
       }),
       '',
-      shareUrl ? `\uD83D\uDD17 ${shareUrl}` : '',
+      shareUrl ? shareUrl : '',
     ].filter(Boolean).join('\n\n');
 
     navigator.clipboard.writeText(text)
@@ -75,7 +96,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
     <div className={styles.container} role="region" aria-label="Bible study answer">
       {/* Summary */}
       <div className={styles.summary} aria-label="Answer summary">
-        <div className={styles.summaryLabel}>✦ Overview</div>
+        <div className={styles.summaryLabel}>Overview</div>
         <p className={styles.summaryText}>{answer.summary}</p>
         <div className={styles.summaryMeta}>
           <span className={`${styles.confidenceBadge} ${styles[`confidence${answer.confidence.charAt(0).toUpperCase() + answer.confidence.slice(1)}` as keyof typeof styles]}`}>
@@ -92,7 +113,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
               rel="noopener noreferrer"
               aria-label="Permanent link to this answer"
             >
-              🔗 Permalink
+              <LinkIcon size={12} style={{ marginRight: '4px' }} /> Permalink
             </a>
           )}
         </div>
@@ -100,21 +121,24 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
 
       {/* Dimension tabs */}
       <div className={styles.tabBar} role="tablist" aria-label="Study dimensions">
-        {DIMENSION_META.map((meta) => (
-          <button
-            key={meta.key}
-            role="tab"
-            id={`tab-${meta.key}`}
-            aria-selected={activeTab === meta.key}
-            aria-controls={`panel-${meta.key}`}
-            className={`${styles.tab} ${activeTab === meta.key ? styles.activeTab : ''}`}
-            data-dim={meta.key}
-            onClick={() => setActiveTab(meta.key)}
-          >
-            <span className={styles.tabEmoji} aria-hidden="true">{meta.emoji}</span>
-            {meta.label}
-          </button>
-        ))}
+        {DIMENSION_META.map((meta) => {
+          const TabIcon = DIMENSION_ICONS[meta.key];
+          return (
+            <button
+              key={meta.key}
+              role="tab"
+              id={`tab-${meta.key}`}
+              aria-selected={activeTab === meta.key}
+              aria-controls={`panel-${meta.key}`}
+              className={`${styles.tab} ${activeTab === meta.key ? styles.activeTab : ''}`}
+              data-dim={meta.key}
+              onClick={() => setActiveTab(meta.key)}
+            >
+              <TabIcon size={15} className={styles.tabIcon} />
+              <span>{meta.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Active dimension panel */}
@@ -126,7 +150,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
         aria-labelledby={`tab-${activeTab}`}
       >
         <div className={styles.panelHeader}>
-          <span className={styles.panelEmoji} aria-hidden="true">{activeMeta.emoji}</span>
+          <ActiveIcon size={20} style={{ color: accentColor }} />
           <h2 className={styles.panelTitle} style={{ color: accentColor }}>
             {activeDim.title}
           </h2>
@@ -163,7 +187,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
 
       {/* Share bar */}
       <div className={styles.shareBar} aria-label="Share options">
-        <span className={styles.shareLabel}>Share this study</span>
+        <span className={styles.shareLabel}>Study Tools & Sharing</span>
         <div className={styles.shareActions}>
           {/* Bookmark toggle */}
           <button
@@ -174,7 +198,8 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
             disabled={bookmarkLoading}
             type="button"
           >
-            {bookmarked ? '★ Saved' : '☆ Save'}
+            {bookmarked ? <BookmarkCheck size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> : <Bookmark size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />}
+            {bookmarked ? 'Saved' : 'Save'}
           </button>
 
           <button
@@ -183,7 +208,8 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
             aria-label="Copy full answer to clipboard"
             type="button"
           >
-            ⫘ Copy
+            <Copy size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+            Copy
           </button>
 
           {shareSlug && (
@@ -193,7 +219,8 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
               aria-label="Copy shareable link"
               type="button"
             >
-              🔗 Copy link
+              <LinkIcon size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              Copy link
             </button>
           )}
 
@@ -210,7 +237,8 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
               aria-label="Share via system share sheet"
               type="button"
             >
-              ↗ Share
+              <Share2 size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              Share
             </button>
           )}
         </div>

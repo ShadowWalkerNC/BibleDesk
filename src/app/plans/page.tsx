@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Calendar, BookOpen, CheckCircle2 } from 'lucide-react';
 import Header from '@/components/Header/Header';
 import { parseReference } from '@/lib/books';
 import { READING_PLANS, type ReadingPlan } from '@/lib/plansData';
@@ -45,7 +46,7 @@ export default function ReadingPlansPage() {
 
           {/* Header */}
           <div className={styles.pageHeader}>
-            <span className={styles.tag}>✦ Daily Scripture Reading</span>
+            <span className={styles.tag}><Calendar size={13} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Daily Scripture Reading</span>
             <h1 className={`${styles.title} text-serif`}>Bible Reading Plans</h1>
             <p className={styles.subtitle}>
               Structured daily reading plans to help you read through the Bible, Gospels, and Psalms consistently.
