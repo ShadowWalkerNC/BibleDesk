@@ -528,11 +528,11 @@ Aligned with [TODO.md](TODO.md) and [README.md](README.md). Older “Phase 1–5
 
 | Stage | Scope | Status |
 |---|---|---|
-| **0 — Local Bible foundation** | Module format, Midvash/public-domain ingest, local read/search/compare | 🔨 **Active** |
-| **1 — Study tools** | Notes, highlights, bookmarks, plans (local-first + sync) | ◐ Partial (UI exists; not module-backed) |
-| **2 — Original language** | OpenScriptures + Strong’s data, token word study | ☐ Not started (Gemini placeholder today) |
-| **3 — Offline + sync** | Content packs, offline personal data, conflict rules | ☐ Not started |
-| **4 — AI assistant** | Passage-grounded assistant on local text + lexicon | ◐ Pipeline/RAG/streaming exist; needs re-grounding |
+| **0 — Local Bible foundation** | Module format, public-domain ingest, local read/search/compare, Strong's Greek/Hebrew lexicons, TSK cross-refs, Quick Jump modal, Chrome Extension MV3 | ✅ **Complete** |
+| **1 — Study tools** | Notes, highlights, bookmarks, plans (local-first + sync) | ✅ Complete (localStorage + deep-linked plans) |
+| **2 — Original language** | OpenScriptures + Strong’s dictionaries (5.5k Greek, 8.6k Hebrew), token word study & concordance | ✅ Complete (`/api/bible/lexicon` + offline data) |
+| **3 — Offline + sync** | Bundled content packs (6 translations), offline personal data, Chrome side panel | ✅ Complete |
+| **4 — AI assistant** | Passage-grounded assistant on local text + lexicon | ◐ Pipeline/RAG/streaming + lexicon integration |
 | **5 — Platform** | Share, mod, MCP, Sigil, church tools, SaaS | ◐ Prototyped in-repo; polish after foundation |
 
 ### Built ahead of Stage 0 (keep)
