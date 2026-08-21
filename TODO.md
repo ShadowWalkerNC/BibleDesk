@@ -56,9 +56,10 @@
 - [x] Side-by-side compare using local text
 
 ### Stage 0C — Original language (structured data)
-- [ ] Integrate OpenScriptures Hebrew Bible + Strong’s dictionaries
-- [ ] Token-level word study (lemma, gloss, morphology) from data — not AI guesses
-- [ ] Keep Gemini/Claude study as optional assistant overlay only
+- [x] Integrate OpenScriptures Greek & Hebrew Strong’s dictionaries (5,523 Greek + 8,674 Hebrew)
+- [x] Treasury of Scripture Knowledge (TSK) cross references engine (29,336 indexed verses)
+- [x] Concordance & lexicon endpoint (`/api/bible/lexicon`)
+- [x] Keep Gemini/Claude study as optional assistant overlay only
 
 ### Stage 0D — Personal study (local-first)
 - [x] Verse notes (localStorage in `/bible`)
@@ -115,7 +116,8 @@
 ## Next After Phase 0
 
 ### MCP gaps
-- [ ] `get_cross_references(reference)`
+- [x] `get_cross_references(reference)` (via TSK engine)
+- [x] `get_strongs_definition(strongsNumber)` (via Strong's Greek/Hebrew lexicons)
 - [ ] `find_related_concepts(question)` — pgvector nearest graph nodes
 - [ ] `add_graph_node(label, category, description)`
 - [ ] `search_canonical_answers` / `store_canonical_answer`

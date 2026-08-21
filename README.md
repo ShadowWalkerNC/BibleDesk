@@ -10,10 +10,10 @@ BibleDesk helps churches, pastors, teachers, and individual readers study Script
 
 | | |
 |---|---|
-| **Active phase** | **Phase 0 — Local-first Bible foundation** |
-| **What exists in code** | Reader UI, AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, catechism/creeds/memory/plans, Electron shell, moderation UI |
-| **Critical gap** | Bible text still fetched from **bible-api.com**. Offline modules + lexicon-backed Strong’s are **not** shipped yet |
-| **Deploy** | Not production-live — see [TODO.md](TODO.md) deploy blockers |
+| **Active phase** | **Phase 0 — Local-first Bible foundation (Complete)** |
+| **What exists in code** | Local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Reader UI, AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, plans |
+| **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
+| **Deploy** | Production Next.js 16 build verified and deployed to Vercel |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [AGENTS.md](AGENTS.md) for agent rules |
 
 Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) (obsolete “empty stub / reset” note).
