@@ -21,21 +21,20 @@
 
 ---
 
-## 🔴 Deploy Blockers (before first public URL)
+## 🔴 Deploy Checklist & Production Readiness
 
-- [ ] Create Supabase project
-- [ ] Apply schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` (+ `rpc.sql` if needed)
-- [ ] Copy `.env.example` → `.env.local` and fill all required keys
-- [ ] Generate secrets: `IP_HASH_SALT`, `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`
-- [ ] Deploy (Vercel preferred for Next.js; Render also documented historically)
-- [ ] Set `NEXT_PUBLIC_APP_URL` to the production URL
-- [ ] Verify build with real env vars
-- [ ] Smoke tests:
-  - [ ] Rate limit returns 429 after 15/hour/IP
-  - [ ] RAG: second similar ask returns `X-RAG-Hit: exact` (or stream equivalent)
-  - [ ] Graph rows appear in `graph_nodes` / `graph_edges` after an answer
-  - [ ] `/share/[slug]` renders + OG preview
-  - [ ] `GET /api/mcp` returns tool manifest; `POST tools/call` works for `get_verse`
+- [x] Full local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT) with zero network dependency for text
+- [x] OpenScriptures Strong's Greek/Hebrew lexicons + Treasury of Scripture Knowledge (TSK) cross-refs engine
+- [x] All 29 routes type-checked & verified in Next.js 16 production build (`next build`)
+- [x] PWA manifest & Chrome MV3 side panel extension aligned
+- [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
+  - [ ] Configure Environment Variables on Host (Vercel):
+    - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
+    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+    - `NEXT_PUBLIC_APP_URL` (production URL)
+    - `IP_HASH_SALT`, `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`
+  - [ ] Trigger deployment build on Vercel & complete smoke tests (Rate limiting, RAG hit headers, share pages)
 
 ---
 
