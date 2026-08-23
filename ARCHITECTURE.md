@@ -1,8 +1,8 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 0 active (local-first Bible foundation) · AI/platform layers already prototyped in-repo  
-> **Last updated:** 2026-08-09  
-> **Stack:** Next.js 16 · TypeScript · Supabase · Anthropic Claude · OpenAI embeddings · Gemini study · bible-api.com (interim)  
+> **Status:** Phase 0 Complete & Deployment Ready · AI/platform layers prototyped & grounded  
+> **Last updated:** 2026-08-23  
+> **Stack:** Next.js 16 (App Router) · TypeScript · Supabase · Anthropic Claude · OpenAI embeddings · Bundled Public Domain Modules · Strong's Lexicons  
 > **Work tracker:** [TODO.md](TODO.md) · **Product vision:** [README.md](README.md)
 
 ---

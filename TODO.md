@@ -1,7 +1,7 @@
 # BibleDesk — TODO
 
-> **Current phase:** Phase 0 — Local-first Bible foundation  
-> **Last updated:** 2026-08-09  
+> **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
+> **Last updated:** 2026-08-23  
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
