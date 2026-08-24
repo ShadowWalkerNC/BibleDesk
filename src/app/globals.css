@@ -1,49 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=SF+Pro+Display:wght@400;500;600&family=SF+Pro+Text:wght@400;500;600&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════
-   BIBLEDESK DESIGN SYSTEM — Apple Liquid Glass (visionOS / macOS / iOS 18)
-   Translucent blurred materials, ultra-fine borders, gold-tinted liquid reflections
+   BIBLEDESK DESIGN SYSTEM — Reverent Bible Desk & Apple Liquid Glass
+   Warm parchment, illuminated manuscript gold, aged vellum texture,
+   fountain pen ink typography, combined with visionOS/macOS translucent glass.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Apple Liquid Glass Palette */
-  --navy-950: #f5f5f7; /* Apple system background / canvas */
-  --navy-900: rgba(255, 255, 255, 0.72); /* Glass material card surface */
-  --navy-800: rgba(230, 230, 235, 0.6); /* Sub-element glass surface */
-  --navy-700: rgba(210, 210, 218, 0.5);
-  --navy-600: #8e8e93; /* System gray */
-  --navy-500: #636366;
+  /* Bible Desk Parchment & Vellum Palette */
+  --navy-950: #f7f3e8; /* Warm manuscript parchment canvas */
+  --navy-900: rgba(252, 249, 242, 0.82); /* Translucent vellum card surface */
+  --navy-800: rgba(238, 230, 214, 0.7); /* Sub-element parchment surface */
+  --navy-700: rgba(220, 208, 186, 0.6); /* Parchment border tone */
+  --navy-600: #8c7d6b; /* Aged leather gray/brown */
+  --navy-500: #5c5042;
 
-  --gold-400: #b58913; /* Scholarly gold accent */
-  --gold-500: #946f0b;
-  --gold-600: #735605;
-  --gold-glow: rgba(181, 137, 19, 0.12);
+  /* Illuminated Manuscript Gold Leaf */
+  --gold-400: #b58414; /* Deep illuminated manuscript gold */
+  --gold-500: #94690a;
+  --gold-600: #6e4e04;
+  --gold-glow: rgba(181, 132, 20, 0.14);
 
-  --parchment-100: #1c1c1e;
-  --parchment-200: #2c2c2e;
-  --parchment-300: #48484a;
+  /* Deep Fountain Pen Ink Typography */
+  --parchment-100: #1b1610; /* Deep iron gall ink */
+  --parchment-200: #2d251c; /* Soft dark manuscript text */
+  --parchment-300: #524738; /* Secondary commentary text */
 
-  --text-primary: #1c1c1e; /* Apple San Francisco primary label */
-  --text-secondary: #3a3a3c; /* Apple secondary label */
-  --text-muted: #8e8e93; /* Apple tertiary system gray */
-  --text-tertiary: #aeaeb2;
+  --text-primary: #2b2319; /* Reverent iron gall ink text */
+  --text-secondary: #594d3c; /* Warm scholarly bronze label */
+  --text-muted: #8c7e6c; /* Aged margin commentary gray */
+  --text-tertiary: #aa9c88;
   --surface-2: var(--navy-900);
-  --text-inverse: #ffffff;
+  --text-inverse: #fdfbf7;
 
-  /* Dimension accent colors (Apple vibrant system tints) */
-  --dim-scripture:    #007aff; /* Apple Blue */
-  --dim-historical:   #ff9500; /* Apple Orange */
-  --dim-language:     #af52de; /* Apple Purple */
-  --dim-theological:  #34c759; /* Apple Green */
-  --dim-practical:    #ff2d55; /* Apple Pink */
+  /* 5 Dimensions Sourced Color Palette (Reverent Manuscript Tints) */
+  --dim-scripture:    #185ea5; /* Deep Royal Sanctuary Blue */
+  --dim-historical:   #b84c16; /* Antique Clay / Terra Cotta */
+  --dim-language:     #6b35b8; /* Royal Codex Purple */
+  --dim-theological:  #0b7a54; /* Olive Branch Green */
+  --dim-practical:    #b81d58; /* Crimson Rubric Pink */
 
-  /* Apple Liquid Glass Surface & Material tokens */
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.45);
-  --glass-border-outer: rgba(0, 0, 0, 0.08);
-  --glass-hover: rgba(255, 255, 255, 0.85);
+  /* Apple Liquid Glass Surface & Parchment Vellum Tokens */
+  --glass-bg: rgba(252, 249, 242, 0.75);
+  --glass-border: rgba(181, 132, 20, 0.22);
+  --glass-border-outer: rgba(100, 80, 50, 0.08);
+  --glass-hover: rgba(255, 253, 248, 0.92);
 
-  /* Apple Squircle Radius tokens */
+  /* Apple Squircle Radius Tokens */
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
@@ -53,14 +56,15 @@
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Apple Typography (System UI with fallback to Inter) */
+  /* Bible-First Typography (Lora Serif primary for Scripture, Cinzel for Display) */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
   --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-display: 'Cinzel', 'Lora', Georgia, serif;
 
-  /* Apple Elevation & Liquid Reflections */
-  --apple-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --apple-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --apple-shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  /* Elevation & Parchment Shadows */
+  --apple-shadow-sm: 0 2px 8px rgba(90, 70, 40, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --apple-shadow-md: 0 10px 30px rgba(90, 70, 40, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+  --apple-shadow-lg: 0 20px 40px rgba(90, 70, 40, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* ── Reset & Base ─────────────────────────────────────────── */
@@ -85,9 +89,9 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   background-image:
-    radial-gradient(ellipse 90% 60% at 20% -10%, rgba(220, 230, 248, 0.65), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 85% 90%, rgba(245, 235, 215, 0.5), transparent 70%),
-    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255, 255, 255, 0.4), transparent);
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 230, 200, 0.7), transparent 75%),
+    radial-gradient(ellipse 70% 50% at 85% 90%, rgba(235, 218, 185, 0.4), transparent 75%),
+    radial-gradient(ellipse 60% 60% at 15% 75%, rgba(255, 252, 245, 0.6), transparent);
   background-attachment: fixed;
 }
 
@@ -108,14 +112,19 @@ a:hover {
   font-family: var(--font-serif);
 }
 
+.text-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
 .text-gradient {
-  background: linear-gradient(135deg, #8a6500 0%, #b58913 50%, #7c5c00 100%);
+  background: linear-gradient(135deg, #7c5804 0%, #b58414 50%, #5e4302 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Apple Liquid Glass Card & Specular Materials ──────────── */
+/* ── Apple Liquid Glass Card & Parchment Specular Materials ─── */
 
 .glass-card {
   background: var(--glass-bg);
@@ -124,10 +133,10 @@ a:hover {
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.05),
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+    0 12px 32px rgba(90, 70, 40, 0.06),
+    0 2px 6px rgba(90, 70, 40, 0.03),
+    inset 0 1px 0 rgba(255, 253, 248, 0.9),
+    inset 0 -1px 0 rgba(181, 132, 20, 0.08);
   transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
 }
 

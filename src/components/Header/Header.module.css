@@ -13,16 +13,16 @@
   justify-content: space-between;
   height: 54px;
   padding: 0 1.25rem;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(252, 249, 242, 0.82);
   backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(181, 132, 20, 0.28);
   border-radius: var(--radius-xl);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+    0 8px 32px rgba(90, 70, 40, 0.07),
+    0 1px 3px rgba(90, 70, 40, 0.03),
+    inset 0 1px 0 rgba(255, 253, 248, 0.95),
+    inset 0 -1px 0 rgba(181, 132, 20, 0.1);
   transition: all 0.3s var(--ease-out);
 }
 
@@ -36,7 +36,7 @@
 .logoIcon {
   width: 30px;
   height: 30px;
-  background: linear-gradient(135deg, #c69919, #8a6500);
+  background: linear-gradient(135deg, #b58414, #6e4e04);
   border-radius: 9px;
   display: flex;
   align-items: center;
@@ -44,14 +44,15 @@
   font-size: 16px;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(181, 137, 19, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 10px rgba(181, 132, 20, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .logoText {
-  font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.025em;
+  letter-spacing: 0.02em;
 }
 
 .logoText span {

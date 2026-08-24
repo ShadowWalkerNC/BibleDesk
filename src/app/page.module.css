@@ -55,9 +55,10 @@
 }
 
 .brandMark {
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--text-primary);
   animation: fadeUp 0.5s var(--ease-out) both;
 }
@@ -125,9 +126,10 @@
 }
 
 .assistantTitle {
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 3vw, 1.85rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
   color: var(--text-primary);
   max-width: 560px;
 }
@@ -141,10 +143,11 @@
 }
 
 .heroTitle {
+  font-family: var(--font-display);
   font-size: clamp(2.25rem, 5.5vw, 3.75rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
   max-width: 720px;
   animation: fadeUp 0.5s var(--ease-out) 0.08s both;
