@@ -145,14 +145,18 @@
   min-height: 0;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow: var(--apple-shadow-sm);
 }
 
 .hubNavHeader {
   display: flex;
-  background: var(--navy-900);
-  border-bottom: 1px solid var(--glass-border);
-  padding: 0.25rem;
-  gap: 2px;
+  background: rgba(225, 225, 232, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 4px;
+  gap: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .hubTabBtn {
@@ -163,23 +167,25 @@
   gap: 5px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.5rem 0.25rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.45rem 0.25rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s var(--ease-out);
 }
 
 .hubTabBtn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .hubTabBtnActive {
-  background: var(--gold-glow) !important;
-  color: var(--gold-400) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .hubContent {
@@ -501,8 +507,10 @@
 
 .tabsHeader {
   display: flex;
-  background: var(--navy-900);
-  border-bottom: 1px solid var(--glass-border);
+  background: rgba(225, 225, 232, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 4px;
+  gap: 3px;
   flex-shrink: 0;
 }
 
@@ -510,13 +518,11 @@
   flex: 1;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 1rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.35rem;
   cursor: pointer;
   transition: all 0.2s var(--ease-out);
   text-align: center;
@@ -524,13 +530,14 @@
 
 .tabLink:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .activeTabLink {
-  color: var(--gold-400);
-  border-bottom-color: var(--gold-400);
-  background: rgba(245, 200, 66, 0.02);
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .tabContent {

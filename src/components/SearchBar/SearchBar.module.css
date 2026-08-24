@@ -25,15 +25,21 @@
   min-height: 72px;
   max-height: 200px;
   padding: 1rem 1.25rem;
-  background: var(--glass-bg);
-  border: 1.5px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.6;
   resize: vertical;
-  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.25s var(--ease-out);
   caret-color: var(--gold-400);
 }
 
@@ -43,8 +49,12 @@
 
 .textarea:focus {
   outline: none;
-  border-color: var(--gold-500);
-  box-shadow: 0 0 0 3px var(--gold-glow), 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: var(--gold-400);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 
+    0 0 0 3px var(--gold-glow),
+    0 8px 28px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .charCount {
@@ -89,30 +99,30 @@
 .translationPills {
   display: flex;
   gap: 4px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: rgba(225, 225, 232, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 99px;
   padding: 3px;
 }
 
 .translationPill {
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 99px;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out);
+  transition: all 0.2s var(--ease-out);
   white-space: nowrap;
 }
 
 .translationPill:hover:not(:disabled) {
-  color: var(--text-secondary);
-  background: var(--glass-hover);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .translationPill:disabled {
@@ -121,9 +131,10 @@
 }
 
 .translationPillActive {
-  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
-  color: var(--text-inverse) !important;
-  box-shadow: 0 1px 6px rgba(181, 137, 19, 0.15);
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .translationName {
@@ -139,16 +150,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0.75rem 1.75rem;
-  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
-  color: var(--text-inverse);
+  padding: 0.7rem 1.6rem;
+  background: linear-gradient(135deg, #c69919, #8a6500);
+  color: #ffffff;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out), opacity 0.15s;
+  box-shadow: 0 4px 16px rgba(181, 137, 19, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), opacity 0.15s;
   white-space: nowrap;
 }
 
