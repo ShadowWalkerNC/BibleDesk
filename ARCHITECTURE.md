@@ -1,9 +1,9 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 0 Complete & Deployment Ready · AI/platform layers prototyped & grounded  
-> **Last updated:** 2026-08-23  
-> **Stack:** Next.js 16 (App Router) · TypeScript · Supabase · Anthropic Claude · OpenAI embeddings · Bundled Public Domain Modules · Strong's Lexicons  
-> **Work tracker:** [TODO.md](TODO.md) · **Product vision:** [README.md](README.md)
+> **Status:** Phase 0 Complete & Deployment Ready · AI/platform layers grounded & audited  
+> **Last updated:** 2026-08-25  
+> **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · OpenAI Embeddings · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Lexicons  
+> **Work tracker:** [TODO.md](TODO.md) · **Ops Audit:** [OPS_REPORT.md](OPS_REPORT.md) · **Product Vision:** [README.md](README.md)
 
 ---
 
@@ -14,22 +14,25 @@
 │                    USER (Browser / PWA / Electron)                  │
 │                                                                     │
 │   Next.js App Router                                                │
-│   · /bible · plans · study tools          ← product core            │
-│   · / (home): Bible-first hero + AI assistant                       │
+│   · /bible · 3-Column Study Desk          ← product core            │
+│   · / (home): Reverent Vellum UI + 3D Sacred Book + AI assistant    │
+│   · Shadcn UI (Button, Card) + Lucide Icons                         │
 │   · /graph · /history · /share/[slug] · prayer · sermons · mod …    │
 │        │ /api/bible/*              │ /api/ask[/stream]              │
 └────────┼───────────────────────────┼────────────────────────────────┘
          ▼                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    NEXT.JS SERVER LAYER                             │
-│  Bible today: bible-api.com (lib/bible.ts) — Phase 0 → local modules│
-│  AI: rate limit → OpenAI embed RAG → 6-stage Claude pipeline        │
-│  Study: /api/bible/study (Gemini, optional offline stub)            │
+│  Bible Reader: Local Static Modules (KJV, ASV, WEB, BBE, Darby, YLT)│
+│  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline│
+│  Embeddings: OpenAI text-embedding-3-small for pgvector RAG         │
+│  Study Companion: /api/bible/study (Gemini + Strong's Lexicons)     │
+│  Operations: Cron 9:00 AM Daily Audit (bibledesk_ops_manager)        │
 │  Sigil: /api/v1/bible/answer (HMAC) · MCP: /api/mcp                 │
-│  Also: graph · history · bookmarks · prayer · sermons · export · mod│
+│  Church Tools: Sermon workspace with offline guest draft fallback   │
 └────────────────┬──────────────────────┬─────────────────────────────┘
                  ▼                      ▼
-        Claude / OpenAI / Gemini     Supabase (Postgres + pgvector + RLS)
+         Google Gemini / OpenAI     Supabase (Postgres + pgvector + RLS)
 
 Sigil Discord bot → HMAC POST /api/v1/bible/answer
 Share URLs: {APP_URL}/share/{8-char-slug}
@@ -43,16 +46,16 @@ Share URLs: {APP_URL}/share/{8-char-slug}
 |---|---|---|
 | **Framework** | Next.js 16 (App Router) | SSR for SEO; secrets stay server-side |
 | **Language** | TypeScript 5 | Full type safety |
-| **AI answers** | Anthropic Claude | Structured JSON; 6-stage grounded pipeline |
+| **UI Components** | Shadcn UI (`components/ui`) | Standard polymorphic `Button` and `Card` primitives |
+| **3D Graphics** | Three.js + React Three Fiber (`@react-three/fiber`, `@react-three/drei`) | Floating interactive Sacred Book hero model (`Bible3DCanvas`) |
+| **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
+| **AI Answers & Pipeline** | Google Gemini API (`GEMINI_API_KEY`) | 6-stage grounded answer pipeline & verse study guide |
 | **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |
-| **Study companion** | Google Gemini | Optional `/api/bible/study` |
-| **Bible Data (today)** | bible-api.com | Interim public-domain fetch |
-| **Bible Data (target)** | Midvash + OpenScriptures | Offline read/search + lexicon word study |
+| **Operations Manager** | `bibledesk_ops_manager` subagent + cron schedule | Autonomous daily product audit at 9:00 AM |
+| **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |
+| **Lexicon & Cross-Refs** | Strong's Greek/Hebrew + TSK | 5.5k Greek + 8.6k Hebrew + 29k cross-references |
 | **Database** | Supabase (PostgreSQL + pgvector) | RLS, vectors, auth |
-| **Hosting** | Vercel preferred | Next.js DX; Render also viable |
-| **PWA** | Manifest + icons | Replace placeholder PNGs before launch |
-| **Desktop** | Electron (`apps/desktop`) | Vault/graph shell |
-| **Styling** | CSS Modules + custom properties | Scoped design system |
+| **PWA & Desktop** | Manifest + Electron (`apps/desktop`) | Local desktop shell & PWA support |
 
 ---
 

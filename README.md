@@ -6,15 +6,15 @@ BibleDesk helps churches, pastors, teachers, and individual readers study Script
 
 ---
 
-## Current Status (2026-08-23)
+## Current Status (2026-08-25)
 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation (Complete & Ready for Deploy)** |
-| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel (Parchment-themed), Lucide SVG icon design system (emoji-free), AI 5-dimension pipeline (+ streaming), RAG, knowledge graph, MCP, history/share, prayer, sermons, plans |
+| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Book canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, Gemini 2.5/3.5 server-side AI pipeline engine, local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel (Parchment-themed), Lucide SVG icon design system (emoji-free), RAG, knowledge graph, MCP, history/share, prayer, sermons with guest offline fallback, plans, and autonomous daily Operations Manager audit cron. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
 | **Deploy** | Production Next.js 16 build verified across all 29 routes (`0` type errors) |
-| **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [AGENTS.md](AGENTS.md) for agent rules |
+| **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) (obsolete “empty stub / reset” note).
 
@@ -28,30 +28,33 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 
 ## What’s Built Today
 
-### Study surfaces
+### Study surfaces & UI
 - `/bible` — Centralized 3-Column Study Desk (Left Hub: Daily/Plans/Bookmarks, Center: Scripture Reader with TTS & word study, Right: 5D AI, Concordance, Strong's, Cross-Refs & Notes)
+- `Shadcn UI` — Standard polymorphic `Button` and `Card` components styled with vellum glass and illuminated gold highlights
+- `3D Canvas` — Three.js + React Three Fiber (`@react-three/fiber`) floating interactive Sacred Book hero model (`Bible3DCanvas`) & interactive D3 `PrayerAtlas` 3D globe
 - `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
 - `/bookmarks`, `/history`, `/graph`, `/share/[slug]`
 - `apps/extension` — Chrome MV3 side panel extension with full Parchment theme & instant lookup
 
-### AI assistant
-- Homepage assistant + `POST /api/ask` / `/api/ask/stream`
+### AI assistant & Operations
+- Server-side **Gemini API (`GEMINI_API_KEY`)** powering 5-dimension AI pipeline & `/bible` verse study companion
 - 5 dimensions: Scripture · Historical · Original Language · Theological · Practical Application
 - Rate limit: 15 questions/hour/IP
 - RAG over canonical answers (OpenAI embeddings + pgvector)
+- **Autonomous Operations Manager (`bibledesk_ops_manager`)**: Daily 9:00 AM background audit cron job testing workflows and updating project priorities (`OPS_REPORT.md`)
 
 ### Platform / network
 - Sigil webhook: `POST /api/v1/bible/answer` (HMAC)
 - HTTP MCP: `/api/mcp`
-- Prayer board, sermon prep, moderation (`/mod`), login
+- Prayer board, sermon prep with guest/offline draft fallback, moderation (`/mod`), login
 - Electron app under `apps/desktop/`
 
-### Temporary data dependency
+### AI & Data Engine
 | Source | Role | Limitation |
 |---|---|---|
-| bible-api.com | Current verse fetch | Online-only; not the long-term foundation |
-| Gemini (`GEMINI_API_KEY`) | `/bible` study companion | Must not be sold as offline lexicon |
-| Claude + OpenAI | Answers + embeddings | Server-only; optional when offline |
+| Local Modules | Installed public domain translations (KJV, ASV, WEB, BBE, Darby, YLT) | Zero network requirement |
+| Gemini (`GEMINI_API_KEY`) | 5-Dimension AI Pipeline & `/bible` study companion | Server-only |
+| OpenAI (`OPENAI_API_KEY`) | RAG vector embeddings (`text-embedding-3-small`) | Server-only; optional when offline |
 
 ---
 
