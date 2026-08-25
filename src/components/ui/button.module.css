@@ -1,0 +1,113 @@
+.buttonBase {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: all 0.2s var(--ease-out);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  user-select: none;
+}
+
+.buttonBase:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
+}
+
+.buttonBase:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.sizeDefault {
+  height: 2.5rem;
+  padding: 0.5rem 1.25rem;
+}
+
+.sizeSm {
+  height: 2rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  border-radius: var(--radius-sm);
+}
+
+.sizeLg {
+  height: 2.85rem;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
+}
+
+.sizeIcon {
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0;
+}
+
+.variantDefault {
+  background: var(--navy-900);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--apple-shadow-sm);
+}
+
+.variantDefault:hover {
+  background: var(--glass-hover);
+  border-color: var(--gold-400);
+}
+
+.variantGold {
+  background: linear-gradient(135deg, #b58414, #6e4e04);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(181, 132, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.variantGold:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(181, 132, 20, 0.38);
+}
+
+.variantSecondary {
+  background: rgba(235, 225, 205, 0.6);
+  color: var(--text-secondary);
+  border: 1px solid rgba(181, 132, 20, 0.18);
+}
+
+.variantSecondary:hover {
+  color: var(--text-primary);
+  background: rgba(255, 253, 248, 0.9);
+}
+
+.variantOutline {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+
+.variantOutline:hover {
+  border-color: var(--gold-400);
+  background: var(--glass-hover);
+}
+
+.variantGhost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.variantGhost:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
+
+.variantLink {
+  background: transparent;
+  color: var(--gold-400);
+  text-decoration: underline;
+  padding: 0;
+  height: auto;
+}

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { 
   BookOpen, 
   Calendar, 
@@ -19,7 +20,14 @@ import StreamingProgress from '@/components/StreamingProgress/StreamingProgress'
 import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import styles from './page.module.css';
+
+const Bible3DCanvas = dynamic(() => import('@/components/Bible3DCanvas/Bible3DCanvas'), {
+  ssr: false,
+  loading: () => <div style={{ height: '240px' }} />
+});
 
 const PLACEHOLDERS = [
   'What did Jesus mean by "born again"?',
@@ -81,17 +89,25 @@ export default function HomePage() {
               <span className="text-gradient">Study deeply.</span>
             </h1>
 
+            {/* Interactive 3D Three.js Sacred Book */}
+            <Bible3DCanvas />
+
             <p className={styles.heroSubtitle}>
               A Bible-first study desk — read, search, and take notes.
               AI helps when you want it, without replacing the text.
             </p>
 
             <div className={styles.heroCtas}>
-              <Link href="/bible" className={styles.ctaPrimary}>
-                Open Bible Reader
+              <Link href="/bible">
+                <Button variant="gold" size="lg">
+                  Open Bible Reader
+                  <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+                </Button>
               </Link>
-              <a href="#assistant" className={styles.ctaSecondary}>
-                Ask the assistant
+              <a href="#assistant">
+                <Button variant="secondary" size="lg">
+                  Ask the assistant
+                </Button>
               </a>
             </div>
 
@@ -102,20 +118,26 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Study tools ───────────────────────────────────── */}
+        {/* ── Study tools (Shadcn UI Cards) ──────────────────── */}
         {!answer && !isLoading && !error && (
           <section className={styles.teaser} aria-label="Study tools">
             <div className="container">
               <p className={styles.teaserLabel}>Study tools</p>
               <div className={styles.teaserGrid}>
                 {STUDY_TOOLS.map(({ label, desc, href, icon: CardIcon }) => (
-                  <Link key={label} href={href} className={styles.teaserCard}>
-                    <div className={styles.teaserIconWrapper}>
-                      <CardIcon size={20} style={{ color: 'var(--gold-400)' }} />
-                    </div>
-                    <p className={styles.teaserCardLabel}>{label}</p>
-                    <p className={styles.teaserCardDesc}>{desc}</p>
-                    <span className={styles.teaserPill}>Open</span>
+                  <Link key={label} href={href} style={{ textDecoration: 'none' }}>
+                    <Card className={styles.teaserCard}>
+                      <CardHeader style={{ padding: '1rem 1rem 0.5rem', alignItems: 'center' }}>
+                        <div className={styles.teaserIconWrapper}>
+                          <CardIcon size={20} style={{ color: 'var(--gold-400)' }} />
+                        </div>
+                        <CardTitle style={{ fontSize: '1rem', marginTop: '0.25rem' }}>{label}</CardTitle>
+                        <CardDescription style={{ fontSize: '0.8rem', textAlign: 'center' }}>{desc}</CardDescription>
+                      </CardHeader>
+                      <CardContent style={{ padding: '0.5rem 1rem 1rem', display: 'flex', justifyContent: 'center' }}>
+                        <span className={styles.teaserPill}>Open</span>
+                      </CardContent>
+                    </Card>
                   </Link>
                 ))}
               </div>
