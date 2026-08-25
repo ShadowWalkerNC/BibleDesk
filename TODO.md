@@ -1,7 +1,7 @@
 # BibleDesk — TODO
 
 > **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
-> **Last updated:** 2026-08-23  
+> **Last updated:** 2026-08-25  
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
@@ -113,6 +113,22 @@
 ---
 
 ## Next After Phase 0
+
+### Operations Audit Action Items (2026-08-25)
+
+#### Daily Reader Friction
+- [ ] Auto-resume last read book/chapter position on `/bible` (store in `localStorage` & profile)
+- [ ] Implement PWA ServiceWorker offline asset & route precaching
+- [ ] Dual-write verse highlights & notes (`localStorage` + Supabase sync when authenticated)
+
+#### Pastor & Preacher Friction
+- [ ] Enable offline/guest draft fallback in Sermon Workspace (`/sermons`) without hard auth gate
+- [ ] Add Markdown (`.md`) and HTML/PDF export options to Sermon Workspace
+- [ ] Multi-passage scripture builder in e-Sword sidebar (select & pin multiple references across books)
+
+#### Study Group & Church Friction
+- [ ] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
+- [ ] Printable Small Group Study Guide exporter for 5D AI answer pages (`/share/[slug]`)
 
 ### MCP gaps
 - [x] `get_cross_references(reference)` (via TSK engine)

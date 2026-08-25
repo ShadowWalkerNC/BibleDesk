@@ -92,7 +92,7 @@ export default function SermonWorkspacePage() {
     }
   }
 
-  // 1. Session check
+  // 1. Session check with Guest / Offline LocalStorage fallback
   useEffect(() => {
     const supabase = getBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,6 +100,22 @@ export default function SermonWorkspacePage() {
       setCheckingSession(false);
       if (session?.user) {
         fetchOutlines(session.user.id);
+      } else {
+        // Guest offline fallback
+        const localData = localStorage.getItem('bibledesk_sermons_guest');
+        if (localData) {
+          try {
+            const parsed = JSON.parse(localData);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setOutlines(parsed);
+              setSelectedOutlineId(parsed[0].id);
+              setTitle(parsed[0].title);
+              setContent(parsed[0].content);
+            }
+          } catch (e) {
+            console.error('Failed to parse guest sermons:', e);
+          }
+        }
       }
     });
   }, []);
@@ -124,11 +140,30 @@ export default function SermonWorkspacePage() {
   }, [sidebarBook, sidebarChapter, sidebarTranslation]);
 
 
-  // 3. Save outline
+  // 3. Save outline (supports guest/offline mode)
   async function handleSave(publishToDiscord = false) {
-    if (!session?.user?.id) return;
     if (!title.trim() || !content.trim()) {
       showToast('Title and content are required.', 'error');
+      return;
+    }
+
+    if (!session?.user?.id) {
+      // Guest local storage save
+      const item: SermonOutline = {
+        id: selectedOutlineId || `guest_${Date.now()}`,
+        title: title.trim(),
+        content: content.trim(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const updated = outlines.some(o => o.id === item.id)
+        ? outlines.map(o => o.id === item.id ? item : o)
+        : [item, ...outlines];
+
+      setOutlines(updated);
+      setSelectedOutlineId(item.id);
+      localStorage.setItem('bibledesk_sermons_guest', JSON.stringify(updated));
+      showToast(publishToDiscord ? 'Saved locally (Sign in to publish to Discord).' : 'Draft saved locally.');
       return;
     }
 
