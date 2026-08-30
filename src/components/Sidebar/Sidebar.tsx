@@ -21,9 +21,12 @@ import {
   LogIn,
   LogOut,
   User,
+  Key,
+  Sparkles,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
+import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
 import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
@@ -56,6 +59,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [isJumpOpen, setIsJumpOpen] = useState(false);
+  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setHasApiKey(!!localStorage.getItem('bibledesk_gemini_key'));
+    }
+  }, [isKeyModalOpen]);
 
   // Auth state
   useEffect(() => {
@@ -156,8 +167,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {TOOL_LINKS.map(link => <NavItem key={link.href} {...link} />)}
         </nav>
 
-        {/* Footer: Auth */}
+        {/* Footer: Gemini API Key & Auth */}
         <div className={styles.sidebarFooter}>
+          <button
+            className={`${styles.apiKeyBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+            onClick={() => setIsKeyModalOpen(true)}
+            title={hasApiKey ? 'Gemini API Key: Configured' : 'Configure Gemini API Key'}
+          >
+            <Sparkles size={14} className={styles.keyIcon} />
+            {!collapsed && (
+              <span className={styles.apiKeyLabel}>
+                {hasApiKey ? 'AI Key: Active' : 'Add Gemini Key'}
+              </span>
+            )}
+          </button>
+
           {user ? (
             <div className={styles.userRow}>
               <div className={styles.userAvatar} aria-hidden="true">
@@ -197,13 +221,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <span>{label}</span>
           </Link>
         ))}
-        <button className={styles.mobileNavItem} onClick={() => setIsJumpOpen(true)}>
-          <Search size={20} />
-          <span>Search</span>
+        <button className={styles.mobileNavItem} onClick={() => setIsKeyModalOpen(true)}>
+          <Sparkles size={20} />
+          <span>AI Key</span>
         </button>
       </nav>
 
       <QuickJumpModal isOpen={isJumpOpen} onClose={() => setIsJumpOpen(false)} />
+      <ApiKeyModal isOpen={isKeyModalOpen} onClose={() => setIsKeyModalOpen(false)} />
     </>
   );
 }

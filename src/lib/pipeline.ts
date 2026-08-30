@@ -59,6 +59,7 @@ export interface PipelineOptions {
   translation?: TranslationId;
   ragContext?: string;
   maxTokens?: number;
+  apiKey?: string;
   /** Called after each stage completes — used by the SSE stream route */
   onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
 }
@@ -70,11 +71,12 @@ import { callGemini } from './gemini';
 async function callClaude(
   system: string,
   userMessage: string,
-  maxTokens = 1024
+  maxTokens = 1024,
+  apiKey?: string
 ): Promise<string> {
   void maxTokens;
   try {
-    return await callGemini(system, userMessage);
+    return await callGemini(system, userMessage, apiKey);
   } catch (err: any) {
     if (err.message && err.message.includes('RESOURCE_EXHAUSTED')) {
       throw new Error('AI Assistant is currently offline due to rate-limits or depleted credits. Please try again later.');
@@ -221,7 +223,8 @@ Return ONLY valid JSON matching this exact schema:
 
 async function runStage1(
   question: string,
-  ragContext: string
+  ragContext: string,
+  apiKey?: string
 ): Promise<ClassificationResult> {
   const t0 = Date.now();
   const contextBlock = ragContext
@@ -231,7 +234,8 @@ async function runStage1(
   const raw = await callClaude(
     STAGE1_SYSTEM,
     `Question: ${question}${contextBlock}`,
-    512
+    512,
+    apiKey
   );
 
   const parsed = tryParseJSON<ClassificationResult>(raw);
@@ -273,10 +277,11 @@ async function runStage2(
 
 async function runStage3(
   question: string,
-  verses: VerifiedVerse[]
+  verses: VerifiedVerse[],
+  apiKey?: string
 ): Promise<VerifiedVerse[]> {
-  if (verses.length === 0) return [];
   const t0 = Date.now();
+  if (verses.length === 0) return [];
 
   const verseBlock = verses
     .map((v) => `${v.reference}: "${v.text}"`)
@@ -285,7 +290,8 @@ async function runStage3(
   const raw = await callClaude(
     STAGE3_SYSTEM,
     `Question: ${question}\n\nVerses to evaluate:\n${verseBlock}`,
-    768
+    768,
+    apiKey
   );
 
   interface Stage3Response {
@@ -323,8 +329,8 @@ async function runStage3(
 
 async function runStage4(
   question: string,
-  verifiedVerses: VerifiedVerse[]
-   
+  verifiedVerses: VerifiedVerse[],
+  apiKey?: string
 ): Promise<Record<string, any>> {
   const t0 = Date.now();
 
@@ -335,7 +341,8 @@ async function runStage4(
   const raw = await callClaude(
     STAGE4_SYSTEM,
     `Question: ${question}\n\nVerified Scripture passages:\n${verseBlock || '(none fetched — reason from scripture knowledge)'}`,
-    1024
+    1024,
+    apiKey
   );
 
    
@@ -353,9 +360,8 @@ async function runStage4(
 async function runStage5(
   question: string,
   verifiedVerses: VerifiedVerse[],
-   
-  historicalAnalysis: Record<string, any>
-   
+  historicalAnalysis: Record<string, any>,
+  apiKey?: string
 ): Promise<Record<string, any>> {
   const t0 = Date.now();
 
@@ -370,7 +376,8 @@ async function runStage5(
       `\nVerified Scripture:\n${verseBlock || '(none)'}`,
       `\nHistorical Analysis:\n${JSON.stringify(historicalAnalysis, null, 2)}`,
     ].join('\n'),
-    1024
+    1024,
+    apiKey
   );
 
    
@@ -389,11 +396,10 @@ async function runStage6(
   question: string,
   classification: ClassificationResult,
   verifiedVerses: VerifiedVerse[],
-   
   historicalAnalysis: Record<string, any>,
-   
   synthesis: Record<string, any>,
-  translation: TranslationId
+  translation: TranslationId,
+  apiKey?: string
 ): Promise<BibleAnswer> {
   const t0 = Date.now();
 
@@ -411,7 +417,7 @@ async function runStage6(
     `\nTHEOLOGICAL SYNTHESIS:\n${JSON.stringify(synthesis, null, 2)}`,
   ].join('\n');
 
-  const raw = await callClaude(STAGE6_SYSTEM, assemblyPrompt, 4096);
+  const raw = await callClaude(STAGE6_SYSTEM, assemblyPrompt, 4096, apiKey);
 
   type RawAnswer = Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at' | 'status'>;
   let parsed = tryParseJSON<RawAnswer>(raw);
@@ -421,7 +427,7 @@ async function runStage6(
       STAGE6_SYSTEM,
       assemblyPrompt +
         '\n\nYour previous response was not valid JSON. Return ONLY the raw JSON object. Start with { and end with }.'
-    , 4096);
+    , 4096, apiKey);
     parsed = tryParseJSON<RawAnswer>(retryRaw);
     if (!parsed) throw new Error(`Stage 6 (Assembly) returned invalid JSON after retry`);
   }
@@ -452,7 +458,7 @@ export async function runPipeline(
   question: string,
   options: PipelineOptions = {}
 ): Promise<PipelineResult> {
-  const { translation = 'web', ragContext = '', maxTokens, onStageComplete } = options;
+  const { translation = 'web', ragContext = '', maxTokens, apiKey, onStageComplete } = options;
   void maxTokens;
 
   const pipelineStart = Date.now();
@@ -465,7 +471,7 @@ export async function runPipeline(
   }
 
   const s1Start = Date.now();
-  const classification = await runStage1(question, ragContext);
+  const classification = await runStage1(question, ragContext, apiKey);
   record(1, 'Classify', s1Start, classification as unknown as Record<string, unknown>);
 
   const s2Start = Date.now();
@@ -473,18 +479,18 @@ export async function runPipeline(
   record(2, 'Scripture Search', s2Start, { verse_count: fetchedVerses.length });
 
   const s3Start = Date.now();
-  const verifiedVerses = await runStage3(question, fetchedVerses);
+  const verifiedVerses = await runStage3(question, fetchedVerses, apiKey);
   record(3, 'Accuracy Check', s3Start, {
     input: fetchedVerses.length,
     passed: verifiedVerses.length,
   });
 
   const s4Start = Date.now();
-  const historicalAnalysis = await runStage4(question, verifiedVerses);
+  const historicalAnalysis = await runStage4(question, verifiedVerses, apiKey);
   record(4, 'Historical & Doctrinal', s4Start, historicalAnalysis);
 
   const s5Start = Date.now();
-  const synthesis = await runStage5(question, verifiedVerses, historicalAnalysis);
+  const synthesis = await runStage5(question, verifiedVerses, historicalAnalysis, apiKey);
   record(5, 'Theological Synthesis', s5Start, synthesis);
 
   const s6Start = Date.now();
@@ -494,7 +500,8 @@ export async function runPipeline(
     verifiedVerses,
     historicalAnalysis,
     synthesis,
-    translation
+    translation,
+    apiKey
   );
   record(6, 'Final Assembly', s6Start, { confidence: answer.confidence, status: answer.status });
 

@@ -28,6 +28,7 @@
 - [x] Persistent App Shell & Sidebar navigation (Logos/Obsidian workspace feel, mobile bottom rail)
 - [x] Focused Study Start screen (removed marketing hero, 3D canvas weight, and card grids)
 - [x] Biblical prose reader typography (superscript verse numbers, generous serif line-height)
+- [x] Bring-Your-Own-Key (BYOK) Gemini API key setup modal & login integration (with shared/free Bible text guarantee)
 - [x] All 29 routes type-checked & verified in Next.js 16 production build (`next build`)
 - [x] PWA manifest & Chrome MV3 side panel extension aligned
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:

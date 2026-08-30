@@ -41,6 +41,7 @@ function sse(event: string, data: unknown): string {
 export async function POST(req: NextRequest) {
   let question: string;
   let translation: TranslationId;
+  let geminiApiKey: string | undefined;
 
   try {
     const body = await req.json();
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
     translation = VALID_TRANSLATIONS.includes(body.translation)
       ? (body.translation as TranslationId)
       : 'web';
+    geminiApiKey = body.geminiApiKey?.trim();
   } catch {
     return new Response(sse('error', { message: 'Invalid request body' }), {
       status: 400,
@@ -87,12 +89,14 @@ export async function POST(req: NextRequest) {
       try {
         const ragResult = await runRAG(question).catch(() => null);
         const ragContext = ragResult?.contextPrompt || '';
+        const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || geminiApiKey;
 
         const options: PipelineOptions & {
           onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
         } = {
           translation,
           ragContext,
+          apiKey: userApiKey,
           onStageComplete(stage, name, duration_ms) {
             emit('stage', { stage, name, duration_ms });
           },

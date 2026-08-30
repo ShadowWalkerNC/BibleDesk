@@ -209,8 +209,62 @@
 
 .sidebarFooter {
   border-top: 1px solid rgba(181, 132, 20, 0.12);
-  padding: 0.75rem 0.6rem;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   flex-shrink: 0;
+}
+
+.apiKeyBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 0.65rem;
+  background: rgba(181, 132, 20, 0.08);
+  border: 1px solid rgba(181, 132, 20, 0.22);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+}
+
+.apiKeyBtn:hover {
+  background: rgba(181, 132, 20, 0.16);
+  border-color: var(--gold-400);
+  color: var(--gold-500);
+}
+
+.apiKeyConfigured {
+  background: rgba(46, 125, 50, 0.08);
+  border-color: rgba(46, 125, 50, 0.25);
+  color: #2e7d32;
+}
+
+.apiKeyConfigured:hover {
+  background: rgba(46, 125, 50, 0.14);
+  border-color: #2e7d32;
+  color: #1b5e20;
+}
+
+.keyIcon {
+  flex-shrink: 0;
+  color: var(--gold-400);
+}
+
+.apiKeyConfigured .keyIcon {
+  color: #2e7d32;
+}
+
+.apiKeyLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userRow {

@@ -38,9 +38,9 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 - `apps/extension` — Chrome MV3 side panel extension with full Parchment theme & instant lookup
 
 ### AI assistant & Operations
-- Server-side **Gemini API (`GEMINI_API_KEY`)** powering 5-dimension AI pipeline & `/bible` verse study companion
+- **Bring-Your-Own-Key (BYOK) Gemini API**: Users can enter their free Google Gemini API key upon sign-in or via the sidebar Settings drawer (`ApiKeyModal`). Falls back to server `GEMINI_API_KEY` if configured.
 - 5 dimensions: Scripture · Historical · Original Language · Theological · Practical Application
-- Rate limit: 15 questions/hour/IP
+- Rate limit: 15 questions/hour/IP (when using server key)
 - RAG over canonical answers (OpenAI embeddings + pgvector)
 - **Autonomous Operations Manager (`bibledesk_ops_manager`)**: Daily 9:00 AM background audit cron job testing workflows and updating project priorities (`OPS_REPORT.md`)
 
@@ -51,11 +51,12 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 - Electron app under `apps/desktop/`
 
 ### AI & Data Engine
-| Source | Role | Limitation |
+| Source | Role | Key Required? |
 |---|---|---|
-| Local Modules | Installed public domain translations (KJV, ASV, WEB, BBE, Darby, YLT) | Zero network requirement |
-| Gemini (`GEMINI_API_KEY`) | 5-Dimension AI Pipeline & `/bible` study companion | Server-only |
-| OpenAI (`OPENAI_API_KEY`) | RAG vector embeddings (`text-embedding-3-small`) | Server-only; optional when offline |
+| **Local Modules** | Installed public domain translations (KJV, ASV, WEB, BBE, Darby, YLT), concordance search & TSK cross-refs | **NO** — 100% Free & Shared (Offline) |
+| **OpenScriptures Lexicons** | Strong's Greek (5.5k) & Hebrew (8.6k) word definitions | **NO** — 100% Free & Shared (Offline) |
+| **Gemini API (`gemini-2.5-flash`)** | 5-Dimension AI Pipeline & `/bible` verse study companion | **User Gemini Key (Free from Google AI Studio)** or Server default |
+| **OpenAI (`OPENAI_API_KEY`)** | RAG vector embeddings (`text-embedding-3-small`) | Server-only; optional when offline |
 
 ---
 

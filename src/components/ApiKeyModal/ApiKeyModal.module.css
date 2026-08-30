@@ -1,0 +1,308 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(20, 15, 10, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background: rgba(252, 249, 242, 0.96);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 24px 64px rgba(90, 70, 40, 0.18),
+    0 4px 16px rgba(90, 70, 40, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  animation: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(181, 132, 20, 0.14);
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(181, 132, 20, 0.12);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-500);
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.closeBtn:hover {
+  background: rgba(181, 132, 20, 0.1);
+  color: var(--text-primary);
+}
+
+/* ── Free Guarantee Banner ────────────────────────────────── */
+
+.infoBanner {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1.25rem 1.5rem 0;
+  padding: 0.85rem 1rem;
+  background: rgba(181, 132, 20, 0.08);
+  border: 1px solid rgba(181, 132, 20, 0.22);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+}
+
+.infoBannerIcon {
+  color: var(--gold-500);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.infoBannerText strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--gold-500);
+  margin-bottom: 2px;
+}
+
+.infoBannerText p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ── Form ────────────────────────────────────────────────── */
+
+.form {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sparkleIcon {
+  color: var(--gold-400);
+}
+
+.input {
+  font-family: monospace;
+  font-size: 0.88rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(245, 240, 228, 0.7);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.15s;
+}
+
+.input:focus {
+  border-color: var(--gold-400);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(181, 132, 20, 0.15);
+}
+
+.fieldHint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+}
+
+.externalLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold-500);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.externalLink:hover {
+  color: var(--gold-400);
+}
+
+.securityNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(230, 225, 215, 0.35);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.securityNote svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #2e7d32;
+}
+
+/* ── Actions ─────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(181, 132, 20, 0.12);
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+}
+
+.clearBtn:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.rightActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cancelBtn:hover {
+  background: rgba(181, 132, 20, 0.08);
+  color: var(--text-primary);
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #b58414, #8a6010);
+  border: none;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.28);
+  transition: all 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c8940e, #9c6e0c);
+  transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saveBtnSuccess {
+  background: #2e7d32 !important;
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { BookOpen, Sparkles, Key, ExternalLink, ShieldCheck } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import styles from './page.module.css';
 
@@ -13,12 +14,18 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [churchName, setChurchName] = useState('');
   const [role, setRole] = useState<'member' | 'pastor'>('member');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Check if user is already logged in, redirect if yes
+  // Load existing Gemini key & check session
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedKey = localStorage.getItem('bibledesk_gemini_key');
+      if (savedKey) setGeminiApiKey(savedKey);
+    }
+
     const supabase = getBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -27,10 +34,20 @@ export default function LoginPage() {
     });
   }, [router]);
 
+  function persistGeminiKey() {
+    if (typeof window !== 'undefined') {
+      const trimmed = geminiApiKey.trim();
+      if (trimmed) {
+        localStorage.setItem('bibledesk_gemini_key', trimmed);
+      }
+    }
+  }
+
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
+    persistGeminiKey();
 
     const supabase = getBrowserClient();
 
@@ -128,6 +145,15 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Free Bible Guarantee */}
+          <div className={styles.sharedBibleNotice}>
+            <BookOpen size={16} className={styles.sharedNoticeIcon} />
+            <div className={styles.sharedNoticeText}>
+              <strong>100% Free &amp; Shared Scripture</strong>
+              <span>Public domain translations (KJV, ASV, WEB, BBE, Darby, YLT), concordance &amp; lexicon are always open without requiring an account or API key.</span>
+            </div>
+          </div>
+
           <form onSubmit={handleAuth} className={styles.form}>
             {isSignUp && (
               <>
@@ -195,6 +221,37 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 className={styles.input}
               />
+            </div>
+
+            {/* Optional Gemini API Key */}
+            <div className={styles.formGroup}>
+              <div className={styles.labelWithLink}>
+                <label htmlFor="gemini-input" className={styles.label}>
+                  <Sparkles size={13} style={{ color: 'var(--gold-400)', marginRight: '4px', verticalAlign: 'middle' }} />
+                  <span>Google Gemini API Key (Optional)</span>
+                </label>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.freeKeyLink}
+                >
+                  Get free key <ExternalLink size={11} />
+                </a>
+              </div>
+              <input
+                id="gemini-input"
+                type="password"
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
+                placeholder="AIzaSy... (for 5D Assistant & AI Study)"
+                className={styles.input}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <p className={styles.inputHint}>
+                Stored locally in your browser. Enables personal 5-Dimension AI Study Assistant.
+              </p>
             </div>
 
             <button type="submit" disabled={loading} className={styles.submitBtn}>

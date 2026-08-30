@@ -20,6 +20,7 @@ export interface ClaudeAnswerOptions {
   maxTokens?: number;
   /** RAG context string from rag.ts — injected into pipeline Stage 1 */
   ragContext?: string;
+  apiKey?: string;
 }
 
 /**
@@ -34,12 +35,13 @@ export async function generateBibleAnswer(
   question: string,
   options: ClaudeAnswerOptions = {}
 ): Promise<BibleAnswer> {
-  const { translation = 'web', maxTokens = 4096, ragContext = '' } = options;
+  const { translation = 'web', maxTokens = 4096, ragContext = '', apiKey } = options;
 
   const result = await runPipeline(question, {
     translation,
     maxTokens,
     ragContext,
+    apiKey,
   });
 
   return result.answer;

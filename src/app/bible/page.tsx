@@ -289,9 +289,15 @@ function BibleReaderContent() {
       setLoadingStudy(true);
       setStudyError(null);
       try {
+        const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (userGeminiKey) {
+          headers['x-gemini-api-key'] = userGeminiKey;
+        }
+
         const res = await fetch('/api/bible/study', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             reference: `${verse.book_name} ${verse.chapter}:${verse.verse}`,
             verseText: verse.text,

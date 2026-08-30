@@ -92,9 +92,15 @@ export function useStreamingAsk(): UseStreamingAskReturn {
     }
 
     // AI Streaming Mode
+    const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (userGeminiKey) {
+      headers['x-gemini-api-key'] = userGeminiKey;
+    }
+
     fetch('/api/ask/stream', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ question, translation }),
     }).then(async (res) => {
       if (!res.ok || !res.body) {

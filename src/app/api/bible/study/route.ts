@@ -49,8 +49,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn('[bible/study] GEMINI_API_KEY is not set. Returning offline fallback study guide.');
+    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || (body as any)?.geminiApiKey?.trim();
+
+    if (!userApiKey && !process.env.GEMINI_API_KEY) {
+      console.warn('[bible/study] Neither user Gemini API key nor server GEMINI_API_KEY is set. Returning offline fallback study guide.');
       const mockStudy = {
         reference,
         translation,
@@ -104,7 +106,7 @@ Analyze this verse and generate the structured JSON study guide. Ensure original
 
     let responseText = '';
     try {
-      responseText = await callGemini(SYSTEM_PROMPT, prompt);
+      responseText = await callGemini(SYSTEM_PROMPT, prompt, userApiKey);
     } catch (apiErr: any) {
       console.warn('[bible/study] Gemini API call failed (credits depleted or quota exceeded). Returning offline fallback study guide:', apiErr.message);
       const mockStudy = {

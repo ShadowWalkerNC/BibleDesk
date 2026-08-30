@@ -50,7 +50,7 @@ Share URLs: {APP_URL}/share/{8-char-slug}
 | **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True study application chrome (Notion / Logos pattern) |
 | **UI Components** | Shadcn UI (`components/ui`) | Standard polymorphic `Button` and `Card` primitives |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
-| **AI Answers & Pipeline** | Google Gemini API (`GEMINI_API_KEY`) | 6-stage grounded answer pipeline & verse study guide |
+| **AI Answers & Pipeline** | Google Gemini API (`gemini-2.5-flash`) | Bring-Your-Own-Key (`x-gemini-api-key`) with server fallback |
 | **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |
 | **Operations Manager** | `bibledesk_ops_manager` subagent + cron schedule | Autonomous daily product audit at 9:00 AM |
 | **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |

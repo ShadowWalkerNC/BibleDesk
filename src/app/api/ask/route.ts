@@ -98,12 +98,14 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       );
     }
 
-    // ── 4. Run pipeline (with optional RAG context) ────────────────────────────
+    // ── 4. Run pipeline (with optional RAG context & user API key) ─────────────
     const ragHitType = rag.contextMatches.length > 0 ? 'context' : 'none';
+    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || (body as any).geminiApiKey?.trim();
 
     const answer = await generateBibleAnswer(question, {
       translation,
       ragContext: rag.contextPrompt,
+      apiKey: userApiKey,
     });
 
     // ── 5. Persist + capture share slug (non-blocking) ──────────────────────────

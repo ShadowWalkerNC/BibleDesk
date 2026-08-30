@@ -7,27 +7,39 @@
 
 import { GoogleGenAI } from '@google/genai';
 
-let _ai: GoogleGenAI | null = null;
+let _serverAi: GoogleGenAI | null = null;
 
-function getGeminiClient(): GoogleGenAI {
-  if (!_ai) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set.');
-    }
-    _ai = new GoogleGenAI({ apiKey });
+function getServerGeminiClient(): GoogleGenAI | null {
+  if (!_serverAi && process.env.GEMINI_API_KEY) {
+    _serverAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return _ai;
+  return _serverAi;
 }
 
 /**
- * Common call helper to complete a text prompt using Gemini 2.0 Flash
+ * Common call helper to complete a text prompt using Gemini 2.5 Flash.
+ * Supports Bring-Your-Own-Key (BYOK) passed from client requests,
+ * falling back to server environment variable if configured.
  */
 export async function callGemini(
   systemInstruction: string,
-  prompt: string
+  prompt: string,
+  apiKeyOverride?: string
 ): Promise<string> {
-  const ai = getGeminiClient();
+  let ai: GoogleGenAI | null = null;
+
+  if (apiKeyOverride && apiKeyOverride.trim().length > 0) {
+    ai = new GoogleGenAI({ apiKey: apiKeyOverride.trim() });
+  } else {
+    ai = getServerGeminiClient();
+  }
+
+  if (!ai) {
+    throw new Error(
+      'Gemini API key is required for AI features. Please enter your free Gemini API key in Settings (Bible text & study reader remain 100% free and shared).'
+    );
+  }
+
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
@@ -35,5 +47,7 @@ export async function callGemini(
       systemInstruction: systemInstruction,
     },
   });
+
   return response.text || '';
 }
+
