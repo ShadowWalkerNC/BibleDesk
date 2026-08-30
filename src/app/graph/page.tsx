@@ -1,8 +1,8 @@
 'use client';
 
-// BibleDesk — /graph  (Knowledge Graph explorer page)
-
 import { useState } from 'react';
+import PageHeader from '@/components/PageHeader/PageHeader';
+import { Network, Search, RefreshCw, Cpu, Database } from 'lucide-react';
 import GraphView from '@/components/GraphView';
 import type { GraphNode } from '@/lib/graph';
 import styles from './page.module.css';
@@ -29,33 +29,43 @@ export default function GraphPage() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerText}>
-          <h1 className={`${styles.title} text-gradient`}>Knowledge Graph</h1>
-          <p className={styles.subtitle}>
-            Explore the conceptual connections across every question and answer in BibleDesk.
-          </p>
-        </div>
+      <PageHeader
+        icon={Network}
+        title="Biblical Knowledge Graph"
+        subtitle="Bidirectional cross-reference network linking Scripture passages, Strong's Greek & Hebrew lemmas, and theological topics."
+      />
 
-        <div className={styles.searchRow}>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Focus on a concept… (e.g. grace, john-3-16)"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleFocus()}
-          />
-          <button className={styles.focusBtn} onClick={handleFocus}>
-            Focus
-          </button>
-          {focusKey && (
-            <button className={styles.resetBtn} onClick={handleReset}>
-              ✕ Reset
-            </button>
-          )}
+      {/* Open API & MCP Info Banner */}
+      <div className={styles.infoBanner}>
+        <div className={styles.infoBadgeRow}>
+          <span className={styles.infoBadge}><Database size={13} /> Open REST API (<code>/api/graph</code>)</span>
+          <span className={styles.infoBadge}><Cpu size={13} /> Model Context Protocol (<code>/api/mcp</code>)</span>
         </div>
-      </header>
+        <p className={styles.infoText}>
+          The BibleDesk Knowledge Graph indexes verses, lexical roots (e.g. <code>G2889</code>, <code>H7225</code>), and Treasury of Scripture Knowledge (TSK) cross-references into an open graph. External AI agents and applications can traverse this network directly to index and retrieve biblical connections at high speed.
+        </p>
+      </div>
+
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="text"
+          placeholder="Focus on a concept or passage… (e.g. grace, john-3-16, G2889)"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleFocus()}
+        />
+        <button className={styles.focusBtn} onClick={handleFocus}>
+          <Search size={15} />
+          <span>Focus Node</span>
+        </button>
+        {focusKey && (
+          <button className={styles.resetBtn} onClick={handleReset}>
+            <RefreshCw size={14} />
+            <span>Reset View</span>
+          </button>
+        )}
+      </div>
 
       <GraphView
         nodeKey={focusKey}

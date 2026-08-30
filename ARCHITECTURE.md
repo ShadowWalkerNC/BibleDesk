@@ -1,8 +1,8 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 0 Complete & Deployment Ready · AI/platform layers grounded & audited  
-> **Last updated:** 2026-08-25  
-> **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · OpenAI Embeddings · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Lexicons  
+> **Status:** Phase 0 Complete & Multi-Platform Suite Deployed · Local Bible Foundation & Open MCP/API Engine  
+> **Last updated:** 2026-08-30  
+> **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · Model Context Protocol (MCP) · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Greek/Hebrew Lexicons · Capacitor (Android) · Electron (Desktop)  
 > **Work tracker:** [TODO.md](TODO.md) · **Ops Audit:** [OPS_REPORT.md](OPS_REPORT.md) · **Product Vision:** [README.md](README.md)
 
 ---
@@ -10,37 +10,33 @@
 ## 1. System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    USER (Browser / PWA / Electron)                  │
-│                                                                     │
-│   Next.js App Router                                                │
-│   · AppShell Layout: Persistent Left Sidebar + Mobile Bottom Rail   │
-│   · /bible · 3-Column Centralized Study Desk (product core)         │
-│   · / (home): Focused Study Start Dashboard + 5D AI Assistant       │
-│   · Shadcn UI (Button, Card) + Lucide Icons                         │
-│   · /graph · /history · /share/[slug] · prayer · sermons · mod …    │
-│        │ /api/bible/*              │ /api/ask[/stream]              │
-└────────┼───────────────────────────┼────────────────────────────────┘
-         ▼                           ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    NEXT.JS SERVER LAYER                             │
-│  Bible Reader: Local Static Modules (KJV, ASV, WEB, BBE, Darby, YLT)│
-│  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline│
-│  Embeddings: OpenAI text-embedding-3-small for pgvector RAG         │
-│  Study Companion: /api/bible/study (Gemini + Strong's Lexicons)     │
-│  Discord Integration: /api/discord/interactions · /api/discord/webhook│
-│  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)       │
-│  Operations: Cron 9:00 AM Daily Audit (bibledesk_ops_manager)        │
-│  Sigil: /api/v1/bible/answer (HMAC) · MCP: /api/mcp                 │
-│  Church Tools: Sermon workspace with offline guest draft fallback   │
-└────────────────┬──────────────────────┬─────────────────────────────┘
-                 ▼                      ▼
-         Google Gemini / OpenAI     Supabase (Postgres + pgvector + RLS)
-
-Sigil Discord bot → HMAC POST /api/v1/bible/answer
-Discord Slash Commands → POST /api/discord/interactions
-WhatsApp Cloud Webhook → GET/POST /api/whatsapp/webhook
-Share URLs: {APP_URL}/share/{8-char-slug}
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CLIENT PLATFORMS (100% Free & Open Source)           │
+│                                                                         │
+│   Web & PWA (`/`) · Desktop Electron (`apps/desktop`) · Android (`apps/android`) │
+│   Chrome Side Panel Extension (`apps/extension`) · Discord Bot · WhatsApp Bot  │
+│                                                                         │
+│   · AppShell Layout: Persistent Left Sidebar + Mobile Bottom Rail       │
+│   · /bible · 3-Column Centralized Study Desk (product core)             │
+│   · /download · Multi-Platform Installation Hub (PWA, Desktop, APK, Ext)│
+│   · Shadcn UI + Three.js 3D Sacred Halo Canvas + Lucide Icons           │
+│   · Bidirectional Biblical Knowledge Graph (`/graph`)                   │
+└────────┬────────────────────────────────┬───────────────────────────────┘
+         │ /api/bible/*, /api/graph       │ /api/mcp (JSON-RPC 2.0)
+         ▼                                ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    OPEN REST API & MCP SERVER LAYER                     │
+│  Bible Reader: Local Static Modules (KJV, ASV, WEB, BBE, Darby, YLT)    │
+│  Knowledge Graph: Semantic passages, Strong's lemmas & TSK cross-refs   │
+│  MCP Server: /api/mcp for Claude Code, Cursor, Windsurf, custom agents  │
+│  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline    │
+│  Embeddings: OpenAI text-embedding-3-small for pgvector RAG (optional)  │
+│  Discord Integration: /api/discord/interactions · /api/discord/webhook  │
+│  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)           │
+│  Sigil Network: /api/v1/bible/answer (HMAC-SHA256)                      │
+└────────────────┬────────────────────────┬───────────────────────────────┘
+                 ▼                        ▼
+         Google Gemini (BYOK)         Supabase (PostgreSQL + pgvector)
 ```
 
 ---
@@ -49,19 +45,17 @@ Share URLs: {APP_URL}/share/{8-char-slug}
 
 | Layer | Technology | Rationale |
 |---|---|---|
-| **Framework** | Next.js 16 (App Router) | SSR for SEO; secrets stay server-side |
-| **Language** | TypeScript 5 | Full type safety |
-| **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True study application chrome (Notion / Logos pattern) |
-| **UI Components** | Shadcn UI (`components/ui`) | Standard polymorphic `Button` and `Card` primitives |
+| **Framework** | Next.js 16 (App Router) | SSR for SEO, dynamic APIs, and zero client key leaks |
+| **Language** | TypeScript 5 | Full strict type safety across all 33 routes |
+| **Open API & MCP** | Model Context Protocol (`/api/mcp`) + REST | Exposes Bible data, Strong's, and Knowledge Graph to external AI agents |
+| **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True desktop-class study application chrome |
+| **UI Components** | Shadcn UI (`components/ui`) | Polymorphic `Button` and `Card` primitives |
+| **3D & Animation** | Three.js + React Three Fiber (`@react-three/fiber`) | Interactive 3D Sacred Halo & Celestial Geometry Canvas |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
 | **AI Answers & Pipeline** | Google Gemini API (`gemini-2.5-flash`) | Bring-Your-Own-Key (`x-gemini-api-key`) with server fallback |
-| **Community Integrations** | Discord Bot / Webhook + Meta WhatsApp API | Broad church reach across Discord channels & WhatsApp study groups |
-| **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |
-| **Operations Manager** | `bibledesk_ops_manager` subagent + cron schedule | Autonomous daily product audit at 9:00 AM |
 | **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |
 | **Lexicon & Cross-Refs** | Strong's Greek/Hebrew + TSK | 5.5k Greek + 8.6k Hebrew + 29k cross-references |
-| **Database** | Supabase (PostgreSQL + pgvector) | RLS, vectors, auth |
-| **PWA & Desktop** | Manifest + Electron (`apps/desktop`) | Local desktop shell & PWA support |
+| **Multi-Platform Suite** | Web PWA + Electron + Capacitor Android + Chrome MV3 | Single-command unified package orchestrator (`npm run package:all`) |
 
 ---
 

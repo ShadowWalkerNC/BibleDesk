@@ -1,8 +1,10 @@
 # BibleDesk ✦
 
-**Bible-first study platform. AI is an assistant, not the product.**
+**Open-source, local-first Bible study platform, Open REST API, and Model Context Protocol (MCP) engine.**
 
-BibleDesk helps churches, pastors, teachers, and individual readers study Scripture with a real reading foundation — then optionally use AI for explanation, comparison, and teaching help.
+BibleDesk provides a completely free, open-source foundation for Scripture study with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek & Hebrew lexicons, Treasury of Scripture Knowledge (TSK) cross-references, and a bidirectional Biblical Knowledge Graph.
+
+The entire app is designed so anyone can use BibleDesk directly as a standalone web/desktop/mobile app or consume it as an **Open REST API & MCP Server** for external AI agents (Claude Code, Cursor, Windsurf, LangChain, custom agents) — **no closed AI subscriptions or mandatory API keys required**.
 
 ---
 
@@ -10,165 +12,95 @@ BibleDesk helps churches, pastors, teachers, and individual readers study Script
 
 | | |
 |---|---|
-| **Active phase** | **Phase 0 — Local-first Bible foundation (Complete & Ready for Deploy)** |
-| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Book canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, Gemini 2.5 server-side AI pipeline engine (BYOK supported), local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Discord & WhatsApp bots/webhooks, MCP server, RAG, knowledge graph, history/share, prayer, sermons with guest offline fallback, plans, and autonomous daily Operations Manager audit cron. |
+| **Active phase** | **Phase 0 — Local-First Bible Foundation & Open Multi-Platform Suite** |
+| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Halo canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, VisionOS 5-dimension segmented control bar, local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Discord & WhatsApp bots/webhooks, Open MCP server (`/api/mcp`), Open REST APIs, bidirectional Biblical Knowledge Graph, multi-platform build suite (`npm run package:all`), Android APK (`apps/android`), Desktop Electron shell (`apps/desktop`), and dedicated `/download` install hub. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Deploy** | Production Next.js 16 build verified across all 32 routes (`0` type errors) |
+| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/daily` |
+| **Deploy & Build** | Production Next.js 16 build verified across all 33 routes (`0` type errors) |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
-Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) (obsolete “empty stub / reset” note).
+---
+
+## Core Pillars & Philosophy
+
+### 1. Open Source & Zero-Paywall Bible Foundation
+All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **100% offline and free** without requiring any paid API keys or closed cloud dependencies.
+
+### 2. Use BibleDesk as an Open API & MCP Server
+BibleDesk is not just a UI; it is an open Bible intelligence engine:
+- **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`lookup_passage`, `search_bible`, `lookup_strongs`, `get_daily_verse`, `query_knowledge_graph`).
+- **Open REST Endpoints**:
+  - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
+  - `GET /api/bible/search?q=light&translation=kjv`
+  - `GET /api/bible/lexicon?strongs=G2889`
+  - `GET /api/graph?node=grace`
+  - `GET /api/daily`
+- **Optional BYOK AI Assistant**: Users who wish to stream synthesized 5-dimension study answers can bring their own free Google Gemini key (`gemini-2.5-flash`) via the sidebar settings.
+
+### 3. Bidirectional Biblical Knowledge Graph
+The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.
+
+### 4. Structured 5-Dimension Study Framework
+When exploring complex theological questions, BibleDesk structures insights across 5 clear, complementary lenses:
+- 📖 **Biblical Foundation**: Primary text, chapter narrative flow, and direct textual evidence.
+- 🏛️ **Historical Setting**: Ancient Near East & Greco-Roman era, cultural customs, authorship, and original audience.
+- 📜 **Original Languages**: Strong's Greek & Hebrew lemmas, root definitions, morphology, and transliterations.
+- ⚖️ **Systematic Theology**: Doctrinal coherence, biblical covenants, and historic church consensus.
+- 💡 **Life Application**: Practical modern reflection, spiritual formation, pastoral guidance, and discipleship.
 
 ---
 
-## Vision
+## Multi-Platform Distribution Suite
 
-Someone can open BibleDesk, **read** Scripture, **search**, **compare** translations, study **Hebrew/Greek from real data**, save notes, and keep going **without internet**. The unified **Centralized 3-Column Study Desk** brings the reader, study hub (daily, plans, bookmarks), and 5-dimension AI assistant into one focused workspace.
+BibleDesk is packaged as a single unified ecosystem installable on any device:
 
----
-
-## What’s Built Today
-
-### Study surfaces & UI
-- **`AppShell` Workspace** — Persistent left sidebar (desktop) + bottom icon rail (mobile) with Ctrl+K Quick Jump, auth status, and grouped Study/Church/Tool navigation
-- `/` — Focused Study Start Dashboard with Today's Verse, Quick Start shortcuts, and immediate 5D AI Assistant (no marketing fluff)
-- `/bible` — Centralized 3-Column Study Desk (Left Hub: Daily/Plans/Bookmarks, Center: Biblical prose reader with superscript numbering & TTS, Right: 5D AI, Concordance, Strong's, Cross-Refs & Notes)
-- `Shadcn UI` — Standard polymorphic `Button` and `Card` components styled with vellum glass and illuminated gold highlights
-- `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
-- `/bookmarks`, `/history`, `/graph`, `/share/[slug]`
-- `apps/extension` — Chrome MV3 side panel extension with full Parchment theme & instant lookup
-
-### AI assistant & Operations
-- **Bring-Your-Own-Key (BYOK) Gemini API**: Users can enter their free Google Gemini API key upon sign-in or via the sidebar Settings drawer (`ApiKeyModal`). Falls back to server `GEMINI_API_KEY` if configured.
-- 5 dimensions: Scripture · Historical · Original Language · Theological · Practical Application
-- Rate limit: 15 questions/hour/IP (when using server key)
-- RAG over canonical answers (OpenAI embeddings + pgvector)
-### Add-ons, Plugins & Extensions Ecosystem
-
-| Add-on / Plugin | Type | Description | Key Capabilities |
-|---|---|---|---|
-| **Chrome Extension (MV3)** | Browser Extension (`apps/extension/`) | Native Chrome Side Panel study companion | Read 6 translations, lookup Strong's Greek/Hebrew (`G2889`, `H7225`), TSK cross-refs, and 5D study while browsing |
-| **Desktop App (Electron)** | Desktop Wrapper (`apps/desktop/`) | Cross-platform desktop application (macOS, Win, Linux) | Native vault storage, Obsidian sync, local graphify rebuilds, offline reading |
-| **Discord Bot & Webhook** | Bot & Webhook (`/api/discord/*`) | Discord server interactions & channel notifications | Slash commands (`/ask`, `/daily`, `/bible`), Ed25519 verification, 1-click embed broadcasting |
-| **WhatsApp Cloud & Share** | Messenger Bot & Click-to-Chat (`/api/whatsapp/webhook`) | WhatsApp interactive bot & group sharing | Interactive bot keywords (`daily`, `John 3:16`, `ask: ...`), 1-click formatted chat forwarder |
-| **MCP Server** | Model Context Protocol (`/api/mcp`) | HTTP JSON-RPC 2.0 MCP endpoint for external AI agents | Claude Code, Cursor, Windsurf, and custom agent tool calls for Bible study & lexicons |
-| **Sigil Network Webhook** | Webhook Protocol (`/api/v1/bible/answer`) | ShadowRealm network integration | HMAC-SHA256 authenticated study answers for Discord bots & Sigil faith packages |
-| **Obsidian Vault Exporter** | Knowledge Plugin (`/api/export/obsidian`) | Markdown knowledge base export | Generates structured `.md` vaults with `[[wikilinks]]` for local-first graph notes |
-
-### AI & Data Engine
-| Source | Role | Key Required? |
+| Platform | Location / Artifact | Key Capabilities |
 |---|---|---|
-| **Local Modules** | Installed public domain translations (KJV, ASV, WEB, BBE, Darby, YLT), concordance search & TSK cross-refs | **NO** — 100% Free & Shared (Offline) |
-| **OpenScriptures Lexicons** | Strong's Greek (5.5k) & Hebrew (8.6k) word definitions | **NO** — 100% Free & Shared (Offline) |
-| **Gemini API (`gemini-2.5-flash`)** | 5-Dimension AI Pipeline & `/bible` verse study companion | **User Gemini Key (Free from Google AI Studio)** or Server default |
-| **OpenAI (`OPENAI_API_KEY`)** | RAG vector embeddings (`text-embedding-3-small`) | Server-only; optional when offline |
+| **Web & PWA** | Root Web App (`/download`) | Zero-install browser access + 1-click Progressive Web App (PWA) installation with offline caching. |
+| **Desktop App (Electron)** | `apps/desktop/` | Native Windows (`.exe`), macOS (`.dmg`), and Linux (`.AppImage`) app with local SQLite storage, Obsidian sync, and local graphify. |
+| **Android App (Capacitor)** | `apps/android/` | Offline-ready Android build with touch Greek/Hebrew lexicons, dark parchment reading mode, and direct APK sideloading. |
+| **Chrome Extension (MV3)** | `apps/extension/` | Manifest V3 Side Panel companion for reading Scripture and looking up Strong's terms while browsing any webpage. |
+| **Discord Bot & Webhooks** | `/api/discord/*` | Ed25519-verified slash commands (`/ask`, `/daily`, `/bible`) and 1-click study embed broadcasting to Discord channels. |
+| **WhatsApp Cloud API & Share** | `/api/whatsapp/*` | Meta Cloud API interactive bot (`daily`, `John 3:16`, `ask: ...`) and 1-click formatted chat forwarder for small groups. |
+| **Obsidian Vault Exporter** | `/api/export/obsidian` | Generates structured Markdown vaults with `[[wikilinks]]` for local-first personal knowledge management. |
 
 ---
 
-## Phase 0 Goal
+## Build & Packaging CLI
 
-Establish the Bible study foundation. The app should still be valuable if AI endpoints are removed.
-
-| Area | Deliverable |
-|---|---|
-| Reading | Book/chapter/verse reader from **installed** public-domain modules |
-| Search | Local full-text search |
-| Compare | Side-by-side installed translations |
-| Original language | Strong’s / lemma / morphology from **structured data** |
-| Study tools | Notes, highlights, bookmarks, collections (local-first) |
-| Offline | Installed modules work without internet |
-| AI boundary | Assistant lives inside study views — not as the only product |
-
-See staged roadmap in [TODO.md](TODO.md) (Stages 0A–0D).
-
----
-
-## Data Sources (Phase 0 target)
-
-### Primary text
-| Dataset | Purpose |
-|---|---|
-| Midvash `bible-data` | Offline corpus (JSON/SQLite, OSIS IDs) |
-| KJV / ASV / WEB (public domain) | Default install set |
-
-### Language / lexicon
-| Dataset | Purpose |
-|---|---|
-| OpenScriptures Hebrew Bible | Lemmas + morphology |
-| OpenScriptures `strongs` | Strong’s dictionaries |
-
-**Policy:** Do not advertise NIV/ESV/NLT (or other copyrighted editions) without a real license.
-
----
-
-## Quick Start
+Assemble all platform distributions into a single `/dist` artifact folder with one command:
 
 ```bash
-cp .env.example .env.local
-# Fill keys documented in .env.example
+# Build & package all targets (Web, Desktop, Android, Chrome Extension)
+npm run package:all
 
+# Target-specific builds
+npm run build:web        # Production Next.js SSR + PWA
+npm run build:desktop    # Electron packages
+npm run build:android    # Android assets & Capacitor workspace
+npm run build:extension  # Pack Chrome extension ZIP
+```
+
+---
+
+## Quick Start (Development)
+
+```bash
+# 1. Clone repository
+git clone https://github.com/ShadowWalkerNC/BibleDesk.git
+cd BibleDesk
+
+# 2. Install dependencies
 npm install
+
+# 3. Start local development server
 npm run dev
 ```
 
-Apply Supabase SQL in order before enabling persistence/RAG/graph:
-
-1. `supabase/schema.sql`
-2. `supabase/schema-v2.sql`
-3. `supabase/schema-v3.sql`
-4. `supabase/schema-v4.sql`
-
-```bash
-npm run build   # production build
-npm run lint
-```
-
-Desktop (optional):
-
-```bash
-npm run desktop:dev
-```
+Visit `http://localhost:3000` to open the Study Desk.
 
 ---
 
-## Environment Variables
+## License
 
-All variables are documented in [`.env.example`](.env.example).
-
-**Server-only (never expose to the browser):**
-`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GRAPH_WRITE_SECRET`, `IP_HASH_SALT`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`, Discord webhook URLs.
-
-**Public:**
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`.
-
----
-
-## Development Stages
-
-| Stage | Goal | Status |
-|---|---|---|
-| **0** | Local Bible modules, search, compare | **Active** |
-| **1** | Notes, highlights, bookmarks, plans (local-first) | Partial (UI exists; not offline-module-backed) |
-| **2** | Lexicon-backed original language | Not started (AI placeholder today) |
-| **3** | Offline hardening + sync | Not started |
-| **4** | AI assistant grounded in local passage + lexicon | Pipeline exists; needs re-grounding on local data |
-| **5** | Platform expansion (share, mod, Discord, SaaS) | Largely prototyped — polish after foundation |
-
----
-
-## Guardrails
-
-- Do not market features that are not implemented.
-- Do not advertise copyrighted translations without licensing.
-- Do not depend on AI for original-language claims.
-- Do not treat bible-api.com as the permanent product foundation.
-- Core study features that claim offline support must work offline.
-
----
-
-## Working Product Definition
-
-BibleDesk succeeds when someone can open it, read Scripture, search deeply, study Hebrew and Greek roots from real data, save notes, and continue without internet. The AI assistant improves that workflow — it is not mistaken for the workflow itself.
-
----
-
-*Updated: 2026-08-09 · Repo: [ShadowWalkerNC/BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+BibleDesk is free and open-source software licensed under the **MIT License**. All bundled Bible texts (KJV, ASV, WEB, BBE, Darby, YLT) and Strong's Lexicons are in the **Public Domain**.

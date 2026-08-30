@@ -245,6 +245,15 @@
   letter-spacing: 0.01em;
 }
 
+.panelSubtitle {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
 .panelContent {
   font-family: var(--font-serif);
   font-size: 1.05rem;

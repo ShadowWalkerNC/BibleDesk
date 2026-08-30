@@ -29,9 +29,10 @@
 - [x] Focused Study Start screen (removed marketing hero, 3D canvas weight, and card grids)
 - [x] Biblical prose reader typography (superscript verse numbers, generous serif line-height)
 - [x] Bring-Your-Own-Key (BYOK) Gemini API key setup modal & login integration (with shared/free Bible text guarantee)
-- [x] Discord (Slash commands `/ask`, `/daily`, `/bible` & Webhook dispatch) & WhatsApp (Click-to-Chat & Cloud API Webhook) integrations
-- [x] All 32 routes type-checked & verified in Next.js 16 production build (`next build`)
-- [x] PWA manifest & Chrome MV3 side panel extension aligned
+- [x] All 33 routes type-checked & verified in Next.js 16 production build (`next build`)
+- [x] Multi-platform packaging suite (`npm run package:all`) with Web PWA, Desktop (Electron), Android (Capacitor), and Chrome MV3 side panel
+- [x] Open REST APIs (`/api/bible/*`, `/api/graph`) and Model Context Protocol (`/api/mcp`) server for external AI agents
+- [x] Bidirectional Biblical Knowledge Graph with semantic cross-reference exploration
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
   - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
   - [ ] Configure Environment Variables on Host (Vercel):

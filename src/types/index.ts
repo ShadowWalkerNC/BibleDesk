@@ -76,15 +76,52 @@ export interface DimensionMeta {
   key: DimensionKey;
   emoji: string;
   label: string;
+  shortLabel: string;
+  description: string;
   color: string;             // CSS custom property name
 }
 
 export const DIMENSION_META: DimensionMeta[] = [
-  { key: 'scripture',         emoji: '📖', label: 'Scripture',             color: '--dim-scripture' },
-  { key: 'historical',        emoji: '🏗️', label: 'Historical Context',  color: '--dim-historical' },
-  { key: 'original_language', emoji: '🔤', label: 'Original Language',    color: '--dim-language' },
-  { key: 'theological',       emoji: '✝️', label: 'Theological Meaning',  color: '--dim-theological' },
-  { key: 'practical',         emoji: '🌱', label: 'Practical Application', color: '--dim-practical' },
+  { 
+    key: 'scripture',         
+    emoji: '📖', 
+    label: 'Biblical Foundation', 
+    shortLabel: 'Scripture', 
+    description: 'Direct scriptural evidence, primary text, and literary context.',
+    color: '--dim-scripture' 
+  },
+  { 
+    key: 'historical',        
+    emoji: '🏛️', 
+    label: 'Historical Setting', 
+    shortLabel: 'History', 
+    description: 'Ancient Near East / Greco-Roman era, cultural customs, authorship, and audience.',
+    color: '--dim-historical' 
+  },
+  { 
+    key: 'original_language', 
+    emoji: '📜', 
+    label: 'Original Languages', 
+    shortLabel: 'Lexicon', 
+    description: "Strong's Greek & Hebrew lemmas, root definitions, and transliterations.",
+    color: '--dim-language' 
+  },
+  { 
+    key: 'theological',       
+    emoji: '⚖️', 
+    label: 'Systematic Theology', 
+    shortLabel: 'Theology', 
+    description: 'Doctrinal coherence, biblical covenants, and historic church consensus.',
+    color: '--dim-theological' 
+  },
+  { 
+    key: 'practical',         
+    emoji: '💡', 
+    label: 'Life Application', 
+    shortLabel: 'Application', 
+    description: 'Practical discipleship, spiritual formation, and actionable modern guidance.',
+    color: '--dim-practical' 
+  },
 ];
 
 // ── API Request/Response ─────────────────────────────────────────────────────

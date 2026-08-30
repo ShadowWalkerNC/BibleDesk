@@ -174,7 +174,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
                 onClick={() => setActiveTab(meta.key)}
               >
                 <TabIcon size={16} className={styles.tabIcon} />
-                <span>{meta.label}</span>
+                <span>{meta.shortLabel}</span>
               </button>
             );
           })}
@@ -193,9 +193,14 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
           <div className={styles.dimIconWrap} style={{ background: `${accentColor}15`, color: accentColor }}>
             <ActiveIcon size={20} />
           </div>
-          <h2 className={styles.panelTitle} style={{ color: accentColor }}>
-            {activeDim.title}
-          </h2>
+          <div>
+            <h2 className={styles.panelTitle} style={{ color: accentColor }}>
+              {activeDim.title || activeMeta.label}
+            </h2>
+            <p className={styles.panelSubtitle}>
+              {activeMeta.description}
+            </p>
+          </div>
         </div>
 
         {activeDim.key_points?.length > 0 && (
