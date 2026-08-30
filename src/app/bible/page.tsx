@@ -21,7 +21,15 @@ import {
   Sun,
   Bookmark,
   Brain,
-  CheckCircle2
+  CheckCircle2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  Maximize2,
+  Minimize2,
+  Columns2,
+  Columns3,
 } from 'lucide-react';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
@@ -86,6 +94,40 @@ function BibleReaderContent() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchTotal, setSearchTotal] = useState(0);
+
+  // Dynamic panel layout & expansion states
+  const [showLeftHub, setShowLeftHub] = useState(true);
+  const [showRightStudy, setShowRightStudy] = useState(true);
+  const [isStudyExpanded, setIsStudyExpanded] = useState(false);
+  const [isReaderMaximized, setIsReaderMaximized] = useState(false);
+
+  function handleToggleReaderMaximized() {
+    if (isReaderMaximized) {
+      setIsReaderMaximized(false);
+      setShowLeftHub(true);
+      setShowRightStudy(true);
+    } else {
+      setIsReaderMaximized(true);
+      setShowLeftHub(false);
+      setShowRightStudy(false);
+    }
+  }
+
+  const getDeskGridClass = () => {
+    if (isReaderMaximized || (!showLeftHub && !showRightStudy)) {
+      return styles.deskGridMaximized;
+    }
+    if (!showLeftHub && showRightStudy) {
+      return isStudyExpanded ? styles.deskGridLeftCollapsedRightExpanded : styles.deskGridLeftCollapsed;
+    }
+    if (showLeftHub && !showRightStudy) {
+      return styles.deskGridRightCollapsed;
+    }
+    if (isStudyExpanded) {
+      return styles.deskGridRightExpanded;
+    }
+    return styles.deskGrid;
+  };
 
   // Sync URL query params (?book=...&chapter=...&verse=...)
   useEffect(() => {
@@ -661,6 +703,39 @@ function BibleReaderContent() {
           </div>
 
           <div className={styles.navButtons}>
+            {/* Panel Layout / Expand Controls */}
+            <div className={styles.panelControlGroup} role="toolbar" aria-label="Panel layout controls">
+              <button
+                onClick={() => setShowLeftHub(!showLeftHub)}
+                className={`${styles.panelToggleBtn} ${showLeftHub ? styles.panelToggleBtnActive : ''}`}
+                title={showLeftHub ? "Collapse Left Hub" : "Show Left Hub (Daily, Plans, Bookmarks)"}
+                aria-label="Toggle Left Panel"
+              >
+                {showLeftHub ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}
+                <span style={{ fontSize: '0.75rem' }}>Hub</span>
+              </button>
+
+              <button
+                onClick={handleToggleReaderMaximized}
+                className={`${styles.panelToggleBtn} ${isReaderMaximized ? styles.panelToggleBtnActive : ''}`}
+                title={isReaderMaximized ? "Exit Distraction-Free Reading" : "Maximize Reader (Distraction-Free Focus)"}
+                aria-label="Toggle Fullscreen Reading Mode"
+              >
+                {isReaderMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                <span style={{ fontSize: '0.75rem' }}>Focus</span>
+              </button>
+
+              <button
+                onClick={() => setShowRightStudy(!showRightStudy)}
+                className={`${styles.panelToggleBtn} ${showRightStudy ? styles.panelToggleBtnActive : ''}`}
+                title={showRightStudy ? "Collapse Study Panel" : "Show Study Panel (AI, Strong's, Search)"}
+                aria-label="Toggle Study Panel"
+              >
+                {showRightStudy ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+                <span style={{ fontSize: '0.75rem' }}>Study</span>
+              </button>
+            </div>
+
             <button
               onClick={() => setIsQuickJumpOpen(true)}
               className={styles.readerJumpBtn}
@@ -681,9 +756,10 @@ function BibleReaderContent() {
         </div>
 
         {/* 3-Column Centralized Study Desk */}
-        <div className={styles.deskGrid}>
+        <div className={getDeskGridClass()}>
           
           {/* Left Column: Study Hub (Daily, Reading Plans, Bookmarks) */}
+          {showLeftHub && (
           <div className={styles.leftHubPanel}>
             <div className={styles.hubNavHeader}>
               <button
@@ -706,6 +782,14 @@ function BibleReaderContent() {
               >
                 <Bookmark size={13} />
                 <span>Saved</span>
+              </button>
+              <button
+                className={styles.panelCloseBtn}
+                onClick={() => setShowLeftHub(false)}
+                title="Collapse Left Hub"
+                aria-label="Collapse Left Hub"
+              >
+                <PanelLeftClose size={13} />
               </button>
             </div>
 
@@ -798,6 +882,7 @@ function BibleReaderContent() {
               )}
             </div>
           </div>
+          )}
           
           {/* Center Column: Bible Text Reader */}
           <div className={`${styles.textPanel} glass-card`} ref={readerScrollRef}>
@@ -961,6 +1046,7 @@ function BibleReaderContent() {
           </div>
 
           {/* Right Column: AI Study & Tools Panel */}
+          {showRightStudy && (
           <div className={`${styles.studyPanel} glass-card`}>
             <div className={styles.toolboxWrapper}>
               
@@ -1011,6 +1097,25 @@ function BibleReaderContent() {
                 >
                   Notes
                 </button>
+
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                  <button
+                    className={`${styles.panelCloseBtn} ${isStudyExpanded ? styles.panelToggleBtnActive : ''}`}
+                    onClick={() => setIsStudyExpanded(!isStudyExpanded)}
+                    title={isStudyExpanded ? "Standard Width" : "Expand Study Panel Width"}
+                    aria-label="Expand Study Width"
+                  >
+                    <Columns2 size={13} />
+                  </button>
+                  <button
+                    className={styles.panelCloseBtn}
+                    onClick={() => setShowRightStudy(false)}
+                    title="Collapse Study Panel"
+                    aria-label="Collapse Study Panel"
+                  >
+                    <PanelRightClose size={13} />
+                  </button>
+                </div>
               </div>
 
               <div className={styles.tabContent}>
@@ -1251,6 +1356,7 @@ function BibleReaderContent() {
               </div>
             </div>
           </div>
+          )}
 
         </div>
       </main>
