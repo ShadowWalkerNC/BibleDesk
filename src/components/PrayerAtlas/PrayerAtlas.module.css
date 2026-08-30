@@ -4,11 +4,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--parchment-100);
-  border: 1px solid var(--glass-border);
+  background: rgba(250, 246, 237, 0.85);
+  border: 1px solid rgba(181, 132, 20, 0.3);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 
+    0 12px 32px rgba(90, 70, 40, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   overflow: hidden;
   min-height: 520px;
 }
@@ -18,98 +20,126 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .globeCanvas {
   max-width: 100%;
   height: auto;
   border-radius: 50%;
-  transition: transform 0.1s var(--ease-out);
+  box-shadow: 
+    0 16px 40px rgba(90, 70, 40, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease;
 }
 
 .controls {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   z-index: 10;
 }
 
 .controlBtn {
-  background: var(--parchment-200);
-  border: 1px solid var(--glass-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.3);
   color: var(--text-primary);
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.05);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .controlBtn:hover {
-  background: var(--parchment-300);
-  border-color: var(--text-muted);
+  background: #fffdf8;
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+  transform: translateY(-1px);
 }
 
 .hoverTooltip {
   position: absolute;
-  bottom: 1.5rem;
+  bottom: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  max-width: 380px;
-  background: var(--parchment-200);
+  max-width: 420px;
+  background: rgba(255, 253, 248, 0.96);
   border: 1px solid var(--gold-400);
   border-radius: var(--radius-md);
-  padding: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 0.95rem 1.15rem;
+  box-shadow: 0 8px 28px rgba(90, 70, 40, 0.14);
   pointer-events: none;
-  animation: fadeIn 0.2s var(--ease-out) forwards;
-  z-index: 15;
+  animation: tooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 20;
+  backdrop-filter: blur(12px);
 }
 
 .tooltipHeader {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
 }
 
 .tooltipLabel {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
+  font-family: var(--font-display);
 }
 
 .tooltipText {
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  line-height: 1.55;
   color: var(--text-secondary);
-  margin: 0;
+  margin: 0 0 0.4rem;
+}
+
+.tooltipHint {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gold-500);
 }
 
 .restrictedBadge {
-  background: #fecaca;
-  color: #b91c1c;
-  font-size: 0.7rem;
+  background: rgba(184, 29, 88, 0.12);
+  color: #b81d58;
+  border: 1px solid rgba(184, 29, 88, 0.25);
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.15rem 0.4rem;
-  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
   text-transform: uppercase;
 }
 
 .openBadge {
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-size: 0.7rem;
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-600);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.15rem 0.4rem;
-  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
   text-transform: uppercase;
 }
 
-@keyframes fadeIn {
+@keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, 5px);
+    transform: translate(-50%, 8px);
   }
   to {
     opacity: 1;
