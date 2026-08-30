@@ -28,6 +28,8 @@
 │  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline│
 │  Embeddings: OpenAI text-embedding-3-small for pgvector RAG         │
 │  Study Companion: /api/bible/study (Gemini + Strong's Lexicons)     │
+│  Discord Integration: /api/discord/interactions · /api/discord/webhook│
+│  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)       │
 │  Operations: Cron 9:00 AM Daily Audit (bibledesk_ops_manager)        │
 │  Sigil: /api/v1/bible/answer (HMAC) · MCP: /api/mcp                 │
 │  Church Tools: Sermon workspace with offline guest draft fallback   │
@@ -36,6 +38,8 @@
          Google Gemini / OpenAI     Supabase (Postgres + pgvector + RLS)
 
 Sigil Discord bot → HMAC POST /api/v1/bible/answer
+Discord Slash Commands → POST /api/discord/interactions
+WhatsApp Cloud Webhook → GET/POST /api/whatsapp/webhook
 Share URLs: {APP_URL}/share/{8-char-slug}
 ```
 
@@ -51,6 +55,7 @@ Share URLs: {APP_URL}/share/{8-char-slug}
 | **UI Components** | Shadcn UI (`components/ui`) | Standard polymorphic `Button` and `Card` primitives |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
 | **AI Answers & Pipeline** | Google Gemini API (`gemini-2.5-flash`) | Bring-Your-Own-Key (`x-gemini-api-key`) with server fallback |
+| **Community Integrations** | Discord Bot / Webhook + Meta WhatsApp API | Broad church reach across Discord channels & WhatsApp study groups |
 | **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |
 | **Operations Manager** | `bibledesk_ops_manager` subagent + cron schedule | Autonomous daily product audit at 9:00 AM |
 | **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |

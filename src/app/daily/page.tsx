@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SkipForward, Shuffle, Copy, Check, BookOpen, Heart, Sun } from 'lucide-react';
+import { SkipForward, Shuffle, Copy, Check, BookOpen, Heart, Sun, MessageSquare, Radio } from 'lucide-react';
+import { createWhatsAppShareLink } from '@/lib/whatsapp';
 import type { DailyVerse } from '@/app/api/daily/route';
 import styles from './page.module.css';
 
@@ -11,6 +12,7 @@ export default function DailyVersePage() {
   const [copied, setCopied] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(1);
+  const [discordStatus, setDiscordStatus] = useState<string | null>(null);
 
   async function fetchDaily(url = '/api/daily') {
     setLoading(true);
@@ -35,10 +37,62 @@ export default function DailyVersePage() {
 
   function handleCopy() {
     if (!dailyVerse) return;
-    const text = `"${dailyVerse.text}" — ${dailyVerse.reference} (${dailyVerse.translation})\n\nReflection: ${dailyVerse.reflection}\n\nVia BibleDesk Daily Verse`;
+    const text = `"${dailyVerse.text}" — ${dailyVerse.reference} (${dailyVerse.translation})\n\nReflection: ${dailyVerse.reflection}\n\nVia BibleDesk Daily Verse: ${window.location.origin}/daily`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  function handleShareWhatsApp() {
+    if (!dailyVerse) return;
+    const text = [
+      `☀️ *BibleDesk Daily Devotional*`,
+      `📖 *${dailyVerse.reference} (${dailyVerse.translation})*`,
+      `"${dailyVerse.text}"`,
+      '',
+      `*Reflection:*`,
+      dailyVerse.reflection,
+      '',
+      `*Daily Prayer:*`,
+      `"${dailyVerse.prayer}"`,
+      '',
+      `🔗 ${window.location.origin}/daily`,
+    ].join('\n');
+    window.open(createWhatsAppShareLink(text), '_blank');
+  }
+
+  async function handleShareDiscord() {
+    if (!dailyVerse) return;
+    const webhookUrl = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_discord_webhook') : null;
+    if (!webhookUrl) {
+      const discordText = `**☀️ BibleDesk Daily Devotional • ${dailyVerse.reference} (${dailyVerse.translation})**\n> "${dailyVerse.text}"\n\n**Reflection:** ${dailyVerse.reflection}\n\n🔗 ${window.location.origin}/daily`;
+      navigator.clipboard.writeText(discordText);
+      setDiscordStatus('Discord text copied!');
+      setTimeout(() => setDiscordStatus(null), 2500);
+      return;
+    }
+
+    setDiscordStatus('Posting to Discord...');
+    try {
+      const res = await fetch('/api/discord/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          webhookUrl,
+          title: `☀️ Daily Devotional • ${dailyVerse.reference}`,
+          message: `*"${dailyVerse.text}"*\n\n**Reflection:**\n${dailyVerse.reflection}\n\n**Prayer:**\n"${dailyVerse.prayer}"`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setDiscordStatus('Posted to Discord!');
+      } else {
+        setDiscordStatus(data.error || 'Failed to post');
+      }
+    } catch {
+      setDiscordStatus('Network error');
+    }
+    setTimeout(() => setDiscordStatus(null), 2500);
   }
 
   function handleNext() {
@@ -104,16 +158,34 @@ export default function DailyVersePage() {
               <div className={styles.cardFooter}>
                 <button onClick={handleCopy} className={styles.copyBtn}>
                   {copied ? (
-                    <><Check size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Copied to Clipboard</>
+                    <><Check size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Copied</>
                   ) : (
-                    <><Copy size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Share Daily Verse</>
+                    <><Copy size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Copy</>
                   )}
                 </button>
+
+                <button
+                  onClick={handleShareWhatsApp}
+                  className={styles.copyBtn}
+                  title="Share to WhatsApp"
+                >
+                  <MessageSquare size={14} style={{ marginRight: '5px', verticalAlign: 'middle', color: '#25D366' }} /> WhatsApp
+                </button>
+
+                <button
+                  onClick={handleShareDiscord}
+                  className={styles.copyBtn}
+                  title="Post to Discord channel"
+                >
+                  <Radio size={14} style={{ marginRight: '5px', verticalAlign: 'middle', color: '#5865F2' }} />
+                  {discordStatus || 'Discord'}
+                </button>
+
                 <a
                   href={`/bible?book=${encodeURIComponent(dailyVerse.reference.split(' ')[0])}`}
                   className={styles.readMoreLink}
                 >
-                  <BookOpen size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Open in Bible Reader →
+                  <BookOpen size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Open Reader →
                 </a>
               </div>
             </div>

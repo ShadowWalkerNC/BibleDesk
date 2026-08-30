@@ -23,10 +23,12 @@ import {
   User,
   Key,
   Sparkles,
+  Share2,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
+import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal';
 import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
@@ -60,6 +62,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [user, setUser] = useState<any>(null);
   const [isJumpOpen, setIsJumpOpen] = useState(false);
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
+  const [isIntegrationsOpen, setIsIntegrationsOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
 
   useEffect(() => {
@@ -165,6 +168,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {!collapsed && <p className={styles.sectionLabel}>Tools</p>}
           {TOOL_LINKS.map(link => <NavItem key={link.href} {...link} />)}
+          
+          <button
+            className={styles.navItem}
+            onClick={() => setIsIntegrationsOpen(true)}
+            title={collapsed ? 'Discord & WhatsApp' : undefined}
+            style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <Share2 size={18} className={styles.navIcon} />
+            {!collapsed && <span className={styles.navLabel}>Integrations</span>}
+          </button>
         </nav>
 
         {/* Footer: Gemini API Key & Auth */}
@@ -221,14 +234,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <span>{label}</span>
           </Link>
         ))}
-        <button className={styles.mobileNavItem} onClick={() => setIsKeyModalOpen(true)}>
-          <Sparkles size={20} />
-          <span>AI Key</span>
+        <button className={styles.mobileNavItem} onClick={() => setIsIntegrationsOpen(true)}>
+          <Share2 size={20} />
+          <span>Connect</span>
         </button>
       </nav>
 
       <QuickJumpModal isOpen={isJumpOpen} onClose={() => setIsJumpOpen(false)} />
       <ApiKeyModal isOpen={isKeyModalOpen} onClose={() => setIsKeyModalOpen(false)} />
+      <IntegrationsModal isOpen={isIntegrationsOpen} onClose={() => setIsIntegrationsOpen(false)} />
     </>
   );
 }

@@ -45,6 +45,13 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 - **Autonomous Operations Manager (`bibledesk_ops_manager`)**: Daily 9:00 AM background audit cron job testing workflows and updating project priorities (`OPS_REPORT.md`)
 
 ### Platform / network
+- **Discord Bot & Webhooks**:
+  - Slash command interactions endpoint: `POST /api/discord/interactions` (`/daily`, `/bible [ref]`, `/ask [question]`)
+  - Direct channel webhook dispatcher: `POST /api/discord/webhook`
+  - 1-click Discord share on 5D answers & daily devotionals
+- **WhatsApp Integration**:
+  - Meta WhatsApp Business Cloud API webhook: `GET/POST /api/whatsapp/webhook` (automated interactive study replies, daily verse, scripture lookup)
+  - 1-click formatted Click-to-Chat sharing links (`https://api.whatsapp.com/send?text=...`)
 - Sigil webhook: `POST /api/v1/bible/answer` (HMAC)
 - HTTP MCP: `/api/mcp`
 - Prayer board, sermon prep with guest/offline draft fallback, moderation (`/mod`), login

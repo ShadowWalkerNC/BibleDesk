@@ -15,8 +15,11 @@ import {
   Link as LinkIcon, 
   Bookmark, 
   BookmarkCheck, 
-  Share2 
+  Share2,
+  MessageSquare,
+  Radio,
 } from 'lucide-react';
+import { createWhatsAppShareLink, formatBibleAnswerForWhatsApp } from '@/lib/whatsapp';
 import styles from './DimensionPanel.module.css';
 
 interface DimensionPanelProps {
@@ -90,6 +93,40 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
     }
     await toggleBookmark();
     toast(bookmarked ? 'Bookmark removed' : 'Bookmarked!');
+  }
+
+  function handleShareWhatsApp() {
+    const formatted = formatBibleAnswerForWhatsApp(answer, shareUrl);
+    const link = createWhatsAppShareLink(formatted);
+    window.open(link, '_blank');
+  }
+
+  async function handleShareDiscord() {
+    const webhookUrl = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_discord_webhook') : null;
+    if (!webhookUrl) {
+      // Copy formatted Discord text
+      const discordText = `**📖 BibleDesk Study:** "${answer.question}"\n\n> ${answer.summary}\n\n🔗 ${shareUrl}`;
+      navigator.clipboard.writeText(discordText)
+        .then(() => toast('Discord text copied! Configure Discord Webhook in Integrations to auto-post.'))
+        .catch(() => toast('Could not copy Discord text', 'error'));
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/discord/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookUrl, type: 'answer', answer }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast('Answer dispatched to Discord channel!');
+      } else {
+        toast(data.error || 'Failed to send to Discord', 'error');
+      }
+    } catch {
+      toast('Network error sending to Discord', 'error');
+    }
   }
 
   return (
@@ -223,6 +260,30 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
               Copy link
             </button>
           )}
+
+          {/* WhatsApp share */}
+          <button
+            className={styles.shareBtn}
+            onClick={handleShareWhatsApp}
+            aria-label="Share to WhatsApp"
+            title="Forward to WhatsApp chat or study group"
+            type="button"
+          >
+            <MessageSquare size={14} style={{ marginRight: '4px', verticalAlign: 'middle', color: '#25D366' }} />
+            WhatsApp
+          </button>
+
+          {/* Discord share */}
+          <button
+            className={styles.shareBtn}
+            onClick={handleShareDiscord}
+            aria-label="Post to Discord channel"
+            title="Post to connected Discord channel or copy Discord formatting"
+            type="button"
+          >
+            <Radio size={14} style={{ marginRight: '4px', verticalAlign: 'middle', color: '#5865F2' }} />
+            Discord
+          </button>
 
           {typeof navigator !== 'undefined' && 'share' in navigator && (
             <button
