@@ -33,6 +33,9 @@
 - [x] Multi-platform packaging suite (`npm run package:all`) with Web PWA, Desktop (Electron), Android (Capacitor), and Chrome MV3 side panel
 - [x] Open REST APIs (`/api/bible/*`, `/api/graph`) and Model Context Protocol (`/api/mcp`) server for external AI agents
 - [x] Bidirectional Biblical Knowledge Graph with semantic cross-reference exploration
+- [x] Dynamic Workspace Panel Layout Controls (Left Hub toggle, Maximize Reader distraction-free focus, Right Study toggle & expand drawer)
+- [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
+- [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
   - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
   - [ ] Configure Environment Variables on Host (Vercel):

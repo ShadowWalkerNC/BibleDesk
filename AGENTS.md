@@ -92,6 +92,9 @@ Active work (Phase 0 Complete):
   ✓ Bring-Your-Own-Key (BYOK) Gemini API key setup with shared/free Bible guarantee
   ✓ Discord bot slash commands & webhook channel dispatcher
   ✓ Meta WhatsApp Business Cloud API webhook & Click-to-Chat sharing
+  ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
+  ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
+  ✓ Single-command packaging CLI (`npm run package:all`) & official multi-resolution brand icon suite
 
 Deploy (parallel):
   □ Apply supabase schemas v1→v4
