@@ -25,13 +25,13 @@ Phase:        Phase 0 — Local-first Bible foundation
 Language:     TypeScript
 Framework:    Next.js 16 (App Router) · React 19
 Database:     Supabase (PostgreSQL + pgvector + RLS)
-AI answers:   Anthropic Claude — server-only
-Embeddings:   OpenAI text-embedding-3-small — server-only
-Study AI:     Google Gemini (verse study companion) — server-only, optional
-Bible data:   bible-api.com today → local Midvash/OpenScriptures modules (Phase 0)
+AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
+Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
+Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
+Integrations: Discord Slash Bot & Webhook · WhatsApp Meta Cloud API · MCP Server · Sigil Webhook
 Hosting:      Vercel preferred (Render also viable)
-PWA:          manifest.json + icons (placeholders until real assets)
 Desktop:      Electron wrapper in apps/desktop/
+Extension:    Chrome Manifest V3 Side Panel in apps/extension/
 ```
 
 ---
@@ -58,7 +58,7 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 
 ## Project-Specific Rules
 
-1. **API keys are server-only.** `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
+1. **API keys are server-only.** `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
 2. **Bible text is public domain only** unless a license review lands. Prefer local modules; bible-api.com is interim.
 3. **All AI answers must be grounded.** Cite specific scripture references. Do not invent lexicon facts — use structured Strong’s/morphology data when claiming original-language detail.
 4. **Rate limiting is non-negotiable.** Every API route that calls Claude (or other paid AI) must be gated by rate-limit middleware.
@@ -79,7 +79,7 @@ Phase goal:     Local-first Bible foundation
 Already shipped (keep; do not rip out):
   ✓ AI 5-dimension pipeline + streaming
   ✓ Rate limiting, RAG, share pages, history
-  ✓ /bible UI (still online-backed)
+  ✓ /bible UI with 3-Column Study Desk workspace
   ✓ Graph, MCP, prayer, sermons, catechism/creeds/memory/plans
   ✓ Moderation UI, login wiring, Electron shell
 
@@ -89,6 +89,9 @@ Active work (Phase 0 Complete):
   ✓ Strong's Greek (5.5k) & Hebrew (8.6k) lexicon data + TSK cross-refs
   ✓ Quick Jump modal (Ctrl+K) & Chrome Extension MV3 side panel
   ✓ Modernized Bible-themed UI with clean Lucide icons across desktop & mobile
+  ✓ Bring-Your-Own-Key (BYOK) Gemini API key setup with shared/free Bible guarantee
+  ✓ Discord bot slash commands & webhook channel dispatcher
+  ✓ Meta WhatsApp Business Cloud API webhook & Click-to-Chat sharing
 
 Deploy (parallel):
   □ Apply supabase schemas v1→v4

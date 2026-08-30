@@ -6,14 +6,14 @@ BibleDesk helps churches, pastors, teachers, and individual readers study Script
 
 ---
 
-## Current Status (2026-08-25)
+## Current Status (2026-08-30)
 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation (Complete & Ready for Deploy)** |
-| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Book canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, Gemini 2.5/3.5 server-side AI pipeline engine, local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel (Parchment-themed), Lucide SVG icon design system (emoji-free), RAG, knowledge graph, MCP, history/share, prayer, sermons with guest offline fallback, plans, and autonomous daily Operations Manager audit cron. |
+| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`), Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Book canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, Gemini 2.5 server-side AI pipeline engine (BYOK supported), local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Discord & WhatsApp bots/webhooks, MCP server, RAG, knowledge graph, history/share, prayer, sermons with guest offline fallback, plans, and autonomous daily Operations Manager audit cron. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Deploy** | Production Next.js 16 build verified across all 29 routes (`0` type errors) |
+| **Deploy** | Production Next.js 16 build verified across all 32 routes (`0` type errors) |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 Close stale GitHub issue [#1](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) (obsolete “empty stub / reset” note).
@@ -42,20 +42,17 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 - 5 dimensions: Scripture · Historical · Original Language · Theological · Practical Application
 - Rate limit: 15 questions/hour/IP (when using server key)
 - RAG over canonical answers (OpenAI embeddings + pgvector)
-- **Autonomous Operations Manager (`bibledesk_ops_manager`)**: Daily 9:00 AM background audit cron job testing workflows and updating project priorities (`OPS_REPORT.md`)
+### Add-ons, Plugins & Extensions Ecosystem
 
-### Platform / network
-- **Discord Bot & Webhooks**:
-  - Slash command interactions endpoint: `POST /api/discord/interactions` (`/daily`, `/bible [ref]`, `/ask [question]`)
-  - Direct channel webhook dispatcher: `POST /api/discord/webhook`
-  - 1-click Discord share on 5D answers & daily devotionals
-- **WhatsApp Integration**:
-  - Meta WhatsApp Business Cloud API webhook: `GET/POST /api/whatsapp/webhook` (automated interactive study replies, daily verse, scripture lookup)
-  - 1-click formatted Click-to-Chat sharing links (`https://api.whatsapp.com/send?text=...`)
-- Sigil webhook: `POST /api/v1/bible/answer` (HMAC)
-- HTTP MCP: `/api/mcp`
-- Prayer board, sermon prep with guest/offline draft fallback, moderation (`/mod`), login
-- Electron app under `apps/desktop/`
+| Add-on / Plugin | Type | Description | Key Capabilities |
+|---|---|---|---|
+| **Chrome Extension (MV3)** | Browser Extension (`apps/extension/`) | Native Chrome Side Panel study companion | Read 6 translations, lookup Strong's Greek/Hebrew (`G2889`, `H7225`), TSK cross-refs, and 5D study while browsing |
+| **Desktop App (Electron)** | Desktop Wrapper (`apps/desktop/`) | Cross-platform desktop application (macOS, Win, Linux) | Native vault storage, Obsidian sync, local graphify rebuilds, offline reading |
+| **Discord Bot & Webhook** | Bot & Webhook (`/api/discord/*`) | Discord server interactions & channel notifications | Slash commands (`/ask`, `/daily`, `/bible`), Ed25519 verification, 1-click embed broadcasting |
+| **WhatsApp Cloud & Share** | Messenger Bot & Click-to-Chat (`/api/whatsapp/webhook`) | WhatsApp interactive bot & group sharing | Interactive bot keywords (`daily`, `John 3:16`, `ask: ...`), 1-click formatted chat forwarder |
+| **MCP Server** | Model Context Protocol (`/api/mcp`) | HTTP JSON-RPC 2.0 MCP endpoint for external AI agents | Claude Code, Cursor, Windsurf, and custom agent tool calls for Bible study & lexicons |
+| **Sigil Network Webhook** | Webhook Protocol (`/api/v1/bible/answer`) | ShadowRealm network integration | HMAC-SHA256 authenticated study answers for Discord bots & Sigil faith packages |
+| **Obsidian Vault Exporter** | Knowledge Plugin (`/api/export/obsidian`) | Markdown knowledge base export | Generates structured `.md` vaults with `[[wikilinks]]` for local-first graph notes |
 
 ### AI & Data Engine
 | Source | Role | Key Required? |
