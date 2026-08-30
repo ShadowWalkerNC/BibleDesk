@@ -18,6 +18,7 @@ import SearchBar from '@/components/SearchBar/SearchBar';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import StreamingProgress from '@/components/StreamingProgress/StreamingProgress';
 import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
+import SacredHaloCanvas from '@/components/SacredHaloCanvas/SacredHaloCanvas';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
 import styles from './page.module.css';
@@ -157,7 +158,10 @@ export default function HomePage() {
           )}
           {!hasContent && (
             <div className={styles.answerPlaceholder}>
-              <p>Ask a question above to receive a structured study answer with citations.</p>
+              <div style={{ width: '100%', height: '220px', marginBottom: '0.75rem' }}>
+                <SacredHaloCanvas tintColor="#b58414" />
+              </div>
+              <p>Ask a question above to explore Scripture across all 5 dimensions with Strong's lexicons and historical context.</p>
             </div>
           )}
         </div>

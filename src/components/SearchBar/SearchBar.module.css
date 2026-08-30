@@ -99,30 +99,30 @@
 .translationPills {
   display: flex;
   gap: 4px;
-  background: rgba(225, 225, 232, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(230, 222, 208, 0.6);
+  border: 1px solid rgba(181, 132, 20, 0.25);
   border-radius: 99px;
   padding: 3px;
 }
 
 .translationPill {
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: 99px;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
 .translationPill:hover:not(:disabled) {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .translationPill:disabled {
@@ -131,10 +131,11 @@
 }
 
 .translationPillActive {
-  background: rgba(255, 255, 255, 0.95) !important;
-  color: var(--text-primary) !important;
+  background: #ffffff !important;
+  color: var(--gold-600) !important;
+  border-color: rgba(181, 132, 20, 0.3) !important;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.1), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .translationName {
@@ -150,39 +151,43 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0.7rem 1.6rem;
-  background: linear-gradient(135deg, #c69919, #8a6500);
+  padding: 0.75rem 1.6rem;
+  background: linear-gradient(135deg, #b58414 0%, #7d5605 100%);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: 0.92rem;
-  font-weight: 600;
-  border: none;
+  font-weight: 700;
+  border: 1px solid #7d5605;
   border-radius: var(--radius-md);
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(181, 137, 19, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), opacity 0.15s;
+  box-shadow:
+    0 4px 14px rgba(181, 132, 20, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s, background 0.18s;
   white-space: nowrap;
 }
 
 .submitBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(181, 137, 19, 0.25);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #c8940e 0%, #916307 100%);
+  box-shadow: 0 8px 24px rgba(181, 132, 20, 0.42);
 }
 
 .submitBtn:active:not(:disabled) {
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(181, 132, 20, 0.25);
 }
 
 .submitBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-top-color: var(--text-inverse);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -201,8 +206,8 @@
   font-size: 0.78rem;
   color: var(--text-muted);
   margin-bottom: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -214,21 +219,24 @@
 
 .chip {
   display: inline-block;
-  padding: 5px 12px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.28);
   border-radius: 99px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  box-shadow: 0 1px 4px rgba(90, 70, 40, 0.04);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .chip:hover {
-  background: var(--glass-hover);
-  border-color: var(--gold-500);
-  color: var(--gold-400);
+  background: rgba(181, 132, 20, 0.1);
+  border-color: var(--gold-400);
+  color: var(--gold-600);
   transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(181, 132, 20, 0.12);
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */

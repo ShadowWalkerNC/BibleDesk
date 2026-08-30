@@ -43,25 +43,32 @@
 }
 
 .select {
-  background: var(--navy-900);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.32);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.9rem;
-  padding: 0.5rem 1.75rem 0.5rem 0.75rem;
+  font-weight: 600;
+  padding: 0.55rem 2rem 0.55rem 0.85rem;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.06);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239fa8d4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b58414'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1rem;
+  background-position: right 0.65rem center;
+  background-size: 0.95rem;
+}
+
+.select:hover {
+  border-color: var(--gold-400);
+  box-shadow: 0 4px 12px rgba(90, 70, 40, 0.1);
 }
 
 .select:focus {
   border-color: var(--gold-400);
-  box-shadow: 0 0 0 2px var(--gold-glow);
+  box-shadow: 0 0 0 3px var(--gold-glow);
 }
 
 .navButtons {
@@ -70,45 +77,51 @@
 }
 
 .navBtn {
-  background: var(--navy-800);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  color: var(--text-primary);
   font-size: 0.85rem;
   font-weight: 600;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.05);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .navBtn:hover {
-  background: var(--glass-hover);
+  background: #fffdf8;
   border-color: var(--gold-400);
-  color: var(--gold-400);
+  color: var(--gold-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(90, 70, 40, 0.1);
 }
 
 .navBtn:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .readerJumpBtn {
-  background: var(--gold-glow);
-  border: 1px solid var(--gold-400);
-  color: var(--gold-400);
-  font-size: 0.85rem;
+  background: linear-gradient(135deg, #b58414, #805703);
+  border: 1px solid #805703;
+  color: #ffffff;
+  font-size: 0.86rem;
   font-weight: 700;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.15rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s var(--ease-out);
+  box-shadow:
+    0 3px 10px rgba(181, 132, 20, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .readerJumpBtn:hover {
-  background: rgba(181, 137, 19, 0.15);
-  box-shadow: 0 0 12px var(--gold-glow);
+  background: linear-gradient(135deg, #c8940e, #916307);
+  box-shadow: 0 6px 18px rgba(181, 132, 20, 0.45);
   transform: translateY(-1px);
 }
 

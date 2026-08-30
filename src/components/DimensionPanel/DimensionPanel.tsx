@@ -156,26 +156,29 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
         </div>
       </div>
 
-      {/* Dimension tabs */}
-      <div className={styles.tabBar} role="tablist" aria-label="Study dimensions">
-        {DIMENSION_META.map((meta) => {
-          const TabIcon = DIMENSION_ICONS[meta.key];
-          return (
-            <button
-              key={meta.key}
-              role="tab"
-              id={`tab-${meta.key}`}
-              aria-selected={activeTab === meta.key}
-              aria-controls={`panel-${meta.key}`}
-              className={`${styles.tab} ${activeTab === meta.key ? styles.activeTab : ''}`}
-              data-dim={meta.key}
-              onClick={() => setActiveTab(meta.key)}
-            >
-              <TabIcon size={15} className={styles.tabIcon} />
-              <span>{meta.label}</span>
-            </button>
-          );
-        })}
+      {/* Dimension tabs (VisionOS Segmented Control) */}
+      <div className={styles.tabBarContainer}>
+        <div className={styles.tabBar} role="tablist" aria-label="Study dimensions">
+          {DIMENSION_META.map((meta) => {
+            const TabIcon = DIMENSION_ICONS[meta.key];
+            const isTabActive = activeTab === meta.key;
+            return (
+              <button
+                key={meta.key}
+                role="tab"
+                id={`tab-${meta.key}`}
+                aria-selected={isTabActive}
+                aria-controls={`panel-${meta.key}`}
+                className={`${styles.tab} ${isTabActive ? styles.activeTab : ''}`}
+                data-dim={meta.key}
+                onClick={() => setActiveTab(meta.key)}
+              >
+                <TabIcon size={16} className={styles.tabIcon} />
+                <span>{meta.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Active dimension panel */}
@@ -187,7 +190,9 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
         aria-labelledby={`tab-${activeTab}`}
       >
         <div className={styles.panelHeader}>
-          <ActiveIcon size={20} style={{ color: accentColor }} />
+          <div className={styles.dimIconWrap} style={{ background: `${accentColor}15`, color: accentColor }}>
+            <ActiveIcon size={20} />
+          </div>
           <h2 className={styles.panelTitle} style={{ color: accentColor }}>
             {activeDim.title}
           </h2>
