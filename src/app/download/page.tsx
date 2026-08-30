@@ -74,35 +74,45 @@ export default function DownloadPage() {
 
         {/* Highlight Banner */}
         <div className={styles.heroBanner}>
-          <div className={styles.heroContent}>
-            <span className={styles.detectedTag}>
-              Detected System: <strong>{userOS.toUpperCase()}</strong>
-            </span>
-            <h2 className={styles.heroTitle}>Install for your daily study workflow</h2>
-            <p className={styles.heroDesc}>
-              Read 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), search concordance terms, and inspect Strong's Greek/Hebrew definitions 100% offline.
-            </p>
-            <div className={styles.heroActionRow}>
-              {userOS === 'android' ? (
-                <a href="#android" className={styles.primaryHeroBtn}>
-                  <Smartphone size={18} />
-                  <span>Download Android APK</span>
-                </a>
-              ) : userOS === 'windows' || userOS === 'macos' || userOS === 'linux' ? (
-                <a href="#desktop" className={styles.primaryHeroBtn}>
-                  <Monitor size={18} />
-                  <span>Download Desktop App</span>
-                </a>
-              ) : (
-                <button onClick={handleInstallPWA} className={styles.primaryHeroBtn}>
-                  <Globe size={18} />
-                  <span>Install Web App (PWA)</span>
-                </button>
-              )}
-              <Link href="/bible" className={styles.secondaryHeroBtn}>
-                <BookOpen size={16} />
-                <span>Open in Web Browser →</span>
-              </Link>
+          <div className={styles.heroBannerFlex}>
+            <div className={styles.heroContent}>
+              <span className={styles.detectedTag}>
+                Detected System: <strong>{userOS.toUpperCase()}</strong>
+              </span>
+              <h2 className={styles.heroTitle}>Install for your daily study workflow</h2>
+              <p className={styles.heroDesc}>
+                Read 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), search concordance terms, and inspect Strong&apos;s Greek/Hebrew definitions 100% offline.
+              </p>
+              <div className={styles.heroActionRow}>
+                {userOS === 'android' ? (
+                  <a href="#android" className={styles.primaryHeroBtn}>
+                    <Smartphone size={18} />
+                    <span>Download Android APK</span>
+                  </a>
+                ) : userOS === 'windows' || userOS === 'macos' || userOS === 'linux' ? (
+                  <a href="#desktop" className={styles.primaryHeroBtn}>
+                    <Monitor size={18} />
+                    <span>Download Desktop App</span>
+                  </a>
+                ) : (
+                  <button onClick={handleInstallPWA} className={styles.primaryHeroBtn}>
+                    <Globe size={18} />
+                    <span>Install Web App (PWA)</span>
+                  </button>
+                )}
+                <Link href="/bible" className={styles.secondaryHeroBtn}>
+                  <BookOpen size={16} />
+                  <span>Open in Web Browser →</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.heroIconBadgeWrap}>
+              <img 
+                src="/icon-512.png" 
+                alt="BibleDesk App Icon" 
+                className={styles.heroAppIcon}
+              />
             </div>
           </div>
         </div>

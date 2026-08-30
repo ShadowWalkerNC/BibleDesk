@@ -19,6 +19,35 @@
   overflow: hidden;
 }
 
+.heroBannerFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.heroIconBadgeWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroAppIcon {
+  width: 140px;
+  height: 140px;
+  border-radius: 28px;
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(181, 132, 20, 0.3);
+  border: 2px solid rgba(181, 132, 20, 0.4);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.heroAppIcon:hover {
+  transform: scale(1.04) rotate(1deg);
+}
+
 .heroBanner::after {
   content: '✦';
   position: absolute;
