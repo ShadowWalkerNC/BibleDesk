@@ -8,6 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "package:all": "node scripts/build-all-packages.mjs --target=all",
+    "build:web": "node scripts/build-all-packages.mjs --target=web",
+    "build:desktop": "node scripts/build-all-packages.mjs --target=desktop",
+    "build:android": "node scripts/build-all-packages.mjs --target=android",
+    "build:extension": "node scripts/build-all-packages.mjs --target=extension",
     "desktop:dev": "npm run dev  --workspace=apps/desktop",
     "desktop:dist": "npm run dist --workspace=apps/desktop"
   },

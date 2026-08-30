@@ -1,0 +1,23 @@
+{
+  "name": "bibledesk-android",
+  "version": "1.0.0",
+  "description": "BibleDesk Android Application — Offline-first Scripture study with Strong's Lexicons, 6 public-domain translations, and 5-Dimension AI companion",
+  "private": true,
+  "scripts": {
+    "build": "node ../../scripts/build-all-packages.mjs --target=android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:build": "npx cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.1"
+  }
+}

@@ -24,6 +24,7 @@ import {
   Key,
   Sparkles,
   Share2,
+  Download,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -49,6 +50,7 @@ const TOOL_LINKS = [
   { href: '/bookmarks', label: 'Bookmarks',    icon: Bookmark },
   { href: '/history',   label: 'History',      icon: History },
   { href: '/graph',     label: 'Concept Graph',icon: Network },
+  { href: '/download',  label: 'Install App',  icon: Download },
 ];
 
 interface SidebarProps {
