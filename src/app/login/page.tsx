@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase';
-import Header from '@/components/Header/Header';
 import styles from './page.module.css';
 
 export default function LoginPage() {
@@ -112,7 +111,6 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.main}>
         <div className={`${styles.authCard} glass-card`}>
           <h1 className={`${styles.title} text-serif`}>

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Scroll } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import { CREEDS, type Creed } from '@/lib/creedsData';
 import styles from './page.module.css';
 
@@ -11,7 +10,6 @@ export default function CreedsPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.main}>
         <div className="container">
 

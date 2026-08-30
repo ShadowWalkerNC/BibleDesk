@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { SkipForward, Shuffle, Copy, Check, BookOpen, Heart, Sun } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import type { DailyVerse } from '@/app/api/daily/route';
 import styles from './page.module.css';
 
@@ -53,7 +52,6 @@ export default function DailyVersePage() {
 
   return (
     <>
-      <Header />
       <main className={styles.main}>
         <div className="container">
           <div className={styles.pageHeader}>

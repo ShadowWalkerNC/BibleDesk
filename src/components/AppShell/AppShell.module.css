@@ -1,0 +1,44 @@
+/* ── App Shell ──────────────────────────────────────────────── */
+
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--navy-950);
+}
+
+/* Main content area */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-left: 220px;
+  transition: margin-left 0.25s var(--ease-out);
+  background: var(--navy-950);
+  /* Subtle inner vellum gradient */
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 230, 200, 0.5), transparent 75%),
+    radial-gradient(ellipse 60% 60% at 15% 75%, rgba(255, 252, 245, 0.4), transparent);
+  min-height: 100vh;
+}
+
+.mainCollapsed {
+  margin-left: 56px;
+}
+
+/* Scrollbar for main */
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 3px; }
+.main::-webkit-scrollbar-thumb:hover { background: var(--gold-600); }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    padding-bottom: 72px; /* Space for bottom nav rail on mobile */
+  }
+  .mainCollapsed {
+    margin-left: 0;
+  }
+}

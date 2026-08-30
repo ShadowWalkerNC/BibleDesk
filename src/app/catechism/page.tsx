@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import {
   ALL_CATECHISMS,
   CATEGORIES,
@@ -58,7 +57,6 @@ export default function CatechismPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.page}>
         <div className="container">
 

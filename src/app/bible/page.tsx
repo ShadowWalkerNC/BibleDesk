@@ -23,7 +23,6 @@ import {
   Brain,
   CheckCircle2
 } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
@@ -559,9 +558,8 @@ function BibleReaderContent() {
 
   return (
     <>
-      <Header />
-      
-      {/* Toast Alert */}
+
+
       {toast && (
         <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`} role="alert">
           {toast.message}

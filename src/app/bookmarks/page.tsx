@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Bookmark, Search, X, RotateCcw, ArrowRight, ArrowLeft, Plus, BookmarkCheck } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import styles from './bookmarks.module.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -94,7 +93,6 @@ export default function BookmarksPage() {
 
   return (
     <>
-      <Header />
       <main id="main-content" className={styles.main}>
         <div className="container">
 

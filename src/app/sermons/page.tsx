@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Printer, Send, Plus, BookOpen } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import { getBrowserClient } from '@/lib/supabase';
 import { BIBLE_BOOKS, getBookChapters } from '@/lib/books';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
@@ -291,8 +290,7 @@ export default function SermonWorkspacePage() {
   if (checkingSession) {
     return (
       <>
-        <Header />
-        <div className={styles.loadingScreen}>
+      <div className={styles.loadingScreen}>
           <div className="skeleton" style={{ height: '30px', width: '200px', marginBottom: '20px' }} />
           <div className="skeleton" style={{ height: '300px', width: '100%' }} />
         </div>
@@ -302,27 +300,22 @@ export default function SermonWorkspacePage() {
 
   if (!session) {
     return (
-      <>
-        <Header />
-        <main className={styles.authGate}>
-          <div className={`${styles.authGateCard} glass-card`}>
-            <h2 className="text-serif">Sermon Workspace Prep</h2>
-            <p>
-              Please sign in to access your study outlines, sermon workspace, and sync scriptures directly into your journals.
-            </p>
-            <button onClick={() => router.push('/login')} className={styles.loginBtn}>
-              Sign In to Workspace
-            </button>
-          </div>
-        </main>
-      </>
+      <main className={styles.authGate}>
+        <div className={`${styles.authGateCard} glass-card`}>
+          <h2 className="text-serif">Sermon Workspace Prep</h2>
+          <p>
+            Please sign in to access your study outlines, sermon workspace, and sync scriptures directly into your journals.
+          </p>
+          <button onClick={() => router.push('/login')} className={styles.loginBtn}>
+            Sign In to Workspace
+          </button>
+        </div>
+      </main>
     );
   }
 
   return (
     <>
-      <Header />
-      
       {toast && (
         <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`} role="alert">
           {toast.message}

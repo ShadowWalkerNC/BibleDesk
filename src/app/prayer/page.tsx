@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Heart, MapPin, Globe } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import { getBrowserClient } from '@/lib/supabase';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
 import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
@@ -165,7 +164,6 @@ export default function PrayerBoardPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.mainContainer}>
         <div className={styles.grid}>
 

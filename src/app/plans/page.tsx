@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Calendar, BookOpen, CheckCircle2 } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import { parseReference } from '@/lib/books';
 import { READING_PLANS, type ReadingPlan } from '@/lib/plansData';
 import styles from './page.module.css';
@@ -40,7 +39,6 @@ export default function ReadingPlansPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.main}>
         <div className="container">
 

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Search, X, RotateCcw, ArrowRight, ArrowLeft, Plus, History, BookOpen } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import styles from './history.module.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -82,7 +81,6 @@ export default function HistoryPage() {
 
   return (
     <>
-      <Header />
       <main id="main-content" className={styles.main}>
         <div className="container">
 

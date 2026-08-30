@@ -5,7 +5,6 @@
 // Provides a “Ask your own question” CTA back to the homepage.
 
 import Link from 'next/link';
-import Header from '@/components/Header/Header';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import type { BibleAnswer } from '@/types';
 import styles from './SharePage.module.css';
@@ -18,7 +17,6 @@ interface Props {
 export default function SharePageClient({ answer, shareSlug }: Props) {
   return (
     <>
-      <Header />
       <main className={styles.page}>
         <div className={`container ${styles.inner}`}>
 

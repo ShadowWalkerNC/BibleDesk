@@ -1,33 +1,37 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { 
-  BookOpen, 
-  Calendar, 
-  Sun, 
-  Brain, 
-  Scroll, 
-  Church, 
+import { useRef, useState, useEffect } from 'react';
+import {
+  BookOpen,
+  Calendar,
+  Sun,
+  Brain,
+  Scroll,
+  Church,
   Sparkles,
-  ArrowRight
+  Heart,
+  ArrowRight,
+  MessageSquare,
 } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import SearchBar from '@/components/SearchBar/SearchBar';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import StreamingProgress from '@/components/StreamingProgress/StreamingProgress';
 import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import styles from './page.module.css';
 
-const Bible3DCanvas = dynamic(() => import('@/components/Bible3DCanvas/Bible3DCanvas'), {
-  ssr: false,
-  loading: () => <div style={{ height: '240px' }} />
-});
+const QUICK_LINKS = [
+  { label: 'Study Desk',    href: '/bible',    icon: BookOpen },
+  { label: 'Daily Verse',   href: '/daily',    icon: Sun },
+  { label: 'Plans',         href: '/plans',    icon: Calendar },
+  { label: 'Verse Memory',  href: '/memory',   icon: Brain },
+  { label: 'Sermons',       href: '/sermons',  icon: Church },
+  { label: 'Prayer',        href: '/prayer',   icon: Heart },
+  { label: 'Catechism',     href: '/catechism',icon: MessageSquare },
+  { label: 'Creeds',        href: '/creeds',   icon: Scroll },
+];
 
 const PLACEHOLDERS = [
   'What did Jesus mean by "born again"?',
@@ -40,14 +44,11 @@ const PLACEHOLDERS = [
   'Explain the Trinity in Scripture',
 ];
 
-const STUDY_TOOLS = [
-  { label: 'Bible Reader',     desc: 'Chapter reading, compare mode, notes & highlights', href: '/bible', icon: BookOpen },
-  { label: 'Reading Plans',    desc: '30- and 90-day schedules with progress tracking',   href: '/plans', icon: Calendar },
-  { label: 'Daily Verse',      desc: 'A daily passage with reflection prompts',           href: '/daily', icon: Sun },
-  { label: 'Verse Memory',     desc: 'Flashcards and word-masking drills',                href: '/memory', icon: Brain },
-  { label: 'Catechism',        desc: 'Westminster & Heidelberg Q&A with quiz mode',      href: '/catechism', icon: Church },
-  { label: 'Historic Creeds',  desc: 'Apostles’, Nicene, Chalcedonian & Athanasian',     href: '/creeds', icon: Scroll },
-];
+const DAILY_VERSE = {
+  text: 'Your word is a lamp to my feet and a light to my path.',
+  ref: 'Psalm 119:105',
+  translation: 'KJV',
+};
 
 export default function HomePage() {
   const { status, stages, answer, shareSlug, error, rateLimit, ask, retry } = useStreamingAsk();
@@ -57,7 +58,7 @@ export default function HomePage() {
   useEffect(() => {
     const id = setInterval(() => {
       setPlaceholderIdx(i => (i + 1) % PLACEHOLDERS.length);
-    }, 3500);
+    }, 3800);
     return () => clearInterval(id);
   }, []);
 
@@ -72,136 +73,96 @@ export default function HomePage() {
   const hasContent = isLoading || answer !== null || error !== null;
 
   return (
-    <>
-      <Header />
-      <main id="main-content">
+    <div className={styles.startScreen}>
 
-        {/* ── Hero: Bible-first ─────────────────────────────── */}
-        <section className={styles.hero} aria-label="BibleDesk hero">
-          <div className={`container ${styles.heroInner}`}>
+      {/* ── Left column: Verse + Quick Start ──────────────────── */}
+      <section className={styles.leftCol} aria-label="Start">
 
-            <p className={styles.brandMark} aria-label="BibleDesk">
-              Bible<span>Desk</span>
-            </p>
+        {/* Wordmark */}
+        <div className={styles.wordmarkRow}>
+          <div className={styles.wordmarkIcon} aria-hidden="true">✦</div>
+          <h1 className={styles.wordmark}>
+            Bible<span>Desk</span>
+          </h1>
+        </div>
 
-            <h1 className={styles.heroTitle}>
-              Read Scripture.{' '}
-              <span className="text-gradient">Study deeply.</span>
-            </h1>
+        {/* Daily Verse card */}
+        <blockquote className={styles.dailyVerse}>
+          <p className={styles.dailyVerseText}>"{DAILY_VERSE.text}"</p>
+          <footer className={styles.dailyVerseRef}>
+            <cite>{DAILY_VERSE.ref}</cite>
+            <span className={styles.dailyVerseTrans}>{DAILY_VERSE.translation}</span>
+          </footer>
+        </blockquote>
 
-            {/* Interactive 3D Three.js Sacred Book */}
-            <Bible3DCanvas />
+        {/* Primary CTA */}
+        <Link href="/bible" className={styles.primaryCta}>
+          <BookOpen size={18} />
+          <span>Open Study Desk</span>
+          <ArrowRight size={15} className={styles.ctaArrow} />
+        </Link>
 
-            <p className={styles.heroSubtitle}>
-              A Bible-first study desk — read, search, and take notes.
-              AI helps when you want it, without replacing the text.
-            </p>
-
-            <div className={styles.heroCtas}>
-              <Link href="/bible">
-                <Button variant="gold" size="lg">
-                  Open Bible Reader
-                  <ArrowRight size={16} style={{ marginLeft: '8px' }} />
-                </Button>
+        {/* Quick links grid */}
+        <nav className={styles.quickNav} aria-label="Quick navigation">
+          <p className={styles.quickNavLabel}>Tools</p>
+          <div className={styles.quickGrid}>
+            {QUICK_LINKS.map(({ label, href, icon: Icon }) => (
+              <Link key={href} href={href} className={styles.quickItem}>
+                <Icon size={16} />
+                <span>{label}</span>
               </Link>
-              <a href="#assistant">
-                <Button variant="secondary" size="lg">
-                  Ask the assistant
-                </Button>
-              </a>
-            </div>
-
-            <p className={styles.heroDivider}>
-              &ldquo;Your word is a lamp to my feet and a light to my path.&rdquo; — Psalm 119:105
-            </p>
-
+            ))}
           </div>
-        </section>
+        </nav>
+      </section>
 
-        {/* ── Study tools (Shadcn UI Cards) ──────────────────── */}
-        {!answer && !isLoading && !error && (
-          <section className={styles.teaser} aria-label="Study tools">
-            <div className="container">
-              <p className={styles.teaserLabel}>Study tools</p>
-              <div className={styles.teaserGrid}>
-                {STUDY_TOOLS.map(({ label, desc, href, icon: CardIcon }) => (
-                  <Link key={label} href={href} style={{ textDecoration: 'none' }}>
-                    <Card className={styles.teaserCard}>
-                      <CardHeader style={{ padding: '1rem 1rem 0.5rem', alignItems: 'center' }}>
-                        <div className={styles.teaserIconWrapper}>
-                          <CardIcon size={20} style={{ color: 'var(--gold-400)' }} />
-                        </div>
-                        <CardTitle style={{ fontSize: '1rem', marginTop: '0.25rem' }}>{label}</CardTitle>
-                        <CardDescription style={{ fontSize: '0.8rem', textAlign: 'center' }}>{desc}</CardDescription>
-                      </CardHeader>
-                      <CardContent style={{ padding: '0.5rem 1rem 1rem', display: 'flex', justifyContent: 'center' }}>
-                        <span className={styles.teaserPill}>Open</span>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+      {/* ── Right column: AI Assistant ────────────────────────── */}
+      <section className={styles.rightCol} aria-label="AI study assistant" id="assistant">
 
-        {/* ── Assistant ─────────────────────────────────────── */}
-        <section id="assistant" className={styles.assistant} aria-label="AI study assistant">
-          <div className={`container ${styles.assistantInner}`}>
-            <p className={styles.teaserLabel}>Optional assistant</p>
-            <h2 className={styles.assistantTitle}>
-              Five dimensions when you have a question
-            </h2>
+        <header className={styles.assistantHeader}>
+          <Sparkles size={16} className={styles.assistantIcon} />
+          <div>
+            <h2 className={styles.assistantTitle}>5-Dimension Assistant</h2>
             <p className={styles.assistantSubtitle}>
-              Scripture, history, original language, theology, and practical application —
-              grounded in cited verses. Rate-limited. Not a replacement for reading.
+              Scripture · Historical · Language · Theology · Application
             </p>
-
-            <div className={styles.searchWrapper}>
-              <SearchBar
-                onSubmit={handleAsk}
-                isLoading={isLoading}
-                placeholder={PLACEHOLDERS[placeholderIdx]}
-              />
-              {rateLimit && (
-                <div className={styles.rateLimitWrapper}>
-                  <RateLimitBar rateLimit={rateLimit} />
-                </div>
-              )}
-            </div>
           </div>
-        </section>
+        </header>
 
-        {/* ── Answer area ───────────────────────────────────── */}
-        <div ref={answerRef}>
-          {hasContent && (
-            <section className={styles.answerSection} aria-label="Study answer" aria-live="polite">
-              <div className="container">
-                {isLoading && <StreamingProgress completedStages={stages} />}
-                {error && !isLoading && (
-                  <ErrorState message={error} onRetry={retry} />
-                )}
-                {answer && status === 'done' && (
-                  <DimensionPanel answer={answer} shareSlug={shareSlug ?? undefined} />
-                )}
-              </div>
-            </section>
+        <div className={styles.searchWrapper}>
+          <SearchBar
+            onSubmit={handleAsk}
+            isLoading={isLoading}
+            placeholder={PLACEHOLDERS[placeholderIdx]}
+          />
+          {rateLimit && (
+            <div className={styles.rateLimitWrapper}>
+              <RateLimitBar rateLimit={rateLimit} />
+            </div>
           )}
         </div>
 
-      </main>
-
-      <footer className={styles.footer}>
-        <div className="container">
-          <nav className={styles.footerNav} aria-label="Footer navigation">
-            <Link href="/bible">Bible</Link>
-            <Link href="/plans">Plans</Link>
-            <a href="https://github.com/ShadowWalkerNC/BibleDesk" target="_blank" rel="noopener noreferrer">GitHub</a>
-          </nav>
-          <p>Built for serious Bible study · Bundled public-domain texts (KJV, ASV, WEB, BBE, Darby, YLT)</p>
-          <p className={styles.footerSub}>BibleDesk is not affiliated with any denomination or publisher.</p>
+        {/* Answer area */}
+        <div ref={answerRef} className={styles.answerArea}>
+          {hasContent && (
+            <div aria-label="Study answer" aria-live="polite">
+              {isLoading && <StreamingProgress completedStages={stages} />}
+              {error && !isLoading && (
+                <ErrorState message={error} onRetry={retry} />
+              )}
+              {answer && status === 'done' && (
+                <DimensionPanel answer={answer} shareSlug={shareSlug ?? undefined} />
+              )}
+            </div>
+          )}
+          {!hasContent && (
+            <div className={styles.answerPlaceholder}>
+              <p>Ask a question above to receive a structured study answer with citations.</p>
+            </div>
+          )}
         </div>
-      </footer>
-    </>
+
+      </section>
+    </div>
   );
 }

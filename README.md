@@ -29,9 +29,10 @@ Someone can open BibleDesk, **read** Scripture, **search**, **compare** translat
 ## What’s Built Today
 
 ### Study surfaces & UI
-- `/bible` — Centralized 3-Column Study Desk (Left Hub: Daily/Plans/Bookmarks, Center: Scripture Reader with TTS & word study, Right: 5D AI, Concordance, Strong's, Cross-Refs & Notes)
+- **`AppShell` Workspace** — Persistent left sidebar (desktop) + bottom icon rail (mobile) with Ctrl+K Quick Jump, auth status, and grouped Study/Church/Tool navigation
+- `/` — Focused Study Start Dashboard with Today's Verse, Quick Start shortcuts, and immediate 5D AI Assistant (no marketing fluff)
+- `/bible` — Centralized 3-Column Study Desk (Left Hub: Daily/Plans/Bookmarks, Center: Biblical prose reader with superscript numbering & TTS, Right: 5D AI, Concordance, Strong's, Cross-Refs & Notes)
 - `Shadcn UI` — Standard polymorphic `Button` and `Card` components styled with vellum glass and illuminated gold highlights
-- `3D Canvas` — Three.js + React Three Fiber (`@react-three/fiber`) floating interactive Sacred Book hero model (`Bible3DCanvas`) & interactive D3 `PrayerAtlas` 3D globe
 - `/daily`, `/plans`, `/catechism`, `/creeds`, `/memory`
 - `/bookmarks`, `/history`, `/graph`, `/share/[slug]`
 - `apps/extension` — Chrome MV3 side panel extension with full Parchment theme & instant lookup

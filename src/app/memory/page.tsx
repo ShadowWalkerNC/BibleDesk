@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Brain, Eye, EyeOff, Layers, Type, ChevronLeft, ChevronRight } from 'lucide-react';
-import Header from '@/components/Header/Header';
 import { MEMORY_VERSES, type MemoryVerse } from '@/lib/memoryData';
 import styles from './page.module.css';
 
@@ -47,7 +46,6 @@ export default function VerseMemoryPage() {
 
   return (
     <>
-      <Header />
       <main className={styles.main}>
         <div className="container">
 

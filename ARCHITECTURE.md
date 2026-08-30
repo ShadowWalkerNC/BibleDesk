@@ -14,8 +14,9 @@
 │                    USER (Browser / PWA / Electron)                  │
 │                                                                     │
 │   Next.js App Router                                                │
-│   · /bible · 3-Column Study Desk          ← product core            │
-│   · / (home): Reverent Vellum UI + 3D Sacred Book + AI assistant    │
+│   · AppShell Layout: Persistent Left Sidebar + Mobile Bottom Rail   │
+│   · /bible · 3-Column Centralized Study Desk (product core)         │
+│   · / (home): Focused Study Start Dashboard + 5D AI Assistant       │
 │   · Shadcn UI (Button, Card) + Lucide Icons                         │
 │   · /graph · /history · /share/[slug] · prayer · sermons · mod …    │
 │        │ /api/bible/*              │ /api/ask[/stream]              │
@@ -46,8 +47,8 @@ Share URLs: {APP_URL}/share/{8-char-slug}
 |---|---|---|
 | **Framework** | Next.js 16 (App Router) | SSR for SEO; secrets stay server-side |
 | **Language** | TypeScript 5 | Full type safety |
+| **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True study application chrome (Notion / Logos pattern) |
 | **UI Components** | Shadcn UI (`components/ui`) | Standard polymorphic `Button` and `Card` primitives |
-| **3D Graphics** | Three.js + React Three Fiber (`@react-three/fiber`, `@react-three/drei`) | Floating interactive Sacred Book hero model (`Bible3DCanvas`) |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
 | **AI Answers & Pipeline** | Google Gemini API (`GEMINI_API_KEY`) | 6-stage grounded answer pipeline & verse study guide |
 | **Embeddings** | OpenAI `text-embedding-3-small` | 1536-dim pgvector RAG |

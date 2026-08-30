@@ -25,6 +25,9 @@
 
 - [x] Full local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT) with zero network dependency for text
 - [x] OpenScriptures Strong's Greek/Hebrew lexicons + Treasury of Scripture Knowledge (TSK) cross-refs engine
+- [x] Persistent App Shell & Sidebar navigation (Logos/Obsidian workspace feel, mobile bottom rail)
+- [x] Focused Study Start screen (removed marketing hero, 3D canvas weight, and card grids)
+- [x] Biblical prose reader typography (superscript verse numbers, generous serif line-height)
 - [x] All 29 routes type-checked & verified in Next.js 16 production build (`next build`)
 - [x] PWA manifest & Chrome MV3 side panel extension aligned
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:

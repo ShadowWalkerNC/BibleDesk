@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ToastProvider } from '@/components/Toast/Toast';
+import AppShell from '@/components/AppShell/AppShell';
 import '@/app/globals.css';
 
 const inter = Inter({
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0b0f2e',
+  themeColor: '#f7f3e8',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -39,9 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body>
         <ToastProvider>
-          {children}
+          <AppShell>
+            {children}
+          </AppShell>
         </ToastProvider>
       </body>
     </html>
   );
 }
+

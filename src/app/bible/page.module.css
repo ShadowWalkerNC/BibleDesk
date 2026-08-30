@@ -121,7 +121,7 @@
 .deskWrapper {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  height: 100vh;
   max-width: 1600px;
   margin: 0 auto;
   padding: 0.75rem 1.25rem;
@@ -306,17 +306,16 @@
 
 .verseRow {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
+  display: block;  /* prose flow, not flexbox row */
+  padding: 0.2rem 1.25rem 0.2rem 1.5rem;
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-out);
+  transition: background-color 0.15s;
+  border-left: 2.5px solid transparent;
 }
 
 .verseRow:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(181, 132, 20, 0.04);
+  border-left-color: rgba(181, 132, 20, 0.2);
 }
 
 .verseRow:hover .rowActions {
@@ -325,9 +324,8 @@
 }
 
 .activeVerseRow {
-  background: rgba(181, 137, 19, 0.08);
+  background: rgba(181, 137, 19, 0.07);
   border-left: 2.5px solid var(--gold-400);
-  padding-left: calc(1rem - 2.5px);
 }
 
 /* ─── Verse Highlighting ─────────────────────────────────────────── */
@@ -414,22 +412,29 @@
 }
 
 .verseNumber {
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--gold-400);
-  width: 1.75rem;
-  text-align: right;
-  flex-shrink: 0;
-  margin-top: 0.25rem;
+  vertical-align: super;
+  line-height: 1;
+  margin-right: 2px;
   user-select: none;
+  flex-shrink: 0;
+  /* Display as inline superscript, not block column */
+  display: inline;
+  width: auto;
+  text-align: left;
+  margin-top: 0;
 }
 
 .verseText {
-  font-size: 1.15rem;
-  line-height: 1.75;
-  color: var(--parchment-200);
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  line-height: 1.9;
+  color: var(--text-primary);
   margin: 0;
   flex: 1;
+  letter-spacing: 0.005em;
 }
 
 /* Interactive Concordance Word Clicking */

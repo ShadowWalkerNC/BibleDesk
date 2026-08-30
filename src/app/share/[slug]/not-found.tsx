@@ -1,13 +1,11 @@
 // BibleDesk — /share/[slug] not found page
 
 import Link from 'next/link';
-import Header from '@/components/Header/Header';
 import styles from './SharePage.module.css';
 
 export default function ShareNotFound() {
   return (
     <>
-      <Header />
       <main className={styles.page}>
         <div className={`container ${styles.inner}`}>
           <div style={{ textAlign: 'center', paddingTop: '4rem' }}>
