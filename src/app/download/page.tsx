@@ -117,6 +117,43 @@ export default function DownloadPage() {
           </div>
         </div>
 
+        {/* Non-Tech 1-Click Installation Helper */}
+        <div className={`${styles.nonTechGuideCard} glass-card`}>
+          <div className={styles.guideHeader}>
+            <Sparkles size={20} className={styles.guideIcon} />
+            <div>
+              <h3 className={styles.guideTitle}>Easiest Way to Install (Zero Technical Steps)</h3>
+              <p className={styles.guideSubtitle}>No command line or coding required — install BibleDesk like an app in seconds.</p>
+            </div>
+          </div>
+
+          <div className={styles.guideStepsGrid}>
+            <div className={styles.guideStepCard}>
+              <span className={styles.stepNum}>1</span>
+              <div>
+                <strong>Web App / PWA (Recommended)</strong>
+                <p>Click the <strong>&ldquo;Install PWA&rdquo;</strong> button below or tap the install icon in your browser address bar. It places a BibleDesk icon directly onto your desktop or phone home screen!</p>
+              </div>
+            </div>
+
+            <div className={styles.guideStepCard}>
+              <span className={styles.stepNum}>2</span>
+              <div>
+                <strong>Windows 1-Click Launcher</strong>
+                <p>If you downloaded the project folder on Windows, simply double-click <code>Launch-BibleDesk.bat</code>. It automatically sets up everything and opens BibleDesk for you!</p>
+              </div>
+            </div>
+
+            <div className={styles.guideStepCard}>
+              <span className={styles.stepNum}>3</span>
+              <div>
+                <strong>iPhone &amp; iPad (iOS)</strong>
+                <p>Open BibleDesk in Safari, tap the <strong>Share button</strong> (square with arrow pointing up), scroll down, and tap <strong>&ldquo;Add to Home Screen&rdquo;</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Platform Grid */}
         <div className={styles.platformGrid}>
           {/* 1. Web & PWA */}

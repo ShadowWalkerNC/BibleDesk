@@ -144,6 +144,105 @@
   color: var(--gold-600);
 }
 
+/* ── Non-Tech 1-Click Installation Helper ──────────────────── */
+
+.nonTechGuideCard {
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(247, 241, 229, 0.95));
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 
+    0 10px 30px rgba(90, 70, 40, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.guideHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.guideIcon {
+  color: var(--gold-500);
+  flex-shrink: 0;
+}
+
+.guideTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.15rem;
+}
+
+.guideSubtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.guideStepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .guideStepsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guideStepCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.04);
+}
+
+.guideStepCard strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.guideStepCard p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.guideStepCard code {
+  background: rgba(181, 132, 20, 0.1);
+  color: var(--gold-600);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.stepNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b58414, #785304);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* ── Platform Grid ───────────────────────────────────────── */
 
 .platformGrid {

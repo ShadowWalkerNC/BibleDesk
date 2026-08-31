@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Bible-first study platform with optional 5-dimension AI assistant",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,8 +16,10 @@
     "build:desktop": "node scripts/build-all-packages.mjs --target=desktop",
     "build:android": "node scripts/build-all-packages.mjs --target=android",
     "build:extension": "node scripts/build-all-packages.mjs --target=extension",
-    "desktop:dev": "npm run dev  --workspace=apps/desktop",
-    "desktop:dist": "npm run dist --workspace=apps/desktop"
+    "desktop:install": "npm --prefix apps/desktop install",
+    "desktop:dev": "npm --prefix apps/desktop run dev",
+    "desktop:build": "npm --prefix apps/desktop run build",
+    "desktop:dist": "npm --prefix apps/desktop run dist"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
