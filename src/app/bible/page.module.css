@@ -569,24 +569,29 @@
 }
 
 .actionBtn {
-  background: var(--navy-800);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
+  background: rgba(255, 253, 248, 0.95);
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  color: var(--gold-600);
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.1);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .actionBtn:hover {
-  background: var(--navy-700);
+  background: #ffffff;
   border-color: var(--gold-400);
-  color: var(--gold-400);
+  color: var(--gold-500);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(181, 132, 20, 0.22);
 }
 
 /* ─── Right Column: Toolbox & Study Tabs ───────────────────── */

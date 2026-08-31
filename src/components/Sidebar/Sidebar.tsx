@@ -25,6 +25,10 @@ import {
   Sparkles,
   Share2,
   Download,
+  Menu,
+  X,
+  Layers,
+  Globe,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -40,17 +44,17 @@ const STUDY_LINKS = [
 ];
 
 const CHURCH_LINKS = [
+  { href: '/prayer',    label: 'Prayer Atlas',  icon: Globe },
   { href: '/sermons',   label: 'Sermons',       icon: Church },
-  { href: '/prayer',    label: 'Prayer',        icon: Heart },
   { href: '/catechism', label: 'Catechism',     icon: MessageSquare },
   { href: '/creeds',    label: 'Creeds',        icon: Scroll },
 ];
 
 const TOOL_LINKS = [
-  { href: '/bookmarks', label: 'Bookmarks',    icon: Bookmark },
-  { href: '/history',   label: 'History',      icon: History },
-  { href: '/graph',     label: 'Concept Graph',icon: Network },
-  { href: '/download',  label: 'Install App',  icon: Download },
+  { href: '/bookmarks', label: 'Bookmarks',     icon: Bookmark },
+  { href: '/history',   label: 'History',       icon: History },
+  { href: '/graph',     label: 'Concept Graph', icon: Network },
+  { href: '/download',  label: 'Install App',   icon: Download },
 ];
 
 interface SidebarProps {
@@ -66,6 +70,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isIntegrationsOpen, setIsIntegrationsOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -97,6 +102,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   async function handleSignOut() {
     const supabase = getBrowserClient();
     await supabase.auth.signOut();
@@ -125,6 +135,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <>
+      {/* ── Desktop Sidebar ────────────────────────────────────────── */}
       <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ''}`}>
         {/* Logo */}
         <div className={styles.logoRow}>
@@ -224,23 +235,176 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
       </aside>
 
-      {/* Mobile bottom nav — visible when collapsed on small screens */}
+      {/* ── Mobile Bottom Navigation Rail ─────────────────────────── */}
       <nav className={styles.mobileNav} aria-label="Mobile navigation">
-        {[...STUDY_LINKS.slice(0, 2), ...CHURCH_LINKS.slice(0, 1), TOOL_LINKS[0]].map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`${styles.mobileNavItem} ${isActive(href) ? styles.mobileNavItemActive : ''}`}
-          >
-            <Icon size={20} />
-            <span>{label}</span>
-          </Link>
-        ))}
-        <button className={styles.mobileNavItem} onClick={() => setIsIntegrationsOpen(true)}>
-          <Share2 size={20} />
-          <span>Connect</span>
+        <Link
+          href="/bible"
+          className={`${styles.mobileNavItem} ${isActive('/bible') ? styles.mobileNavItemActive : ''}`}
+        >
+          <BookOpen size={20} />
+          <span>Bible</span>
+        </Link>
+        <Link
+          href="/daily"
+          className={`${styles.mobileNavItem} ${isActive('/daily') ? styles.mobileNavItemActive : ''}`}
+        >
+          <Sun size={20} />
+          <span>Daily</span>
+        </Link>
+        <Link
+          href="/prayer"
+          className={`${styles.mobileNavItem} ${isActive('/prayer') ? styles.mobileNavItemActive : ''}`}
+        >
+          <Globe size={20} />
+          <span>Prayer</span>
+        </Link>
+        <Link
+          href="/plans"
+          className={`${styles.mobileNavItem} ${isActive('/plans') ? styles.mobileNavItemActive : ''}`}
+        >
+          <Calendar size={20} />
+          <span>Plans</span>
+        </Link>
+        <button
+          className={`${styles.mobileNavItem} ${isMobileMenuOpen ? styles.mobileNavItemActive : ''}`}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="All Tools and Pages"
+        >
+          <Menu size={20} />
+          <span>All Pages</span>
         </button>
       </nav>
+
+      {/* ── Full Mobile Menu Sheet / Drawer (Shows ALL pages) ─────── */}
+      {isMobileMenuOpen && (
+        <div className={styles.mobileDrawerOverlay} onClick={() => setIsMobileMenuOpen(false)}>
+          <div className={styles.mobileDrawerContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.mobileDrawerHeader}>
+              <div className={styles.mobileDrawerBrand}>
+                <div className={styles.logoIcon}>✦</div>
+                <span className={styles.logoText}>Bible<span>Desk</span></span>
+              </div>
+              <button
+                className={styles.mobileDrawerCloseBtn}
+                onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Quick Jump Bar */}
+            <button
+              className={styles.mobileQuickJumpBtn}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsJumpOpen(true);
+              }}
+            >
+              <Search size={16} />
+              <span>Jump to book, chapter, or verse...</span>
+            </button>
+
+            {/* Categorized Full Links */}
+            <div className={styles.mobileDrawerLinks}>
+              <div className={styles.mobileCategory}>
+                <span className={styles.mobileCategoryTitle}>Scripture &amp; Study</span>
+                <div className={styles.mobileCategoryGrid}>
+                  {STUDY_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} className={styles.mobileCategoryIcon} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.mobileCategory}>
+                <span className={styles.mobileCategoryTitle}>Church &amp; Community</span>
+                <div className={styles.mobileCategoryGrid}>
+                  {CHURCH_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} className={styles.mobileCategoryIcon} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.mobileCategory}>
+                <span className={styles.mobileCategoryTitle}>Tools &amp; Knowledge</span>
+                <div className={styles.mobileCategoryGrid}>
+                  {TOOL_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} className={styles.mobileCategoryIcon} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Footer Actions (API Key, Integrations, Auth) */}
+            <div className={styles.mobileDrawerFooter}>
+              <button
+                className={`${styles.mobileActionBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsKeyModalOpen(true);
+                }}
+              >
+                <Sparkles size={16} />
+                <span>{hasApiKey ? 'Gemini AI Key: Active' : 'Add Gemini AI Key'}</span>
+              </button>
+
+              <button
+                className={styles.mobileActionBtn}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsIntegrationsOpen(true);
+                }}
+              >
+                <Share2 size={16} />
+                <span>Discord &amp; WhatsApp Connect</span>
+              </button>
+
+              {user ? (
+                <div className={styles.mobileUserRow}>
+                  <div className={styles.userAvatar}><User size={14} /></div>
+                  <span className={styles.userName}>{user.user_metadata?.name || user.email?.split('@')[0]}</span>
+                  <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
+                    <LogOut size={14} />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className={styles.mobileSignInBtn}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <LogIn size={16} />
+                  <span>Sign In</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <QuickJumpModal isOpen={isJumpOpen} onClose={() => setIsJumpOpen(false)} />
       <ApiKeyModal isOpen={isKeyModalOpen} onClose={() => setIsKeyModalOpen(false)} />

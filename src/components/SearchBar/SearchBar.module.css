@@ -145,6 +145,52 @@
   white-space: nowrap;
 }
 
+/* ─── Mode Switch: AI 5-Stage vs Concordance ─────────────────────── */
+
+.modeToggleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(235, 226, 210, 0.55);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.modeToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.modeToggleBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--gold-600);
+}
+
+.modeToggleBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modeToggleActive {
+  background: #ffffff !important;
+  color: var(--gold-600) !important;
+  border-color: rgba(181, 132, 20, 0.35) !important;
+  box-shadow: 0 1px 4px rgba(90, 70, 40, 0.1) !important;
+  font-weight: 700;
+}
+
 /* ─── Submit button ─────────────────────────────────────────────── */
 
 .submitBtn {
