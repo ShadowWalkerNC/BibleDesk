@@ -67,6 +67,7 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 7. **Docs follow code.** Update `README.md`, `ARCHITECTURE.md`, and `TODO.md` every session that changes behavior. Keep phase labels consistent across all four docs (including this file).
 8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
 9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
+10. **Mobile UX adheres to Jakob's Law.** Mobile apps & responsive web experiences must align with standard platform conventions and user expectations (thumb-friendly bottom navigation/action sheets, standard touch targets >= 48px, predictable back navigation, standard search/keyboard inputs, safe area insets, and universally recognizable iconography). Do not create unorthodox UX patterns where standard mobile conventions exist.
 
 ---
 
