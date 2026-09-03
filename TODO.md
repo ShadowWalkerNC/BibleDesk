@@ -1,7 +1,7 @@
 # BibleDesk — TODO
 
 > **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
-> **Last updated:** 2026-08-25  
+> **Last updated:** 2026-09-03
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
@@ -138,6 +138,21 @@
 #### Study Group & Church Friction
 - [ ] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
 - [ ] Printable Small Group Study Guide exporter for 5D AI answer pages (`/share/[slug]`)
+
+#### Prayer Care Workflow
+
+> Feature brief: [`docs/PRAYER_CARE_WORKFLOW.md`](docs/PRAYER_CARE_WORKFLOW.md)
+
+- [ ] Add a private Prayer Circle for people, groups, prayer topics, and sensitive entries
+- [ ] Add daily, weekly, monthly, selected-weekday, and one-time prayer commitments
+- [ ] Add a timezone-aware `Today in Prayer` queue with snooze, pause, and quiet hours
+- [ ] Record private prayer check-ins, notes, answered prayers, and gratitude history
+- [ ] Add editable follow-up drafts for email, SMS, WhatsApp, or clipboard
+- [ ] Require explicit review and approval before every outbound follow-up
+- [ ] Add IndexedDB offline capture with authenticated Supabase sync
+- [ ] Add Supabase tables, indexes, and owner-only RLS policies for private prayer data
+- [ ] Add idempotent scheduled reminders using a Supabase Edge Function or protected Vercel Cron route
+- [ ] Add ministry-team sharing and a church care dashboard only after the private MVP is secure
 
 ### MCP gaps
 - [x] `get_cross_references(reference)` (via TSK engine)
