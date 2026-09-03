@@ -231,8 +231,8 @@ export default function IntegrationsModal({ isOpen, onClose }: IntegrationsModal
               <code>{typeof window !== 'undefined' ? window.location.origin : 'https://bibledesk.org'}/api/whatsapp/webhook</code>
               <p style={{ marginTop: '8px' }}><strong>Supported User Keywords:</strong></p>
               <ul className={styles.keywordList}>
-                <li><code>daily</code> — Returns today's verse &amp; devotional reflection.</li>
-                <li><code>John 3:16</code> — Returns verse text with Strong's definition links.</li>
+                <li><code>daily</code> — Returns today&apos;s verse &amp; devotional reflection.</li>
+                <li><code>John 3:16</code> — Returns verse text with Strong&apos;s definition links.</li>
                 <li><code>ask: What is grace?</code> — Returns 5-Dimension AI Study Guide.</li>
               </ul>
             </div>

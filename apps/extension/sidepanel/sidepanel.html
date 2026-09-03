@@ -49,6 +49,7 @@
       <button class="tab-btn" data-tab="dimensions">5-D Study</button>
       <button class="tab-btn" data-tab="crossrefs">Cross-Refs</button>
       <button class="tab-btn" data-tab="lexicon">Strong's</button>
+      <button class="tab-btn" data-tab="prayer">Prayer Care</button>
     </div>
 
     <!-- Main Content Panels -->
@@ -91,6 +92,18 @@
       <div id="panel-lexicon" class="tab-panel">
         <div id="lexicon-content" class="lexicon-view">
           <p class="empty-text">Enter a Strong's concordance tag (e.g. <em>G2889</em> or <em>H7225</em>) for original Greek/Hebrew definition.</p>
+        </div>
+      </div>
+
+      <!-- Prayer Care launcher (private data remains in the authenticated web app) -->
+      <div id="panel-prayer" class="tab-panel">
+        <div class="prayer-care-card">
+          <div class="prayer-care-kicker">Private Prayer Care</div>
+          <h2>Today in Prayer</h2>
+          <p>Open your private queue to mark a prayer complete, add a Google Calendar event or ICS file, and review a follow-up before opening Gmail or creating a draft.</p>
+          <button id="open-prayer-care" class="prayer-primary" type="button">Open Today in Prayer</button>
+          <button id="open-prayer-exports" class="prayer-secondary" type="button">Open export actions</button>
+          <p class="prayer-privacy">Sign-in and Google OAuth stay in your configured BibleDesk web app. The extension does not store prayer contacts or Google tokens.</p>
         </div>
       </div>
     </main>

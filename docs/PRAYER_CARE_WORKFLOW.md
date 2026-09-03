@@ -1,6 +1,6 @@
 # Prayer Care Workflow
 
-> Status: Proposed
+> Status: First increment implemented in code; migration/OAuth setup not deployed
 > Added: 2026-09-03
 > Product area: Church tools / personal prayer
 > Related surface: `/prayer`
@@ -20,14 +20,26 @@ The core loop is:
 
 This expands the existing public prayer board and PrayerAtlas with a private pastoral-care workflow. It is useful for individuals, pastors, ministry teams, small-group leaders, and churches.
 
+## Implemented First Increment (2026-09-03)
+
+- `schema-v5.sql` defines the five private Prayer Care tables plus `google_connections`, constraints, indexes, owner-only RLS, and service-role-only OAuth storage. The migration is not applied.
+- `/prayer` keeps the existing PrayerAtlas globe and community feed, and adds a signed-in Today in Prayer surface for creating a person/topic, scheduling daily/weekly/monthly/one-time prayer, listing upcoming commitments, and marking a commitment prayed.
+- Authenticated APIs create/list contacts and commitments, record `prayed` check-ins, download private ICS events, expose Google connection status/disconnect, create idempotent Google Calendar events, and create Gmail drafts after explicit review.
+- Every API derives the owner from a verified Supabase bearer token. It does not accept a body-supplied owner ID.
+- Google OAuth is direct between each user, BibleDesk, and Google. It uses signed expiring state plus an httpOnly cookie; tokens are AES-256-GCM encrypted at rest and refreshed server-side.
+- Gmail integration creates drafts only. The editable review UI also offers a Gmail compose URL fallback; it never sends automatically.
+- The Chrome side panel opens `/prayer#prayer-care` for Today in Prayer and export actions while leaving authentication and private data in the web app. PWA/Electron/Android wrappers use the shared web route.
+
+Not yet implemented: reminder delivery, browser notifications, quiet-hour UI/API, snooze/skip/answered flows, check-in history UI, offline/IndexedDB sync, selected weekdays/custom recurrence, team sharing, and SMS/WhatsApp delivery.
+
 ## Product Principles
 
 - **Prayer before productivity:** The interface should feel calm and pastoral, not like a sales CRM or streak-driven task manager.
-- **Private by default:** Names, contact details, prayer notes, and schedules are visible only to their owner unless explicitly shared.
+- **Private by default:** Names, contact details, prayer notes, and schedules are visible only to their owner. Sharing is not part of this increment.
 - **Human review before outreach:** BibleDesk may prepare a follow-up draft, but it must never email or message someone without the user reviewing and approving it.
 - **Consent and discretion:** Sensitive prayer details should not be copied into follow-up messages automatically. Contacts must be able to opt out of messages.
 - **Graceful rhythms:** Missing a reminder should not create guilt-oriented warnings or break a streak. Users can snooze, reschedule, or pause commitments.
-- **Local-first capture:** A user should be able to add a prayer item and record a check-in while offline, with authenticated sync later.
+- **Local-first capture (planned):** Offline capture and later authenticated sync remain roadmap work.
 
 ## MVP
 
@@ -156,6 +168,19 @@ Suggested Supabase tables:
 - `email_enabled BOOLEAN`
 - `digest_mode TEXT` (`individual`, `daily_digest`)
 
+### `google_connections`
+
+- `owner_id UUID PRIMARY KEY REFERENCES auth.users`
+- `google_account_email TEXT`
+- `encrypted_access_token TEXT`
+- `encrypted_refresh_token TEXT`
+- `token_expires_at TIMESTAMPTZ`
+- `scopes TEXT[]`
+- `created_at TIMESTAMPTZ`
+- `updated_at TIMESTAMPTZ`
+
+Unlike the prayer tables, this table has no browser policy and revokes `anon` and `authenticated` grants. Only service-role server code may read it, and API responses never include encrypted token fields.
+
 Every table must use Row Level Security so only the owning user can read or modify private records. Shared ministry-team access should be a later, explicit permission layer rather than part of the MVP.
 
 ## Technical Approach
@@ -163,36 +188,35 @@ Every table must use Row Level Security so only the owning user can read or modi
 ### Client
 
 - Add the private prayer views to the existing `/prayer` route.
-- Use IndexedDB for offline prayer contacts, commitments, due items, and unsynced check-ins.
-- Add a service worker for scheduled local/PWA notifications where supported.
-- Queue offline mutations and reconcile them after authentication and connectivity return.
+- Keep PrayerAtlas and the public feed intact beside the private view.
+- Planned: use IndexedDB for offline prayer contacts, commitments, due items, and unsynced check-ins.
+- Planned: add a service worker for scheduled local/PWA notifications and reconcile queued mutations.
 
 ### Server and Supabase
 
-- Add a versioned Supabase migration for the five tables, constraints, indexes, and RLS policies.
-- Add authenticated REST routes for contacts, commitments, check-ins, preferences, and follow-up drafts.
-- Calculate `next_due_at` server-side from the recurrence rule and user timezone.
-- Use a scheduled Supabase Edge Function or protected Vercel Cron endpoint to create due notification jobs.
-- Make reminder processing idempotent so retries cannot create duplicate notifications.
+- Implemented: versioned migration for private tables, constraints, indexes, RLS, and server-only Google connections.
+- Implemented: authenticated routes for contact/commitment create/list, prayer completion, ICS, Google connection/export, and Gmail drafts.
+- Implemented: calculate initial/next due times server-side for daily, weekly, monthly, and one-time schedules using the user's IANA timezone.
+- Planned: preferences APIs, scheduled notification jobs, custom recurrence, and idempotent reminder delivery.
 
 ### Messaging
 
-- Phase 1: in-app/PWA reminders and copy-to-clipboard follow-ups.
-- Phase 2: opt-in email delivery.
-- Phase 3: WhatsApp, SMS, Discord, and ministry-team integrations.
+- Current first increment: editable Gmail compose handoff and Gmail draft creation; no delivery.
+- Planned Phase 1: in-app/PWA reminders and copy-to-clipboard follow-ups.
+- Planned Phase 2+: any opt-in delivery, WhatsApp, SMS, Discord, and ministry-team integrations.
 - All outbound delivery requires an explicit user approval event with an audit timestamp.
 
 ## Acceptance Criteria
 
-- A signed-in user can add a private person and daily or weekly prayer commitment.
-- The due commitment appears in `Today in Prayer` at the correct local time.
-- The user can mark it prayed, add a private note, and see the next due date.
-- The user can review, edit, and copy a follow-up message.
-- No follow-up can be transmitted without explicit approval.
+- [x] A signed-in user can add a private person and daily, weekly, monthly, or one-time prayer commitment.
+- [x] The upcoming commitment appears in `Today in Prayer` using a server-computed due time and IANA timezone.
+- [x] The user can mark it prayed; the API accepts a private note and advances recurring schedules.
+- [x] The user can review/edit a follow-up and open Gmail compose or create a Gmail draft.
+- [x] No follow-up is sent by BibleDesk; the Gmail API route creates a draft only.
 - Sensitive entries hide identifying details in notification previews.
-- Private prayer records are inaccessible to other users under Supabase RLS tests.
+- [ ] Run deployed Supabase RLS integration tests after applying schema v5 in a non-production project.
 - A missed reminder can be snoozed or resumed without punitive streak messaging.
-- Core capture and check-in work offline and sync without duplicate records.
+- [ ] Core capture and check-in work offline and sync without duplicate records.
 
 ## Delivery Plan
 
@@ -230,4 +254,3 @@ Every table must use Row Level Security so only the owning user can read or modi
 - Which reminder channel should follow browser/PWA notifications: email, WhatsApp, or SMS?
 - Should follow-up messages be stored after sending, or should BibleDesk retain only delivery metadata?
 - Should an answered prayer automatically stop its recurrence or ask the user whether to continue in gratitude mode?
-

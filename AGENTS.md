@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-08-09
+> **Updated:** 2026-09-03
 
 ---
 
@@ -28,7 +28,7 @@ Database:     Supabase (PostgreSQL + pgvector + RLS)
 AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
-Integrations: Discord Slash Bot & Webhook · WhatsApp Meta Cloud API · MCP Server · Sigil Webhook
+Integrations: Discord · WhatsApp · MCP · Sigil · direct per-user Google OAuth for Prayer Care
 Hosting:      Vercel preferred (Render also viable)
 Desktop:      Electron wrapper in apps/desktop/
 Extension:    Chrome Manifest V3 Side Panel in apps/extension/
@@ -58,7 +58,7 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 
 ## Project-Specific Rules
 
-1. **API keys are server-only.** `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
+1. **API keys are server-only.** `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_TOKEN_ENCRYPTION_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
 2. **Bible text is public domain only** unless a license review lands. Prefer local modules; bible-api.com is interim.
 3. **All AI answers must be grounded.** Cite specific scripture references. Do not invent lexicon facts — use structured Strong’s/morphology data when claiming original-language detail.
 4. **Rate limiting is non-negotiable.** Every API route that calls Claude (or other paid AI) must be gated by rate-limit middleware.
@@ -67,6 +67,9 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 7. **Docs follow code.** Update `README.md`, `ARCHITECTURE.md`, and `TODO.md` every session that changes behavior. Keep phase labels consistent across all four docs (including this file).
 8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
 9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
+10. **Prayer Care ownership is server-derived.** Verify the Supabase bearer token and use its user ID; never accept an owner/user ID from request JSON.
+11. **Google exports use BibleDesk OAuth only.** Do not use Perplexity connector credentials in application code. Encrypt tokens at rest, keep `google_connections` service-role-only, and never add an automatic Gmail send path.
+12. **Human review precedes follow-up.** Gmail integration may create a draft only after explicit review. Recipient, subject, and message remain editable.
 
 ---
 
@@ -94,11 +97,13 @@ Active work (Phase 0 Complete):
   ✓ Meta WhatsApp Business Cloud API webhook & Click-to-Chat sharing
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
   ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
+  ✓ Private Prayer Care first increment with Calendar/ICS and reviewed Gmail draft/compose exports
+  ✓ Chrome extension Prayer Care launcher; shared web flow is used by PWA/Electron/Android
   ✓ Single-command packaging CLI (`npm run package:all`) & official multi-resolution brand icon suite
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v4
-  □ Env vars + host + smoke tests (see TODO.md)
+  □ Apply supabase schemas v1→v5
+  □ Configure Google OAuth consent/client, APIs, callback, encryption key, host, and smoke tests
 ```
 
 ---
@@ -114,7 +119,7 @@ src/
     api/
       ask/                       ← AI answer (+ stream/)
       bible/                     ← chapter, search, study
-      graph|history|bookmarks|daily|mcp|mod|prayer|sermons|export/
+      graph|history|bookmarks|daily|mcp|mod|prayer|prayer-care|google|sermons|export/
       v1/bible/answer/           ← Sigil webhook
   components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
   lib/
@@ -124,7 +129,7 @@ src/
   types/
 apps/desktop/                    ← Electron wrapper
 supabase/
-  schema.sql → schema-v4.sql     ← Apply in order
+  schema.sql → schema-v5.sql     ← Apply in order
 public/
   manifest.json, icon-*.png
 TODO.md · README.md · ARCHITECTURE.md · .env.example
@@ -132,4 +137,4 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
-*Updated: 2026-08-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-03 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
