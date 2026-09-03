@@ -362,6 +362,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
   color: var(--text-muted);
   font-size: 0.68rem;
@@ -374,6 +375,11 @@
   text-decoration: none;
   transition: all 0.15s ease;
   min-width: 52px;
+  min-height: 48px;
+}
+
+.mobileNavItem:active {
+  transform: scale(0.94);
 }
 
 .mobileNavItem:hover,
@@ -410,11 +416,26 @@
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
+.mobileDrawerHandleBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 2px;
+}
+
+.mobileDrawerHandle {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(181, 132, 20, 0.35);
+}
+
 .mobileDrawerHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.15rem 1.25rem 0.75rem;
+  padding: 0.75rem 1.25rem 0.75rem;
   border-bottom: 1px solid rgba(181, 132, 20, 0.15);
 }
 
@@ -428,14 +449,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(181, 132, 20, 0.08);
   border: 1px solid rgba(181, 132, 20, 0.2);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s;
+}
+
+.mobileDrawerCloseBtn:active {
+  transform: scale(0.92);
 }
 
 .mobileDrawerCloseBtn:hover {
@@ -456,7 +481,13 @@
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
+  min-height: 48px;
   box-shadow: 0 1px 4px rgba(90, 70, 40, 0.04);
+  transition: all 0.15s ease;
+}
+
+.mobileQuickJumpBtn:active {
+  transform: scale(0.98);
 }
 
 .mobileQuickJumpBtn:hover {
@@ -497,7 +528,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0.7rem 0.85rem;
+  padding: 0.75rem 0.85rem;
+  min-height: 48px;
   background: #ffffff;
   border: 1px solid rgba(181, 132, 20, 0.18);
   border-radius: var(--radius-sm);
@@ -507,6 +539,10 @@
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(90, 70, 40, 0.03);
   transition: all 0.15s ease;
+}
+
+.mobileCategoryCard:active {
+  transform: scale(0.97);
 }
 
 .mobileCategoryCard:hover {
@@ -539,7 +575,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.85rem;
+  min-height: 48px;
   background: #ffffff;
   border: 1px solid rgba(181, 132, 20, 0.25);
   border-radius: var(--radius-sm);
@@ -548,6 +585,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+}
+
+.mobileActionBtn:active {
+  transform: scale(0.97);
 }
 
 .mobileActionBtn:hover {
@@ -567,13 +608,19 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
+  min-height: 48px;
   background: linear-gradient(135deg, #b58414, #785304);
   color: #ffffff;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.mobileSignInBtn:active {
+  transform: scale(0.97);
 }
 
 @keyframes drawerFadeIn {

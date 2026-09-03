@@ -36,6 +36,7 @@
 - [x] Dynamic Workspace Panel Layout Controls (Left Hub toggle, Maximize Reader distraction-free focus, Right Study toggle & expand drawer)
 - [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
+- [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
   - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
   - [ ] Configure Environment Variables on Host (Vercel):

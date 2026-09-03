@@ -36,7 +36,7 @@
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
-    padding-bottom: 72px; /* Space for bottom nav rail on mobile */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* Space for bottom nav rail on mobile */
   }
   .mainCollapsed {
     margin-left: 0;

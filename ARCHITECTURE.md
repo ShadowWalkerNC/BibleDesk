@@ -16,7 +16,7 @@
 │   Web & PWA (`/`) · Desktop Electron (`apps/desktop`) · Android (`apps/android`) │
 │   Chrome Side Panel Extension (`apps/extension`) · Discord Bot · WhatsApp Bot  │
 │                                                                         │
-│   · AppShell Layout: Persistent Left Sidebar + Mobile Bottom Rail       │
+│   · AppShell Layout: Persistent Left Sidebar + Jakob's Law Mobile Rail/Sheet  │
 │   · /bible · 3-Column Centralized Study Desk (product core)             │
 │   · /download · Multi-Platform Installation Hub (PWA, Desktop, APK, Ext)│
 │   · Shadcn UI + Three.js 3D Sacred Halo Canvas + Lucide Icons           │
@@ -48,7 +48,7 @@
 | **Framework** | Next.js 16 (App Router) | SSR for SEO, dynamic APIs, and zero client key leaks |
 | **Language** | TypeScript 5 | Full strict type safety across all 33 routes |
 | **Open API & MCP** | Model Context Protocol (`/api/mcp`) + REST | Exposes Bible data, Strong's, and Knowledge Graph to external AI agents |
-| **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True desktop-class study application chrome |
+| **App Shell & Mobile** | Persistent Sidebar + Jakob's Law Bottom Rail & Drawer Sheet (`AppShell.tsx`, `Sidebar.tsx`) | Desktop-class workspace chrome and standard thumb-friendly mobile patterns |
 | **UI Components** | Shadcn UI (`components/ui`) | Polymorphic `Button` and `Card` primitives |
 | **3D & Animation** | Three.js + React Three Fiber (`@react-three/fiber`) | Interactive 3D Sacred Halo & Celestial Geometry Canvas |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |

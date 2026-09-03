@@ -279,6 +279,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {isMobileMenuOpen && (
         <div className={styles.mobileDrawerOverlay} onClick={() => setIsMobileMenuOpen(false)}>
           <div className={styles.mobileDrawerContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.mobileDrawerHandleBar}>
+              <div className={styles.mobileDrawerHandle} />
+            </div>
             <div className={styles.mobileDrawerHeader}>
               <div className={styles.mobileDrawerBrand}>
                 <div className={styles.logoIcon}>✦</div>
