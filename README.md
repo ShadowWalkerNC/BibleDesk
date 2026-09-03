@@ -8,15 +8,15 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 
 ---
 
-## Current Status (2026-08-30)
+## Current Status (2026-09-03)
 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-First Bible Foundation & Open Multi-Platform Suite** |
-| **What exists in code** | Centralized 3-Column Study Desk workspace (`/bible`) with dynamic panel expand/collapse & distraction-free reading controls, PrayerAtlas 3D interactive global prayer map (`/prayer`) with country-level privacy & restricted region shields, official cross-platform brand icon assets, Shadcn UI component suite, Three.js & R3F interactive 3D Sacred Halo canvas, Reverent Bible Manuscript parchment theme with Cinzel display typography & Apple Liquid Glass materials, VisionOS 5-dimension segmented control bar, local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references (29k+ verses), Quick Jump (Ctrl+K), Chrome Extension MV3 side panel, Discord & WhatsApp bots/webhooks, Open MCP server (`/api/mcp`), Open REST APIs, bidirectional Biblical Knowledge Graph, multi-platform build suite (`npm run package:all`), Android APK (`apps/android`), Desktop Electron shell (`apps/desktop`), and dedicated `/download` install hub. |
+| **What exists in code** | Centralized 3-Column Study Desk (`/bible`), the existing public PrayerAtlas/community board plus a private Prayer Care first increment (`/prayer`), local 6-translation engine, Strong's lexicons, TSK cross-references, Chrome MV3 side panel, Discord/WhatsApp integrations, Open MCP/REST APIs, Knowledge Graph, and web/Electron/Android packaging. Prayer Care includes private contacts and daily/weekly/monthly/one-time commitments, prayer completion, Google Calendar event export, reviewed Gmail draft creation, ICS download, and Gmail compose fallback. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
 | **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/daily` |
-| **Deploy & Build** | Production Next.js 16 build verified across all 33 routes (`0` type errors) |
+| **Deploy & Build** | Not deployed. Supabase schema v5 and Google OAuth credentials still require manual setup; see `.env.example` and `TODO.md`. |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 ---
@@ -40,7 +40,14 @@ BibleDesk is not just a UI; it is an open Bible intelligence engine:
 ### 3. Bidirectional Biblical Knowledge Graph
 The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.
 
-### 4. Structured 5-Dimension Study Framework
+### 4. Private Prayer Care and Reviewed Exports
+The `/prayer` route preserves PrayerAtlas and its community feed while adding a signed-in, owner-private Today in Prayer area. Users can add a person/topic, choose a daily, weekly, monthly, or one-time rhythm, mark a commitment prayed, and export it as ICS or to their own Google Calendar. Follow-up text remains editable and requires an explicit review checkbox before BibleDesk opens Gmail compose or creates a Gmail draft. There is no email-send route.
+
+Each user connects Google directly through BibleDesk's OAuth client. Access and refresh tokens are AES-256-GCM encrypted at rest in a service-role-only table. Application code does not use Perplexity or development-environment connector credentials.
+
+The shared `/prayer` route is available to PWA/Electron/Android wrappers that load the web app. The Chrome extension's Prayer Care tab opens Today in Prayer and its export controls in the configured BibleDesk instance; it does not store private prayer data or Google tokens.
+
+### 5. Structured 5-Dimension Study Framework
 When exploring complex theological questions, BibleDesk structures insights across 5 clear, complementary lenses:
 - 📖 **Biblical Foundation**: Primary text, chapter narrative flow, and direct textual evidence.
 - 🏛️ **Historical Setting**: Ancient Near East & Greco-Roman era, cultural customs, authorship, and original audience.
@@ -93,7 +100,11 @@ cd BibleDesk
 # 2. Install dependencies
 npm install
 
-# 3. Start local development server
+# 3. Copy .env.example to .env.local and configure required services.
+# Prayer Care requires schema-v5.sql after the earlier schemas.
+# Google exports additionally require the documented Google OAuth variables.
+
+# 4. Start local development server
 npm run dev
 ```
 

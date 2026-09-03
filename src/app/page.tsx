@@ -89,7 +89,7 @@ export default function HomePage() {
 
         {/* Daily Verse card */}
         <blockquote className={styles.dailyVerse}>
-          <p className={styles.dailyVerseText}>"{DAILY_VERSE.text}"</p>
+          <p className={styles.dailyVerseText}>&ldquo;{DAILY_VERSE.text}&rdquo;</p>
           <footer className={styles.dailyVerseRef}>
             <cite>{DAILY_VERSE.ref}</cite>
             <span className={styles.dailyVerseTrans}>{DAILY_VERSE.translation}</span>
@@ -161,7 +161,7 @@ export default function HomePage() {
               <div style={{ width: '100%', height: '220px', marginBottom: '0.75rem' }}>
                 <SacredHaloCanvas tintColor="#b58414" />
               </div>
-              <p>Ask a question above to explore Scripture across all 5 dimensions with Strong's lexicons and historical context.</p>
+              <p>Ask a question above to explore Scripture across all 5 dimensions with Strong&apos;s lexicons and historical context.</p>
             </div>
           )}
         </div>

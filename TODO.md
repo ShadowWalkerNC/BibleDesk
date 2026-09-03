@@ -14,7 +14,7 @@
 | Codebase | Large feature surface already shipped in-repo (reader, AI pipeline, church tools) |
 | Bible data | Still depends on **bible-api.com** (online). Local Midvash/OpenScriptures corpus **not** built |
 | Original language | Reader “Strong’s / commentary” is **AI-assisted** (Gemini), not lexicon-backed offline data |
-| Deploy | **Not live** — Supabase schemas + env vars + host still need production setup |
+| Deploy | **Not live** — Supabase schemas (including v5) + env vars + host still need production setup |
 | Docs | Aligned as of 2026-08-09 (this file / README / ARCHITECTURE / AGENTS) |
 
 **GitHub hygiene:** Close issue [#1 REPO RESET](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) — it describes an empty stub from 2026-06-15 and is obsolete.
@@ -35,13 +35,15 @@
 - [x] Bidirectional Biblical Knowledge Graph with semantic cross-reference exploration
 - [x] Dynamic Workspace Panel Layout Controls (Left Hub toggle, Maximize Reader distraction-free focus, Right Study toggle & expand drawer)
 - [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
+- [x] Prayer Care first increment in code: private contacts/commitments, prayer completion, reviewed Gmail drafts, Google Calendar/ICS exports, and extension deep link
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
     - `NEXT_PUBLIC_APP_URL` (production URL)
+    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_TOKEN_ENCRYPTION_KEY` (Prayer Care Google exports)
     - `IP_HASH_SALT`, `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`
   - [ ] Trigger deployment build on Vercel & complete smoke tests (Rate limiting, RAG hit headers, share pages)
 
@@ -143,14 +145,20 @@
 
 > Feature brief: [`docs/PRAYER_CARE_WORKFLOW.md`](docs/PRAYER_CARE_WORKFLOW.md)
 
-- [ ] Add a private Prayer Circle for people, groups, prayer topics, and sensitive entries
-- [ ] Add daily, weekly, monthly, selected-weekday, and one-time prayer commitments
+- [x] Add a private Prayer Circle first increment for people/groups, prayer topics, and sensitive entries
+- [x] Add daily, weekly, monthly, and one-time prayer commitments
+- [ ] Add selected-weekday and custom recurrence rules
 - [ ] Add a timezone-aware `Today in Prayer` queue with snooze, pause, and quiet hours
-- [ ] Record private prayer check-ins, notes, answered prayers, and gratitude history
-- [ ] Add editable follow-up drafts for email, SMS, WhatsApp, or clipboard
-- [ ] Require explicit review and approval before every outbound follow-up
+- [x] Record `prayed` check-ins and accept optional private notes through the authenticated API
+- [ ] Add check-in history UI, answered prayers, gratitude history, snooze, and skip actions
+- [x] Add editable email follow-up review with Gmail compose fallback and Gmail draft creation
+- [ ] Add SMS, WhatsApp, and clipboard follow-up adapters
+- [x] Require explicit review before opening Gmail compose or creating a Gmail draft; no automatic send endpoint exists
 - [ ] Add IndexedDB offline capture with authenticated Supabase sync
-- [ ] Add Supabase tables, indexes, and owner-only RLS policies for private prayer data
+- [x] Add an unapplied `schema-v5.sql` with private prayer tables, indexes, owner-only RLS, and service-role-only Google connections
+- [x] Add direct per-user Google OAuth, AES-256-GCM token storage, refresh, status/disconnect, Calendar export, and Gmail draft export
+- [x] Add ICS download and Gmail compose fallback when Google is not connected
+- [x] Add Chrome extension Prayer Care launcher/deep link; shared web route covers PWA/Electron/Android wrappers
 - [ ] Add idempotent scheduled reminders using a Supabase Edge Function or protected Vercel Cron route
 - [ ] Add ministry-team sharing and a church care dashboard only after the private MVP is secure
 

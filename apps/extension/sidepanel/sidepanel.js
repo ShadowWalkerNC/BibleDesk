@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dimensions: document.getElementById('panel-dimensions'),
     crossrefs: document.getElementById('panel-crossrefs'),
     lexicon: document.getElementById('panel-lexicon'),
+    prayer: document.getElementById('panel-prayer'),
   };
 
   const scriptureContent = document.getElementById('scripture-content');
@@ -76,8 +77,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function getServerUrl() {
-    return serverUrlInput.value.replace(/\/$/, '') || 'http://localhost:3000';
+    const configured = serverUrlInput.value.trim() || 'http://localhost:3000';
+    try {
+      const url = new URL(configured);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error('Unsupported protocol');
+      return url.origin;
+    } catch {
+      return 'http://localhost:3000';
+    }
   }
+
+  function openPrayerCare() {
+    const prayerUrl = new URL('/prayer', getServerUrl());
+    prayerUrl.hash = 'prayer-care';
+    chrome.tabs.create({ url: prayerUrl.toString() });
+  }
+
+  document.getElementById('open-prayer-care').addEventListener('click', openPrayerCare);
+  document.getElementById('open-prayer-exports').addEventListener('click', openPrayerCare);
 
   // Handle Query
   async function handleSearch(query) {
@@ -141,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         scriptureContent.innerHTML = `<p class="empty-text">No direct verse matches found for "${query}". Check the 5-D Study tab for concordance insights.</p>`;
         switchTab('dimensions');
       }
-    } catch (err) {
+    } catch {
       showError(`Connection to server failed (${server}). Ensure your BibleDesk instance is running.`);
     }
   }

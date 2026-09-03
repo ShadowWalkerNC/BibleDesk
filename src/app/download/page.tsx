@@ -237,7 +237,7 @@ export default function DownloadPage() {
               </div>
             </div>
             <p className={styles.platformDesc}>
-              Native Capacitor Android build with fluid touch scrolling, Strong's lexicon lookup, dark parchment reading mode, and offline Scripture search.
+              Native Capacitor Android build with fluid touch scrolling, Strong&apos;s lexicon lookup, dark parchment reading mode, and offline Scripture search.
             </p>
             <ul className={styles.featureList}>
               <li><Check size={14} className={styles.checkIcon} /> Direct APK Sideload (<code>BibleDesk.apk</code>)</li>
@@ -280,11 +280,11 @@ export default function DownloadPage() {
               </div>
             </div>
             <p className={styles.platformDesc}>
-              Read Scripture, query Strong's Greek/Hebrew dictionaries, and review 5D study insights directly in Chrome's native Side Panel while browsing.
+              Read Scripture, query Strong&apos;s Greek/Hebrew dictionaries, and review 5D study insights directly in Chrome&apos;s native Side Panel while browsing.
             </p>
             <ul className={styles.featureList}>
-              <li><Check size={14} className={styles.checkIcon} /> Context menu: Right click text → "Study in BibleDesk"</li>
-              <li><Check size={14} className={styles.checkIcon} /> Instant Strong's lookup (e.g. <code>G2889</code>, <code>H7225</code>)</li>
+              <li><Check size={14} className={styles.checkIcon} /> Context menu: Right click text → &ldquo;Study in BibleDesk&rdquo;</li>
+              <li><Check size={14} className={styles.checkIcon} /> Instant Strong&apos;s lookup (e.g. <code>G2889</code>, <code>H7225</code>)</li>
               <li><Check size={14} className={styles.checkIcon} /> Works in Chrome, Brave, Edge, and Arc</li>
             </ul>
             <div className={styles.cardFooter}>
@@ -309,7 +309,7 @@ export default function DownloadPage() {
           <div>
             <h4 className={styles.guaranteeTitle}>Shared Offline Scripture Foundation</h4>
             <p className={styles.guaranteeText}>
-              Every platform package includes the complete public-domain Bible corpus (KJV, ASV, WEB, BBE, Darby, YLT) and OpenScriptures Strong's Greek &amp; Hebrew lexicons locally. No subscriptions, no ads, and no internet required for core Bible study.
+              Every platform package includes the complete public-domain Bible corpus (KJV, ASV, WEB, BBE, Darby, YLT) and OpenScriptures Strong&apos;s Greek &amp; Hebrew lexicons locally. No subscriptions, no ads, and no internet required for core Bible study.
             </p>
           </div>
         </div>

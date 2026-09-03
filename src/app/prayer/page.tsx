@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
+import PrayerCare from '@/components/PrayerCare/PrayerCare';
 import { getBrowserClient } from '@/lib/supabase';
 import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
 import type { MissionMapPin } from '@/types/map';
@@ -259,6 +260,8 @@ export default function PrayerBoardPage() {
             {message.text}
           </div>
         )}
+
+        <PrayerCare />
 
         {/* View Controls & Filter Bar */}
         <div className={styles.toolbar}>

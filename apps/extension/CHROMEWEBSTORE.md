@@ -1,7 +1,7 @@
 # Chrome Web Store Listing — BibleDesk Companion
 
-> **Last Updated:** 2026-08-20  
-> **Status:** Ready for Submission
+> **Last Updated:** 2026-09-03
+> **Status:** Draft update; re-run packaging and store review before submission
 
 ---
 
@@ -10,7 +10,7 @@
 | Field | Value |
 |---|---|
 | **Name** | BibleDesk Companion |
-| **Short Description** | Instant Scripture lookup, 5-dimension AI Bible study, Strong's lexicon, and cross-references right from any webpage. |
+| **Short Description** | Scripture study, Strong's lexicon, cross-references, and secure access to BibleDesk Today in Prayer. |
 | **Category** | Productivity / Lifestyle |
 | **Primary Language** | English |
 
@@ -24,9 +24,12 @@
 | `contextMenus` | Enables right-click "Study in BibleDesk" on any highlighted text or scripture citation across the web. |
 | `storage` | Saves user's preferred Bible translation (WEB, KJV, ASV, etc.) and server endpoint locally on their device. |
 
+Host access covers localhost development and configured BibleDesk deployments (`bibledesk.org`, `*.bibledesk.app`, and `*.vercel.app`) for the existing Scripture API requests. Prayer Care opens as a normal web tab and does not broaden extension access to Google.
+
 ---
 
 ## 3. Privacy & Data Use
 
-- **Data Collection:** No personal information or browsing history is tracked or sold.
-- **Server Communication:** Queries are sent only to the configured BibleDesk server instance to fetch Bible texts and lexicon definitions.
+- **Data Collection:** The extension does not store prayer contacts, commitments, Supabase sessions, Google tokens, or message content. It does not track or sell browsing history.
+- **Server Communication:** Study queries are sent only to the configured BibleDesk server. Prayer Care buttons open the configured HTTP(S) BibleDesk origin in a regular tab so authentication and exports remain in the web app.
+- **Google:** The extension does not call Google APIs. Direct per-user Google OAuth and encrypted credential storage are handled by the configured BibleDesk server.

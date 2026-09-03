@@ -1,0 +1,359 @@
+.shell {
+  margin-bottom: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(145deg, rgba(255, 253, 247, 0.94), rgba(242, 232, 211, 0.72)),
+    var(--bg-card);
+  box-shadow: 0 8px 30px rgba(90, 70, 40, 0.08);
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.8rem;
+  color: var(--gold-600);
+}
+
+.intro h2 {
+  margin: 0.1rem 0 0.3rem;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+}
+
+.intro p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.eyebrow {
+  color: var(--gold-600) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.googleBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.googleBox span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.careGrid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(360px, 1.15fr);
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.addCard,
+.queueCard,
+.followupCard {
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.68);
+  padding: 1rem;
+}
+
+.cardHeading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gold-600);
+  margin-bottom: 0.85rem;
+}
+
+.cardHeading h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.count {
+  margin-left: auto;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(181, 132, 20, 0.12);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  font-weight: 500;
+}
+
+.formGrid textarea {
+  resize: vertical;
+}
+
+.formGrid input:focus,
+.formGrid select:focus,
+.formGrid textarea:focus {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formGrid .checkboxLabel {
+  flex-direction: row;
+  align-items: center;
+  min-height: 42px;
+  font-weight: 600;
+}
+
+.checkboxLabel input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--gold-600);
+}
+
+.timezone,
+.privacyNote,
+.empty {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.timezone {
+  margin: 0.6rem 0;
+}
+
+.primaryButton,
+.secondaryButton,
+.prayedButton,
+.actionButton,
+.actionLink,
+.textButton {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid #785304;
+  background: linear-gradient(135deg, #b58414, #785304);
+  color: white;
+}
+
+.secondaryButton,
+.actionButton,
+.actionLink {
+  border: 1px solid rgba(181, 132, 20, 0.36);
+  background: white;
+  color: var(--gold-600);
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.prayedButton:disabled,
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.commitmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commitment {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid rgba(181, 132, 20, 0.15);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 253, 247, 0.84);
+}
+
+.commitment > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.commitment strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.commitment span {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.commitment small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.prayedButton {
+  border: 1px solid #397153;
+  background: #397153;
+  color: white;
+}
+
+.exported {
+  align-self: center;
+  font-size: 0.75rem !important;
+  color: #397153 !important;
+  font-weight: 700;
+}
+
+.followupCard {
+  margin-top: 1rem;
+}
+
+.followupCard > p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.followupActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.success,
+.error {
+  margin: 0.8rem 0 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.success {
+  border: 1px solid rgba(57, 113, 83, 0.32);
+  background: rgba(57, 113, 83, 0.09);
+  color: #28573e;
+}
+
+.error {
+  border: 1px solid rgba(170, 45, 45, 0.3);
+  background: rgba(170, 45, 45, 0.08);
+  color: #8d2626;
+}
+
+.privacyNote {
+  margin: 0.8rem 0 0;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .intro {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .googleBox {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+  }
+
+  .careGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .shell {
+    padding: 0.85rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fullWidth {
+    grid-column: auto;
+  }
+
+  .commitment {
+    grid-template-columns: 1fr;
+  }
+
+  .actions,
+  .actions > * {
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .prayedButton,
+  .actionButton,
+  .actionLink {
+    min-height: 44px;
+  }
+}
+

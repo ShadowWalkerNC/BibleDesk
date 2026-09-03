@@ -1,7 +1,7 @@
 # BibleDesk — Architecture
 
 > **Status:** Phase 0 Complete & Multi-Platform Suite Deployed · Local Bible Foundation & Open MCP/API Engine  
-> **Last updated:** 2026-08-30  
+> **Last updated:** 2026-09-03
 > **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · Model Context Protocol (MCP) · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Greek/Hebrew Lexicons · Capacitor (Android) · Electron (Desktop)  
 > **Work tracker:** [TODO.md](TODO.md) · **Ops Audit:** [OPS_REPORT.md](OPS_REPORT.md) · **Product Vision:** [README.md](README.md)
 
@@ -31,6 +31,7 @@
 │  MCP Server: /api/mcp for Claude Code, Cursor, Windsurf, custom agents  │
 │  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline    │
 │  Embeddings: OpenAI text-embedding-3-small for pgvector RAG (optional)  │
+│  Prayer Care: authenticated private API + direct per-user Google OAuth  │
 │  Discord Integration: /api/discord/interactions · /api/discord/webhook  │
 │  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)           │
 │  Sigil Network: /api/v1/bible/answer (HMAC-SHA256)                      │
@@ -55,7 +56,8 @@
 | **AI Answers & Pipeline** | Google Gemini API (`gemini-2.5-flash`) | Bring-Your-Own-Key (`x-gemini-api-key`) with server fallback |
 | **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |
 | **Lexicon & Cross-Refs** | Strong's Greek/Hebrew + TSK | 5.5k Greek + 8.6k Hebrew + 29k cross-references |
-| **Multi-Platform Suite** | Web PWA + Electron + Capacitor Android + Chrome MV3 | Single-command unified package orchestrator (`npm run package:all`) |
+| **Prayer Care exports** | Supabase Auth/RLS + Google OAuth 2.0 + AES-256-GCM | Owner-private prayer rhythms; Calendar events and reviewed Gmail drafts |
+| **Multi-Platform Suite** | Web PWA + Electron + Capacitor Android + Chrome MV3 | Shared `/prayer` flow for app wrappers; extension opens secure web actions |
 
 ---
 
@@ -70,6 +72,8 @@ BibleDesk/
 │   │   │   ├── ask/stream/route.ts       ← SSE streaming ask
 │   │   │   ├── bible/{chapter,search,study}/
 │   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|sermons/
+│   │   │   ├── prayer-care/{contacts,commitments,followups}/
+│   │   │   ├── google/{connect/start,callback,status,disconnect}/
 │   │   │   ├── export/obsidian/
 │   │   │   ├── mod/{queue,vote,approve,invite}/
 │   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
@@ -84,10 +88,11 @@ BibleDesk/
 │   │   ├── bible.ts                      ← bible-api.com (interim)
 │   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
 │   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
+│   │   ├── google-oauth.ts · prayer-care.ts · server-auth.ts
 │   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
 │   └── types/
 ├── apps/desktop/                         ← Electron shell
-├── supabase/                             ← schema.sql → schema-v4.sql (+ rpc.sql)
+├── supabase/                             ← schema.sql → schema-v5.sql (+ rpc.sql)
 ├── public/                               ← manifest + icons
 ├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
 └── next.config.ts
@@ -430,6 +435,31 @@ flagged_topics (
 )
 ```
 
+### Prayer Care schema v5 (migration ready, not applied)
+
+`schema-v5.sql` adds `prayer_contacts`, `prayer_commitments`, `prayer_checkins`, `prayer_followups`, and `prayer_notification_preferences`. Every private record is keyed to `auth.users`, child relationships enforce the same owner, and owner-only RLS governs browser access. `google_connections` stores only encrypted OAuth token envelopes, expiry, scopes, and Google account email; it has RLS enabled with no browser policies and explicit `anon`/`authenticated` grants revoked.
+
+The server verifies the Supabase bearer token for every Prayer Care and Google status/export route, then derives `owner_id` from the verified user. Request bodies cannot select an owner.
+
+### Google export flow
+
+```text
+Authenticated user
+  -> POST /api/google/connect/start (Bearer token)
+  -> signed, expiring OAuth state + httpOnly SameSite=Lax cookie
+  -> Google consent (openid/email, calendar.events, gmail.compose)
+  -> GET /api/google/callback
+  -> exchange code, encrypt tokens with AES-256-GCM, service-role upsert
+
+Commitment -> POST .../[id]/calendar -> primary-calendar event
+           -> GET  .../[id]/ics      -> private ICS download fallback
+
+Reviewed follow-up -> POST .../followups/gmail-draft -> Gmail draft only
+                   -> Gmail compose URL fallback
+```
+
+Calendar export persists Google event ID/link and returns the existing result on retries. Gmail has no send route. The browser extension does not duplicate auth or private storage; it opens `/prayer#prayer-care` on the configured HTTP(S) BibleDesk origin. PWA, Electron, and Android builds consume the same web route.
+
 ---
 
 ## 9. Security Model
@@ -441,6 +471,10 @@ flagged_topics (
 | **IP privacy** | IPs are SHA-256 hashed with a salt — raw IPs never stored |
 | **Input validation** | Server-side: min 5 chars, max 500, whitespace-normalized |
 | **Supabase RLS** | `answers`: public SELECT, service-role INSERT. `canonical_answers`, `flags`, `moderation_votes`, `moderators`: service-role only |
+| **Prayer ownership** | Supabase bearer token verified server-side; owner ID is never accepted from request JSON; private tables use strict owner-only RLS |
+| **Google OAuth** | Direct BibleDesk OAuth client, signed/expiring state plus httpOnly cookie, fixed callback/return path, least-privilege Calendar/Gmail draft scopes |
+| **Token storage** | Access/refresh tokens use AES-256-GCM envelopes; `google_connections` is service-role-only and APIs never return ciphertext |
+| **Follow-up safety** | Editable final recipient/subject/message with explicit review; Gmail draft creation only; no automatic send endpoint |
 | **Moderator auth** | Supabase Auth (email, invite-only) — all `/api/mod/*` routes validate session before any data access |
 | **Sigil webhook auth** | HMAC-SHA256 via `x-bibledesk-signature` header — timing-safe comparison |
 | **Build verification** | `next build` must pass with zero secrets in client chunks before every deploy |

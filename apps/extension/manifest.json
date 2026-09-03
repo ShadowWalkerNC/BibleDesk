@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "BibleDesk Companion",
-  "version": "1.0.0",
-  "description": "Instant Scripture lookup, 5-dimension AI Bible study, Strong's lexicon, and cross-references right from any webpage.",
+  "version": "1.1.0",
+  "description": "Scripture study, Strong's lexicon, cross-references, and secure access to BibleDesk Today in Prayer.",
   "permissions": [
     "storage",
     "contextMenus",
     "sidePanel"
   ],
   "host_permissions": [
+    "https://bibledesk.org/*",
     "https://*.bibledesk.app/*",
     "https://*.vercel.app/*",
     "http://localhost:3000/*"
