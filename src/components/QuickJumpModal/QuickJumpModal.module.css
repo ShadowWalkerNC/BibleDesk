@@ -15,10 +15,10 @@
 .modal {
   width: 100%;
   max-width: 680px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(181, 132, 20, 0.32);
   border-radius: var(--radius-xl);
   box-shadow: 
     0 24px 60px rgba(0, 0, 0, 0.12),
