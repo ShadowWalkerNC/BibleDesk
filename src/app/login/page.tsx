@@ -148,7 +148,7 @@ export default function LoginPage() {
 
   return (
     <main className={styles.main}>
-      <div className={`${styles.authCard} glass-card`}>
+      <div className={styles.authCard}>
         {/* Tab Switcher */}
         <div className={styles.authTabs} role="tablist" aria-label="Authentication Options">
           <button

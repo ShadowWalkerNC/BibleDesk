@@ -42,6 +42,7 @@
 - [x] Complete Authentication: Email/Password + Google OAuth one-click sign-in, password visibility toggle, auto profile creation
 - [x] Database RLS Hardening: schema-v6.sql user-scoped bookmarks with strict RLS (auth.uid() = user_id) and guest data auto-merge engine
 - [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
+- [x] Modal & Dialog CSS Hardening: zero-bleed solid opaque cards across QuickJumpModal, ApiKeyModal, IntegrationsModal, Pastoral Care Follow-up, Pin to Map, and Login with high z-index (9990) and darkened backdrops
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
   - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql`
   - [ ] Configure Environment Variables on Host (Vercel):

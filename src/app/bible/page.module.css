@@ -454,8 +454,9 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  background: var(--navy-900);
-  border: 1px solid var(--glass-border);
+  background: #ffffff !important;
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  box-shadow: 0 4px 12px rgba(90, 70, 40, 0.15);
   padding: 3px 6px;
   border-radius: var(--radius-sm);
 }

@@ -393,10 +393,10 @@
 .mobileDrawerOverlay {
   position: fixed;
   inset: 0;
-  z-index: 300;
-  background: rgba(20, 15, 8, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  z-index: 800;
+  background: rgba(15, 12, 8, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -404,8 +404,8 @@
 }
 
 .mobileDrawerContent {
-  background: rgba(255, 253, 248, 0.99);
-  border-top: 1px solid rgba(181, 132, 20, 0.35);
+  background: #ffffff !important;
+  border-top: 1px solid rgba(181, 132, 20, 0.38);
   border-radius: 20px 20px 0 0;
   max-height: 85vh;
   display: flex;

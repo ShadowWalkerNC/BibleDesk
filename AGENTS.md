@@ -99,6 +99,7 @@ Active work (Phase 0 Complete):
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Focus Reader, Right Study Drawer)
   ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
+  ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
 
 Deploy (parallel):
   □ Apply supabase schemas v1→v6

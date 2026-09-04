@@ -14,6 +14,12 @@
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
+  background: #ffffff !important;
+  border: 1px solid rgba(181, 132, 20, 0.38);
+  box-shadow: 
+    0 25px 65px rgba(0, 0, 0, 0.14),
+    0 4px 20px rgba(90, 70, 40, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 /* ── Tab Switcher (Jakob's Law: Standard conventions) ── */

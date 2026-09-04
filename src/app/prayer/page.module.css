@@ -599,14 +599,14 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 12, 8, 0.68);
+  background: rgba(15, 12, 8, 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  z-index: 1000;
+  z-index: 9990;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -619,7 +619,7 @@
   padding: 1.75rem 2rem;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(181, 132, 20, 0.38);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(90, 70, 40, 0.15);
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.35), 0 4px 20px rgba(90, 70, 40, 0.15);
   background: #ffffff !important;
   color: var(--text-primary);
   display: flex;
@@ -1446,8 +1446,8 @@
   padding: 0.55rem;
   min-height: 48px;
   border-radius: var(--radius-sm);
-  background: rgba(235, 226, 210, 0.5);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(235, 226, 210, 0.65);
+  border: 1px solid rgba(181, 132, 20, 0.3);
   color: var(--text-secondary);
   font-size: 0.82rem;
   font-weight: 600;
@@ -1459,7 +1459,7 @@
   background: #ffffff !important;
   color: var(--gold-600) !important;
   border-color: var(--gold-500) !important;
-  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.08);
+  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.12);
 }
 
 .templateList {
@@ -1479,27 +1479,29 @@
 
 .templatePill {
   text-align: left;
-  padding: 0.45rem 0.75rem;
-  border-radius: 6px;
-  background: rgba(181, 132, 20, 0.06);
-  border: 1px solid rgba(181, 132, 20, 0.18);
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  background: #fbf9f4;
+  border: 1px solid rgba(181, 132, 20, 0.25);
   color: var(--text-primary);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .templatePill:hover {
-  background: rgba(181, 132, 20, 0.14);
+  background: #ffffff;
   border-color: var(--gold-400);
+  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.12);
 }
 
 .followupTextarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.85rem;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  background: #ffffff;
   font-family: inherit;
   font-size: 0.88rem;
   line-height: 1.45;
