@@ -97,12 +97,12 @@ Active work (Phase 0 Complete):
   ✓ Multi-Channel Prayer Care Workflow (In-app rhythm, browser notifications, email digest)
   ✓ 1-Click Care Follow-ups (WhatsApp, Email, SMS, Clipboard) with encouraging templates
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Focus Reader, Right Study Drawer)
-  ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
+  ✓ PrayerAtlas 2D Interactive Vector Global Prayer Map (D3 Natural Earth, category color-coding, approximate halos vs precise beacons, restricted shields, offline TopoJSON)
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v6
+  □ Apply supabase schemas v1→v7
   □ Env vars + host + smoke tests (see TODO.md)
 ```
 

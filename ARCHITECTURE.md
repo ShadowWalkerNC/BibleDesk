@@ -19,7 +19,7 @@
 │   · AppShell Layout: Persistent Left Sidebar + Jakob's Law Mobile Rail/Sheet  │
 │   · /bible · 3-Column Centralized Study Desk (product core)             │
 │   · /download · Multi-Platform Installation Hub (PWA, Desktop, APK, Ext)│
-│   · Shadcn UI + Three.js 3D Sacred Halo Canvas + Lucide Icons           │
+│   · Shadcn UI + Lucide Icons + PrayerAtlas 2D Vector Map (`/prayer`)    │
 │   · Bidirectional Biblical Knowledge Graph (`/graph`)                   │
 └────────┬────────────────────────────────┬───────────────────────────────┘
          │ /api/bible/*, /api/graph       │ /api/mcp (JSON-RPC 2.0)
@@ -89,7 +89,7 @@ BibleDesk/
 │   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
 │   └── types/
 ├── apps/desktop/                         ← Electron shell
-├── supabase/                             ← schema.sql → schema-v6.sql (+ rpc.sql)
+├── supabase/                             ← schema.sql → schema-v7.sql (+ rpc.sql)
 ├── public/                               ← manifest + icons
 ├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
 └── next.config.ts

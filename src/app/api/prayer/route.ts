@@ -46,7 +46,19 @@ export async function POST(req: NextRequest) {
     }
     const supabase = getServerClient();
     const body = await req.json();
-    const { request, display_name = 'Anonymous', anonymous = false, user_id = null } = body;
+    const { 
+      request, 
+      display_name = 'Anonymous', 
+      anonymous = false, 
+      user_id = null,
+      country_code = null,
+      country_name = null,
+      latitude = null,
+      longitude = null,
+      category = 'community',
+      privacy_mode = 'approximate',
+      is_restricted = false
+    } = body;
 
     if (!request || request.trim().length < 5) {
       return NextResponse.json(
@@ -57,19 +69,54 @@ export async function POST(req: NextRequest) {
 
     const nameToStore = anonymous ? 'Anonymous' : display_name.trim();
 
-    // Insert prayer request into Supabase
-    const { data, error } = await supabase
-      .from('prayer_requests')
-      .insert({
-        user_id: user_id || null,
-        display_name: nameToStore,
-        request: request.trim(),
-        likes_count: 0,
-      })
-      .select()
-      .single();
+    // Insert prayer request into Supabase (try with extended columns, fallback to base)
+    let data: any = null;
+    try {
+      const result = await supabase
+        .from('prayer_requests')
+        .insert({
+          user_id: user_id || null,
+          display_name: nameToStore,
+          request: request.trim(),
+          likes_count: 0,
+          country_code: country_code ?? null,
+          country_name: country_name ?? null,
+          latitude: latitude != null ? Number(latitude) : null,
+          longitude: longitude != null ? Number(longitude) : null,
+          category: category || 'community',
+          privacy_mode: privacy_mode || 'approximate',
+          is_restricted: Boolean(is_restricted),
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
+      if (result.error) throw result.error;
+      data = result.data;
+    } catch (insertErr: any) {
+      console.warn('[api/prayer] Extended column insert failed, falling back to basic columns:', insertErr.message);
+      const fallbackResult = await supabase
+        .from('prayer_requests')
+        .insert({
+          user_id: user_id || null,
+          display_name: nameToStore,
+          request: request.trim(),
+          likes_count: 0,
+        })
+        .select()
+        .single();
+
+      if (fallbackResult.error) throw fallbackResult.error;
+      data = {
+        ...fallbackResult.data,
+        country_code,
+        country_name,
+        latitude,
+        longitude,
+        category,
+        privacy_mode,
+        is_restricted,
+      };
+    }
 
     // Send Webhook to Discord (Sigil Bot trigger)
     const webhookUrl = process.env.PRAYER_DISCORD_WEBHOOK_URL || process.env.SIGIL_PRAYER_WEBHOOK_URL;

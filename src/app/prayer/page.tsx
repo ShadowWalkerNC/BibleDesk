@@ -65,9 +65,24 @@ interface PublicPrayerRequest {
   latitude?: number | null;
   longitude?: number | null;
   is_restricted?: boolean;
+  category?: string;
+  privacy_mode?: 'approximate' | 'precise' | 'restricted';
 }
 
 type MainTab = 'today' | 'circle' | 'community' | 'world' | 'answered';
+
+function inferPrayerCategory(text: string, isRestricted?: boolean, explicitCategory?: string): string {
+  if (isRestricted) return 'restricted';
+  if (explicitCategory && explicitCategory !== 'all') return explicitCategory.toLowerCase();
+  const lower = (text || '').toLowerCase();
+  if (/heal|sick|cancer|doctor|pain|health|surgery|hospital|recover|illness|disease/.test(lower)) return 'healing';
+  if (/church|pastor|congregation|elder|service|fellowship|ministry|sermon/.test(lower)) return 'church';
+  if (/mission|unreached|tribal|outreach|evangelism|gospel|field|bible translation/.test(lower)) return 'missions';
+  if (/family|father|mother|son|daughter|husband|wife|marriage|parent|child|kids/.test(lower)) return 'family';
+  if (/work|job|boss|career|colleague|business|interview|employment|financial/.test(lower)) return 'work';
+  if (/friend|neighbor|brother|sister|companion/.test(lower)) return 'friend';
+  return 'community';
+}
 
 export default function PrayerBoardPage() {
   // Navigation: Primary Segments
@@ -96,7 +111,8 @@ export default function PrayerBoardPage() {
   const [anonymous, setAnonymous] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState('');
-  const [locationPrivacy, setLocationPrivacy] = useState<'exact' | 'country_only' | 'restricted'>('country_only');
+  const [publicCategory, setPublicCategory] = useState<string>('community');
+  const [locationPrivacy, setLocationPrivacy] = useState<'approximate' | 'precise' | 'restricted'>('approximate');
   const [prayedSession, setPrayedSession] = useState<Record<string, boolean>>({});
 
   // ── Prayer Care Workflow State (Local-first & Supabase synced) ───────────
@@ -198,24 +214,34 @@ export default function PrayerBoardPage() {
     });
   }, [contacts, categoryFilter]);
 
-  // Globe Pins
+  // Globe Pins: Unifies active community prayers with global beacons
   const globePins = useMemo<MissionMapPin[]>(() => {
     const submittedPins: MissionMapPin[] = prayers
       .filter(p => p.latitude != null && p.longitude != null)
-      .map(p => ({
-        id: p.id,
-        latitude: p.latitude!,
-        longitude: p.longitude!,
-        label: p.is_restricted 
-          ? 'Restricted Region' 
-          : (p.country_name ? `${p.country_name} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
-        category: 'prayer',
-        text: p.is_restricted
-          ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
-          : p.request,
-        urgency: 'normal',
-        isRestricted: p.is_restricted ?? false,
-      }));
+      .map(p => {
+        const isRestr = Boolean(p.is_restricted || p.privacy_mode === 'restricted');
+        const cat = inferPrayerCategory(p.request, isRestr, p.category);
+        const privMode = p.privacy_mode || (isRestr ? 'restricted' : 'approximate');
+
+        return {
+          id: p.id,
+          latitude: p.latitude!,
+          longitude: p.longitude!,
+          label: isRestr 
+            ? 'Restricted Region' 
+            : (p.country_name ? `${p.country_name} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
+          category: cat,
+          privacy_mode: privMode,
+          text: isRestr
+            ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
+            : p.request,
+          urgency: 'normal',
+          isRestricted: isRestr,
+          source: 'public' as const,
+          country_code: p.country_code,
+          country_name: p.country_name,
+        };
+      });
 
     const merged = [...DEFAULT_MAP_PINS];
     for (const pin of submittedPins) {
@@ -453,6 +479,8 @@ export default function PrayerBoardPage() {
           country_name: isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? null),
           latitude: selectedCountry ? selectedCountry.lat : null,
           longitude: selectedCountry ? selectedCountry.lng : null,
+          category: publicCategory,
+          privacy_mode: locationPrivacy,
           is_restricted: isRestrictedSetting,
         }),
       });
@@ -861,7 +889,7 @@ export default function PrayerBoardPage() {
                 <div>
                   <h2 className={styles.atlasCardTitle}>Global Intercession Map</h2>
                   <p className={styles.atlasCardSubtitle}>
-                    Rotate the globe to discover prayer beacons and pray for missionaries, churches, and restricted regions.
+                    Explore interactive 2D prayer beacons color-coded by category across nations. Pray for missionaries, churches, healing, and restricted regions.
                   </p>
                 </div>
                 <span className={styles.globePinCount}>
@@ -875,6 +903,34 @@ export default function PrayerBoardPage() {
                   setSelectedPinId(pin.id);
                   const matched = prayers.find(p => p.id === pin.id);
                   if (matched) setSelectedPrayer(matched);
+                }}
+                onPray={(pin) => {
+                  handlePublicPray(pin.id);
+                  setMessage({ text: `Prayed in spirit for ${pin.label}.`, type: 'success' });
+                  setTimeout(() => setMessage(null), 3000);
+                }}
+                onFollowup={(pin) => {
+                  const matchedContact = contacts.find(c => c.id === pin.contact_id || c.display_name === pin.label);
+                  if (matchedContact) {
+                    setSelectedFollowupContact(matchedContact);
+                    const matchingCommitment = commitments.find(c => c.contact_id === matchedContact.id);
+                    setSelectedFollowupCommitment(matchingCommitment || null);
+                    setFollowupMessage(`I prayed for you today regarding "${pin.text || pin.label}". How are you doing?`);
+                    setFollowupModalOpen(true);
+                  } else {
+                    setSelectedFollowupContact({
+                      id: pin.id,
+                      display_name: pin.label,
+                      category: (pin.category as any) || 'Friend',
+                      is_sensitive: pin.isRestricted,
+                      is_archived: false,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    });
+                    setSelectedFollowupCommitment(null);
+                    setFollowupMessage(`Praying for ${pin.label} today: "${pin.text}"`);
+                    setFollowupModalOpen(true);
+                  }
                 }}
               />
             </div>
@@ -1260,6 +1316,22 @@ export default function PrayerBoardPage() {
 
                 <div className={styles.formRow}>
                   <label className={styles.formLabel}>
+                    Prayer Category
+                    <select
+                      value={publicCategory}
+                      onChange={(e) => setPublicCategory(e.target.value)}
+                      className={styles.formSelect}
+                    >
+                      <option value="community">Community &amp; Civic</option>
+                      <option value="healing">Healing &amp; Recovery</option>
+                      <option value="church">Church &amp; Leadership</option>
+                      <option value="missions">Missions &amp; Outreach</option>
+                      <option value="family">Family &amp; Marriage</option>
+                      <option value="work">Work &amp; Calling</option>
+                    </select>
+                  </label>
+
+                  <label className={styles.formLabel}>
                     Nation / Country
                     <select
                       value={countryCode}
@@ -1272,16 +1344,19 @@ export default function PrayerBoardPage() {
                       ))}
                     </select>
                   </label>
+                </div>
 
+                <div className={styles.formRow}>
                   <label className={styles.formLabel}>
-                    Privacy Level
+                    Map Highlight &amp; Privacy Level
                     <select
                       value={locationPrivacy}
                       onChange={(e) => setLocationPrivacy(e.target.value as any)}
                       className={styles.formSelect}
                     >
-                      <option value="country_only">Country Capital Beacon (Recommended)</option>
-                      <option value="restricted">Restricted Region Shield (Anonymous)</option>
+                      <option value="approximate">Approximate Region (Country Capital Centroid)</option>
+                      <option value="precise">Precise Pinpoint Beacon</option>
+                      <option value="restricted">Restricted Region Shield (Protected Location)</option>
                     </select>
                   </label>
                 </div>

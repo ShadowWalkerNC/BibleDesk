@@ -34,7 +34,7 @@
 - [x] Open REST APIs (`/api/bible/*`, `/api/graph`) and Model Context Protocol (`/api/mcp`) server for external AI agents
 - [x] Bidirectional Biblical Knowledge Graph with semantic cross-reference exploration
 - [x] Dynamic Workspace Panel Layout Controls (Left Hub toggle, Maximize Reader distraction-free focus, Right Study toggle & expand drawer)
-- [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
+- [x] PrayerAtlas 2D Interactive Vector Global Prayer Map with category color-coding, approximate glowing halos vs precise pinpoint beacons, restricted protective shields, and Jakob's Law mobile bottom card (`/prayer`, `schema-v7.sql`)
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
 - [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, SMS, Clipboard), answered gratitude log, browser push notifications, and schema-v5.sql
@@ -44,7 +44,7 @@
 - [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
 - [x] Modal & Dialog CSS Hardening: zero-bleed solid opaque cards across QuickJumpModal, ApiKeyModal, IntegrationsModal, Pastoral Care Follow-up, Pin to Map, and Login with high z-index (9990) and darkened backdrops
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
