@@ -90,15 +90,18 @@ Active work (Phase 0 Complete):
   ✓ Strong's Greek (5.5k) & Hebrew (8.6k) lexicon data + TSK cross-refs
   ✓ Quick Jump modal (Ctrl+K) & Chrome Extension MV3 side panel
   ✓ Modernized Bible-themed UI with clean Lucide icons across desktop & mobile
-  ✓ Bring-Your-Own-Key (BYOK) Gemini API key setup with shared/free Bible guarantee
-  ✓ Discord bot slash commands & webhook channel dispatcher
-  ✓ Meta WhatsApp Business Cloud API webhook & Click-to-Chat sharing
-  ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
+  ✓ Server Gemini AI Key Gating (strictly hidden; automatic access for signed-in accounts)
+  ✓ Complete Authentication & Signup (Email/Password + Google OAuth + profile creation)
+  ✓ Database RLS Hardening & user-scoped bookmarks (schema-v6.sql)
+  ✓ Guest Data Auto-Merge (migrates guest bookmarks, notes, prayer lists on login)
+  ✓ Multi-Channel Prayer Care Workflow (In-app rhythm, browser notifications, email digest)
+  ✓ 1-Click Care Follow-ups (WhatsApp, Email, SMS, Clipboard) with encouraging templates
+  ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Focus Reader, Right Study Drawer)
   ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
-  ✓ Single-command packaging CLI (`npm run package:all`) & official multi-resolution brand icon suite
+  ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v5
+  □ Apply supabase schemas v1→v6
   □ Env vars + host + smoke tests (see TODO.md)
 ```
 
@@ -120,12 +123,12 @@ src/
   components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
   lib/
     bible.ts                     ← bible-api.com client (interim)
-    claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|…
+    claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|auth.ts|syncGuestData.ts
   hooks/                         ← useStreamingAsk, useBookmark
   types/
 apps/desktop/                    ← Electron wrapper
 supabase/
-  schema.sql → schema-v4.sql     ← Apply in order
+  schema.sql → schema-v6.sql     ← Apply in order
 public/
   manifest.json, icon-*.png
 TODO.md · README.md · ARCHITECTURE.md · .env.example

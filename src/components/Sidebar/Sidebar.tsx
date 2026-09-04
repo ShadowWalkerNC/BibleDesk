@@ -196,14 +196,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Footer: Gemini API Key & Auth */}
         <div className={styles.sidebarFooter}>
           <button
-            className={`${styles.apiKeyBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+            className={`${styles.apiKeyBtn} ${(user || hasApiKey) ? styles.apiKeyConfigured : ''}`}
             onClick={() => setIsKeyModalOpen(true)}
-            title={hasApiKey ? 'Gemini API Key: Configured' : 'Configure Gemini API Key'}
+            title={user ? 'Gemini AI: Active (Included with your account)' : hasApiKey ? 'Gemini API Key: Configured' : 'Configure Gemini API Key / Sign In'}
           >
             <Sparkles size={14} className={styles.keyIcon} />
             {!collapsed && (
               <span className={styles.apiKeyLabel}>
-                {hasApiKey ? 'AI Key: Active' : 'Add Gemini Key'}
+                {user ? 'Gemini AI: Included' : hasApiKey ? 'AI Key: Active' : 'Sign in for AI'}
               </span>
             )}
           </button>
@@ -365,14 +365,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             {/* Mobile Footer Actions (API Key, Integrations, Auth) */}
             <div className={styles.mobileDrawerFooter}>
               <button
-                className={`${styles.mobileActionBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+                className={`${styles.mobileActionBtn} ${(user || hasApiKey) ? styles.apiKeyConfigured : ''}`}
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsKeyModalOpen(true);
                 }}
               >
                 <Sparkles size={16} />
-                <span>{hasApiKey ? 'Gemini AI Key: Active' : 'Add Gemini AI Key'}</span>
+                <span>{user ? 'Gemini AI: Included' : hasApiKey ? 'AI Key: Active' : 'Sign in for AI Assistant'}</span>
               </button>
 
               <button

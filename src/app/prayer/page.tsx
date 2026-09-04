@@ -48,6 +48,7 @@ import {
   addContactToStore, 
   addCommitmentToStore, 
   performCheckin, 
+  recordFollowupInStore,
   FOLLOWUP_TEMPLATES 
 } from '@/lib/prayerCareLocal';
 import styles from './page.module.css';
@@ -127,6 +128,10 @@ export default function PrayerBoardPage() {
   const [pendingCheckinCommitment, setPendingCheckinCommitment] = useState<PrayerCommitment | null>(null);
   const [privateNote, setPrivateNote] = useState('');
 
+  // ── Multi-Channel Reminders & Digest State ────────────────────────────────
+  const [notificationPermission, setNotificationPermission] = useState<string>('default');
+  const [digestSending, setDigestSending] = useState(false);
+
   // Initial Load
   useEffect(() => {
     // 1. Load Local Prayer Care Store
@@ -144,7 +149,12 @@ export default function PrayerBoardPage() {
       }
     });
 
-    // 3. Fetch Public Community Prayers
+    // 3. Check browser notification support
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+
+    // 4. Fetch Public Community Prayers
     fetchPublicPrayers();
   }, []);
 
@@ -289,6 +299,20 @@ export default function PrayerBoardPage() {
   function handleSendFollowup() {
     if (!followupMessage.trim() || !selectedFollowupContact) return;
 
+    // Record follow-up event in store
+    const store = loadPrayerCareStore();
+    recordFollowupInStore(store, {
+      contact_id: selectedFollowupContact.id,
+      channel: followupChannel,
+      recipient: followupChannel === 'email' 
+        ? selectedFollowupContact.email 
+        : (followupChannel === 'whatsapp' || followupChannel === 'sms')
+          ? selectedFollowupContact.phone 
+          : 'clipboard',
+      message: followupMessage,
+      status: 'sent',
+    });
+
     if (followupChannel === 'clipboard') {
       navigator.clipboard.writeText(followupMessage);
       setCopiedSuccess(true);
@@ -303,12 +327,90 @@ export default function PrayerBoardPage() {
       );
       window.open(link, '_blank');
       setFollowupModalOpen(false);
+    } else if (followupChannel === 'sms') {
+      const cleanPhone = (selectedFollowupContact.phone || '').replace(/[^0-9+]/g, '');
+      const body = encodeURIComponent(followupMessage);
+      window.location.href = `sms:${cleanPhone}?body=${body}`;
+      setFollowupModalOpen(false);
     } else if (followupChannel === 'email') {
       const email = selectedFollowupContact.email || '';
       const subject = encodeURIComponent('Thinking of you and praying today');
       const body = encodeURIComponent(followupMessage);
       window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
       setFollowupModalOpen(false);
+    }
+  }
+
+  // ── Multi-Channel Reminder & Digest Handlers ──────────────────────────────
+  async function handleRequestNotificationPermission() {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      setMessage({ text: 'Web push notifications are not supported on this browser.', type: 'error' });
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission === 'granted') {
+        setMessage({ text: 'Prayer reminders enabled! You will be notified when prayers are due.', type: 'success' });
+        setTimeout(() => setMessage(null), 3500);
+      } else {
+        setMessage({ text: 'Notifications were denied. Please enable them in your browser settings.', type: 'error' });
+      }
+    } catch (e) {
+      console.error('Notification permission error:', e);
+    }
+  }
+
+  function handleSendTestNotification() {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') {
+      handleRequestNotificationPermission();
+      return;
+    }
+    const samplePerson = dueCommitments[0]?.contact_id 
+      ? contacts.find(c => c.id === dueCommitments[0].contact_id)?.display_name 
+      : 'Sarah (Family)';
+    const sampleTitle = dueCommitments[0]?.title || 'Health, peace, and spiritual strength';
+
+    new Notification(`Time to Pray for ${samplePerson}`, {
+      body: `${sampleTitle} — Open BibleDesk to pray and check in.`,
+      icon: '/icon-192.png',
+    });
+
+    setMessage({ text: 'Test reminder notification sent to your device!', type: 'success' });
+    setTimeout(() => setMessage(null), 3500);
+  }
+
+  async function handleSendEmailDigest() {
+    setDigestSending(true);
+    try {
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch('/api/prayer/digest?send=true', { headers });
+      const data = await res.json();
+
+      if (data.success) {
+        setMessage({ 
+          text: `Daily Prayer Digest generated! (${data.dueCount} prayers scheduled). Check your email inbox.`, 
+          type: 'success' 
+        });
+      } else {
+        setMessage({ 
+          text: data.error || 'Please sign in to email daily prayer digests.', 
+          type: 'error' 
+        });
+      }
+    } catch (err) {
+      console.error('Email digest error:', err);
+      setMessage({ text: 'Failed to generate prayer digest email.', type: 'error' });
+    } finally {
+      setDigestSending(false);
+      setTimeout(() => setMessage(null), 4000);
     }
   }
 
@@ -457,6 +559,58 @@ export default function PrayerBoardPage() {
               <p className={styles.sectionDesc}>
                 Take a quiet moment before God. Mark when you have prayed, take an optional note, or follow up with pastoral care.
               </p>
+            </div>
+
+            {/* Multi-channel Reminders & Daily Digest Control Bar */}
+            <div className={styles.remindersBanner}>
+              <div className={styles.remindersInfo}>
+                <div className={styles.remindersIcon}>
+                  <Bell size={20} />
+                </div>
+                <div>
+                  <h4 className={styles.remindersTitle}>Daily Intercession Reminders</h4>
+                  <p className={styles.remindersSubtitle}>
+                    {notificationPermission === 'granted'
+                      ? 'Device push reminders are active. You will be alerted when commitments are due.'
+                      : 'Enable gentle browser notifications to be reminded when friends need prayer.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.remindersActions}>
+                {notificationPermission === 'granted' ? (
+                  <button
+                    type="button"
+                    onClick={handleSendTestNotification}
+                    className={styles.reminderActionBtn}
+                    title="Send a sample reminder alert to verify device notifications"
+                  >
+                    <Bell size={14} />
+                    <span>Test Device Alert</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRequestNotificationPermission}
+                    className={styles.reminderActionBtn}
+                    title="Enable browser notifications"
+                  >
+                    <Bell size={14} />
+                    <span>Enable Reminders</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  disabled={digestSending}
+                  onClick={handleSendEmailDigest}
+                  className={styles.reminderDigestBtn}
+                  title="Generate and email today's intercession digest to your inbox"
+                >
+                  <Mail size={14} />
+                  <span>{digestSending ? 'Sending Digest...' : "Email Today's Digest"}</span>
+                </button>
+              </div>
             </div>
 
             {dueCommitments.length === 0 ? (
@@ -933,19 +1087,27 @@ export default function PrayerBoardPage() {
                 </button>
                 <button
                   type="button"
-                  className={`${styles.channelBtn} ${followupChannel === 'clipboard' ? styles.channelBtnActive : ''}`}
-                  onClick={() => setFollowupChannel('clipboard')}
-                >
-                  <Copy size={16} />
-                  <span>Copy Text</span>
-                </button>
-                <button
-                  type="button"
                   className={`${styles.channelBtn} ${followupChannel === 'email' ? styles.channelBtnActive : ''}`}
                   onClick={() => setFollowupChannel('email')}
                 >
                   <Mail size={16} />
                   <span>Email</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'sms' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('sms')}
+                >
+                  <Phone size={16} />
+                  <span>SMS</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'clipboard' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('clipboard')}
+                >
+                  <Copy size={16} />
+                  <span>Copy</span>
                 </button>
               </div>
 
@@ -1000,6 +1162,11 @@ export default function PrayerBoardPage() {
                     <>
                       <Mail size={16} />
                       <span>Open Email Draft</span>
+                    </>
+                  ) : followupChannel === 'sms' ? (
+                    <>
+                      <Phone size={16} />
+                      <span>Open SMS App</span>
                     </>
                   ) : (
                     <>

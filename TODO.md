@@ -37,9 +37,13 @@
 - [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
-- [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, Clipboard), answered gratitude log, and schema-v5.sql
+- [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, SMS, Clipboard), answered gratitude log, browser push notifications, and schema-v5.sql
+- [x] Server Gemini AI Key Gating: strictly hidden on server; automatic access for signed-in users (15/hr), BYOK guest fallback
+- [x] Complete Authentication: Email/Password + Google OAuth one-click sign-in, password visibility toggle, auto profile creation
+- [x] Database RLS Hardening: schema-v6.sql user-scoped bookmarks with strict RLS (auth.uid() = user_id) and guest data auto-merge engine
+- [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
@@ -145,15 +149,15 @@
 
 > Feature brief: [`docs/PRAYER_CARE_WORKFLOW.md`](docs/PRAYER_CARE_WORKFLOW.md)
 
-- [ ] Add a private Prayer Circle for people, groups, prayer topics, and sensitive entries
-- [ ] Add daily, weekly, monthly, selected-weekday, and one-time prayer commitments
-- [ ] Add a timezone-aware `Today in Prayer` queue with snooze, pause, and quiet hours
-- [ ] Record private prayer check-ins, notes, answered prayers, and gratitude history
-- [ ] Add editable follow-up drafts for email, SMS, WhatsApp, or clipboard
-- [ ] Require explicit review and approval before every outbound follow-up
-- [ ] Add IndexedDB offline capture with authenticated Supabase sync
-- [ ] Add Supabase tables, indexes, and owner-only RLS policies for private prayer data
-- [ ] Add idempotent scheduled reminders using a Supabase Edge Function or protected Vercel Cron route
+- [x] Add a private Prayer Circle for people, groups, prayer topics, and sensitive entries
+- [x] Add daily, weekly, monthly, selected-weekday, and one-time prayer commitments
+- [x] Add a timezone-aware `Today in Prayer` queue with snooze, grace periods, and quiet hours
+- [x] Record private prayer check-ins, notes, answered prayers, and gratitude history
+- [x] Add editable follow-up drafts for email, SMS, WhatsApp, and clipboard with pre-filled encouraging care templates
+- [x] Require explicit review and approval before every outbound follow-up
+- [x] Add local-first storage with authenticated Supabase sync & guest data auto-merge engine
+- [x] Add Supabase tables, indexes, and owner-only RLS policies for private prayer data (schema-v5.sql)
+- [x] Add multi-channel reminders using browser push notifications and protected daily email digest API (`/api/prayer/digest`)
 - [ ] Add ministry-team sharing and a church care dashboard only after the private MVP is secure
 
 ### MCP gaps

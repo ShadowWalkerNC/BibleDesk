@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import type { BibleAnswer, TranslationId } from '@/types';
+import { getBrowserClient } from '@/lib/supabase';
 
 export interface StageProgress {
   stage: number;
@@ -91,26 +92,45 @@ export function useStreamingAsk(): UseStreamingAskReturn {
       return;
     }
 
-    // AI Streaming Mode
-    const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (userGeminiKey) {
-      headers['x-gemini-api-key'] = userGeminiKey;
-    }
+    // AI Streaming Mode — Attach Supabase Auth Bearer token if logged in
+    (async () => {
+      try {
+        const supabase = getBrowserClient();
+        const { data: { session } } = await supabase.auth.getSession();
 
-    fetch('/api/ask/stream', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ question, translation }),
-    }).then(async (res) => {
-      if (!res.ok || !res.body) {
-        setState((s) => ({ ...s, status: 'error', error: 'Server error. Please try again.' }));
-        return;
-      }
+        const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-      const reader  = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+        if (userGeminiKey) {
+          headers['x-gemini-api-key'] = userGeminiKey;
+        }
+
+        const res = await fetch('/api/ask/stream', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ question, translation }),
+        });
+
+        if (res.status === 401) {
+          setState((s) => ({
+            ...s,
+            status: 'error',
+            error: 'Please sign in or enter a free Gemini API key to use the 5-Dimension AI Study Assistant.',
+          }));
+          return;
+        }
+
+        if (!res.ok || !res.body) {
+          setState((s) => ({ ...s, status: 'error', error: 'Server error. Please try again.' }));
+          return;
+        }
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
        
       while (true) {
@@ -162,10 +182,11 @@ export function useStreamingAsk(): UseStreamingAskReturn {
           }
         }
       }
-    }).catch(() => {
+    } catch {
       setState((s) => ({ ...s, status: 'error', error: 'Network error. Please try again.' }));
-    });
-  }, []);
+    }
+  })();
+}, []);
 
   const retry = useCallback(() => {
     if (lastQ) ask(lastQ, lastT, lastIsNonAI);

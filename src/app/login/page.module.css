@@ -3,32 +3,67 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 64px);
-  padding: 2rem;
+  padding: 1.5rem 1rem;
   box-sizing: border-box;
 }
 
 .authCard {
   width: 100%;
-  max-width: 450px;
-  padding: 2.5rem;
+  max-width: 460px;
+  padding: 2.25rem 2rem;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
 }
 
+/* ── Tab Switcher (Jakob's Law: Standard conventions) ── */
+.authTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  background: var(--navy-900);
+  padding: 0.35rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 1.75rem;
+}
+
+.tabBtn {
+  min-height: 48px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabBtnActive {
+  background: var(--navy-800);
+  color: var(--gold-400);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 160, 23, 0.25);
+}
+
 .title {
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 700;
   text-align: center;
   color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.4rem 0;
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-align: center;
   color: var(--text-muted);
-  margin: 0 0 1.75rem 0;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.45;
 }
 
 .alert {
@@ -36,7 +71,7 @@
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   line-height: 1.4;
 }
 
@@ -52,68 +87,108 @@
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
 
+/* ── Google OAuth Button ── */
+.googleBtn {
+  min-height: 48px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.googleBtn:hover {
+  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+.googleBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.googleIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Included AI & Shared Scripture Notices ── */
+.includedAiNotice {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(212, 160, 23, 0.1);
+  border: 1px solid rgba(212, 160, 23, 0.28);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+}
+
+.includedAiIcon {
+  color: var(--gold-400);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.includedAiText strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--gold-400);
+  margin-bottom: 2px;
+}
+
+.includedAiText span {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  display: block;
+}
+
 .sharedBibleNotice {
   display: flex;
   gap: 0.75rem;
   padding: 0.75rem 0.9rem;
-  background: rgba(181, 132, 20, 0.08);
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   margin-bottom: 1.25rem;
 }
 
 .sharedNoticeIcon {
-  color: var(--gold-500);
+  color: var(--text-secondary);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .sharedNoticeText strong {
   display: block;
-  font-size: 0.8rem;
-  color: var(--gold-500);
+  font-size: 0.78rem;
+  color: var(--text-primary);
   margin-bottom: 1px;
 }
 
 .sharedNoticeText span {
   font-size: 0.72rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   line-height: 1.4;
   display: block;
 }
 
-.labelWithLink {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.freeKeyLink {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--gold-500);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  transition: color 0.15s;
-}
-
-.freeKeyLink:hover {
-  color: var(--gold-400);
-}
-
-.inputHint {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin: 2px 0 0 0;
-}
-
+/* ── Form Inputs ── */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 .formGroup {
@@ -131,12 +206,13 @@
 }
 
 .input, .select {
+  min-height: 48px;
   background: var(--navy-900);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.95rem;
-  padding: 0.65rem 0.75rem;
+  padding: 0 0.85rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
@@ -153,12 +229,44 @@
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239fa8d4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
+  background-position: right 0.85rem center;
   background-size: 1rem;
-  padding-right: 2rem;
+  padding-right: 2.25rem;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInputWrapper .input {
+  padding-right: 3rem;
+}
+
+.passwordToggleBtn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.passwordToggleBtn:hover {
+  color: var(--gold-400);
 }
 
 .submitBtn {
+  min-height: 48px;
   background: var(--gold-500);
   color: var(--navy-950);
   border: 1px solid var(--gold-400);
@@ -168,7 +276,7 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s var(--ease-out);
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .submitBtn:hover {
@@ -185,9 +293,9 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -207,6 +315,7 @@
 }
 
 .otpBtn {
+  min-height: 48px;
   background: var(--navy-800);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
@@ -216,6 +325,10 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .otpBtn:hover {
@@ -225,7 +338,7 @@
 }
 
 .footer {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
 }
@@ -237,7 +350,11 @@
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 0.5rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: color 0.2s;
 }
 

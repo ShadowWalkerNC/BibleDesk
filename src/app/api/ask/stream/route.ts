@@ -18,6 +18,7 @@ import { runPipeline, type PipelineOptions } from '@/lib/pipeline';
 import { runRAG } from '@/lib/rag';
 import { saveAnswer } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -64,9 +65,23 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Rate limit check before opening stream
-  const ip        = getClientIp(req);
-  const rateLimit = await checkRateLimit(ip);
+  // Authenticate user & validate AI permissions
+  const user = await getAuthenticatedUser(req);
+  const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || geminiApiKey;
+
+  if (!user && !userApiKey) {
+    return new Response(
+      sse('error', {
+        message: 'Please sign in or enter a free Gemini API key to use the 5-Dimension AI Assistant.',
+        code: 'AUTH_REQUIRED',
+      }),
+      { status: 401, headers: { 'Content-Type': 'text/event-stream' } }
+    );
+  }
+
+  // Rate limit check before opening stream (keyed by user ID if authenticated, else IP)
+  const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
+  const rateLimit = await checkRateLimit(rateLimitKey);
 
   if (!rateLimit.allowed) {
     return new Response(
@@ -89,14 +104,14 @@ export async function POST(req: NextRequest) {
       try {
         const ragResult = await runRAG(question).catch(() => null);
         const ragContext = ragResult?.contextPrompt || '';
-        const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || geminiApiKey;
 
+        // Authenticated users automatically use the server's hidden GEMINI_API_KEY
         const options: PipelineOptions & {
           onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
         } = {
           translation,
           ragContext,
-          apiKey: userApiKey,
+          apiKey: userApiKey || undefined,
           onStageComplete(stage, name, duration_ms) {
             emit('stage', { stage, name, duration_ms });
           },

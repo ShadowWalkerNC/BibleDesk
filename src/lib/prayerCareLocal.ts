@@ -9,7 +9,8 @@ import {
   PrayerCareStore,
   RecurrenceRule,
   CheckinOutcome,
-  PrayerCategory
+  PrayerCategory,
+  FollowupChannel
 } from '@/types/prayerCare';
 
 const STORAGE_KEY = 'bibledesk_prayer_circle_v1';
@@ -250,4 +251,33 @@ export function performCheckin(
   };
   savePrayerCareStore(updated);
   return { store: updated, checkin };
+}
+
+export function recordFollowupInStore(
+  store: PrayerCareStore,
+  data: {
+    contact_id?: string | null;
+    channel: FollowupChannel;
+    recipient?: string | null;
+    message: string;
+    status?: 'draft' | 'sent';
+  }
+): { store: PrayerCareStore; followup: PrayerFollowup } {
+  const followup: PrayerFollowup = {
+    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `followup-${Date.now()}`,
+    contact_id: data.contact_id || null,
+    channel: data.channel,
+    recipient: data.recipient || null,
+    message: data.message,
+    status: data.status || 'sent',
+    sent_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  };
+
+  const updated: PrayerCareStore = {
+    ...store,
+    followups: [followup, ...store.followups],
+  };
+  savePrayerCareStore(updated);
+  return { store: updated, followup };
 }

@@ -18,6 +18,7 @@ import { generateBibleAnswer } from '@/lib/claude';
 import { saveAnswer } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { runRAG } from '@/lib/rag';
+import { getAuthenticatedUser } from '@/lib/auth';
 import type { AskRequest, ApiResponse } from '@/types';
 
 const MAX_QUESTION_LENGTH = 500;
@@ -59,9 +60,25 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       );
     }
 
-    // ── 2. Rate limit ─────────────────────────────────────────────────────────
-    const ip        = getClientIp(req);
-    const rateLimit = await checkRateLimit(ip);
+    // ── 2. Authenticate User & Validate AI Access ────────────────────────────
+    const user = await getAuthenticatedUser(req);
+    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || (body as any).geminiApiKey?.trim();
+
+    // Guests must provide a personal Gemini API key to use AI features
+    if (!user && !userApiKey) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Please sign in or enter a free Gemini API key to use the 5-Dimension AI Assistant.',
+          code: 'AUTH_REQUIRED',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit check: keyed by user ID if authenticated, else IP
+    const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
+    const rateLimit = await checkRateLimit(rateLimitKey);
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -100,12 +117,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // ── 4. Run pipeline (with optional RAG context & user API key) ─────────────
     const ragHitType = rag.contextMatches.length > 0 ? 'context' : 'none';
-    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || (body as any).geminiApiKey?.trim();
 
+    // Authenticated users use the server's hidden GEMINI_API_KEY unless they explicitly passed an override
     const answer = await generateBibleAnswer(question, {
       translation,
       ragContext: rag.contextPrompt,
-      apiKey: userApiKey,
+      apiKey: userApiKey || undefined,
     });
 
     // ── 5. Persist + capture share slug (non-blocking) ──────────────────────────

@@ -141,7 +141,7 @@ export interface AskResponse {
 export interface ErrorResponse {
   success: false;
   error: string;
-  code: 'RATE_LIMITED' | 'INVALID_INPUT' | 'AI_ERROR' | 'BIBLE_API_ERROR' | 'UNKNOWN';
+  code: 'RATE_LIMITED' | 'INVALID_INPUT' | 'AI_ERROR' | 'BIBLE_API_ERROR' | 'AUTH_REQUIRED' | 'UNKNOWN';
 }
 
 export type ApiResponse = AskResponse | ErrorResponse;

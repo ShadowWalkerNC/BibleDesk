@@ -66,10 +66,11 @@ BibleDesk/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited)
-│   │   │   ├── ask/stream/route.ts       ← SSE streaming ask
+│   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited, auth-gated)
+│   │   │   ├── ask/stream/route.ts       ← SSE streaming ask (server Gemini key gated)
 │   │   │   ├── bible/{chapter,search,study}/
 │   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|sermons/
+│   │   │   ├── prayer/{circle,digest}/   ← Prayer Circle sync & daily intercession digest
 │   │   │   ├── export/obsidian/
 │   │   │   ├── mod/{queue,vote,approve,invite}/
 │   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
@@ -84,10 +85,11 @@ BibleDesk/
 │   │   ├── bible.ts                      ← bible-api.com (interim)
 │   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
 │   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
+│   │   ├── auth.ts · syncGuestData.ts    ← Server auth validator & guest auto-merge
 │   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
 │   └── types/
 ├── apps/desktop/                         ← Electron shell
-├── supabase/                             ← schema.sql → schema-v4.sql (+ rpc.sql)
+├── supabase/                             ← schema.sql → schema-v6.sql (+ rpc.sql)
 ├── public/                               ← manifest + icons
 ├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
 └── next.config.ts

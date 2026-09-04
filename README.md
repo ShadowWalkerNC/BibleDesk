@@ -35,7 +35,8 @@ BibleDesk is not just a UI; it is an open Bible intelligence engine:
   - `GET /api/bible/lexicon?strongs=G2889`
   - `GET /api/graph?node=grace`
   - `GET /api/daily`
-- **Optional BYOK AI Assistant**: Users who wish to stream synthesized 5-dimension study answers can bring their own free Google Gemini key (`gemini-2.5-flash`) via the sidebar settings.
+- **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 15 questions/hr) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
+- **Pastoral Prayer Care Workflow & Reminders**: Private intercession circles with daily/weekly recurrence, browser push reminders, automated email digest (`/api/prayer/digest`), and 1-click follow-up messaging (WhatsApp, Email, SMS, Clipboard).
 
 ### 3. Bidirectional Biblical Knowledge Graph
 The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.
