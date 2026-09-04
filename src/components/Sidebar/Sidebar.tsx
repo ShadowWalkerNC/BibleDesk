@@ -30,6 +30,7 @@ import {
   Layers,
   Globe,
   Code,
+  Radio,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -194,6 +195,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <Share2 size={18} className={styles.navIcon} />
             {!collapsed && <span className={styles.navLabel}>Integrations</span>}
+          </button>
+
+          <button
+            className={styles.navItem}
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
+              }
+            }}
+            title={collapsed ? 'Live Worship Radio' : undefined}
+            style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <Radio size={18} className={styles.navIcon} />
+            {!collapsed && <span className={styles.navLabel}>Worship Radio</span>}
           </button>
         </nav>
 
@@ -388,6 +403,19 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               >
                 <Share2 size={16} />
                 <span>Discord &amp; WhatsApp Connect</span>
+              </button>
+
+              <button
+                className={styles.mobileActionBtn}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
+                  }
+                }}
+              >
+                <Radio size={16} />
+                <span>Live Worship Radio</span>
               </button>
 
               {user ? (

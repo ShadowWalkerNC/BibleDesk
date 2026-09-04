@@ -16,6 +16,10 @@ import {
   Globe,
   X,
   Search,
+  Radio,
+  Tv,
+  Presentation,
+  Scroll,
 } from 'lucide-react';
 import styles from './SlashCommandPalette.module.css';
 
@@ -151,6 +155,48 @@ const COMMANDS: SlashCommand[] = [
     icon: Network,
     action: (_arg, router) => {
       router.push('/graph');
+    },
+  },
+  {
+    id: 'radio',
+    name: '/radio',
+    category: 'Worship',
+    description: 'Launch Live Worship Radio dock with ambient hymns, K-LOVE & Air1',
+    icon: Radio,
+    action: () => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
+      }
+    },
+  },
+  {
+    id: 'sermon',
+    name: '/sermon',
+    category: 'Ministry',
+    description: 'Open Church Live Sermon Theatre and sermon outline study notes',
+    icon: Tv,
+    action: (_arg, router) => {
+      router.push('/sermons');
+    },
+  },
+  {
+    id: 'slides',
+    name: '/slides',
+    category: 'Ministry',
+    description: 'Launch 1-Click ProPresenter 7 projector slide generator',
+    icon: Presentation,
+    action: (_arg, router) => {
+      router.push('/sermons');
+    },
+  },
+  {
+    id: 'catechism',
+    name: '/catechism',
+    category: 'Theology',
+    description: 'Explore 6 historic confessions & catechisms with interactive quiz mode',
+    icon: Scroll,
+    action: (_arg, router) => {
+      router.push('/catechism');
     },
   },
 ];

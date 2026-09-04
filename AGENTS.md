@@ -101,7 +101,7 @@ Active work (Phase 0 Complete):
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
   ✓ Marketing Showcase on `/` with 4 target personas (Believers, Churches, Missionaries, Worship Artists) & transparent pricing
-  ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`)
+  ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`)
   ✓ Words of Encouragement Hub (`/encourage`) with topical promises & kingdom creativity meditations
   ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql
   ✓ Church Integration & Ministry Hub (`/church`) with prayer chain & 1-click embed widgets ($0 Free Forever)

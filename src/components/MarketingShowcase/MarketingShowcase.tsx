@@ -20,6 +20,10 @@ import {
   Lock,
   Layers,
   Terminal,
+  Radio,
+  Tv,
+  Presentation,
+  Scroll,
 } from 'lucide-react';
 import styles from './MarketingShowcase.module.css';
 
@@ -69,16 +73,24 @@ export default function MarketingShowcase() {
             <span>100% Free Forever for Churches</span>
           </div>
           <div className={styles.featurePillItem}>
+            <Radio size={16} color="#b58414" />
+            <span>Worship Radio (K-LOVE, Air1, Moody &amp; Sacred Hymns)</span>
+          </div>
+          <div className={styles.featurePillItem}>
+            <Tv size={16} color="#ef4444" />
+            <span>Live Sermon Theatre &amp; ProPresenter 7 Export</span>
+          </div>
+          <div className={styles.featurePillItem}>
+            <Scroll size={16} color="#b58414" />
+            <span>Multi-Tradition Catechisms &amp; Doctrinal RAG</span>
+          </div>
+          <div className={styles.featurePillItem}>
             <Check size={16} color="#059669" />
             <span>6 Translations Offline (KJV, ASV, WEB, BBE, Darby, YLT)</span>
           </div>
           <div className={styles.featurePillItem}>
-            <Check size={16} color="#059669" />
-            <span>Strong’s Greek &amp; Hebrew Lexicons</span>
-          </div>
-          <div className={styles.featurePillItem}>
-            <Check size={16} color="#059669" />
-            <span>Model Context Protocol (MCP) Ready</span>
+            <Code size={16} color="#059669" />
+            <span>Official Client SDK &amp; MCP Engine</span>
           </div>
         </div>
       </section>
@@ -165,7 +177,11 @@ export default function MarketingShowcase() {
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Verse Memory &amp; Rhythms:</strong> Practice active recall flashcards, track reading plans, and set daily prayer reminders.</span>
+                  <span><strong>Multi-Tradition Catechisms &amp; Systematic Theology:</strong> 6 historic confessions (Westminster, Heidelberg, Luther, 1689 Baptist, 39 Articles, Assemblies of God) across 8 theological loci with interactive Quiz Mode.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>Worship Radio &amp; Verse Memory:</strong> Ambient sacred hymns, 1-click K-LOVE / Air1 docks, active recall flashcards, and reading plans.</span>
                 </div>
               </div>
               <Link href="/bible" className={styles.primaryCta}>
@@ -194,13 +210,21 @@ export default function MarketingShowcase() {
             <div className={styles.personaCardContent}>
               <h3>Equip Your Congregation for Free</h3>
               <p className={styles.personaCardDesc}>
-                Unite your church around corporate prayer, triage urgent pastoral needs, and embed interactive
-                Scripture tools directly on your church website—at zero financial cost.
+                Unite your church around corporate prayer, triage urgent pastoral needs, broadcast Sunday live sermons,
+                and export presentation slides—at zero financial cost.
               </p>
               <div className={styles.personaBulletList}>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
                   <span><strong>100% Free Forever for Churches:</strong> Never pay for prayer chains, member accounts, or website embed widgets.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>Church Live Sermon Theatre:</strong> Embed free 4K YouTube Live and Facebook Live broadcasts for Sunday worship with zero hosting costs.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>1-Click ProPresenter 7 &amp; Planning Center:</strong> Auto-chunk sermon outlines and Scriptures into projector slide blocks and PCO worship notes.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
@@ -307,6 +331,10 @@ export default function MarketingShowcase() {
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
                   <span><strong>Tour &amp; Event Prayer Beacons:</strong> Pin worship nights and tour stops to the PrayerAtlas to invite intercessors to cover your cities.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>Live Worship Radio &amp; Station Docks:</strong> Stream ambient sacred hymns, choral meditations, and launch official K-LOVE &amp; Air1 players for creative inspiration.</span>
                 </div>
               </div>
               <Link href="/encourage" className={styles.primaryCta}>
@@ -532,6 +560,46 @@ export default function MarketingShowcase() {
             <div>
               <div className={styles.integrationTitle}>Desktop &amp; Android APK</div>
               <div className={styles.integrationDesc}>Native Electron desktop app and Capacitor Android APK available for offline use.</div>
+            </div>
+          </div>
+
+          <div className={styles.integrationCard}>
+            <div className={styles.integrationIconBox}>
+              <Radio size={20} />
+            </div>
+            <div>
+              <div className={styles.integrationTitle}>Live Worship Radio Dock</div>
+              <div className={styles.integrationDesc}>Ambient sacred hymns and direct 1-click player docks for K-LOVE, Air1, and Moody Radio.</div>
+            </div>
+          </div>
+
+          <div className={styles.integrationCard}>
+            <div className={styles.integrationIconBox}>
+              <Tv size={20} />
+            </div>
+            <div>
+              <div className={styles.integrationTitle}>Church Live Sermon Theatre</div>
+              <div className={styles.integrationDesc}>Embed zero-cost YouTube Live &amp; Facebook Live broadcasts with synced Scripture study.</div>
+            </div>
+          </div>
+
+          <div className={styles.integrationCard}>
+            <div className={styles.integrationIconBox}>
+              <Presentation size={20} />
+            </div>
+            <div>
+              <div className={styles.integrationTitle}>ProPresenter 7 Slide Exporter</div>
+              <div className={styles.integrationDesc}>1-Click projector slide export auto-chunking sermon points and Scriptures for Sunday services.</div>
+            </div>
+          </div>
+
+          <div className={styles.integrationCard}>
+            <div className={styles.integrationIconBox}>
+              <Scroll size={20} />
+            </div>
+            <div>
+              <div className={styles.integrationTitle}>Multi-Tradition Catechisms</div>
+              <div className={styles.integrationDesc}>Westminster, Heidelberg, Luther, 1689 Baptist, 39 Articles, and Assemblies of God confessions.</div>
             </div>
           </div>
         </div>
