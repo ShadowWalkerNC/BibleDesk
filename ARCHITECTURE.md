@@ -69,28 +69,29 @@ BibleDesk/
 │   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited, auth-gated)
 │   │   │   ├── ask/stream/route.ts       ← SSE streaming ask (server Gemini key gated)
 │   │   │   ├── bible/{chapter,search,study}/
-│   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|sermons/
-│   │   │   ├── prayer/{circle,digest}/   ← Prayer Circle sync & daily intercession digest
+│   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|church|sermons/
+│   │   │   ├── prayer/{circle,digest,escalate}/   ← Prayer Circle sync & 4-tier escalation
 │   │   │   ├── export/obsidian/
 │   │   │   ├── mod/{queue,vote,approve,invite}/
 │   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
-│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|sermons/
+│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|encourage|church|developers|sermons/
 │   │   ├── bookmarks|history|graph|share/[slug]|mod|login/
-│   │   ├── page.tsx                      ← Homepage (Bible-first + assistant)
+│   │   ├── page.tsx                      ← Homepage (Marketing Showcase or Study start)
 │   │   ├── layout.tsx · globals.css · robots.ts · sitemap.ts
-│   ├── components/                       ← Header, SearchBar, DimensionPanel,
-│   │                                       GraphView, StreamingProgress, …
-│   ├── hooks/                            ← useStreamingAsk, useBookmark
-│   ├── lib/
-│   │   ├── bible.ts                      ← bible-api.com (interim)
-│   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
-│   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
-│   │   ├── auth.ts · syncGuestData.ts    ← Server auth validator & guest auto-merge
-│   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
-│   └── types/
+│   │   ├── components/                   ← Header, SearchBar, DimensionPanel,
+│   │   │                                   SlashCommandPalette, MarketingShowcase, …
+│   │   ├── hooks/                        ← useStreamingAsk, useBookmark
+│   │   ├── lib/
+│   │   │   ├── sdk.ts                    ← Official BibleDesk Client SDK
+│   │   │   ├── bible.ts · encouragementData.ts
+│   │   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
+│   │   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
+│   │   │   ├── auth.ts · syncGuestData.ts← Server auth validator & guest auto-merge
+│   │   │   └── *Data.ts                  ← catechism/creeds/plans/memory datasets
+│   │   └── types/                        ← index.ts · map.ts · prayerCare.ts · church.ts
 ├── apps/desktop/                         ← Electron shell
-├── supabase/                             ← schema.sql → schema-v7.sql (+ rpc.sql)
-├── public/                               ← manifest + icons
+├── supabase/                             ← schema.sql → schema-v8.sql (+ rpc.sql)
+├── public/                               ← manifest + icons + data/world-110m.json
 ├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
 └── next.config.ts
 ```

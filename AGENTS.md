@@ -100,9 +100,15 @@ Active work (Phase 0 Complete):
   ✓ PrayerAtlas 2D Interactive Vector Global Prayer Map (D3 Natural Earth, category color-coding, approximate halos vs precise beacons, restricted shields, offline TopoJSON)
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
+  ✓ Marketing Showcase on `/` with 4 target personas (Believers, Churches, Missionaries, Worship Artists) & transparent pricing
+  ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`)
+  ✓ Words of Encouragement Hub (`/encourage`) with topical promises & kingdom creativity meditations
+  ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql
+  ✓ Church Integration & Ministry Hub (`/church`) with prayer chain & 1-click embed widgets ($0 Free Forever)
+  ✓ Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST & MCP docs
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v7
+  □ Apply supabase schemas v1→v8
   □ Env vars + host + smoke tests (see TODO.md)
 ```
 

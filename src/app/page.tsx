@@ -21,6 +21,8 @@ import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
 import SacredHaloCanvas from '@/components/SacredHaloCanvas/SacredHaloCanvas';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
+import { getBrowserClient } from '@/lib/supabase';
+import MarketingShowcase from '@/components/MarketingShowcase/MarketingShowcase';
 import styles from './page.module.css';
 
 const QUICK_LINKS = [
@@ -28,10 +30,10 @@ const QUICK_LINKS = [
   { label: 'Daily Verse',   href: '/daily',    icon: Sun },
   { label: 'Plans',         href: '/plans',    icon: Calendar },
   { label: 'Verse Memory',  href: '/memory',   icon: Brain },
-  { label: 'Sermons',       href: '/sermons',  icon: Church },
-  { label: 'Prayer',        href: '/prayer',   icon: Heart },
-  { label: 'Catechism',     href: '/catechism',icon: MessageSquare },
-  { label: 'Creeds',        href: '/creeds',   icon: Scroll },
+  { label: 'Encouragement', href: '/encourage',icon: Sparkles },
+  { label: 'Church Hub',    href: '/church',   icon: Church },
+  { label: 'Prayer Atlas',  href: '/prayer',   icon: Heart },
+  { label: 'Developers',    href: '/developers',icon: MessageSquare },
 ];
 
 const PLACEHOLDERS = [
@@ -55,6 +57,18 @@ export default function HomePage() {
   const { status, stages, answer, shareSlug, error, rateLimit, ask, retry } = useStreamingAsk();
   const answerRef = useRef<HTMLDivElement>(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [user, setUser] = useState<any>(undefined);
+
+  useEffect(() => {
+    const supabase = getBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -72,6 +86,11 @@ export default function HomePage() {
 
   const isLoading  = status === 'loading';
   const hasContent = isLoading || answer !== null || error !== null;
+
+  // Render Marketing Showcase for unauthenticated visitors
+  if (user === null) {
+    return <MarketingShowcase />;
+  }
 
   return (
     <div className={styles.startScreen}>

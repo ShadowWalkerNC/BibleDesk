@@ -66,6 +66,35 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
             <span className={`${styles.charCount} ${isWarn ? styles.warn : ''}`} aria-live="polite">
               {remaining}
             </span>
+
+            {/* Inline Slash Command Suggestions */}
+            {question.startsWith('/') && !question.includes('\n') && (
+              <div className={styles.slashPopover} role="listbox" aria-label="Slash commands">
+                {[
+                  { cmd: '/verse', desc: 'Jump or search Scripture passage' },
+                  { cmd: '/encourage', desc: 'Find topical promises & comfort' },
+                  { cmd: '/pray', desc: 'Submit a prayer request' },
+                  { cmd: '/church', desc: 'Open church prayer chain & widgets' },
+                  { cmd: '/strongs', desc: 'Lookup Strong’s Greek/Hebrew definition' },
+                  { cmd: '/sdk', desc: 'Open Developer SDK & MCP docs' },
+                ]
+                  .filter(item => item.cmd.startsWith(question.split(' ')[0].toLowerCase()))
+                  .map(item => (
+                    <button
+                      key={item.cmd}
+                      type="button"
+                      className={styles.slashItem}
+                      onClick={() => {
+                        setQuestion(`${item.cmd} `);
+                        textareaRef.current?.focus();
+                      }}
+                    >
+                      <span className={styles.slashName}>{item.cmd}</span>
+                      <span className={styles.slashDesc}>{item.desc}</span>
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
 

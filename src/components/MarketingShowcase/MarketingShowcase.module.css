@@ -1,0 +1,508 @@
+.container {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, rgba(181, 132, 20, 0.08) 0%, transparent 65%), #fdfbf7;
+  color: #1e1913;
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 4rem;
+  text-align: center;
+  position: relative;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 9999px;
+  background: rgba(181, 132, 20, 0.12);
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  color: #8f650b;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.8s ease;
+}
+
+.heroTitle {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 3.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #1a150e;
+  max-width: 920px;
+  margin: 0 auto 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.heroTitle span {
+  color: #b58414;
+  background: linear-gradient(135deg, #b58414 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: #574d3b;
+  max-width: 760px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.65;
+}
+
+.heroCtas {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #b58414;
+  color: #ffffff;
+  padding: 0.95rem 2rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(181, 132, 20, 0.3);
+  transition: all 0.22s ease;
+  min-height: 52px;
+}
+
+.primaryCta:hover {
+  background: #986d0e;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(181, 132, 20, 0.38);
+}
+
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  color: #3f3627;
+  padding: 0.95rem 1.85rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  min-height: 52px;
+}
+
+.secondaryCta:hover {
+  background: #fbf9f4;
+  border-color: #b58414;
+  transform: translateY(-1px);
+}
+
+/* Feature highlight pill bar */
+.featurePillsBar {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: #635742;
+  font-weight: 600;
+}
+
+.featurePillItem {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* 4-Persona Interactive Section */
+.personaSection {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.sectionHeading {
+  text-align: center;
+  margin-bottom: 2.75rem;
+}
+
+.sectionBadge {
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #946910;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.sectionTitle {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1e1913;
+  margin-bottom: 0.75rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.05rem;
+  color: #605747;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Persona Switcher Tabs */
+.personaTabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.personaTabBtn {
+  background: #ffffff;
+  border: 1.5px solid rgba(181, 132, 20, 0.25);
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.22s ease;
+  min-height: 100px;
+  text-align: center;
+}
+
+.personaTabBtn:hover {
+  background: #fdfbf7;
+  border-color: #b58414;
+}
+
+.personaTabBtnActive {
+  background: #ffffff !important;
+  border-color: #b58414 !important;
+  box-shadow: 0 8px 24px rgba(181, 132, 20, 0.18);
+  border-bottom: 4px solid #b58414 !important;
+}
+
+.personaIconBox {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(181, 132, 20, 0.1);
+  color: #b58414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.personaTabBtnActive .personaIconBox {
+  background: #b58414;
+  color: #ffffff;
+}
+
+.personaTabTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e1913;
+}
+
+.personaTabRole {
+  font-size: 0.78rem;
+  color: #786d59;
+}
+
+/* Persona Detail Card */
+.personaCard {
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  border-radius: 20px;
+  padding: 2.75rem;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.personaCardContent h3 {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #1e1913;
+  margin-bottom: 0.85rem;
+}
+
+.personaCardDesc {
+  font-size: 1.02rem;
+  color: #554a37;
+  line-height: 1.65;
+  margin-bottom: 1.75rem;
+}
+
+.personaBulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.personaBullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #3f3627;
+  line-height: 1.5;
+}
+
+.bulletCheck {
+  color: #059669;
+  background: rgba(5, 150, 105, 0.12);
+  border-radius: 50%;
+  padding: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.personaInteractivePreview {
+  background: #fbf9f4;
+  border: 1px dashed rgba(181, 132, 20, 0.35);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.previewTag {
+  align-self: flex-start;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #b58414;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Pricing Grid */
+.pricingSection {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.pricingCard {
+  background: #ffffff;
+  border: 1.5px solid rgba(181, 132, 20, 0.25);
+  border-radius: 18px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.pricingCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.pricingCardFeatured {
+  border-color: #b58414 !important;
+  box-shadow: 0 10px 32px rgba(181, 132, 20, 0.2) !important;
+  background: #ffffff;
+}
+
+.pricingFeaturedBadge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #059669;
+  color: #ffffff;
+  padding: 0.3rem 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tierName {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e1913;
+  margin-bottom: 0.5rem;
+}
+
+.tierPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.tierPrice {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #1e1913;
+  line-height: 1;
+}
+
+.tierPeriod {
+  font-size: 0.95rem;
+  color: #786d59;
+}
+
+.tierDesc {
+  font-size: 0.9rem;
+  color: #605644;
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+  min-height: 48px;
+}
+
+.tierFeatureList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.tierFeatureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #3b3223;
+}
+
+/* Integrations Section */
+.integrationsSection {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+.integrationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.integrationCard {
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.22);
+  border-radius: 14px;
+  padding: 1.4rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.integrationCard:hover {
+  border-color: #b58414;
+  background: #fdfbf7;
+  transform: translateY(-2px);
+}
+
+.integrationIconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(181, 132, 20, 0.1);
+  color: #b58414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.integrationTitle {
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: #1e1913;
+  margin-bottom: 0.25rem;
+}
+
+.integrationDesc {
+  font-size: 0.82rem;
+  color: #6b604e;
+  line-height: 1.45;
+}
+
+/* Final Banner */
+.finalBanner {
+  max-width: 1180px;
+  margin: 0 auto 5rem;
+  padding: 0 1.5rem;
+}
+
+.bannerCard {
+  background: linear-gradient(135deg, #241d13 0%, #15110a 100%);
+  border: 1px solid rgba(181, 132, 20, 0.4);
+  border-radius: 22px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.bannerTitle {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #f7e6b5;
+  margin-bottom: 1rem;
+}
+
+.bannerSubtitle {
+  font-size: 1.1rem;
+  color: #d1c5af;
+  max-width: 680px;
+  margin: 0 auto 2.2rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  .personaTabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .personaCard {
+    grid-template-columns: 1fr;
+    padding: 1.75rem;
+  }
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
+}

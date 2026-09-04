@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
+import SlashCommandPalette from '@/components/SlashCommandPalette/SlashCommandPalette';
 import styles from './AppShell.module.css';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
+      <SlashCommandPalette />
     </div>
   );
 }

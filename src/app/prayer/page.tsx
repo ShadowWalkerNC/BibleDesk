@@ -26,10 +26,12 @@ import {
   Smile,
   RefreshCw,
   Bell,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
+import PrayerEscalationModal from '@/components/PrayerEscalationModal/PrayerEscalationModal';
 import { getBrowserClient } from '@/lib/supabase';
 import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
 import type { MissionMapPin } from '@/types/map';
@@ -41,7 +43,9 @@ import {
   PrayerCategory, 
   RecurrenceRule,
   CheckinOutcome,
-  FollowupChannel
+  FollowupChannel,
+  PrayerEscalationLevel,
+  PrayerUrgencyLevel
 } from '@/types/prayerCare';
 import { 
   loadPrayerCareStore, 
@@ -148,6 +152,16 @@ export default function PrayerBoardPage() {
   const [notificationPermission, setNotificationPermission] = useState<string>('default');
   const [digestSending, setDigestSending] = useState(false);
 
+  // ── 4-Tier Prayer Escalation Modal State ─────────────────────────────────
+  const [escalationModalOpen, setEscalationModalOpen] = useState(false);
+  const [selectedEscalationPrayer, setSelectedEscalationPrayer] = useState<{
+    id: string;
+    title: string;
+    text: string;
+    escalation_level?: PrayerEscalationLevel;
+    urgency_level?: PrayerUrgencyLevel;
+  } | null>(null);
+
   // Initial Load
   useEffect(() => {
     // 1. Load Local Prayer Care Store
@@ -155,7 +169,21 @@ export default function PrayerBoardPage() {
     setContacts(store.contacts);
     setCommitments(store.commitments);
 
-    // 2. Auth Session Check
+    // 2. Check URL search params for quick action prefill (e.g. from /encourage)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'new') {
+        const title = urlParams.get('title') || '';
+        const text = urlParams.get('text') || '';
+        if (title || text) {
+          setCommitmentTitle(title);
+          setCommitmentDetails(text);
+          setIsAddCommitmentModalOpen(true);
+        }
+      }
+    }
+
+    // 3. Auth Session Check
     const supabase = getBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -165,12 +193,12 @@ export default function PrayerBoardPage() {
       }
     });
 
-    // 3. Check browser notification support
+    // 4. Check browser notification support
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
 
-    // 4. Fetch Public Community Prayers
+    // 5. Fetch Public Community Prayers
     fetchPublicPrayers();
   }, []);
 
@@ -187,6 +215,46 @@ export default function PrayerBoardPage() {
       console.error('Failed to fetch public prayers:', err);
     } finally {
       setLoadingPublic(false);
+    }
+  }
+
+  async function handleEscalateSubmit(data: {
+    prayerId: string;
+    targetLevel: PrayerEscalationLevel;
+    urgencyLevel: PrayerUrgencyLevel;
+    isAnonymous: boolean;
+    churchId?: string;
+    updateNote?: string;
+  }) {
+    try {
+      const res = await fetch('/api/prayer/escalate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setMessage({
+          text: `Prayer successfully escalated to ${data.targetLevel.toUpperCase()} tier!`,
+          type: 'success',
+        });
+        // Update commitment state
+        setCommitments(prev =>
+          prev.map(c =>
+            c.id === data.prayerId
+              ? {
+                  ...c,
+                  escalation_level: data.targetLevel,
+                  urgency_level: data.urgencyLevel,
+                  church_id: data.churchId,
+                  is_anonymous: data.isAnonymous,
+                }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Failed to escalate prayer:', err);
+      setMessage({ text: 'Failed to escalate prayer. Please try again.', type: 'error' });
     }
   }
 
@@ -724,6 +792,23 @@ export default function PrayerBoardPage() {
                             <span>Follow Up</span>
                           </button>
                         )}
+                        <button
+                          className={styles.actionSnoozeBtn}
+                          onClick={() => {
+                            setSelectedEscalationPrayer({
+                              id: c.id,
+                              title: c.title,
+                              text: c.private_details || c.title,
+                              escalation_level: c.escalation_level,
+                              urgency_level: c.urgency_level,
+                            });
+                            setEscalationModalOpen(true);
+                          }}
+                          title="Escalate prayer to Circle, Church, or Global Atlas"
+                        >
+                          <TrendingUp size={15} />
+                          <span>Escalate</span>
+                        </button>
                       </div>
                     </article>
                   );
@@ -1381,6 +1466,17 @@ export default function PrayerBoardPage() {
             </div>
           </div>
         )}
+
+        {/* ── 4-Tier Prayer Escalation Modal ── */}
+        <PrayerEscalationModal
+          isOpen={escalationModalOpen}
+          onClose={() => {
+            setEscalationModalOpen(false);
+            setSelectedEscalationPrayer(null);
+          }}
+          prayer={selectedEscalationPrayer}
+          onEscalate={handleEscalateSubmit}
+        />
       </div>
     </main>
   );

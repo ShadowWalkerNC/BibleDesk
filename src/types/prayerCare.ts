@@ -29,6 +29,18 @@ export type CheckinOutcome =
   | 'skipped' 
   | 'answered';
 
+export type PrayerEscalationLevel = 
+  | 'private' 
+  | 'circle' 
+  | 'church' 
+  | 'atlas';
+
+export type PrayerUrgencyLevel = 
+  | 'low' 
+  | 'normal' 
+  | 'urgent' 
+  | 'crisis';
+
 export type FollowupChannel = 
   | 'email' 
   | 'sms' 
@@ -66,6 +78,10 @@ export interface PrayerCommitment {
   timezone: string;
   next_due_at: string;
   status: CommitmentStatus;
+  escalation_level?: PrayerEscalationLevel;
+  church_id?: string | null;
+  urgency_level?: PrayerUrgencyLevel;
+  is_anonymous?: boolean;
   created_at: string;
   updated_at: string;
   // Computed / local helper

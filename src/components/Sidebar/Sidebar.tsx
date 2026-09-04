@@ -29,6 +29,7 @@ import {
   X,
   Layers,
   Globe,
+  Code,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -38,12 +39,14 @@ import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
   { href: '/bible',     label: 'Study Desk',    icon: BookOpen },
+  { href: '/encourage', label: 'Encouragement', icon: Sparkles },
   { href: '/daily',     label: 'Daily Verse',   icon: Sun },
   { href: '/plans',     label: 'Reading Plans', icon: Calendar },
   { href: '/memory',    label: 'Verse Memory',  icon: Brain },
 ];
 
 const CHURCH_LINKS = [
+  { href: '/church',    label: 'Church Hub',    icon: Church },
   { href: '/prayer',    label: 'Prayer Atlas',  icon: Globe },
   { href: '/sermons',   label: 'Sermons',       icon: Church },
   { href: '/catechism', label: 'Catechism',     icon: MessageSquare },
@@ -51,6 +54,7 @@ const CHURCH_LINKS = [
 ];
 
 const TOOL_LINKS = [
+  { href: '/developers',label: 'Developers & SDK', icon: Code },
   { href: '/bookmarks', label: 'Bookmarks',     icon: Bookmark },
   { href: '/history',   label: 'History',       icon: History },
   { href: '/graph',     label: 'Concept Graph', icon: Network },

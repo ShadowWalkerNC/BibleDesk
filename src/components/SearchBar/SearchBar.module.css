@@ -285,12 +285,58 @@
   box-shadow: 0 3px 8px rgba(181, 132, 20, 0.12);
 }
 
-/* ─── Responsive ─────────────────────────────────────────────── */
-
 @media (max-width: 600px) {
   .inputRow       { flex-direction: column; }
   .submitBtn      { width: 100%; justify-content: center; }
   .controls       { flex-direction: column; align-items: flex-start; }
   .translationRow { gap: 0.5rem; }
   .translationName { display: none; } /* save space on mobile — pills are self-labelling */
+}
+
+/* ── Inline Slash Command Popover ── */
+.slashPopover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.slashItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.slashItem:hover {
+  background: #fbf9f4;
+  color: #92670e;
+}
+
+.slashName {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1e1913;
+}
+
+.slashDesc {
+  font-size: 0.8rem;
+  color: #7b6f59;
 }

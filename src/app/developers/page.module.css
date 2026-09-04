@@ -1,0 +1,264 @@
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+  min-height: calc(100vh - 64px);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2.8rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  color: #1d4ed8;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.85rem;
+}
+
+.title {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1e1913;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: #605747;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* Tab Navigation */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  color: #4a4131;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.tabBtn:hover {
+  background: #fdfbf7;
+  border-color: #b58414;
+}
+
+.tabBtnActive {
+  background: #b58414 !important;
+  color: #ffffff !important;
+  border-color: #92670e !important;
+  box-shadow: 0 4px 14px rgba(181, 132, 20, 0.25);
+}
+
+/* Content Sections */
+.section {
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: 18px;
+  padding: 2.2rem;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.04);
+  margin-bottom: 2.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(181, 132, 20, 0.15);
+}
+
+.sectionTitle {
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e1913;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.codeBlock {
+  background: #1e1a14;
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+}
+
+.codePre {
+  margin: 0;
+  color: #f7e6b5;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.copyBtn {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.copyBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Endpoint Row */
+.endpointGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.endpointCard {
+  background: #fdfbf7;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+}
+
+.endpointHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.methodGet {
+  background: #059669;
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.methodPost {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.endpointPath {
+  font-family: monospace;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #1e1913;
+}
+
+.endpointDesc {
+  font-size: 0.88rem;
+  color: #5a513f;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+/* Grid for guides */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.guideCard {
+  background: #fdfbf7;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.guideTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e1913;
+  margin-bottom: 0.5rem;
+}
+
+.guideText {
+  font-size: 0.88rem;
+  color: #5e5443;
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+}
+
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #92670e;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem 5rem;
+  }
+  .title {
+    font-size: 1.85rem;
+  }
+  .section {
+    padding: 1.5rem;
+  }
+}

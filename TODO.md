@@ -43,8 +43,14 @@
 - [x] Database RLS Hardening: schema-v6.sql user-scoped bookmarks with strict RLS (auth.uid() = user_id) and guest data auto-merge engine
 - [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
 - [x] Modal & Dialog CSS Hardening: zero-bleed solid opaque cards across QuickJumpModal, ApiKeyModal, IntegrationsModal, Pastoral Care Follow-up, Pin to Map, and Login with high z-index (9990) and darkened backdrops
+- [x] Marketing Showcase on `/` with 4 target personas (Believers, Churches, Missionaries, Worship Artists), live feature showcases, and transparent pricing ($0 for churches forever; $0 preview -> $4.99/mo later)
+- [x] Universal & Inline Slash Commands System (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/plan`, etc.) with global `/` key trigger and SearchBar popover autocomplete
+- [x] Words of Encouragement Engine (`/encourage`) with 8 topical promise categories, kingdom creativity & worship reflections, audio playback, and prayer conversion
+- [x] 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with urgency triage, anonymity, and audit tracking
+- [x] Church Integration & Ministry Hub (`/church`) with congregation prayer chain, member invite links, and 1-click embeddable website widgets (100% Free Forever)
+- [x] Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST API reference, copyable cURL/TS snippets, and MCP setup guides
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
