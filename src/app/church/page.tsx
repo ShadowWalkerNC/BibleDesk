@@ -18,6 +18,10 @@ import {
   X,
   Send,
   Sparkles,
+  Tv,
+  Presentation,
+  Radio,
+  Layers,
 } from 'lucide-react';
 import { SAMPLE_CHURCHES, ChurchProfile } from '@/types/church';
 import styles from './page.module.css';
@@ -348,6 +352,48 @@ export default function ChurchHubPage() {
               {copiedType === 'widget' ? <Check size={16} color="#059669" /> : <Copy size={16} />}
               <span>{copiedType === 'widget' ? 'Snippet Copied!' : 'Copy Embed Code'}</span>
             </button>
+          </div>
+
+          {/* Church Tech Integrations Guide Card */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <Layers size={18} color="#b58414" />
+                <span>Church Tech Ecosystem Interop</span>
+              </h3>
+            </div>
+            <p style={{ fontSize: '0.86rem', color: '#574d3c', lineHeight: 1.5, margin: '0 0 10px 0' }}>
+              BibleDesk operates alongside the software your ministry already uses, eliminating costly duplicate subscriptions:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ background: '#f8f5ee', padding: '8px 10px', borderRadius: '8px', borderLeft: '3px solid #b58414' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#3d3426' }}>
+                  Planning Center (PCO)
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#685d47' }}>
+                  Write outlines in BibleDesk; 1-click Markdown copy pastes directly into PCO Services order of worship.
+                </div>
+              </div>
+
+              <div style={{ background: '#f8f5ee', padding: '8px 10px', borderRadius: '8px', borderLeft: '3px solid #b58414' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#3d3426' }}>
+                  ProPresenter 7 (Renewed Vision)
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#685d47' }}>
+                  1-Click Slide Export auto-chunks sermon Scripture &amp; bullet points for Sunday projector presentation.
+                </div>
+              </div>
+
+              <div style={{ background: '#f8f5ee', padding: '8px 10px', borderRadius: '8px', borderLeft: '3px solid #059669' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#3d3426' }}>
+                  YouTube Live &amp; Facebook Live
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#685d47' }}>
+                  Zero-cost live sermon theatre embeds your free 4K CDN broadcasts with synchronized Scripture lookups.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

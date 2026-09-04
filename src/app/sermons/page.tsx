@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Printer, Send, Plus, BookOpen } from 'lucide-react';
+import { Printer, Send, Plus, BookOpen, Tv, Presentation, Copy, Check, Download, X } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import { BIBLE_BOOKS, getBookChapters } from '@/lib/books';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
+import ChurchLivePlayer from '@/components/ChurchLivePlayer/ChurchLivePlayer';
 import styles from './page.module.css';
 
 interface SermonOutline {
@@ -40,7 +41,71 @@ export default function SermonWorkspacePage() {
   const [viewMode, setViewMode] = useState<'edit' | 'split' | 'preview'>('edit');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // Live Stream & ProPresenter Slide Export states
+  const [showLiveStream, setShowLiveStream] = useState(false);
+  const [showSlideExport, setShowSlideExport] = useState(false);
+  const [slidesCopied, setSlidesCopied] = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function generateProPresenterSlides(markdown: string, sermonTitle: string): string {
+    const slides: string[] = [];
+    slides.push(`${sermonTitle || 'Sermon Notes'}\nBibleDesk Presentation Export`);
+
+    const lines = markdown.split('\n');
+    let currentBlock: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        if (currentBlock.length > 0) {
+          slides.push(currentBlock.join('\n'));
+          currentBlock = [];
+        }
+        continue;
+      }
+
+      if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
+        if (currentBlock.length > 0) {
+          slides.push(currentBlock.join('\n'));
+          currentBlock = [];
+        }
+        slides.push(trimmed.replace(/^#+\s*/, ''));
+      } else if (trimmed.startsWith('> ')) {
+        if (currentBlock.length > 0) {
+          slides.push(currentBlock.join('\n'));
+          currentBlock = [];
+        }
+        slides.push(trimmed.slice(2));
+      } else if (trimmed.startsWith('- ')) {
+        currentBlock.push(trimmed);
+        if (currentBlock.length >= 3) {
+          slides.push(currentBlock.join('\n'));
+          currentBlock = [];
+        }
+      } else {
+        currentBlock.push(trimmed);
+      }
+    }
+
+    if (currentBlock.length > 0) {
+      slides.push(currentBlock.join('\n'));
+    }
+
+    return slides.filter((s) => s.trim().length > 0).join('\n\n---\n\n');
+  }
+
+  function downloadSlidesText(text: string, filename: string) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename.replace(/[^a-z0-9_-]/gi, '_') || 'sermon_slides'}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
   function renderMarkdownPreview(markdown: string) {
     const lines = markdown.split('\n');
@@ -323,6 +388,13 @@ export default function SermonWorkspacePage() {
       )}
 
       <main className={styles.mainContainer}>
+        {showLiveStream && (
+          <ChurchLivePlayer
+            initialUrl="https://www.youtube.com/watch?v=live_stream"
+            churchName="Church Live Sermon Theatre"
+            onClose={() => setShowLiveStream(false)}
+          />
+        )}
         <div className={styles.splitGrid}>
           
           {/* Left panel: Editor workspace */}
@@ -350,6 +422,15 @@ export default function SermonWorkspacePage() {
               </div>
 
               <div className={styles.navActions}>
+                <button
+                  type="button"
+                  onClick={() => setShowLiveStream(!showLiveStream)}
+                  className={styles.secondaryBtn}
+                  title="Toggle live church sermon video broadcast"
+                >
+                  <Tv size={14} style={{ marginRight: '5px', verticalAlign: 'middle', color: showLiveStream ? '#ef4444' : 'inherit' }} />
+                  {showLiveStream ? 'Hide Broadcast' : 'Live Broadcast'}
+                </button>
                 <button onClick={handleNewOutline} className={styles.secondaryBtn}>
                   New Outline
                 </button>
@@ -420,6 +501,14 @@ export default function SermonWorkspacePage() {
                 </button>
               </div>
               <div className={styles.footerBtns}>
+                <button
+                  type="button"
+                  onClick={() => setShowSlideExport(true)}
+                  className={styles.secondaryBtn}
+                  title="Export slides formatted for ProPresenter 7, PowerPoint, or Keynote"
+                >
+                  <Presentation size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Slide Export
+                </button>
                 <button type="button" onClick={() => window.print()} className={styles.secondaryBtn} title="Print clean sermon outline notes">
                   <Printer size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Print Notes
                 </button>
@@ -512,6 +601,115 @@ export default function SermonWorkspacePage() {
 
         </div>
       </main>
+
+      {/* ProPresenter & Presentation Slide Export Modal */}
+      {showSlideExport && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem',
+            backdropFilter: 'blur(8px)',
+          }}
+          onClick={() => setShowSlideExport(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            style={{
+              background: '#16130d',
+              border: '1px solid rgba(181, 132, 20, 0.4)',
+              borderRadius: '16px',
+              width: '700px',
+              maxWidth: '100%',
+              maxHeight: '88vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem 1.5rem', borderBottom: '1px solid rgba(181, 132, 20, 0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Presentation size={20} color="#b58414" />
+                <div>
+                  <h3 style={{ margin: 0, fontFamily: 'Cinzel, serif', color: '#f7f3e8', fontSize: '1.15rem' }}>
+                    ProPresenter 7 &amp; Slide Exporter
+                  </h3>
+                  <span style={{ fontSize: '0.74rem', color: '#b58414', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Church Presentation Sync
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSlideExport(false)}
+                style={{ background: 'transparent', border: 'none', color: '#9c8e79', cursor: 'pointer', padding: '4px' }}
+                aria-label="Close export modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <p style={{ fontSize: '0.86rem', color: '#b3a794', margin: 0, lineHeight: 1.5 }}>
+                Sections separated by <code>---</code> are auto-chunked for church projectors. Copy or download this text, then in <strong>ProPresenter 7</strong> go to <em>File &gt; Import &gt; Text</em> or paste into PowerPoint / Keynote.
+              </p>
+              <textarea
+                readOnly
+                value={generateProPresenterSlides(content, title)}
+                style={{
+                  width: '100%',
+                  height: '320px',
+                  background: '#0e0c08',
+                  border: '1px solid rgba(181, 132, 20, 0.3)',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  color: '#fdfaf3',
+                  fontFamily: 'monospace',
+                  fontSize: '0.84rem',
+                  lineHeight: '1.45',
+                  resize: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '1rem 1.5rem', borderTop: '1px solid rgba(181, 132, 20, 0.2)', background: 'rgba(255, 255, 255, 0.02)' }}>
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => {
+                  const slidesText = generateProPresenterSlides(content, title);
+                  navigator.clipboard.writeText(slidesText);
+                  setSlidesCopied(true);
+                  setTimeout(() => setSlidesCopied(false), 2500);
+                }}
+              >
+                {slidesCopied ? <Check size={15} color="#10b981" /> : <Copy size={15} />}
+                <span style={{ marginLeft: '6px' }}>{slidesCopied ? 'Copied Slides!' : 'Copy to Clipboard'}</span>
+              </button>
+              <button
+                type="button"
+                className={styles.saveBtn}
+                onClick={() => {
+                  const slidesText = generateProPresenterSlides(content, title);
+                  downloadSlidesText(slidesText, title || 'sermon_slides');
+                }}
+              >
+                <Download size={15} style={{ marginRight: '6px' }} />
+                Download .txt File
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

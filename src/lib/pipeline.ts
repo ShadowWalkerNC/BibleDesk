@@ -330,6 +330,7 @@ async function runStage3(
 async function runStage4(
   question: string,
   verifiedVerses: VerifiedVerse[],
+  ragContext?: string,
   apiKey?: string
 ): Promise<Record<string, any>> {
   const t0 = Date.now();
@@ -338,9 +339,13 @@ async function runStage4(
     .map((v) => `${v.reference}: "${v.text}"`)
     .join('\n');
 
+  const contextSnippet = ragContext
+    ? `\n\nHISTORICAL DOCTRINAL & CONFESSIONAL REFERENCE (use to cite exact catechisms/confessions):\n${ragContext}\n`
+    : '';
+
   const raw = await callClaude(
     STAGE4_SYSTEM,
-    `Question: ${question}\n\nVerified Scripture passages:\n${verseBlock || '(none fetched — reason from scripture knowledge)'}`,
+    `Question: ${question}\n\nVerified Scripture passages:\n${verseBlock || '(none fetched — reason from scripture knowledge)'}${contextSnippet}`,
     1024,
     apiKey
   );
@@ -486,7 +491,7 @@ export async function runPipeline(
   });
 
   const s4Start = Date.now();
-  const historicalAnalysis = await runStage4(question, verifiedVerses, apiKey);
+  const historicalAnalysis = await runStage4(question, verifiedVerses, ragContext, apiKey);
   record(4, 'Historical & Doctrinal', s4Start, historicalAnalysis);
 
   const s5Start = Date.now();

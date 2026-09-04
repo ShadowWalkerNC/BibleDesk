@@ -49,6 +49,12 @@
 - [x] 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with urgency triage, anonymity, and audit tracking
 - [x] Church Integration & Ministry Hub (`/church`) with congregation prayer chain, member invite links, and 1-click embeddable website widgets (100% Free Forever)
 - [x] Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST API reference, copyable cURL/TS snippets, and MCP setup guides
+- [x] Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`, `src/lib/pipeline.ts`) covering 8 classical theological loci with Scripture proofs, historical consensus, and fair multi-tradition perspectives (Reformed, Lutheran, Baptist, Anglican, Wesleyan, Pentecostal)
+- [x] Multi-Tradition Catechisms & Confessions (`src/lib/catechismData.ts`, `/catechism`) expanding Westminster & Heidelberg with Luther's Small Catechism (1529), 1689 Baptist Catechism, 39 Articles (1571), and Assemblies of God 16 Truths (1916)
+- [x] Live Christian Worship Radio Dock (`src/components/LiveRadioPlayer/`) with open sacred & instrumental streams, volume/playback controls, and 1-click official partner docks (K-LOVE, Air1, Moody)
+- [x] Church Live Sermon Theatre (`src/components/ChurchLivePlayer/`, `/sermons`) supporting YouTube Live & Facebook Live video embeds with zero server bandwidth cost
+- [x] 1-Click ProPresenter 7 & Presentation Slide Exporter (`/sermons`) auto-chunking Scripture passages and outline headers for Sunday church projectors
+- [x] Church Tech Interoperability Hub (`/church`) detailing zero-cost integration workflows for Planning Center, ProPresenter, and website embed widgets
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
   - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql`
   - [ ] Configure Environment Variables on Host (Vercel):

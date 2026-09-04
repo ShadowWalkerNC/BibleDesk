@@ -106,6 +106,11 @@ Active work (Phase 0 Complete):
   ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql
   ✓ Church Integration & Ministry Hub (`/church`) with prayer chain & 1-click embed widgets ($0 Free Forever)
   ✓ Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST & MCP docs
+  ✓ Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`) with 8 classical loci of Christian theology
+  ✓ Multi-Tradition Catechisms & Confessions (`/catechism`) expanding Westminster & Heidelberg with Luther, 1689 Baptist, 39 Articles, and Assemblies of God
+  ✓ Live Christian Worship Radio Dock (`LiveRadioPlayer.tsx`) with ambient sacred streams & 1-click K-LOVE/Air1 official station docks
+  ✓ Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with zero-cost YouTube Live & Facebook Live embeds
+  ✓ 1-Click ProPresenter 7 Presentation Slide Exporter (`/sermons`) auto-chunking Scripture & sermon outlines for Sunday church projectors
 
 Deploy (parallel):
   □ Apply supabase schemas v1→v8

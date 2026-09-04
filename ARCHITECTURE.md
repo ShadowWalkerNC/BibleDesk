@@ -250,6 +250,23 @@ More questions → more moderation → more canonical answers
 | Month 6 | ~500 | ~60% of questions benefit |
 | Year 1 | 2000+ | Near-encyclopedic; fine-tuning viable |
 
+### 6.1 Doctrinal Grounding & Confessional Corpus
+To prevent AI hallucinations and generic consensus on theological matters, BibleDesk uses a **dual RAG strategy**:
+1. **Vector RAG (`canonical_answers`)**: Searches moderator-reviewed, pastor-approved answers via pgvector (1536-dim OpenAI embeddings).
+2. **Deterministic Doctrinal Corpus (`src/lib/doctrinesData.ts`, `src/lib/catechismData.ts`)**: Instant, zero-latency local retrieval across 8 classical loci of Christian theology and 6 historic confessions:
+   - **Reformed / Presbyterian**: Westminster Shorter Catechism (1647)
+   - **Reformed / Continental**: Heidelberg Catechism (1563)
+   - **Lutheran**: Luther's Small Catechism (1529)
+   - **Baptist**: Keach's Baptist Catechism / 1689 London Baptist (1689)
+   - **Anglican**: Thirty-Nine Articles of Religion (1571)
+   - **Pentecostal / Evangelical**: Assemblies of God 16 Fundamental Truths (1916)
+   - Grounded context is automatically fed into Stage 4 (Historical & Doctrinal) and Stage 5 (Synthesis) of the AI pipeline to guarantee fair representation and exact confessional citations.
+
+### 6.2 Live Worship Radio & Live Sermon Theatre (Solo Developer Zero-Cost Architecture)
+- **Worship Radio Dock (`LiveRadioPlayer.tsx`)**: Embedded HTML5 audio dock delivering verified, non-commercial sacred hymn & instrumental Christian audio directly from public streams (Abiding Radio, Moody Radio) at $0 server bandwidth, paired with 1-click official station launchers for K-LOVE and Air1.
+- **Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`)**: Enables churches to broadcast Sunday sermons through embedded YouTube Live or Facebook Live feeds alongside synchronized Scripture lookups and sermon outline notes, eliminating expensive custom video transcoding infrastructure.
+- **ProPresenter 7 Slide Exporter (`/sermons`)**: 1-Click plain-text projector slide generator auto-chunking sermon headers and Scripture citations into ProPresenter/PowerPoint-ready slides.
+
 ---
 
 ## 7. Moderation System

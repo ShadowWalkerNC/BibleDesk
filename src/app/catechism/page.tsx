@@ -12,6 +12,7 @@ import styles from './page.module.css';
 
 export default function CatechismPage() {
   const [activeCatechism, setActiveCatechism] = useState<Catechism>(ALL_CATECHISMS[0]);
+  const [activeTradition, setActiveTradition] = useState<string>('All');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -19,6 +20,15 @@ export default function CatechismPage() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [quizScore, setQuizScore] = useState({ correct: 0, total: 0 });
+
+  const TRADITIONS = ['All', 'Reformed', 'Lutheran', 'Baptist', 'Anglican', 'Pentecostal'];
+
+  const displayedCatechisms = useMemo(() => {
+    if (activeTradition === 'All') return ALL_CATECHISMS;
+    return ALL_CATECHISMS.filter(c =>
+      c.tradition.toLowerCase().includes(activeTradition.toLowerCase())
+    );
+  }, [activeTradition]);
 
   const categories = ['All', ...CATEGORIES(activeCatechism)];
 
@@ -62,15 +72,47 @@ export default function CatechismPage() {
 
           {/* Page Header */}
           <div className={styles.pageHeader}>
-            <h1 className={`${styles.pageTitle} text-serif`}>Catechism</h1>
+            <h1 className={`${styles.pageTitle} text-serif`}>Historic Catechisms &amp; Confessions</h1>
             <p className={styles.pageSubtitle}>
-              Classic Reformed Q&amp;A summaries of Christian doctrine. Study, memorize, and test yourself.
+              Classical Q&amp;A summaries and confessional statements across Reformed, Lutheran, Baptist, Anglican, and Pentecostal traditions. Study, memorize, and test yourself.
             </p>
+          </div>
+
+          {/* Tradition Filter Bar */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px', justifyContent: 'center' }}>
+            {TRADITIONS.map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => {
+                  setActiveTradition(t);
+                  const matching = t === 'All'
+                    ? ALL_CATECHISMS
+                    : ALL_CATECHISMS.filter(c => c.tradition.toLowerCase().includes(t.toLowerCase()));
+                  if (matching.length > 0 && !matching.some(c => c.id === activeCatechism.id)) {
+                    switchCatechism(matching[0]);
+                  }
+                }}
+                style={{
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  border: activeTradition === t ? '1px solid #b58414' : '1px solid rgba(181, 132, 20, 0.25)',
+                  background: activeTradition === t ? '#b58414' : 'rgba(255, 255, 255, 0.04)',
+                  color: activeTradition === t ? '#ffffff' : 'var(--text-muted)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {t}
+              </button>
+            ))}
           </div>
 
           {/* Catechism Selector */}
           <div className={styles.catechismSelector}>
-            {ALL_CATECHISMS.map(cat => (
+            {displayedCatechisms.map(cat => (
               <button
                 key={cat.id}
                 className={`${styles.catechismBtn} ${activeCatechism.id === cat.id ? styles.catechismBtnActive : ''}`}
