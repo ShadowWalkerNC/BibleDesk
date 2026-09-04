@@ -98,7 +98,7 @@ Active work (Phase 0 Complete):
   ✓ Single-command packaging CLI (`npm run package:all`) & official multi-resolution brand icon suite
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v4
+  □ Apply supabase schemas v1→v5
   □ Env vars + host + smoke tests (see TODO.md)
 ```
 

@@ -21,6 +21,34 @@
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.addCareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-600);
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  padding: 0.65rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.2s ease;
+}
+
+.addCareBtn:hover {
+  background: rgba(181, 132, 20, 0.22);
+  border-color: var(--gold-500);
+}
+
 .pinPrayerHeroBtn:hover {
   background: linear-gradient(135deg, #c8940e, #916307);
   box-shadow: 0 6px 20px rgba(181, 132, 20, 0.45);
@@ -819,3 +847,614 @@
     width: 100%;
   }
 }
+
+/* ─── Segmented Navigation (Jakob's Law Compliant) ───────────── */
+
+.segmentedNav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(235, 226, 210, 0.55);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.segmentedNav::-webkit-scrollbar {
+  display: none;
+}
+
+.segmentBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.15rem;
+  min-height: 48px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.segmentBtn:active {
+  transform: scale(0.97);
+}
+
+.segmentBtn:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--gold-600);
+}
+
+.segmentBtnActive {
+  background: #ffffff !important;
+  color: var(--gold-600) !important;
+  border-color: rgba(181, 132, 20, 0.35) !important;
+  box-shadow: 0 1px 4px rgba(90, 70, 40, 0.1) !important;
+}
+
+.badgeCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-500);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+}
+
+/* ─── Section Layouts & Due Queue ────────────────────────────── */
+
+.sectionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.sectionIntro {
+  margin-bottom: 0.5rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-cinzel), serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-600);
+  margin-bottom: 0.25rem;
+}
+
+.sectionDesc {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.emptyStateCard {
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 580px;
+  margin: 2rem auto;
+  border-radius: var(--radius-md);
+}
+
+.emptyStateIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addCommitmentBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #b58414, #785304);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.dueGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.careCard {
+  padding: 1.35rem 1.4rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.22);
+  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.04);
+  transition: all 0.2s ease;
+}
+
+.careCard:hover {
+  box-shadow: 0 4px 16px rgba(181, 132, 20, 0.12);
+  border-color: rgba(181, 132, 20, 0.4);
+}
+
+.careCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.careCardPerson {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.careCardName {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.categoryBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-600);
+}
+
+.sensitiveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.recurrencePill {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.careCardTitle {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.careCardDetails {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.careCardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(181, 132, 20, 0.12);
+}
+
+.actionPrayedBtn,
+.actionSnoozeBtn,
+.actionAnsweredBtn,
+.actionFollowupBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.5rem 0.85rem;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionPrayedBtn {
+  background: linear-gradient(135deg, #b58414, #785304);
+  color: #ffffff;
+  border: none;
+  flex: 1;
+}
+
+.actionPrayedBtn:active {
+  transform: scale(0.96);
+}
+
+.actionSnoozeBtn {
+  background: rgba(181, 132, 20, 0.08);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  color: var(--text-secondary);
+}
+
+.actionAnsweredBtn {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #047857;
+}
+
+.actionFollowupBtn {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #1d4ed8;
+}
+
+/* ─── My Circle Layout ───────────────────────────────────────── */
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.categoryChips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chipBtn {
+  padding: 0.4rem 0.85rem;
+  min-height: 38px;
+  border-radius: 999px;
+  background: rgba(235, 226, 210, 0.5);
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chipBtnActive {
+  background: var(--gold-500) !important;
+  color: #ffffff !important;
+  border-color: var(--gold-600) !important;
+}
+
+.addContactInlineBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  background: rgba(181, 132, 20, 0.12);
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  color: var(--gold-600);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.circleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.circleCard {
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+}
+
+.circleCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.circleName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.circleCategory {
+  font-size: 0.75rem;
+  color: var(--gold-600);
+  font-weight: 600;
+}
+
+.sensitiveTag {
+  font-size: 0.7rem;
+  color: #b91c1c;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.circleCommitmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.noCommitmentsNote {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.circleCommitmentItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0.4rem 0;
+}
+
+.circleCommitmentDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-400);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.circleCommitmentContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.circleCommitmentTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.circleCommitmentSchedule {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.circleCardFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(181, 132, 20, 0.12);
+}
+
+.circleQuickPrayBtn,
+.circleFollowupBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 0.5rem;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.circleQuickPrayBtn {
+  background: rgba(181, 132, 20, 0.08);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  color: var(--gold-600);
+}
+
+.circleFollowupBtn {
+  background: transparent;
+  border: 1px solid rgba(181, 132, 20, 0.2);
+  color: var(--text-secondary);
+}
+
+/* ─── Answered Grid ──────────────────────────────────────────── */
+
+.answeredGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.answeredCard {
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.answeredHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.answeredBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.answeredDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.answeredTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.answeredFor {
+  font-size: 0.82rem;
+  color: var(--gold-600);
+  font-weight: 600;
+  margin: 0;
+}
+
+.answeredDetails {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ─── Care Follow-up Modal & Channels ────────────────────────── */
+
+.modalSub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.channelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.channelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 0.55rem;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  background: rgba(235, 226, 210, 0.5);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.channelBtnActive {
+  background: #ffffff !important;
+  color: var(--gold-600) !important;
+  border-color: var(--gold-500) !important;
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.08);
+}
+
+.templateList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.templateLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.templatePill {
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(181, 132, 20, 0.06);
+  border: 1px solid rgba(181, 132, 20, 0.18);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.templatePill:hover {
+  background: rgba(181, 132, 20, 0.14);
+  border-color: var(--gold-400);
+}
+
+.followupTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.notePrompt {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+

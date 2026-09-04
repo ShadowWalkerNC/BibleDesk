@@ -37,8 +37,9 @@
 - [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
+- [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, Clipboard), answered gratitude log, and schema-v5.sql
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`

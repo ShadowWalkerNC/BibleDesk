@@ -1,9 +1,10 @@
 # Prayer Care Workflow
 
-> Status: Proposed
+> Status: Implemented (Phase A: Private Prayer Circle & Pastoral Care Workflow)
 > Added: 2026-09-03
+> Schema: supabase/schema-v5.sql
 > Product area: Church tools / personal prayer
-> Related surface: `/prayer`
+> Related surface: `/prayer` & `/api/prayer/circle`
 
 ## Product Idea
 
