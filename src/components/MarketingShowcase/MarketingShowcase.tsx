@@ -318,6 +318,10 @@ export default function MarketingShowcase() {
               <div className={styles.personaBulletList}>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>Christian Creator &amp; Ministry Hub:</strong> Publish a reverent link-in-bio page (<code>/@yourname</code>) showcasing your songs, podcasts, seasonal Scripture, and prayer needs with 0% platform fee support links.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
                   <span><strong>Poetic Concordance Search:</strong> Search Psalms, prophets, and imagery by lyrical nuance, Hebrew root words, and theological resonance.</span>
                 </div>
                 <div className={styles.personaBullet}>
@@ -337,22 +341,36 @@ export default function MarketingShowcase() {
                   <span><strong>Live Worship Radio &amp; Station Docks:</strong> Stream ambient sacred hymns, choral meditations, and launch official K-LOVE &amp; Air1 players for creative inspiration.</span>
                 </div>
               </div>
-              <Link href="/encourage" className={styles.primaryCta}>
-                <span>Explore Words of Encouragement</span>
-                <ArrowRight size={16} />
-              </Link>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <Link href="/creators" className={styles.primaryCta}>
+                  <span>Explore Creator Hub</span>
+                  <ArrowRight size={16} />
+                </Link>
+                <Link href="/encourage" className={styles.secondaryCta} style={{ border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                  <span>Words of Encouragement</span>
+                </Link>
+              </div>
             </div>
 
             <div className={styles.personaInteractivePreview}>
-              <span className={styles.previewTag} style={{ background: '#7c3aed' }}>Creative Calling Promise</span>
-              <div style={{ fontStyle: 'italic', fontFamily: 'Lora, serif', fontSize: '0.96rem', color: '#1e1913' }}>
-                "And I have filled him with the Spirit of God, with wisdom... to make artistic designs for work in gold, silver and bronze." — Exodus 31:3-4
+              <span className={styles.previewTag} style={{ background: '#7c3aed' }}>Creator Profile Preview</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#b58414', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                  G
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.94rem' }}>Grace Worship Collective</div>
+                  <div style={{ fontSize: '0.75rem', color: '#7c3aed' }}>@graceworship · Nashville, TN</div>
+                </div>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#574d3b', margin: '0.5rem 0' }}>
-                Your artistic skill is not secular until baptized; it is God-breathed. Play skillfully, and write songs that anchor weary souls in truth.
+              <div style={{ fontStyle: 'italic', fontFamily: 'Lora, serif', fontSize: '0.88rem', color: '#1e1913', background: 'rgba(181, 132, 20, 0.1)', padding: '0.5rem', borderRadius: '6px' }}>
+                "Oh, magnify the LORD with me, and let us exalt his name together!" — Psalm 34:3
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#574d3b', margin: '0.5rem 0' }}>
+                Acoustic Scripture psalms &amp; contemplative worship music. 84 intercessors praying for our university tour.
               </p>
-              <Link href="/encourage" style={{ fontSize: '0.82rem', color: '#7c3aed', fontWeight: 700, textDecoration: 'none' }}>
-                View 15+ Artist Meditations →
+              <Link href="/c/graceworship" style={{ fontSize: '0.82rem', color: '#7c3aed', fontWeight: 700, textDecoration: 'none' }}>
+                View Full Creator Profile (Media + Support) →
               </Link>
             </div>
           </div>

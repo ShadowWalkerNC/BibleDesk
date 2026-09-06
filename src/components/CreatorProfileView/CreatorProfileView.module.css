@@ -1,0 +1,435 @@
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.banner {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  background-color: var(--navy-900);
+  border: 1px solid var(--glass-border);
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 100%);
+}
+
+.profileHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: -4.5rem;
+  position: relative;
+  gap: 0.5rem;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--gold-400);
+  object-fit: cover;
+  background: var(--navy-800);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.avatarFallback {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--gold-400);
+  background: var(--navy-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  color: var(--gold-300);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.displayName {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.verifiedBadge {
+  color: var(--gold-400);
+}
+
+.handle {
+  font-size: 0.9rem;
+  color: var(--gold-500);
+  margin: 0;
+  font-weight: 500;
+}
+
+.tagline {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0.25rem 0 0;
+  max-width: 520px;
+}
+
+.metaPills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.metaPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.bioCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Season Verse Block ─────────────────────────────────────────────────── */
+
+.verseCard {
+  background: radial-gradient(ellipse at top left, rgba(212, 175, 55, 0.12), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  backdrop-filter: blur(12px);
+}
+
+.verseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.verseLabel {
+  font-size: 0.75rem;
+  color: var(--gold-400);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.verseLinkBtn {
+  font-size: 0.75rem;
+  color: var(--gold-300);
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  transition: all 0.15s ease;
+}
+
+.verseLinkBtn:hover {
+  background: rgba(212, 175, 55, 0.3);
+  color: #ffffff;
+}
+
+.verseQuoteText {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.verseCitation {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold-400);
+  margin-left: auto;
+}
+
+/* ── Patronage Support Links ────────────────────────────────────────────── */
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin: 0.5rem 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.patronageGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.patronageBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.95rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(181, 132, 20, 0.12) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.patronageBtn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(181, 132, 20, 0.2) 100%);
+  border-color: var(--gold-400);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+}
+
+.patronageLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.patronageIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-300);
+}
+
+.patronageInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.patronageLabel {
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.patronageDesc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ── Prayer Requests Block ──────────────────────────────────────────────── */
+
+.prayerCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.prayerItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.prayerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.prayerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prayerTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.urgencyBadge {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  padding: 0.15rem 0.4rem;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.prayerDetails {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.prayButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(236, 72, 153, 0.15);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  color: #f472b6;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.prayButton:hover {
+  background: rgba(236, 72, 153, 0.28);
+  transform: scale(1.03);
+}
+
+.prayCount {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ── Media Embeds ───────────────────────────────────────────────────────── */
+
+.mediaGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mediaItem {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: var(--navy-900);
+}
+
+.mediaTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.6rem 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  margin: 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.mediaFrameWrap {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+
+.mediaFrameWrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ── Social Links ───────────────────────────────────────────────────────── */
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.socialBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
+}
+
+.socialBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.footerNote {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+}
+
+.footerNote a {
+  color: var(--gold-400);
+  text-decoration: none;
+}

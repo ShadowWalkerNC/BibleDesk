@@ -111,9 +111,10 @@ Active work (Phase 0 Complete):
   ✓ Live Christian Worship Radio Dock (`LiveRadioPlayer.tsx`) with ambient sacred streams & 1-click K-LOVE/Air1 official station docks
   ✓ Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with zero-cost YouTube Live & Facebook Live embeds
   ✓ 1-Click ProPresenter 7 Presentation Slide Exporter (`/sermons`) auto-chunking Scripture & sermon outlines for Sunday church projectors
+  ✓ Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`) with link-in-bio pages, embedded YouTube/Spotify worship media, Scripture of the Season, direct 0% platform fee patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests, and creator discovery directory
 
 Deploy (parallel):
-  □ Apply supabase schemas v1→v8
+  □ Apply supabase schemas v1→v9
   □ Env vars + host + smoke tests (see TODO.md)
 ```
 

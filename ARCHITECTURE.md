@@ -74,15 +74,16 @@ BibleDesk/
 │   │   │   ├── export/obsidian/
 │   │   │   ├── mod/{queue,vote,approve,invite}/
 │   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
-│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|encourage|church|developers|sermons/
-│   │   ├── bookmarks|history|graph|share/[slug]|mod|login/
+│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|encourage|church|developers|sermons|creators/
+│   │   ├── c/[handle]|bookmarks|history|graph|share/[slug]|mod|login/
 │   │   ├── page.tsx                      ← Homepage (Marketing Showcase or Study start)
 │   │   ├── layout.tsx · globals.css · robots.ts · sitemap.ts
 │   │   ├── components/                   ← Header, SearchBar, DimensionPanel,
-│   │   │                                   SlashCommandPalette, MarketingShowcase, …
+│   │   │                                   SlashCommandPalette, CreatorProfileView, …
 │   │   ├── hooks/                        ← useStreamingAsk, useBookmark
 │   │   ├── lib/
 │   │   │   ├── sdk.ts                    ← Official BibleDesk Client SDK
+│   │   │   ├── creatorStore.ts · universalIndexer.ts
 │   │   │   ├── bible.ts · encouragementData.ts
 │   │   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
 │   │   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts

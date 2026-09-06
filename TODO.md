@@ -23,6 +23,7 @@
 
 ## 🔴 Deploy Checklist & Production Readiness
 
+- [x] Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`): Reverent link-in-bio pages with media embeds (YouTube/Spotify), Scripture of the Season, direct 0% platform fee patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests, and creator discovery directory
 - [x] Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network
 - [x] Connected Knowledge Drawer (`src/components/ConnectedKnowledgeDrawer/`) embedded across `/bible`, `/sermons`, and `/prayer`
 - [x] Toggleable Multi-Layer Knowledge Graph (`GraphView.tsx`) synthesizing local sermons, prayers, scripture verses, doctrines, and concepts with layer filter pills

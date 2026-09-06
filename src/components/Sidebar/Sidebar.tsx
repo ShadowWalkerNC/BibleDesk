@@ -31,6 +31,7 @@ import {
   Globe,
   Code,
   Radio,
+  Palette,
 } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -48,6 +49,7 @@ const STUDY_LINKS = [
 
 const CHURCH_LINKS = [
   { href: '/church',    label: 'Church Hub',    icon: Church },
+  { href: '/creators',  label: 'Creator Hub',   icon: Palette },
   { href: '/prayer',    label: 'Prayer Atlas',  icon: Globe },
   { href: '/sermons',   label: 'Sermons',       icon: Church },
   { href: '/catechism', label: 'Catechism',     icon: MessageSquare },

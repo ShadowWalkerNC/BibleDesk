@@ -31,6 +31,7 @@ const QUICK_LINKS = [
   { label: 'Plans',         href: '/plans',    icon: Calendar },
   { label: 'Verse Memory',  href: '/memory',   icon: Brain },
   { label: 'Encouragement', href: '/encourage',icon: Sparkles },
+  { label: 'Creator Hub',   href: '/creators', icon: Heart },
   { label: 'Church Hub',    href: '/church',   icon: Church },
   { label: 'Prayer Atlas',  href: '/prayer',   icon: Heart },
   { label: 'Developers',    href: '/developers',icon: MessageSquare },

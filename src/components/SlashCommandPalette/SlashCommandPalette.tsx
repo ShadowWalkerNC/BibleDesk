@@ -20,6 +20,7 @@ import {
   Tv,
   Presentation,
   Scroll,
+  Palette,
 } from 'lucide-react';
 import styles from './SlashCommandPalette.module.css';
 
@@ -33,6 +34,17 @@ interface SlashCommand {
 }
 
 const COMMANDS: SlashCommand[] = [
+  {
+    id: 'creator',
+    name: '/creator',
+    category: 'Creatives',
+    description: 'Explore Christian Creator Hub or manage your ministry profile',
+    icon: Palette,
+    action: (arg, router) => {
+      const q = arg.trim();
+      router.push(q ? `/c/${encodeURIComponent(q)}` : '/creators');
+    },
+  },
   {
     id: 'verse',
     name: '/verse',
