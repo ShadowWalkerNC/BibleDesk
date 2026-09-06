@@ -148,4 +148,24 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
+---
+
+## Base44 Dev Environment
+
+The app runs via `docker-compose.base44.yml` (Node 22 + Next.js 16 dev server, live reload).
+
+**No external credentials are required to boot.** The app degrades gracefully:
+- Bible data (6 translations, Strong's lexicons, TSK cross-refs) is local JSON in `src/data/` — reading/search works fully offline.
+- Supabase clients are lazy-init with placeholder credentials (`src/lib/supabase.ts`); the browser client warns but boots, the server client throws only when an API route actually calls it.
+- AI routes (Gemini/Claude/OpenAI) return offline fallback stubs when keys are unset.
+
+**Optional secrets** (set via the Base44 secrets dashboard when needed for full functionality): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (auth, bookmarks, prayer, history), `GEMINI_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` (AI features). See `.base44/environment.json`.
+
+**Quirks:**
+- `npm install` uses `--workspaces=false` to skip the Electron (`apps/desktop`) and Capacitor (`apps/android`) workspace builds, which are not needed for the web dev server and would pull large native deps.
+- `next.config.ts` has `allowedDevOrigins` derived from `BASE44_PUBLIC_HOST_SUFFIX` so the preview origin can access dev assets/HMR — do not remove.
+- `node_modules` is a named compose volume (not bind-mounted) to avoid host/native-module issues.
+
+**Verify it works:** `curl -sf -H "Host: external-preview.example.com" http://localhost:3000/` → HTTP 200 with "BibleDesk" in the body.
+
 *Updated: 2026-08-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

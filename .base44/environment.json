@@ -1,0 +1,13 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    { "name": "NEXT_PUBLIC_SUPABASE_URL", "description": "Supabase project URL (https://<project>.supabase.co). Optional — app boots with placeholder; needed for auth, bookmarks, prayer, history.", "requiredAtBoot": false },
+    { "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY", "description": "Supabase anon/public key (browser-safe). Optional at boot; needed for auth and user-scoped data.", "requiredAtBoot": false },
+    { "name": "SUPABASE_SERVICE_ROLE_KEY", "description": "Supabase service role key (server-only, bypasses RLS). Optional; needed for server-side DB writes (answers, graph, moderation).", "requiredAtBoot": false },
+    { "name": "GEMINI_API_KEY", "description": "Google Gemini API key for the Bible study companion. Optional; route returns offline fallback when unset.", "requiredAtBoot": false },
+    { "name": "OPENAI_API_KEY", "description": "OpenAI API key for RAG embeddings (text-embedding-3-small). Optional; RAG features degrade without it.", "requiredAtBoot": false },
+    { "name": "ANTHROPIC_API_KEY", "description": "Anthropic Claude API key for AI answer pipeline. Optional; AI answers degrade without it.", "requiredAtBoot": false }
+  ]
+}
