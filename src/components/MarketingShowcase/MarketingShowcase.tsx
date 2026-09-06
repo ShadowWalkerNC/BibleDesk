@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import styles from './MarketingShowcase.module.css';
 
-type PersonaKey = 'believer' | 'church' | 'missionary' | 'artist';
+type PersonaKey = 'believer' | 'organization';
 
 export default function MarketingShowcase() {
   const [activePersona, setActivePersona] = useState<PersonaKey>('believer');
@@ -46,28 +46,38 @@ export default function MarketingShowcase() {
         </h1>
 
         <p className={styles.heroSubtitle}>
-          Study Scripture with 6 public-domain translations 100% offline. Explore grounded 5-dimension theology,
-          track corporate petitions on the 2D vector PrayerAtlas, and integrate your church—at zero paywall.
+          BibleDesk unites 6 public-domain translations (100% offline), Strong’s Greek &amp; Hebrew lexicons,
+          Treasury of Scripture Knowledge cross-references, church prayer networks, and an open developer SDK.
         </p>
 
-        <div className={styles.heroCtas}>
-          <Link href="/login" className={styles.primaryCta}>
-            <span>Get Started Free</span>
-            <ArrowRight size={18} />
-          </Link>
-
-          <Link href="/bible" className={styles.secondaryCta}>
+        <div className={styles.heroActions}>
+          <Link href="/bible" className={styles.primaryCta}>
             <BookOpen size={18} />
             <span>Open Study Desk</span>
+            <ArrowRight size={16} />
           </Link>
 
           <Link href="/church" className={styles.secondaryCta}>
             <Church size={18} />
-            <span>For Churches &amp; Ministries</span>
+            <span>Church &amp; Ministry Hub ($0)</span>
+          </Link>
+
+          <Link href="/developers" className={styles.sdkCta}>
+            <Code size={18} />
+            <span>Developer SDK</span>
           </Link>
         </div>
 
+        {/* Feature Highlights Bar */}
         <div className={styles.featurePillsBar}>
+          <div className={styles.featurePillItem}>
+            <Globe size={16} color="#b58414" />
+            <span>2D Vector PrayerAtlas</span>
+          </div>
+          <div className={styles.featurePillItem}>
+            <Tv size={16} color="#ef4444" />
+            <span>Live Sermon Theatre &amp; ProPresenter 7 Export</span>
+          </div>
           <div className={styles.featurePillItem}>
             <ShieldCheck size={16} color="#059669" />
             <span>100% Free Forever for Churches</span>
@@ -75,10 +85,6 @@ export default function MarketingShowcase() {
           <div className={styles.featurePillItem}>
             <Radio size={16} color="#b58414" />
             <span>Worship Radio (K-LOVE, Air1, Moody &amp; Sacred Hymns)</span>
-          </div>
-          <div className={styles.featurePillItem}>
-            <Tv size={16} color="#ef4444" />
-            <span>Live Sermon Theatre &amp; ProPresenter 7 Export</span>
           </div>
           <div className={styles.featurePillItem}>
             <Scroll size={16} color="#b58414" />
@@ -95,99 +101,83 @@ export default function MarketingShowcase() {
         </div>
       </section>
 
-      {/* ── 2. Four Target Personas Interactive Section ── */}
+      {/* ── 2. Two Core Personas Section ── */}
       <section className={styles.personaSection} aria-label="Audience Personas">
         <div className={styles.sectionHeading}>
           <span className={styles.sectionBadge}>Tailored for the Body of Christ</span>
-          <h2 className={styles.sectionTitle}>Built for Every Stage of the Calling</h2>
+          <h2 className={styles.sectionTitle}>Built for Believers &amp; Ministries</h2>
           <p className={styles.sectionSubtitle}>
-            Whether you are meditating in personal devotion, pastoring a flock, serving in a sensitive mission
-            field, or writing worship songs, BibleDesk equips your ministry.
+            Whether meditating in personal discipleship or leading a congregation, mission agency, or creative ministry, BibleDesk provides the local-first biblical foundation.
           </p>
         </div>
 
-        {/* Persona Switcher Tabs */}
-        <div className={styles.personaTabs} role="tablist">
+        {/* Persona Switcher Tabs (2 Pillars) */}
+        <div className={styles.personaTabs} style={{ gridTemplateColumns: 'repeat(2, 1fr)', maxWidth: '720px', margin: '0 auto 2.5rem' }} role="tablist">
           <button
             type="button"
             className={`${styles.personaTabBtn} ${activePersona === 'believer' ? styles.personaTabBtnActive : ''}`}
             onClick={() => setActivePersona('believer')}
           >
             <div className={styles.personaIconBox}>
-              <BookOpen size={20} />
+              <BookOpen size={22} />
             </div>
-            <span className={styles.personaTabTitle}>Everyday Believers</span>
-            <span className={styles.personaTabRole}>Personal Devotion</span>
+            <span className={styles.personaTabTitle} style={{ fontSize: '1.05rem', fontWeight: 700 }}>Individual Believers &amp; Discipleship</span>
+            <span className={styles.personaTabRole}>Personal Devotion · Verse Memory · Daily Rhythms</span>
           </button>
 
           <button
             type="button"
-            className={`${styles.personaTabBtn} ${activePersona === 'church' ? styles.personaTabBtnActive : ''}`}
-            onClick={() => setActivePersona('church')}
+            className={`${styles.personaTabBtn} ${activePersona === 'organization' ? styles.personaTabBtnActive : ''}`}
+            onClick={() => setActivePersona('organization')}
           >
             <div className={styles.personaIconBox}>
-              <Church size={20} />
+              <Church size={22} />
             </div>
-            <span className={styles.personaTabTitle}>Pastors &amp; Churches</span>
-            <span className={styles.personaTabRole}>Congregation Care</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.personaTabBtn} ${activePersona === 'missionary' ? styles.personaTabBtnActive : ''}`}
-            onClick={() => setActivePersona('missionary')}
-          >
-            <div className={styles.personaIconBox}>
-              <Globe size={20} />
-            </div>
-            <span className={styles.personaTabTitle}>Missionaries</span>
-            <span className={styles.personaTabRole}>Global Field Workers</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.personaTabBtn} ${activePersona === 'artist' ? styles.personaTabBtnActive : ''}`}
-            onClick={() => setActivePersona('artist')}
-          >
-            <div className={styles.personaIconBox}>
-              <Music size={20} />
-            </div>
-            <span className={styles.personaTabTitle}>Worship Artists</span>
-            <span className={styles.personaTabRole}>Creatives &amp; Songwriters</span>
+            <span className={styles.personaTabTitle} style={{ fontSize: '1.05rem', fontWeight: 700 }}>Churches, Ministries &amp; Creators</span>
+            <span className={styles.personaTabRole}>Prayer Chains · Sermons · Creator Hub · Missions</span>
           </button>
         </div>
 
-        {/* Persona Detail Card */}
+        {/* Pillar 1: Individual Believers */}
         {activePersona === 'believer' && (
           <div className={styles.personaCard}>
             <div className={styles.personaCardContent}>
-              <h3>Uncompromised Personal Devotion</h3>
+              <h3>Uncompromised Personal Devotion &amp; Discipleship</h3>
               <p className={styles.personaCardDesc}>
                 Read, search, and memorize Scripture without subscription paywalls or invasive tracking.
-                Dive deeper into God’s Word with 5-dimension theological clarity.
+                Dive deeper into God’s Word with 5-dimension theological clarity and daily spiritual rhythms.
               </p>
               <div className={styles.personaBulletList}>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>6 Public-Domain Translations Offline:</strong> Read KJV, ASV, WEB, BBE, Darby, and YLT anytime.</span>
+                  <span><strong>6 Public-Domain Translations Offline:</strong> Read KJV, ASV, WEB, BBE, Darby, and YLT with 0 latency and 0 network needed.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>5-Dimension Study Depth:</strong> Sourced answers across Scripture, History, Original Language, Theology, and Life Application.</span>
+                  <span><strong>Strong’s Greek &amp; Hebrew Lexicons:</strong> Tap any verse to inspect 14,000+ original language lemmas, transliterations, and definitions.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Multi-Tradition Catechisms &amp; Systematic Theology:</strong> 6 historic confessions (Westminster, Heidelberg, Luther, 1689 Baptist, 39 Articles, Assemblies of God) across 8 theological loci with interactive Quiz Mode.</span>
+                  <span><strong>5-Dimension Study Assistant:</strong> Sourced answers across Scripture, History, Original Language, Theology, and Practical Application (5 free/day or unlimited with free BYOK).</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Worship Radio &amp; Verse Memory:</strong> Ambient sacred hymns, 1-click K-LOVE / Air1 docks, active recall flashcards, and reading plans.</span>
+                  <span><strong>Multi-Tradition Catechisms &amp; Confessions:</strong> Westminster, Heidelberg, Luther, 1689 Baptist, 39 Articles, and Assemblies of God with interactive quiz recall.</span>
+                </div>
+                <div className={styles.personaBullet}>
+                  <Check size={16} className={styles.bulletCheck} />
+                  <span><strong>Personal Prayer Circle &amp; Follow-up:</strong> Track commitments, set recurring rhythms, and log answered prayers with gratitude.</span>
                 </div>
               </div>
-              <Link href="/bible" className={styles.primaryCta}>
-                <span>Start Studying Scripture</span>
-                <ArrowRight size={16} />
-              </Link>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <Link href="/bible" className={styles.primaryCta}>
+                  <span>Start Studying Scripture</span>
+                  <ArrowRight size={16} />
+                </Link>
+                <Link href="/encourage" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                  <span>Words of Encouragement</span>
+                </Link>
+              </div>
             </div>
 
             <div className={styles.personaInteractivePreview}>
@@ -205,173 +195,59 @@ export default function MarketingShowcase() {
           </div>
         )}
 
-        {activePersona === 'church' && (
+        {/* Pillar 2: Organizations, Churches & Creators */}
+        {activePersona === 'organization' && (
           <div className={styles.personaCard}>
             <div className={styles.personaCardContent}>
-              <h3>Equip Your Congregation for Free</h3>
+              <h3>Equip Your Congregation, Ministry &amp; Calling ($0 Free Forever)</h3>
               <p className={styles.personaCardDesc}>
-                Unite your church around corporate prayer, triage urgent pastoral needs, broadcast Sunday live sermons,
-                and export presentation slides—at zero financial cost.
+                Whether you pastor a local congregation, direct a mission team, or lead worship, BibleDesk provides the free digital infrastructure to rally your community.
               </p>
               <div className={styles.personaBulletList}>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>100% Free Forever for Churches:</strong> Never pay for prayer chains, member accounts, or website embed widgets.</span>
+                  <span><strong>100% Free Forever for Churches &amp; Non-Profits:</strong> Never pay for prayer chains, member accounts, or website embed widgets.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Church Live Sermon Theatre:</strong> Embed free 4K YouTube Live and Facebook Live broadcasts for Sunday worship with zero hosting costs.</span>
+                  <span><strong>Christian Creator &amp; Ministry Hub:</strong> Publish a reverent link-in-bio page (<code>/@yourname</code>) with embedded YouTube/Spotify media, seasonal Scripture, and 0% platform fee direct support links.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>1-Click ProPresenter 7 &amp; Planning Center:</strong> Auto-chunk sermon outlines and Scriptures into projector slide blocks and PCO worship notes.</span>
+                  <span><strong>Church Live Sermon Theatre &amp; Slides:</strong> Broadcast YouTube Live sermons and export 1-click ProPresenter 7 projector slides.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Congregation Prayer Chain:</strong> Member petitions with 4-tier escalation (Private $\rightarrow$ Circle $\rightarrow$ Church $\rightarrow$ Atlas).</span>
+                  <span><strong>Congregation Prayer Chain:</strong> Member petitions with 4-tier privacy escalation (Private $\rightarrow$ Circle $\rightarrow$ Church $\rightarrow$ Atlas).</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>1-Click Pastoral Follow-up:</strong> Pre-drafted care messages for WhatsApp, SMS, and Email to check on hospitalized or grieving saints.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>1-Click Website Embeds:</strong> Paste an iframe code into Squarespace, WordPress, or Subsplash to display your church prayer wall.</span>
-                </div>
-              </div>
-              <Link href="/church" className={styles.primaryCta}>
-                <span>Open Church Ministry Hub</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            <div className={styles.personaInteractivePreview}>
-              <span className={styles.previewTag}>Church Prayer Chain Preview</span>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.94rem' }}>Grace Fellowship Prayer Chain</span>
-                <span style={{ fontSize: '0.75rem', background: '#dc2626', color: '#fff', padding: '2px 8px', borderRadius: '99px' }}>CRISIS</span>
-              </div>
-              <p style={{ fontSize: '0.86rem', color: '#4a4030', margin: '0.5rem 0' }}>
-                "Urgent prayer for Elder Thomas entering surgery at 8 AM tomorrow morning. Pastoral care team is standing with the family."
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: '#b58414', color: '#fff', border: 'none', fontSize: '0.8rem', fontWeight: 600 }}>
-                  Stand in Prayer (34)
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activePersona === 'missionary' && (
-          <div className={styles.personaCard}>
-            <div className={styles.personaCardContent}>
-              <h3>Resilient Ministry in the Field</h3>
-              <p className={styles.personaCardDesc}>
-                Whether serving in a remote rural village or an urban restricted zone, BibleDesk provides offline
-                Scripture tools and safe global intercession.
-              </p>
-              <div className={styles.personaBulletList}>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>100% Offline Operation:</strong> Full Bible translations, Strong's Greek &amp; Hebrew lexicons, and TSK cross-refs run without internet.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Restricted Region Shields:</strong> Mask location coordinates and render protective shields on sensitive worker beacons to preserve security.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Global Intercession Network:</strong> Rally praying saints across continents to intercede for breakthrough in unreached people groups.</span>
-                </div>
-              </div>
-              <Link href="/prayer" className={styles.primaryCta}>
-                <span>Explore 2D PrayerAtlas</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            <div className={styles.personaInteractivePreview}>
-              <span className={styles.previewTag} style={{ background: '#dc2626' }}>Restricted Shield Active</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626', fontWeight: 700 }}>
-                <Lock size={16} />
-                <span>Protected Global Beacon</span>
-              </div>
-              <p style={{ fontSize: '0.86rem', color: '#574d3b', margin: '0.4rem 0' }}>
-                "Training underground church planters across Northern Africa. Pray for resilience, safe border crossings, and translated Scripture distribution."
-              </p>
-              <div style={{ fontSize: '0.78rem', color: '#8c826e' }}>
-                Coordinates masked to regional capital centroid. 128 intercessors praying.
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activePersona === 'artist' && (
-          <div className={styles.personaCard}>
-            <div className={styles.personaCardContent}>
-              <h3>Kingdom Creativity &amp; Songwriting</h3>
-              <p className={styles.personaCardDesc}>
-                Designed specifically for worship leaders, lyricists, musicians, and artists seeking divine
-                inspiration and theological grounding for their craft.
-              </p>
-              <div className={styles.personaBulletList}>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Christian Creator &amp; Ministry Hub:</strong> Publish a reverent link-in-bio page (<code>/@yourname</code>) showcasing your songs, podcasts, seasonal Scripture, and prayer needs with 0% platform fee support links.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Poetic Concordance Search:</strong> Search Psalms, prophets, and imagery by lyrical nuance, Hebrew root words, and theological resonance.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Encouragement for Creatives:</strong> Curated promises addressing calling, craftsmanship, artistic anxiety, and staying centered on Christ.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>1-Click Shareable Devotionals:</strong> Share biblical promise cards with your band, choir, social followers, and congregations.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Tour &amp; Event Prayer Beacons:</strong> Pin worship nights and tour stops to the PrayerAtlas to invite intercessors to cover your cities.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Live Worship Radio &amp; Station Docks:</strong> Stream ambient sacred hymns, choral meditations, and launch official K-LOVE &amp; Air1 players for creative inspiration.</span>
+                  <span><strong>Global Mission Shields:</strong> Restricted shields for international workers with masked coordinates for safety.</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <Link href="/creators" className={styles.primaryCta}>
-                  <span>Explore Creator Hub</span>
+                <Link href="/church" className={styles.primaryCta}>
+                  <span>Open Church Ministry Hub</span>
                   <ArrowRight size={16} />
                 </Link>
-                <Link href="/encourage" className={styles.secondaryCta} style={{ border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-                  <span>Words of Encouragement</span>
+                <Link href="/creators" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                  <span>Explore Creator Hub</span>
                 </Link>
               </div>
             </div>
 
             <div className={styles.personaInteractivePreview}>
-              <span className={styles.previewTag} style={{ background: '#7c3aed' }}>Creator Profile Preview</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#b58414', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  G
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.94rem' }}>Grace Worship Collective</div>
-                  <div style={{ fontSize: '0.75rem', color: '#7c3aed' }}>@graceworship · Nashville, TN</div>
-                </div>
+              <span className={styles.previewTag}>Church Prayer &amp; Creator Preview</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.94rem' }}>Grace Fellowship Prayer Chain</span>
+                <span style={{ fontSize: '0.72rem', background: '#dc2626', color: '#fff', padding: '2px 8px', borderRadius: '99px' }}>URGENT</span>
               </div>
-              <div style={{ fontStyle: 'italic', fontFamily: 'Lora, serif', fontSize: '0.88rem', color: '#1e1913', background: 'rgba(181, 132, 20, 0.1)', padding: '0.5rem', borderRadius: '6px' }}>
+              <p style={{ fontSize: '0.86rem', color: '#4a4030', margin: '0.4rem 0' }}>
+                "Standing in prayer for Elder Thomas and ministry partners on mission in Southeast Asia. 84 intercessors praying."
+              </p>
+              <div style={{ fontStyle: 'italic', fontFamily: 'Lora, serif', fontSize: '0.84rem', color: '#1e1913', background: 'rgba(181, 132, 20, 0.1)', padding: '0.45rem', borderRadius: '6px' }}>
                 "Oh, magnify the LORD with me, and let us exalt his name together!" — Psalm 34:3
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#574d3b', margin: '0.5rem 0' }}>
-                Acoustic Scripture psalms &amp; contemplative worship music. 84 intercessors praying for our university tour.
-              </p>
-              <Link href="/c/graceworship" style={{ fontSize: '0.82rem', color: '#7c3aed', fontWeight: 700, textDecoration: 'none' }}>
-                View Full Creator Profile (Media + Support) →
-              </Link>
             </div>
           </div>
         )}
@@ -412,7 +288,7 @@ export default function MarketingShowcase() {
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>1-Click Pastoral Follow-up (WhatsApp/Email)</span>
+                <span>Live Sermon Theatre &amp; Slide Exporter</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
@@ -420,7 +296,7 @@ export default function MarketingShowcase() {
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>Discord &amp; WhatsApp Bots</span>
+                <span>Christian Creator / Ministry Page</span>
               </div>
             </div>
 
@@ -434,10 +310,10 @@ export default function MarketingShowcase() {
             <h3 className={styles.tierName}>Individual Believers</h3>
             <div className={styles.tierPriceRow}>
               <span className={styles.tierPrice}>$0</span>
-              <span className={styles.tierPeriod}>Free Preview</span>
+              <span className={styles.tierPeriod}>Free Forever</span>
             </div>
             <p className={styles.tierDesc}>
-              Currently 100% free. A future update will offer an optional $4.99/mo Pro tier with expanded server AI tokens.
+              Full offline Bible foundation with 5 free server AI answers/day, or unlimited answers using your own free Gemini API key.
             </p>
 
             <div className={styles.tierFeatureList}>
@@ -451,15 +327,15 @@ export default function MarketingShowcase() {
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>5-Dimension AI Study Assistant</span>
+                <span>5 Free Server AI Answers / Day</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>2D Vector PrayerAtlas &amp; Rhythms</span>
+                <span>Unlimited AI with Free Gemini Key (BYOK)</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>Bring-Your-Own-Key (BYOK) Fallback</span>
+                <span>Optional Supporter Tier ($4.99/mo)</span>
               </div>
             </div>
 

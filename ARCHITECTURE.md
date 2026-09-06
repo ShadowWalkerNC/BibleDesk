@@ -33,7 +33,7 @@
 │  Embeddings: OpenAI text-embedding-3-small for pgvector RAG (optional)  │
 │  Discord Integration: /api/discord/interactions · /api/discord/webhook  │
 │  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)           │
-│  Sigil Network: /api/v1/bible/answer (HMAC-SHA256)                      │
+│  Internal Webhook: /api/v1/bible/answer (HMAC-SHA256)                   │
 └────────────────┬────────────────────────┬───────────────────────────────┘
                  ▼                        ▼
          Google Gemini (BYOK)         Supabase (PostgreSQL + pgvector)

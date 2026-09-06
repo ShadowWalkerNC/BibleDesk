@@ -36,13 +36,12 @@ Extension:    Chrome Manifest V3 Side Panel in apps/extension/
 
 ---
 
-## ShadowRealm Network
+## Interoperability & Network Compatibility
 
-BibleDesk is a node in the ShadowRealm Network alongside Sigil.
-- Exposes: `POST /api/v1/bible/answer` (HMAC-signed, Sigil-compatible)
+BibleDesk is a standalone, independent Bible intelligence node.
+- Internal compatibility: Exposes `POST /api/v1/bible/answer` (HMAC-signed, Sigil-compatible)
 - Exposes: `GET /api/v1/bible/answer` (health check)
-- Integrates with: Sigil `faith` package (/bible /devotional /sermon /prayer)
-- Auth contract: `x-bibledesk-signature: sha256=<HMAC>` matching Sigil webhook pattern
+- Auth contract: `x-bibledesk-signature: sha256=<HMAC>`
 - Share URLs use `/share/[slug]` (8-char slug), not `/answer/...`
 
 ---
@@ -100,7 +99,7 @@ Active work (Phase 0 Complete):
   ✓ PrayerAtlas 2D Interactive Vector Global Prayer Map (D3 Natural Earth, category color-coding, approximate halos vs precise beacons, restricted shields, offline TopoJSON)
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
-  ✓ Marketing Showcase on `/` with 4 target personas (Believers, Churches, Missionaries, Worship Artists) & transparent pricing
+  ✓ Marketing Showcase on `/` with 2 core personas (Individual Believers & Discipleship vs Churches, Ministries & Creators) & transparent pricing ($0 Free with 5 daily AI answers vs $4.99/mo Supporter tier; $0 for Churches forever)
   ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`)
   ✓ Words of Encouragement Hub (`/encourage`) with topical promises & kingdom creativity meditations
   ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql

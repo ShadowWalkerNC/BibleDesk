@@ -232,12 +232,12 @@ export default function DownloadPage() {
                 <Smartphone size={22} className={styles.platformIcon} />
               </div>
               <div>
-                <h3 className={styles.platformName}>Android App</h3>
-                <span className={styles.platformType}>Phones • Tablets • Foldables</span>
+                <h3 className={styles.platformName}>Android App (Community Beta)</h3>
+                <span className={styles.platformType}>Phones • Tablets (Sideload APK)</span>
               </div>
             </div>
             <p className={styles.platformDesc}>
-              Native Capacitor Android build with fluid touch scrolling, Strong's lexicon lookup, dark parchment reading mode, and offline Scripture search.
+              Experimental Capacitor Android build with fluid touch scrolling, Strong's lexicon lookup, dark parchment reading mode, and offline Scripture search. For everyday mobile use, the 1-click Web PWA above is recommended.
             </p>
             <ul className={styles.featureList}>
               <li><Check size={14} className={styles.checkIcon} /> Direct APK Sideload (<code>BibleDesk.apk</code>)</li>
