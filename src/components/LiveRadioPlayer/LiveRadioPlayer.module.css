@@ -184,6 +184,8 @@
 .playToggleBtn {
   width: 48px;
   height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: 50%;
   background: #b58414;
   border: none;
@@ -192,14 +194,24 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 4px 14px rgba(181, 132, 20, 0.4);
   flex-shrink: 0;
 }
 
+.playToggleBtn:active {
+  transform: var(--touch-spring-active, scale(0.97));
+}
+
+.playToggleBtn:focus-visible {
+  outline: 2px solid #b58414;
+  outline-offset: 2px;
+}
+
 .playToggleBtn:hover {
-  background: #c9941a;
-  transform: scale(1.05);
+  background: #c8940e;
+  transform: scale(1.04);
+  box-shadow: 0 6px 20px rgba(181, 132, 20, 0.55);
 }
 
 .volumeBox {

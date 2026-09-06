@@ -224,12 +224,14 @@
 
 .chaptersGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
   gap: 8px;
 }
 
 .chapterCell {
   aspect-ratio: 1;
+  min-width: 48px;
+  min-height: 48px;
   background: var(--navy-900);
   border: 1px solid var(--navy-800);
   border-radius: var(--radius-sm);
@@ -240,14 +242,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chapterCell:active {
+  transform: var(--touch-spring-active, scale(0.97));
 }
 
 .chapterCell:hover {
   background: var(--gold-400);
   color: var(--navy-950);
   border-color: var(--gold-400);
-  transform: scale(1.05);
 }
 
 .noResults {

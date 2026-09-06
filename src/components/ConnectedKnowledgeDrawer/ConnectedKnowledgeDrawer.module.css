@@ -86,11 +86,17 @@
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 0.35rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.15s ease, color 0.15s ease;
+}
+
+.closeBtn:active {
+  transform: var(--touch-spring-active, scale(0.97));
 }
 
 .closeBtn:hover {

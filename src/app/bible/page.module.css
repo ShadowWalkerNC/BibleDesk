@@ -82,23 +82,28 @@
   color: var(--text-primary);
   font-size: 0.85rem;
   font-weight: 600;
+  min-height: 44px;
   padding: 0.55rem 1.1rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(90, 70, 40, 0.05);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
 
 .navBtn:hover {
   background: #fffdf8;
   border-color: var(--gold-400);
   color: var(--gold-600);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(90, 70, 40, 0.1);
 }
 
 .navBtn:active {
-  transform: translateY(0);
+  transform: var(--touch-spring-active, scale(0.97));
+}
+
+.navBtn:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
 }
 
 .readerJumpBtn {
@@ -107,6 +112,7 @@
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
+  min-height: 44px;
   padding: 0.55rem 1.15rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -116,17 +122,21 @@
   box-shadow:
     0 3px 10px rgba(181, 132, 20, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.18s, box-shadow 0.18s;
 }
 
 .readerJumpBtn:hover {
   background: linear-gradient(135deg, #c8940e, #916307);
   box-shadow: 0 6px 18px rgba(181, 132, 20, 0.45);
-  transform: translateY(-1px);
 }
 
 .readerJumpBtn:active {
-  transform: translateY(0);
+  transform: var(--touch-spring-active, scale(0.97));
+}
+
+.readerJumpBtn:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
 }
 
 /* ─── Unified 3-Column Centralized Desk Grid ────────────────── */

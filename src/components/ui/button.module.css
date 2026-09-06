@@ -7,11 +7,15 @@
   font-size: 0.875rem;
   font-weight: 600;
   border-radius: var(--radius-md);
-  transition: all 0.2s var(--ease-out);
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.18s, border-color 0.18s, box-shadow 0.18s;
   cursor: pointer;
   border: none;
   outline: none;
   user-select: none;
+}
+
+.buttonBase:active:not(:disabled) {
+  transform: var(--touch-spring-active, scale(0.97));
 }
 
 .buttonBase:focus-visible {
@@ -22,29 +26,35 @@
 .buttonBase:disabled {
   pointer-events: none;
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .sizeDefault {
-  height: 2.5rem;
-  padding: 0.5rem 1.25rem;
+  min-height: 2.75rem; /* ~44-48px physical bounding area */
+  height: 2.75rem;
+  padding: 0.55rem 1.35rem;
 }
 
 .sizeSm {
-  height: 2rem;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.78rem;
+  min-height: 2.25rem;
+  height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
   border-radius: var(--radius-sm);
 }
 
 .sizeLg {
-  height: 2.85rem;
-  padding: 0.75rem 1.75rem;
-  font-size: 0.95rem;
+  min-height: 3rem; /* 48px standard touch target */
+  height: 3rem;
+  padding: 0.85rem 1.85rem;
+  font-size: 0.98rem;
 }
 
 .sizeIcon {
-  height: 2.5rem;
-  width: 2.5rem;
+  min-height: 3rem; /* 48px touch minimum */
+  min-width: 3rem;
+  height: 3rem;
+  width: 3rem;
   padding: 0;
 }
 
