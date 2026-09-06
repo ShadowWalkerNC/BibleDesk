@@ -34,7 +34,7 @@ export default function DevelopersPage() {
 
 // Initialize isomorphic client (no key needed for public domain Scripture & lexicons)
 const bibledesk = createBibleDeskClient({
-  baseUrl: 'https://bibledesk.org',
+  baseUrl: 'https://bible-desk.vercel.app',
 });
 
 // 1. Read Chapter Text (KJV, ASV, WEB, BBE, Darby, YLT)
@@ -67,7 +67,7 @@ await bibledesk.prayer.escalate({
       "command": "npx",
       "args": ["-y", "@bibledesk/mcp-server"],
       "env": {
-        "BIBLEDESK_URL": "https://bibledesk.org"
+        "BIBLEDESK_URL": "https://bible-desk.vercel.app"
       }
     }
   }
@@ -76,7 +76,7 @@ await bibledesk.prayer.escalate({
   const MCP_CURSOR_CONFIG = `{
   "mcpServers": {
     "bibledesk": {
-      "url": "https://bibledesk.org/api/mcp"
+      "url": "https://bible-desk.vercel.app/api/mcp"
     }
   }
 }`;
@@ -213,7 +213,7 @@ await bibledesk.prayer.escalate({
                 Fetch an entire chapter with verses, book metadata, and translation notes. Supported translations: <code>web</code>, <code>kjv</code>, <code>asv</code>, <code>bbe</code>, <code>darby</code>, <code>ylt</code>.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bibledesk.org/api/bible/chapter?book=John&amp;chapter=3&amp;translation=web"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/chapter?book=John&amp;chapter=3&amp;translation=web"</pre>
               </div>
             </div>
 
@@ -226,7 +226,7 @@ await bibledesk.prayer.escalate({
                 High-performance full-text search across all 31,102 verses of the Bible.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bibledesk.org/api/bible/search?q=grace&amp;translation=kjv&amp;limit=10"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/search?q=grace&amp;translation=kjv&amp;limit=10"</pre>
               </div>
             </div>
 
@@ -239,7 +239,7 @@ await bibledesk.prayer.escalate({
                 Retrieve OpenScriptures Strong's Greek (5,523 words) or Hebrew (8,674 words) lexical roots, morphology, and transliterations.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bibledesk.org/api/bible/lexicon?strongs=G2889"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/lexicon?strongs=G2889"</pre>
               </div>
             </div>
 
@@ -252,7 +252,7 @@ await bibledesk.prayer.escalate({
                 Query the bidirectional Biblical Knowledge Graph connecting scripture verses, theological themes, and TSK cross-references.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bibledesk.org/api/graph?node=grace"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/graph?node=grace"</pre>
               </div>
             </div>
 
@@ -266,7 +266,7 @@ await bibledesk.prayer.escalate({
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
                 <pre className={styles.codePre}>
-                  {`curl -X POST "https://bibledesk.org/api/prayer/escalate" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "prayerId": "id-123", "targetLevel": "church", "urgencyLevel": "urgent" }'`}
+                  {`curl -X POST "https://bible-desk.vercel.app/api/prayer/escalate" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "prayerId": "id-123", "targetLevel": "church", "urgencyLevel": "urgent" }'`}
                 </pre>
               </div>
             </div>

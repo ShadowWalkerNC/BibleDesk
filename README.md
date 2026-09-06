@@ -27,7 +27,15 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **100% offline and free** without requiring any paid API keys or closed cloud dependencies.
 
 ### 2. Use BibleDesk as an Open API & MCP Server
-BibleDesk is not just a UI; it is an open Bible intelligence engine:
+- **Official Client SDK (`@bibledesk/sdk`)**: Open-source isomorphic TypeScript/JavaScript client library installable via npm (`packages/sdk`) for Node.js, Web, React Native, and autonomous AI agents:
+  ```bash
+  npm install @bibledesk/sdk
+  ```
+  ```typescript
+  import { createBibleDeskClient } from '@bibledesk/sdk';
+  const client = createBibleDeskClient();
+  const chapter = await client.bible.getChapter({ book: 'John', chapter: 3 });
+  ```
 - **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`lookup_passage`, `search_bible`, `lookup_strongs`, `get_daily_verse`, `query_knowledge_graph`).
 - **Open REST Endpoints**:
   - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
