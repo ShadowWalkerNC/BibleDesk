@@ -11,11 +11,11 @@
 | Area | Reality |
 |---|---|
 | Product direction | Bible-first study platform; AI is an assistant layer |
-| Codebase | Large feature surface already shipped in-repo (reader, AI pipeline, church tools) |
-| Bible data | Still depends on **bible-api.com** (online). Local Midvash/OpenScriptures corpus **not** built |
-| Original language | Reader “Strong’s / commentary” is **AI-assisted** (Gemini), not lexicon-backed offline data |
-| Deploy | **Not live** — Supabase schemas + env vars + host still need production setup |
-| Docs | Aligned as of 2026-08-09 (this file / README / ARCHITECTURE / AGENTS) |
+| Codebase | Complete multi-platform feature surface shipped in-repo (reader, AI pipeline, church tools, creators, SDK) |
+| Bible data | Fully local static public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) with zero network requirement |
+| Original language | OpenScriptures Strong's Greek (5.5k) & Hebrew (8.6k) lexicons + TSK cross-refs engine |
+| Deploy | Production build verified across all 34 routes (`npm run build`); ready for live Supabase schema execution (v1→v9) & Vercel deployment |
+| Docs | Aligned across all documents (`README.md`, `ARCHITECTURE.md`, `TODO.md`, `AGENTS.md`) |
 
 **GitHub hygiene:** Close issue [#1 REPO RESET](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) — it describes an empty stub from 2026-06-15 and is obsolete.
 
@@ -63,7 +63,7 @@
 - [x] 1-Click ProPresenter 7 & Presentation Slide Exporter (`/sermons`) auto-chunking Scripture passages and outline headers for Sunday church projectors
 - [x] Church Tech Interoperability Hub (`/church`) detailing zero-cost integration workflows for Planning Center, ProPresenter, and website embed widgets
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql` → `schema-v9.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
