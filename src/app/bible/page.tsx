@@ -132,7 +132,7 @@ function BibleReaderContent() {
     return styles.deskGrid;
   };
 
-  // Sync URL query params (?book=...&chapter=...&verse=...)
+  // Sync URL query params (?book=...&chapter=...&verse=...) or auto-resume from localStorage
   useEffect(() => {
     const bookParam = searchParams.get('book');
     const chapterParam = searchParams.get('chapter');
@@ -150,7 +150,36 @@ function BibleReaderContent() {
       const v = parseInt(verseParam, 10);
       if (!isNaN(v) && v > 0) setPendingVerseTarget(v);
     }
+
+    // Auto-resume from localStorage if no URL query param was provided
+    if (!bookParam && !chapterParam) {
+      try {
+        const savedPos = localStorage.getItem('bibledesk_last_read_position');
+        if (savedPos) {
+          const parsed = JSON.parse(savedPos);
+          if (parsed.book) setSelectedBook(parsed.book);
+          if (parsed.chapter) setSelectedChapter(parsed.chapter);
+          if (parsed.translation) setSelectedTranslation(parsed.translation);
+        }
+      } catch (e) {
+        console.error('Failed to load last read position:', e);
+      }
+    }
   }, [searchParams]);
+
+  // Persist last read position to localStorage on book/chapter/translation change
+  useEffect(() => {
+    try {
+      localStorage.setItem('bibledesk_last_read_position', JSON.stringify({
+        book: selectedBook,
+        chapter: selectedChapter,
+        translation: selectedTranslation,
+        updatedAt: new Date().toISOString()
+      }));
+    } catch (e) {
+      console.error('Failed to save last read position:', e);
+    }
+  }, [selectedBook, selectedChapter, selectedTranslation]);
 
   // Translation comparison state
   const [comparedVerses, setComparedVerses] = useState<Array<{ translation: string; text: string }>>([]);

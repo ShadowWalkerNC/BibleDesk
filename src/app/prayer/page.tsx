@@ -105,6 +105,7 @@ export default function PrayerBoardPage() {
   const [viewMode, setViewMode] = useState<'split' | 'globe' | 'feed'>('split');
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterRestricted, setFilterRestricted] = useState(false);
+  const [communityCategoryFilter, setCommunityCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Selected Pin on Globe
@@ -291,6 +292,30 @@ export default function PrayerBoardPage() {
       return true;
     });
   }, [contacts, categoryFilter]);
+
+  // Filtered Community Prayers
+  const filteredPrayers = useMemo(() => {
+    return prayers.filter(p => {
+      if (filterRestricted && !p.is_restricted && p.privacy_mode !== 'restricted') {
+        return false;
+      }
+      if (filterCountry !== 'all' && p.country_code !== filterCountry) {
+        return false;
+      }
+      if (communityCategoryFilter !== 'all') {
+        const cat = inferPrayerCategory(p.request, p.is_restricted, p.category);
+        if (cat !== communityCategoryFilter) return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchText = (p.request || '').toLowerCase().includes(q);
+        const matchAuthor = (p.display_name || '').toLowerCase().includes(q);
+        const matchCountry = (p.country_name || '').toLowerCase().includes(q);
+        if (!matchText && !matchAuthor && !matchCountry) return false;
+      }
+      return true;
+    });
+  }, [prayers, filterRestricted, filterCountry, communityCategoryFilter, searchQuery]);
 
   // Globe Pins: Unifies active community prayers with global beacons
   const globePins = useMemo<MissionMapPin[]>(() => {
@@ -995,6 +1020,21 @@ export default function PrayerBoardPage() {
                 ))}
               </select>
 
+              <select
+                value={communityCategoryFilter}
+                onChange={(e) => setCommunityCategoryFilter(e.target.value)}
+                className={styles.filterSelect}
+                title="Filter community prayers by category"
+              >
+                <option value="all">All Categories</option>
+                <option value="healing">🕊️ Healing &amp; Health</option>
+                <option value="family">👨‍👩‍👧 Family &amp; Home</option>
+                <option value="missions">🌐 Missions &amp; Outreach</option>
+                <option value="church">⛪ Church &amp; Pastors</option>
+                <option value="work">💼 Career &amp; Work</option>
+                <option value="community">🤝 Community &amp; Friends</option>
+              </select>
+
               <button
                 onClick={() => setFilterRestricted(!filterRestricted)}
                 className={`${styles.restrictedFilterBtn} ${filterRestricted ? styles.restrictedFilterActive : ''}`}
@@ -1005,7 +1045,13 @@ export default function PrayerBoardPage() {
             </div>
 
             <div className={styles.communityGrid}>
-              {prayers.map(p => (
+              {filteredPrayers.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>No community prayers match the selected filters.</p>
+                  <p style={{ fontSize: '0.85rem' }}>Try clearing your category, nation, or search filters.</p>
+                </div>
+              ) : (
+                filteredPrayers.map(p => (
                 <article key={p.id} className={`${styles.communityCard} glass-card`}>
                   <div className={styles.communityHeader}>
                     <span className={styles.communityAuthor}>{p.display_name}</span>
@@ -1063,7 +1109,7 @@ export default function PrayerBoardPage() {
                     </button>
                   </div>
                 </article>
-              ))}
+              )))}
             </div>
           </section>
         )}

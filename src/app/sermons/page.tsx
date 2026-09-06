@@ -112,16 +112,26 @@ export default function SermonWorkspacePage() {
     return slides.filter((s) => s.trim().length > 0).join('\n\n---\n\n');
   }
 
-  function downloadSlidesText(text: string, filename: string) {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  function downloadFile(content: string, filename: string, mimeType: string) {
+    const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${filename.replace(/[^a-z0-9_-]/gi, '_') || 'sermon_slides'}.txt`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  function downloadSlidesText(text: string, filename: string) {
+    downloadFile(text, `${filename.replace(/[^a-z0-9_-]/gi, '_') || 'sermon_slides'}.txt`, 'text/plain;charset=utf-8');
+  }
+
+  function downloadMarkdown(content: string, title: string) {
+    const md = `# ${title || 'Sermon Outline'}\n\n${content}`;
+    downloadFile(md, `${title.replace(/[^a-z0-9_-]/gi, '_') || 'sermon_outline'}.md`, 'text/markdown;charset=utf-8');
+    showToast('Downloaded Markdown (.md) file!');
   }
 
   function renderMarkdownPreview(markdown: string) {
@@ -380,27 +390,42 @@ export default function SermonWorkspacePage() {
     );
   }
 
-  if (!session) {
-    return (
-      <main className={styles.authGate}>
-        <div className={`${styles.authGateCard} glass-card`}>
-          <h2 className="text-serif">Sermon Workspace Prep</h2>
-          <p>
-            Please sign in to access your study outlines, sermon workspace, and sync scriptures directly into your journals.
-          </p>
-          <button onClick={() => router.push('/login')} className={styles.loginBtn}>
-            Sign In to Workspace
-          </button>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <>
       {toast && (
         <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`} role="alert">
           {toast.message}
+        </div>
+      )}
+
+      {!session && (
+        <div style={{
+          background: 'rgba(181, 132, 20, 0.1)',
+          borderBottom: '1px solid rgba(181, 132, 20, 0.25)',
+          padding: '0.55rem 1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '0.82rem',
+          color: 'var(--text-secondary)'
+        }}>
+          <span>✦ <strong>Guest Offline Mode:</strong> Outlines are saved directly to your device storage. Sign in anytime to sync across devices or publish to Discord.</span>
+          <button
+            type="button"
+            onClick={() => router.push('/login')}
+            style={{
+              background: '#b58414',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '4px 10px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Sign In to Sync
+          </button>
         </div>
       )}
 
@@ -571,6 +596,14 @@ export default function SermonWorkspacePage() {
                 </button>
               </div>
               <div className={styles.footerBtns}>
+                <button
+                  type="button"
+                  onClick={() => downloadMarkdown(content, title)}
+                  className={styles.secondaryBtn}
+                  title="Export outline as standard Markdown (.md) file"
+                >
+                  <Download size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Export .md
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowSlideExport(true)}

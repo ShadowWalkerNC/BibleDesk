@@ -152,17 +152,17 @@
 ### Operations Audit Action Items (2026-08-25)
 
 #### Daily Reader Friction
-- [ ] Auto-resume last read book/chapter position on `/bible` (store in `localStorage` & profile)
+- [x] Auto-resume last read book/chapter position on `/bible` (store in `localStorage` & profile)
 - [ ] Implement PWA ServiceWorker offline asset & route precaching
 - [ ] Dual-write verse highlights & notes (`localStorage` + Supabase sync when authenticated)
 
 #### Pastor & Preacher Friction
-- [ ] Enable offline/guest draft fallback in Sermon Workspace (`/sermons`) without hard auth gate
-- [ ] Add Markdown (`.md`) and HTML/PDF export options to Sermon Workspace
+- [x] Enable offline/guest draft fallback in Sermon Workspace (`/sermons`) without hard auth gate
+- [x] Add Markdown (`.md`) and HTML/PDF export options to Sermon Workspace
 - [ ] Multi-passage scripture builder in e-Sword sidebar (select & pin multiple references across books)
 
 #### Study Group & Church Friction
-- [ ] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
+- [x] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
 - [ ] Printable Small Group Study Guide exporter for 5D AI answer pages (`/share/[slug]`)
 
 #### Prayer Care Workflow
