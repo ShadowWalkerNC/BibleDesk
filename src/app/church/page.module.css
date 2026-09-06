@@ -46,7 +46,7 @@
 /* Church Selector Bar */
 .churchBar {
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -68,7 +68,7 @@
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: rgba(181, 132, 20, 0.12);
+  background: rgba(107, 142, 123, 0.12);
   color: #b58414;
   display: flex;
   align-items: center;
@@ -116,12 +116,12 @@
 
 .secondaryBtn {
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.32);
+  border: 1px solid rgba(107, 142, 123, 0.32);
   color: #4a4131;
 }
 
 .secondaryBtn:hover {
-  background: #fbf9f4;
+  background: rgba(247, 248, 239, 0.72);
   border-color: #b58414;
 }
 
@@ -135,7 +135,7 @@
 /* Prayer Chain Section */
 .card {
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: 16px;
   padding: 1.6rem;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
@@ -147,7 +147,7 @@
   align-items: center;
   margin-bottom: 1.25rem;
   padding-bottom: 0.85rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.15);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
 }
 
 .cardTitle {
@@ -167,8 +167,8 @@
 }
 
 .prayerItem {
-  background: #fdfbf7;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  background: rgba(247, 248, 239, 0.72);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: 12px;
   padding: 1.15rem;
   transition: all 0.2s ease;
@@ -237,7 +237,7 @@
   font-size: 0.82rem;
   font-weight: 600;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   color: #4a4131;
   cursor: pointer;
   min-height: 40px;
@@ -284,7 +284,7 @@
 }
 
 .widgetPreview {
-  border: 1px dashed rgba(181, 132, 20, 0.35);
+  border: 1px dashed rgba(107, 142, 123, 0.35);
   border-radius: 12px;
   padding: 1rem;
   background: #fdfcf9;
@@ -307,7 +307,7 @@
 
 .modal {
   background: #ffffff !important;
-  border: 1px solid rgba(181, 132, 20, 0.42);
+  border: 1px solid rgba(107, 142, 123, 0.42);
   border-radius: 20px;
   width: 100%;
   max-width: 580px;
@@ -321,7 +321,7 @@
 .modalHeader {
   padding: 1.4rem 1.75rem;
   background: #fdfcf9;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.2);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -346,7 +346,7 @@
 
 .formInput {
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: 10px;
   font-size: 0.92rem;
   color: #1e1913;

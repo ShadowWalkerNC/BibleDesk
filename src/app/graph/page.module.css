@@ -40,11 +40,11 @@
 /* ── Info Banner ──────────────────────────────────────────────────────────── */
 
 .infoBanner {
-  background: rgba(252, 249, 242, 0.9);
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  background: rgba(247, 248, 239, 0.9);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(90, 70, 40, 0.05);
+  box-shadow: 0 4px 16px rgba(71, 92, 76, 0.05);
 }
 
 .infoBadgeRow {
@@ -62,8 +62,8 @@
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--gold-600);
-  background: rgba(181, 132, 20, 0.1);
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  background: rgba(107, 142, 123, 0.1);
+  border: 1px solid rgba(107, 142, 123, 0.22);
   padding: 3px 9px;
   border-radius: 999px;
 }
@@ -81,7 +81,7 @@
 }
 
 .infoText code {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.8rem;
@@ -101,13 +101,13 @@
   flex: 1;
   min-width: 260px;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.32);
+  border: 1px solid rgba(107, 142, 123, 0.32);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 0.9rem;
   padding: 0.65rem 1rem;
-  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.04);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
 }
@@ -133,14 +133,14 @@
   font-size: 0.88rem;
   font-weight: 700;
   padding: 0.65rem 1.25rem;
-  box-shadow: 0 3px 10px rgba(181, 132, 20, 0.32);
+  box-shadow: 0 3px 10px rgba(107, 142, 123, 0.32);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .focusBtn:hover {
   background: linear-gradient(135deg, #c8940e 0%, #916307 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(181, 132, 20, 0.42);
+  box-shadow: 0 6px 16px rgba(107, 142, 123, 0.42);
 }
 
 .focusBtn:active {
@@ -152,21 +152,21 @@
   align-items: center;
   gap: 5px;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 0.84rem;
   font-weight: 600;
   padding: 0.65rem 1rem;
-  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.04);
   transition: all 0.18s;
 }
 
 .resetBtn:hover {
   color: var(--gold-600);
   border-color: var(--gold-400);
-  background: #fffdf8;
+  background: rgba(255, 252, 245, 0.72);
 }
 
 /* ── Graph ───────────────────────────────────────────────────────────────── */
@@ -183,10 +183,10 @@
   flex-direction: column;
   gap: 0.85rem;
   padding: 1.25rem 1.5rem;
-  background: rgba(252, 249, 242, 0.95);
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  background: rgba(247, 248, 239, 0.95);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 16px rgba(90, 70, 40, 0.06);
+  box-shadow: 0 4px 16px rgba(71, 92, 76, 0.06);
 }
 
 .selectedHeader {
@@ -218,8 +218,8 @@
 
 .lastSelectedMeta {
   color: var(--gold-600);
-  background: rgba(181, 132, 20, 0.1);
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  background: rgba(107, 142, 123, 0.1);
+  border: 1px solid rgba(107, 142, 123, 0.22);
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 0.72rem;
@@ -247,7 +247,7 @@
   align-items: center;
   gap: 6px;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   text-decoration: none;
@@ -256,11 +256,11 @@
   padding: 0.45rem 0.85rem;
   cursor: pointer;
   transition: all 0.18s ease;
-  box-shadow: 0 2px 5px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 2px 5px rgba(71, 92, 76, 0.04);
 }
 
 .actionLink:hover {
-  background: #fffdf8;
+  background: rgba(255, 252, 245, 0.72);
   border-color: var(--gold-400);
   color: var(--gold-600);
   transform: translateY(-1px);

@@ -74,18 +74,18 @@
 .variantGold {
   background: linear-gradient(135deg, #b58414, #6e4e04);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(181, 132, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(107, 142, 123, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .variantGold:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(181, 132, 20, 0.38);
+  box-shadow: 0 6px 20px rgba(107, 142, 123, 0.38);
 }
 
 .variantSecondary {
   background: rgba(235, 225, 205, 0.6);
   color: var(--text-secondary);
-  border: 1px solid rgba(181, 132, 20, 0.18);
+  border: 1px solid rgba(107, 142, 123, 0.18);
 }
 
 .variantSecondary:hover {

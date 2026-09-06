@@ -5,10 +5,10 @@
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.32);
+  border: 1px solid rgba(107, 142, 123, 0.32);
   border-radius: var(--radius-lg);
   box-shadow: 
-    0 16px 40px rgba(90, 70, 40, 0.08),
+    0 16px 40px rgba(71, 92, 76, 0.08),
     0 2px 8px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   width: 100%;
@@ -24,7 +24,7 @@
   gap: 0.75rem;
   padding: 0.85rem 1.15rem;
   background: #fcfbf8;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.2);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.2);
   z-index: 10;
 }
 
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 5px;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  border: 1px solid rgba(107, 142, 123, 0.22);
   color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -67,7 +67,7 @@
   background: var(--gold-500) !important;
   color: #ffffff !important;
   border-color: var(--gold-600) !important;
-  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.3);
+  box-shadow: 0 2px 8px rgba(107, 142, 123, 0.3);
 }
 
 .legendColorDot {
@@ -93,10 +93,10 @@
   gap: 3px;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: var(--radius-sm);
   padding: 3px;
-  box-shadow: 0 4px 14px rgba(90, 70, 40, 0.12);
+  box-shadow: 0 4px 14px rgba(71, 92, 76, 0.12);
   z-index: 15;
 }
 
@@ -122,7 +122,7 @@
 
 .zoomDivider {
   height: 1px;
-  background: rgba(181, 132, 20, 0.2);
+  background: rgba(107, 142, 123, 0.2);
   margin: 1px 4px;
 }
 
@@ -156,7 +156,7 @@
 
 .graticulePath {
   fill: none;
-  stroke: rgba(181, 132, 20, 0.14);
+  stroke: rgba(107, 142, 123, 0.14);
   stroke-width: 0.5px;
 }
 
@@ -227,10 +227,10 @@
   right: 1rem;
   max-width: 320px;
   background: #ffffff !important;
-  border: 1px solid rgba(181, 132, 20, 0.35);
+  border: 1px solid rgba(107, 142, 123, 0.35);
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(90, 70, 40, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(71, 92, 76, 0.1);
   pointer-events: none;
   z-index: 20;
   animation: tooltipFadeIn 0.18s ease-out forwards;
@@ -293,7 +293,7 @@
 
 .selectedCard {
   background: #ffffff;
-  border-top: 1px solid rgba(181, 132, 20, 0.25);
+  border-top: 1px solid rgba(107, 142, 123, 0.25);
   padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
@@ -349,9 +349,9 @@
   font-weight: 600;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: rgba(181, 132, 20, 0.08);
+  background: rgba(107, 142, 123, 0.08);
   color: var(--gold-600);
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  border: 1px solid rgba(107, 142, 123, 0.22);
 }
 
 .selectedTitle {
@@ -375,7 +375,7 @@
 }
 
 .closeCardBtn:hover {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   color: var(--text-primary);
 }
 
@@ -393,7 +393,7 @@
   gap: 0.65rem;
   flex-wrap: wrap;
   padding-top: 0.5rem;
-  border-top: 1px dashed rgba(181, 132, 20, 0.18);
+  border-top: 1px dashed rgba(107, 142, 123, 0.18);
 }
 
 .prayActionBtn {
@@ -402,20 +402,20 @@
   gap: 6px;
   background: linear-gradient(135deg, #b58414, #785304);
   color: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.4);
+  border: 1px solid rgba(107, 142, 123, 0.4);
   padding: 0.6rem 1.25rem;
   min-height: 48px;
   border-radius: var(--radius-sm);
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(181, 132, 20, 0.3);
+  box-shadow: 0 3px 10px rgba(107, 142, 123, 0.3);
   transition: all 0.18s ease;
 }
 
 .prayActionBtn:hover {
   background: linear-gradient(135deg, #c8940e, #916307);
-  box-shadow: 0 5px 14px rgba(181, 132, 20, 0.4);
+  box-shadow: 0 5px 14px rgba(107, 142, 123, 0.4);
   transform: translateY(-1px);
 }
 
@@ -424,7 +424,7 @@
   align-items: center;
   gap: 6px;
   background: #f7f4ee;
-  border: 1px solid rgba(181, 132, 20, 0.32);
+  border: 1px solid rgba(107, 142, 123, 0.32);
   color: var(--text-secondary);
   padding: 0.6rem 1.15rem;
   min-height: 48px;
@@ -436,7 +436,7 @@
 }
 
 .followupActionBtn:hover {
-  background: rgba(181, 132, 20, 0.12);
+  background: rgba(107, 142, 123, 0.12);
   color: var(--text-primary);
   border-color: var(--gold-400);
 }

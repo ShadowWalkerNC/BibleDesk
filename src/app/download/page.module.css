@@ -6,14 +6,14 @@
 /* ── Hero Banner ─────────────────────────────────────────── */
 
 .heroBanner {
-  background: linear-gradient(135deg, rgba(252, 249, 242, 0.95), rgba(240, 233, 218, 0.95));
-  border: 1px solid rgba(181, 132, 20, 0.35);
+  background: linear-gradient(135deg, rgba(247, 248, 239, 0.95), rgba(240, 233, 218, 0.95));
+  border: 1px solid rgba(107, 142, 123, 0.35);
   border-radius: var(--radius-lg);
   padding: 2.25rem 2.5rem;
   margin-bottom: 2.5rem;
   box-shadow:
-    0 16px 40px rgba(90, 70, 40, 0.08),
-    0 2px 8px rgba(90, 70, 40, 0.04),
+    0 16px 40px rgba(71, 92, 76, 0.08),
+    0 2px 8px rgba(71, 92, 76, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   position: relative;
   overflow: hidden;
@@ -39,8 +39,8 @@
   border-radius: 28px;
   box-shadow: 
     0 16px 36px rgba(0, 0, 0, 0.25),
-    0 2px 8px rgba(181, 132, 20, 0.3);
-  border: 2px solid rgba(181, 132, 20, 0.4);
+    0 2px 8px rgba(107, 142, 123, 0.3);
+  border: 2px solid rgba(107, 142, 123, 0.4);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -54,7 +54,7 @@
   right: -20px;
   top: -40px;
   font-size: 160px;
-  color: rgba(181, 132, 20, 0.04);
+  color: rgba(107, 142, 123, 0.04);
   pointer-events: none;
   font-family: serif;
 }
@@ -65,8 +65,8 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--gold-600);
-  background: rgba(181, 132, 20, 0.12);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(107, 142, 123, 0.12);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   padding: 3px 8px;
   border-radius: 999px;
   margin-bottom: 0.75rem;
@@ -112,7 +112,7 @@
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(181, 132, 20, 0.32);
+  box-shadow: 0 3px 12px rgba(107, 142, 123, 0.32);
   transition: all 0.18s ease;
   text-decoration: none;
 }
@@ -120,7 +120,7 @@
 .primaryHeroBtn:hover {
   background: linear-gradient(135deg, #c8940e, #9c6e0c);
   transform: translateY(-1px);
-  box-shadow: 0 5px 16px rgba(181, 132, 20, 0.4);
+  box-shadow: 0 5px 16px rgba(107, 142, 123, 0.4);
 }
 
 .secondaryHeroBtn {
@@ -128,7 +128,7 @@
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(107, 142, 123, 0.3);
   color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 600;
@@ -148,12 +148,12 @@
 
 .nonTechGuideCard {
   background: linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(247, 241, 229, 0.95));
-  border: 1px solid rgba(181, 132, 20, 0.35);
+  border: 1px solid rgba(107, 142, 123, 0.35);
   border-radius: var(--radius-lg);
   padding: 1.75rem 2rem;
   margin-bottom: 2.5rem;
   box-shadow: 
-    0 10px 30px rgba(90, 70, 40, 0.06),
+    0 10px 30px rgba(71, 92, 76, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
@@ -200,10 +200,10 @@
   align-items: flex-start;
   gap: 0.75rem;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: var(--radius-md);
   padding: 1rem 1.15rem;
-  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.04);
 }
 
 .guideStepCard strong {
@@ -221,7 +221,7 @@
 }
 
 .guideStepCard code {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   color: var(--gold-600);
   padding: 1px 5px;
   border-radius: 4px;
@@ -259,20 +259,20 @@
 }
 
 .platformCard {
-  background: rgba(252, 249, 242, 0.85);
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  background: rgba(247, 248, 239, 0.85);
+  border: 1px solid rgba(107, 142, 123, 0.22);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 16px rgba(90, 70, 40, 0.05);
+  box-shadow: 0 4px 16px rgba(71, 92, 76, 0.05);
   transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
 }
 
 .platformCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(90, 70, 40, 0.09);
-  border-color: rgba(181, 132, 20, 0.4);
+  box-shadow: 0 8px 24px rgba(71, 92, 76, 0.09);
+  border-color: rgba(107, 142, 123, 0.4);
 }
 
 .cardHeaderRow {
@@ -286,8 +286,8 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(181, 132, 20, 0.1);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(107, 142, 123, 0.1);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,7 +334,7 @@
 }
 
 .featureList li code {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.76rem;
@@ -370,7 +370,7 @@
   padding: 0.55rem 1.15rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.28);
+  box-shadow: 0 2px 8px rgba(107, 142, 123, 0.28);
   transition: all 0.15s ease;
   text-decoration: none;
 }
@@ -393,7 +393,7 @@
 }
 
 .outlineLink:hover {
-  background: rgba(181, 132, 20, 0.08);
+  background: rgba(107, 142, 123, 0.08);
   color: var(--gold-500);
 }
 
@@ -414,8 +414,8 @@
 }
 
 .qrToggleBtn {
-  background: rgba(181, 132, 20, 0.1);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(107, 142, 123, 0.1);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   color: var(--gold-500);
   padding: 0.5rem;
   border-radius: var(--radius-sm);
@@ -427,14 +427,14 @@
 }
 
 .qrToggleBtn:hover {
-  background: rgba(181, 132, 20, 0.2);
+  background: rgba(107, 142, 123, 0.2);
 }
 
 .qrBox {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   background: rgba(240, 233, 218, 0.6);
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   color: var(--text-secondary);
@@ -458,10 +458,10 @@
   align-items: flex-start;
   gap: 1.25rem;
   padding: 1.5rem 1.75rem;
-  background: rgba(252, 249, 242, 0.9);
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  background: rgba(247, 248, 239, 0.9);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 16px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 4px 16px rgba(71, 92, 76, 0.04);
 }
 
 .guaranteeIcon {

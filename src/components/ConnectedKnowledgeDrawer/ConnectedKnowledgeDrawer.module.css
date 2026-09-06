@@ -24,8 +24,8 @@
   bottom: 0;
   width: 440px;
   max-width: 92vw;
-  background: #fdfbf7;
-  border-left: 1px solid rgba(181, 132, 20, 0.3);
+  background: rgba(247, 248, 239, 0.72);
+  border-left: 1px solid rgba(107, 142, 123, 0.3);
   box-shadow: -8px 0 32px rgba(10, 14, 26, 0.25);
   z-index: 9990;
   display: flex;
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.1rem 1.35rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.2);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.2);
   background: rgba(245, 238, 222, 0.65);
 }
 
@@ -66,10 +66,10 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #7d5605;
-  background: rgba(181, 132, 20, 0.14);
+  background: rgba(107, 142, 123, 0.14);
   padding: 2px 7px;
   border-radius: 999px;
-  border: 1px solid rgba(181, 132, 20, 0.3);
+  border: 1px solid rgba(107, 142, 123, 0.3);
 }
 
 .headerTitle {
@@ -82,7 +82,7 @@
 
 .closeBtn {
   background: none;
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   cursor: pointer;
@@ -100,14 +100,14 @@
 }
 
 .closeBtn:hover {
-  background: rgba(181, 132, 20, 0.15);
+  background: rgba(107, 142, 123, 0.15);
   color: var(--text-primary);
 }
 
 /* Search bar */
 .searchSection {
   padding: 0.75rem 1.35rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.15);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
   background: #ffffff;
 }
 
@@ -115,8 +115,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #fdfbf7;
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(247, 248, 239, 0.72);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.75rem;
 }
@@ -141,7 +141,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem 1.35rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.18);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.18);
   background: rgba(245, 238, 222, 0.3);
   overflow-x: auto;
 }
@@ -163,19 +163,19 @@
 }
 
 .tabBtn:hover {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   color: var(--gold-600);
 }
 
 .tabBtn.active {
   background: #ffffff;
-  border-color: rgba(181, 132, 20, 0.3);
+  border-color: rgba(107, 142, 123, 0.3);
   color: var(--gold-600);
-  box-shadow: 0 1px 4px rgba(90, 70, 40, 0.08);
+  box-shadow: 0 1px 4px rgba(71, 92, 76, 0.08);
 }
 
 .tabBadge {
-  background: rgba(181, 132, 20, 0.15);
+  background: rgba(107, 142, 123, 0.15);
   border-radius: 999px;
   font-size: 0.68rem;
   padding: 1px 5px;
@@ -194,10 +194,10 @@
 /* Cards */
 .card {
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.22);
+  border: 1px solid rgba(107, 142, 123, 0.22);
   border-radius: var(--radius-md);
   padding: 1rem 1.15rem;
-  box-shadow: 0 2px 8px rgba(90, 70, 40, 0.04);
+  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.04);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

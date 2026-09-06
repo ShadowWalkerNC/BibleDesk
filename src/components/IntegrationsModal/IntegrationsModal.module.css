@@ -19,11 +19,11 @@
 
 .modal {
   background: #ffffff !important;
-  border: 1px solid rgba(181, 132, 20, 0.38);
+  border: 1px solid rgba(107, 142, 123, 0.38);
   border-radius: var(--radius-lg);
   box-shadow:
     0 25px 65px rgba(0, 0, 0, 0.35),
-    0 4px 20px rgba(90, 70, 40, 0.15),
+    0 4px 20px rgba(71, 92, 76, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
   width: 100%;
   max-width: 580px;
@@ -43,7 +43,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.14);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.14);
 }
 
 .headerTitleRow {
@@ -56,8 +56,8 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(181, 132, 20, 0.12);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(107, 142, 123, 0.12);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,7 +94,7 @@
 }
 
 .closeBtn:hover {
-  background: rgba(181, 132, 20, 0.1);
+  background: rgba(107, 142, 123, 0.1);
   color: var(--text-primary);
 }
 
@@ -103,7 +103,7 @@
 .tabNav {
   display: flex;
   background: rgba(230, 222, 208, 0.4);
-  border-bottom: 1px solid rgba(181, 132, 20, 0.14);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.14);
   padding: 4px 6px;
   gap: 4px;
 }
@@ -184,7 +184,7 @@
   font-size: 0.82rem;
   padding: 0.6rem 0.8rem;
   background: rgba(245, 240, 228, 0.7);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   outline: none;
@@ -194,7 +194,7 @@
 .input:focus {
   border-color: var(--gold-400);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(181, 132, 20, 0.15);
+  box-shadow: 0 0 0 3px rgba(107, 142, 123, 0.15);
 }
 
 .fieldHint {
@@ -214,8 +214,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(181, 132, 20, 0.1);
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  background: rgba(107, 142, 123, 0.1);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   color: var(--gold-500);
   font-size: 0.8rem;
   font-weight: 600;
@@ -226,7 +226,7 @@
 }
 
 .testBtn:hover:not(:disabled) {
-  background: rgba(181, 132, 20, 0.18);
+  background: rgba(107, 142, 123, 0.18);
   border-color: var(--gold-400);
 }
 
@@ -247,7 +247,7 @@
   padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.28);
+  box-shadow: 0 2px 8px rgba(107, 142, 123, 0.28);
   transition: all 0.15s;
 }
 
@@ -283,7 +283,7 @@
 
 .divider {
   height: 1px;
-  background: rgba(181, 132, 20, 0.12);
+  background: rgba(107, 142, 123, 0.12);
 }
 
 .codeSnippetBox {
@@ -292,7 +292,7 @@
   justify-content: space-between;
   padding: 0.65rem 0.85rem;
   background: rgba(240, 235, 222, 0.6);
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: var(--radius-sm);
 }
 
@@ -302,7 +302,7 @@
 }
 
 .codeSnippetText code {
-  background: rgba(181, 132, 20, 0.12);
+  background: rgba(107, 142, 123, 0.12);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
@@ -314,7 +314,7 @@
   align-items: center;
   gap: 4px;
   background: transparent;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -362,7 +362,7 @@
 
 .metaGuide {
   background: rgba(240, 235, 222, 0.5);
-  border: 1px solid rgba(181, 132, 20, 0.18);
+  border: 1px solid rgba(107, 142, 123, 0.18);
   border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   font-size: 0.78rem;
@@ -370,7 +370,7 @@
 }
 
 .metaGuide code {
-  background: rgba(181, 132, 20, 0.12);
+  background: rgba(107, 142, 123, 0.12);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
@@ -393,7 +393,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 0.9rem 1.5rem;
-  border-top: 1px solid rgba(181, 132, 20, 0.12);
+  border-top: 1px solid rgba(107, 142, 123, 0.12);
   background: rgba(245, 240, 228, 0.4);
 }
 

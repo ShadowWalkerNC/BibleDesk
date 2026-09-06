@@ -214,7 +214,7 @@
   justify-content: space-between;
   padding: 0.95rem 1.25rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(181, 132, 20, 0.12) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(107, 142, 123, 0.12) 100%);
   border: 1px solid rgba(212, 175, 55, 0.4);
   color: #ffffff;
   text-decoration: none;
@@ -225,7 +225,7 @@
 }
 
 .patronageBtn:hover {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(181, 132, 20, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(107, 142, 123, 0.2) 100%);
   border-color: var(--gold-400);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);

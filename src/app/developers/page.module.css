@@ -59,7 +59,7 @@
   padding: 0.65rem 1.25rem;
   border-radius: 12px;
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.25);
+  border: 1px solid rgba(107, 142, 123, 0.25);
   color: #4a4131;
   font-size: 0.92rem;
   font-weight: 600;
@@ -69,7 +69,7 @@
 }
 
 .tabBtn:hover {
-  background: #fdfbf7;
+  background: rgba(247, 248, 239, 0.72);
   border-color: #b58414;
 }
 
@@ -77,13 +77,13 @@
   background: #b58414 !important;
   color: #ffffff !important;
   border-color: #92670e !important;
-  box-shadow: 0 4px 14px rgba(181, 132, 20, 0.25);
+  box-shadow: 0 4px 14px rgba(107, 142, 123, 0.25);
 }
 
 /* Content Sections */
 .section {
   background: #ffffff;
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  border: 1px solid rgba(107, 142, 123, 0.28);
   border-radius: 18px;
   padding: 2.2rem;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.04);
@@ -98,7 +98,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(181, 132, 20, 0.15);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
 }
 
 .sectionTitle {
@@ -118,7 +118,7 @@
   position: relative;
   overflow-x: auto;
   margin: 1.25rem 0;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  border: 1px solid rgba(107, 142, 123, 0.2);
 }
 
 .codePre {
@@ -158,8 +158,8 @@
 }
 
 .endpointCard {
-  background: #fdfbf7;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  background: rgba(247, 248, 239, 0.72);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: 12px;
   padding: 1.25rem 1.4rem;
 }
@@ -214,8 +214,8 @@
 }
 
 .guideCard {
-  background: #fdfbf7;
-  border: 1px solid rgba(181, 132, 20, 0.2);
+  background: rgba(247, 248, 239, 0.72);
+  border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: 14px;
   padding: 1.5rem;
   display: flex;
