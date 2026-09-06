@@ -720,7 +720,7 @@
 .input,
 .select,
 .textarea {
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border: 1px solid rgba(107, 142, 123, 0.32);
   border-radius: var(--radius-sm);
   color: var(--text-primary);

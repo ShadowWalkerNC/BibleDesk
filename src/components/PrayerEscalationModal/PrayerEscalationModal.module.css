@@ -26,7 +26,7 @@
 
 .header {
   padding: 1.5rem 1.75rem 1.25rem;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-bottom: 1px solid rgba(107, 142, 123, 0.22);
   display: flex;
   justify-content: space-between;
@@ -47,7 +47,7 @@
   font-family: var(--font-cinzel, 'Cinzel', serif);
   font-size: 1.35rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   margin: 0;
 }
 
@@ -63,7 +63,7 @@
 
 .closeBtn:hover {
   background: #f1ede4;
-  color: #1e1913;
+  color: #34483d;
 }
 
 .body {
@@ -84,7 +84,7 @@
 .prayerSummaryTitle {
   font-weight: 700;
   font-size: 0.95rem;
-  color: #1e1913;
+  color: #34483d;
   margin-bottom: 0.25rem;
 }
 
@@ -154,13 +154,13 @@
 .tierTitle {
   font-size: 0.94rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   margin-bottom: 0.15rem;
 }
 
 .tierDesc {
   font-size: 0.82rem;
-  color: #635946;
+  color: #526053;
   line-height: 1.4;
 }
 
@@ -180,7 +180,7 @@
   cursor: pointer;
   border: 1px solid rgba(107, 142, 123, 0.25);
   background: #ffffff;
-  color: #4a4131;
+  color: #405548;
   transition: all 0.15s ease;
   min-height: 44px;
 }
@@ -188,7 +188,7 @@
 .urgencyBtnActive {
   background: #b58414 !important;
   color: #ffffff !important;
-  border-color: #92670e !important;
+  border-color: #94690a !important;
 }
 
 .toggleRow {
@@ -213,7 +213,7 @@
   border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: 10px;
   font-size: 0.88rem;
-  color: #1e1913;
+  color: #34483d;
   background: #ffffff;
   min-height: 70px;
   resize: vertical;
@@ -226,7 +226,7 @@
 
 .footer {
   padding: 1.25rem 1.75rem;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-top: 1px solid rgba(107, 142, 123, 0.22);
   display: flex;
   justify-content: flex-end;
@@ -240,7 +240,7 @@
   font-weight: 600;
   background: #ffffff;
   border: 1px solid rgba(107, 142, 123, 0.3);
-  color: #4a4131;
+  color: #405548;
   cursor: pointer;
   min-height: 48px;
 }

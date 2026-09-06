@@ -30,14 +30,14 @@
   font-family: var(--font-cinzel, 'Cinzel', serif);
   font-size: 2.4rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   margin-bottom: 0.75rem;
   line-height: 1.2;
 }
 
 .subtitle {
   font-size: 1.05rem;
-  color: #605747;
+  color: #526053;
   max-width: 680px;
   margin: 0 auto 2rem;
   line-height: 1.55;
@@ -78,12 +78,12 @@
 .churchName {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
 }
 
 .churchMeta {
   font-size: 0.86rem;
-  color: #635946;
+  color: #526053;
 }
 
 .churchBarRight {
@@ -111,13 +111,13 @@
 }
 
 .primaryBtn:hover {
-  background: #966c0e;
+  background: #94690a;
 }
 
 .secondaryBtn {
   background: #ffffff;
   border: 1px solid rgba(107, 142, 123, 0.32);
-  color: #4a4131;
+  color: #405548;
 }
 
 .secondaryBtn:hover {
@@ -154,7 +154,7 @@
   font-family: var(--font-cinzel, 'Cinzel', serif);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -189,7 +189,7 @@
 .prayerAuthor {
   font-weight: 700;
   font-size: 0.94rem;
-  color: #1e1913;
+  color: #34483d;
 }
 
 .urgencyBadge {
@@ -218,7 +218,7 @@
 .prayerText {
   font-size: 0.92rem;
   line-height: 1.55;
-  color: #3f3627;
+  color: #405548;
   margin-bottom: 0.85rem;
 }
 
@@ -238,14 +238,14 @@
   font-weight: 600;
   background: #ffffff;
   border: 1px solid rgba(107, 142, 123, 0.25);
-  color: #4a4131;
+  color: #405548;
   cursor: pointer;
   min-height: 40px;
 }
 
 .prayerIntercedeBtn:hover {
   border-color: #b58414;
-  color: #92670e;
+  color: #94690a;
 }
 
 /* Sidebar Tools (Invite & Widget generator) */
@@ -256,10 +256,10 @@
 }
 
 .codeBox {
-  background: #231e17;
+  background: #2a3a30;
   border-radius: 10px;
   padding: 0.85rem 1rem;
-  color: #f7e6b5;
+  color: #d5e0d2;
   font-family: monospace;
   font-size: 0.84rem;
   overflow-x: auto;
@@ -287,7 +287,7 @@
   border: 1px dashed rgba(107, 142, 123, 0.35);
   border-radius: 12px;
   padding: 1rem;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   text-align: center;
 }
 
@@ -320,7 +320,7 @@
 
 .modalHeader {
   padding: 1.4rem 1.75rem;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-bottom: 1px solid rgba(107, 142, 123, 0.2);
   display: flex;
   justify-content: space-between;
@@ -349,7 +349,7 @@
   border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: 10px;
   font-size: 0.92rem;
-  color: #1e1913;
+  color: #34483d;
   background: #ffffff;
 }
 

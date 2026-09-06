@@ -29,7 +29,7 @@
   gap: 0.75rem;
   padding: 1.1rem 1.4rem;
   border-bottom: 1px solid rgba(107, 142, 123, 0.22);
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
 }
 
 .slashBadge {
@@ -50,7 +50,7 @@
   border: none;
   background: transparent;
   font-size: 1.1rem;
-  color: #1e1913;
+  color: #34483d;
   font-family: inherit;
 }
 
@@ -120,7 +120,7 @@
 .commandName {
   font-weight: 700;
   font-size: 0.94rem;
-  color: #1e1913;
+  color: #34483d;
   font-family: monospace;
 }
 
@@ -133,7 +133,7 @@
 
 .commandDescription {
   font-size: 0.82rem;
-  color: #635946;
+  color: #526053;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -142,7 +142,7 @@
 
 .footer {
   padding: 0.65rem 1.25rem;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-top: 1px solid rgba(107, 142, 123, 0.15);
   display: flex;
   justify-content: space-between;

@@ -331,14 +331,14 @@
 
 .slashItem:hover {
   background: rgba(247, 248, 239, 0.72);
-  color: #92670e;
+  color: #94690a;
 }
 
 .slashName {
   font-family: monospace;
   font-weight: 700;
   font-size: 0.9rem;
-  color: #1e1913;
+  color: #34483d;
 }
 
 .slashDesc {

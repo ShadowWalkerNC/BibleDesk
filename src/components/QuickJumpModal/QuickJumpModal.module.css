@@ -41,7 +41,7 @@
 
 .modalHeader {
   padding: 16px;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-bottom: 1px solid rgba(107, 142, 123, 0.16);
   display: flex;
   flex-direction: column;
@@ -274,7 +274,7 @@
 
 .modalFooter {
   padding: 10px 16px;
-  background: #fdfcf9;
+  background: rgba(247, 248, 239, 0.72);
   border-top: 1px solid rgba(107, 142, 123, 0.15);
   font-size: 0.75rem;
   color: var(--text-muted);

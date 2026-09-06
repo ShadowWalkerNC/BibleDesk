@@ -30,14 +30,14 @@
   font-family: var(--font-cinzel, 'Cinzel', serif);
   font-size: 2.4rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   margin-bottom: 0.75rem;
   line-height: 1.2;
 }
 
 .subtitle {
   font-size: 1.05rem;
-  color: #605747;
+  color: #526053;
   max-width: 700px;
   margin: 0 auto 2rem;
   line-height: 1.6;
@@ -60,7 +60,7 @@
   border-radius: 12px;
   background: #ffffff;
   border: 1px solid rgba(107, 142, 123, 0.25);
-  color: #4a4131;
+  color: #405548;
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
@@ -76,7 +76,7 @@
 .tabBtnActive {
   background: #b58414 !important;
   color: #ffffff !important;
-  border-color: #92670e !important;
+  border-color: #94690a !important;
   box-shadow: 0 4px 14px rgba(107, 142, 123, 0.25);
 }
 
@@ -105,7 +105,7 @@
   font-family: var(--font-cinzel, 'Cinzel', serif);
   font-size: 1.35rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -123,7 +123,7 @@
 
 .codePre {
   margin: 0;
-  color: #f7e6b5;
+  color: #d5e0d2;
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
   font-size: 0.88rem;
   line-height: 1.6;
@@ -196,7 +196,7 @@
   font-family: monospace;
   font-size: 0.94rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
 }
 
 .endpointDesc {
@@ -226,7 +226,7 @@
 .guideTitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1e1913;
+  color: #34483d;
   margin-bottom: 0.5rem;
 }
 
@@ -241,7 +241,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: #92670e;
+  color: #94690a;
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
