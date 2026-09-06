@@ -15,10 +15,9 @@
 
 .hero {
   position: relative;
-  min-height: 405px;
-  display: flex;
-  align-items: flex-end;
-  padding: 42px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-rows: 1fr auto;
   border: 1px solid rgba(255, 255, 255, 0.62);
   border-radius: 25px;
   overflow: hidden;
@@ -26,30 +25,28 @@
   animation: fadein 0.9s ease-out both;
   max-width: 1180px;
   margin: 0 auto 43px;
+  min-height: 360px;
 }
 
 .heroImage {
-  position: absolute;
-  inset: 0;
+  grid-column: 1;
+  grid-row: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(42, 62, 50, 0.8), rgba(50, 69, 56, 0.37) 62%, rgba(50, 69, 56, 0.12));
-  z-index: 1;
 }
 
 .heroCopy {
-  position: relative;
-  z-index: 2;
-  max-width: 570px;
-  color: #fff;
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 42px 38px;
+  background: rgba(247, 248, 239, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text-primary);
 }
 
 .heroBadge {
@@ -58,25 +55,25 @@
   gap: 0.5rem;
   margin-bottom: 18px;
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(107, 142, 123, 0.3);
   border-radius: 20px;
-  background: rgba(232, 230, 220, 0.17);
-  color: #fff;
+  background: rgba(107, 142, 123, 0.1);
+  color: var(--sage-dark);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
+  align-self: flex-start;
 }
 
 .heroTitle {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 49px;
+  font-size: 38px;
   font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -1.7px;
-  color: #fff;
-  margin: 0 0 20px;
-  max-width: 570px;
+  line-height: 1.08;
+  letter-spacing: -1.3px;
+  color: #34483d;
+  margin: 0 0 16px;
 }
 
 .heroTitle span {
@@ -84,10 +81,9 @@
 }
 
 .heroSubtitle {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.82);
-  max-width: 510px;
+  color: #526053;
   margin: 0 0 25px;
 }
 
@@ -131,9 +127,9 @@
   gap: 9px;
   padding: 13px 17px;
   border-radius: 9px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  border: 1px solid var(--sage);
+  background: transparent;
+  color: var(--sage-dark);
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
@@ -141,15 +137,15 @@
 }
 
 .secondaryCta:hover {
-  background: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 8px 18px rgba(24, 43, 31, 0.25);
+  background: var(--sage-tint);
+  box-shadow: 0 8px 18px rgba(24, 43, 31, 0.15);
   transform: translateY(-1px);
   text-decoration: none;
-  color: #fff;
+  color: var(--sage-dark);
 }
 
 .secondaryCta:focus-visible {
-  box-shadow: 0 8px 18px rgba(24, 43, 31, 0.25);
+  box-shadow: 0 8px 18px rgba(24, 43, 31, 0.15);
   transform: translateY(-1px);
   outline: none;
 }
@@ -175,14 +171,15 @@
 
 /* Feature Highlights Bar */
 .featurePillsBar {
-  position: relative;
-  z-index: 2;
+  grid-column: 1 / -1;
+  grid-row: 2;
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
-  max-width: 1180px;
-  margin: 25px auto 0;
-  font-size: 0.9rem;
+  padding: 16px 38px;
+  border-top: 1px solid rgba(107, 142, 123, 0.15);
+  background: rgba(232, 230, 220, 0.5);
+  font-size: 0.82rem;
   color: #747b72;
   font-weight: 600;
 }
@@ -735,6 +732,22 @@
 @media (max-width: 900px) {
   .container {
     padding: 20px 20px 60px;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    grid-template-rows: 200px auto auto;
+  }
+  .heroImage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .heroCopy {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 28px 24px;
+  }
+  .featurePillsBar {
+    grid-row: 3;
   }
   .heroTitle {
     font-size: 2.5rem;
