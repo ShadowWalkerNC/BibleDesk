@@ -11,6 +11,10 @@ import {
   ExternalLink,
   Music,
   Disc,
+  Loader2,
+  RotateCw,
+  SkipForward,
+  AlertCircle,
 } from 'lucide-react';
 import styles from './LiveRadioPlayer.module.css';
 
@@ -25,20 +29,38 @@ const STATIONS: RadioStation[] = [
   {
     id: 'abiding-sacred',
     name: 'Abiding Radio (Sacred Hymns)',
-    category: 'Choral & Classical Hymns',
-    streamUrl: 'https://stream.abidingradio.org/sacred',
+    category: 'Choral & Classical Sacred Hymns',
+    streamUrl: 'https://streams.abidingradio.com/sacred',
   },
   {
     id: 'abiding-instrumental',
     name: 'Abiding Radio (Instrumental)',
     category: 'Piano & Orchestral Meditation',
-    streamUrl: 'https://stream.abidingradio.org/instrumental',
+    streamUrl: 'https://streams.abidingradio.com/instrumental',
   },
   {
     id: 'moody-radio',
-    name: 'Moody Radio (Chicago Live)',
-    category: 'Christian Teaching & Worship',
-    streamUrl: 'https://primary.moodyradio.org/chicago.mp3',
+    name: 'Moody Radio (WMBI Chicago Live)',
+    category: 'Christian Teaching, Music & Worship',
+    streamUrl: 'https://playerservices.streamtheworld.com/api/livestream-redirect/WMBIFM.mp3',
+  },
+  {
+    id: 'gsotf',
+    name: 'Great Songs of the Faith',
+    category: 'Traditional Hymns & Sacred Classics',
+    streamUrl: 'https://ice64.securenetsystems.net/GSOTF',
+  },
+  {
+    id: 'christian-life-radio',
+    name: 'Christian Life Radio',
+    category: 'Inspirational & Contemporary Praise',
+    streamUrl: 'https://ice64.securenetsystems.net/CLR1MP3',
+  },
+  {
+    id: 'abiding-kids',
+    name: 'Abiding Radio (Kids Songs)',
+    category: 'Bible Truth & Stories for Children',
+    streamUrl: 'https://streams.abidingradio.com/kids',
   },
 ];
 
@@ -72,6 +94,7 @@ export default function LiveRadioPlayer() {
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
+      setIsLoading(false);
     } else {
       setIsLoading(true);
       setHasError(false);
@@ -109,13 +132,41 @@ export default function LiveRadioPlayer() {
             setIsPlaying(true);
             setIsLoading(false);
           })
-          .catch(() => {
+          .catch((err) => {
+            console.warn('Station change playback error:', err);
             setIsPlaying(false);
             setIsLoading(false);
             setHasError(true);
           });
       }
     }
+  };
+
+  const handleRetry = () => {
+    if (!audioRef.current) return;
+    setHasError(false);
+    setIsLoading(true);
+    audioRef.current.src = currentStation.streamUrl;
+    audioRef.current.load();
+    audioRef.current
+      .play()
+      .then(() => {
+        setIsPlaying(true);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.warn('Retry playback error:', err);
+        setIsPlaying(false);
+        setIsLoading(false);
+        setHasError(true);
+      });
+  };
+
+  const handleNextStation = () => {
+    const currentIndex = STATIONS.findIndex((s) => s.id === currentStation.id);
+    const nextIndex = (currentIndex + 1) % STATIONS.length;
+    const nextStation = STATIONS[nextIndex];
+    handleStationChange(nextStation.id);
   };
 
   return (
@@ -125,7 +176,12 @@ export default function LiveRadioPlayer() {
         src={currentStation.streamUrl}
         preload="none"
         onWaiting={() => setIsLoading(true)}
-        onPlaying={() => setIsLoading(false)}
+        onCanPlay={() => setIsLoading(false)}
+        onPlaying={() => {
+          setIsLoading(false);
+          setIsPlaying(true);
+        }}
+        onPause={() => setIsPlaying(false)}
         onError={() => {
           setIsPlaying(false);
           setIsLoading(false);
@@ -170,17 +226,46 @@ export default function LiveRadioPlayer() {
           {/* Now Playing info */}
           <div className={styles.nowPlayingSection}>
             <div className={styles.stationAvatar}>
-              {isPlaying ? <Disc size={24} className="animate-spin" /> : <Music size={22} />}
+              {isLoading ? (
+                <Loader2 size={22} className="animate-spin" />
+              ) : isPlaying ? (
+                <Disc size={24} className="animate-spin" />
+              ) : (
+                <Music size={22} />
+              )}
             </div>
             <div className={styles.stationInfo}>
               <div className={styles.stationName}>{currentStation.name}</div>
-              <div className={styles.stationCategory}>{currentStation.category}</div>
+              <div className={styles.stationCategory}>
+                {isLoading ? 'Connecting to live stream...' : currentStation.category}
+              </div>
             </div>
           </div>
 
           {hasError && (
-            <div style={{ fontSize: '0.76rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.1)', padding: '6px 10px', borderRadius: '6px' }}>
-              Stream unavailable or connecting. Try selecting another station below.
+            <div className={styles.errorBox} role="alert">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertCircle size={14} color="#fca5a5" />
+                <span>Stream unavailable or interrupted.</span>
+              </div>
+              <div className={styles.errorActions}>
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className={styles.errorActionBtn}
+                >
+                  <RotateCw size={12} />
+                  <span>Retry</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextStation}
+                  className={styles.errorActionBtn}
+                >
+                  <SkipForward size={12} />
+                  <span>Next Station</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -205,9 +290,15 @@ export default function LiveRadioPlayer() {
               className={styles.playToggleBtn}
               onClick={togglePlay}
               disabled={isLoading}
-              aria-label={isPlaying ? 'Pause radio' : 'Play radio'}
+              aria-label={isLoading ? 'Connecting to stream...' : isPlaying ? 'Pause radio' : 'Play radio'}
             >
-              {isPlaying ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: '2px' }} />}
+              {isLoading ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : isPlaying ? (
+                <Pause size={20} />
+              ) : (
+                <Play size={20} style={{ marginLeft: '2px' }} />
+              )}
             </button>
 
             <div className={styles.volumeBox}>
