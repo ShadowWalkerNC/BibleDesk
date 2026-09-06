@@ -19,20 +19,12 @@ export async function GET(req: NextRequest) {
       if (id) query = query.eq('id', id);
 
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return NextResponse.json({ success: true, churches: data });
       }
     }
 
-    // Fallback: search local sample churches
-    let filtered = SAMPLE_CHURCHES;
-    if (code) {
-      filtered = SAMPLE_CHURCHES.filter(c => c.invite_code.toLowerCase() === code.toLowerCase());
-    } else if (id) {
-      filtered = SAMPLE_CHURCHES.filter(c => c.id === id);
-    }
-
-    return NextResponse.json({ success: true, churches: filtered });
+    return NextResponse.json({ success: true, churches: [] });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
   }

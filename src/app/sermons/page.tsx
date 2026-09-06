@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Printer, Send, Plus, BookOpen, Tv, Presentation, Copy, Check, Download, X } from 'lucide-react';
+import { Printer, Send, Plus, BookOpen, Tv, Presentation, Copy, Check, Download, X, Sparkles, Languages, HeartHandshake } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase';
 import { BIBLE_BOOKS, getBookChapters } from '@/lib/books';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
 import ChurchLivePlayer from '@/components/ChurchLivePlayer/ChurchLivePlayer';
+import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
+import { resolveConnectionsForSermon } from '@/lib/universalIndexer';
 import styles from './page.module.css';
 
 interface SermonOutline {
@@ -45,6 +47,21 @@ export default function SermonWorkspacePage() {
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [showSlideExport, setShowSlideExport] = useState(false);
   const [slidesCopied, setSlidesCopied] = useState(false);
+
+  // Connected Knowledge states
+  const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
+  const [activeDrawerTarget, setActiveDrawerTarget] = useState<{ type: 'verse' | 'strongs' | 'sermon' | 'prayer'; id: string }>({
+    type: 'verse',
+    id: 'John 3:16',
+  });
+
+  const detectedConnections = useMemo(() => {
+    return resolveConnectionsForSermon({
+      id: selectedOutlineId || 'current',
+      title: title || 'Sermon Outline',
+      content: content || '',
+    });
+  }, [selectedOutlineId, title, content]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -453,6 +470,59 @@ export default function SermonWorkspacePage() {
               />
             </div>
 
+            {/* Auto-detected Cross-Connections Bar */}
+            {(detectedConnections.verses.length > 0 || detectedConnections.strongs.length > 0 || detectedConnections.prayers.length > 0) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', padding: '0.45rem 0.75rem', background: 'rgba(181, 132, 20, 0.08)', borderRadius: '6px', border: '1px solid rgba(181, 132, 20, 0.22)', margin: '0.5rem 0' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--gold-600)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <Sparkles size={12} /> Auto-Linked:
+                </span>
+                
+                {detectedConnections.verses.map(v => (
+                  <button
+                    key={v.ref}
+                    type="button"
+                    onClick={() => {
+                      setSidebarBook(v.book);
+                      setSidebarChapter(v.chapter);
+                      showToast(`Loaded ${v.ref} into Scripture Sidebar.`);
+                    }}
+                    style={{ background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.3)', borderRadius: '4px', padding: '2px 7px', fontSize: '0.74rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                    title="Click to load into Scripture Sidebar"
+                  >
+                    <BookOpen size={11} /> {v.ref}
+                  </button>
+                ))}
+
+                {detectedConnections.strongs.map(s => (
+                  <button
+                    key={s.code}
+                    type="button"
+                    onClick={() => {
+                      setActiveDrawerTarget({ type: 'strongs', id: s.code });
+                      setIsKnowledgeDrawerOpen(true);
+                    }}
+                    style={{ background: 'rgba(79, 156, 249, 0.1)', border: '1px solid rgba(79, 156, 249, 0.3)', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 7px', fontSize: '0.74rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                    title={s.definition}
+                  >
+                    <Languages size={11} /> {s.code} ({s.transliteration})
+                  </button>
+                ))}
+
+                {detectedConnections.prayers.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveDrawerTarget({ type: 'verse', id: detectedConnections.verses[0]?.ref || title || 'John 3:16' });
+                      setIsKnowledgeDrawerOpen(true);
+                    }}
+                    style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.35)', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 7px', fontSize: '0.74rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px', marginLeft: 'auto' }}
+                  >
+                    <HeartHandshake size={11} /> {detectedConnections.prayers.length} Related Prayers ↗
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Markdown Text Editor & Live Preview */}
             <div className={styles.textareaWrapper}>
               {(viewMode === 'edit' || viewMode === 'split') && (
@@ -710,6 +780,13 @@ export default function SermonWorkspacePage() {
           </div>
         </div>
       )}
+
+      <ConnectedKnowledgeDrawer
+        isOpen={isKnowledgeDrawerOpen}
+        onClose={() => setIsKnowledgeDrawerOpen(false)}
+        entityType={activeDrawerTarget.type}
+        entityId={activeDrawerTarget.id}
+      />
     </>
   );
 }

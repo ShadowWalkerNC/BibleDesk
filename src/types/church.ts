@@ -42,45 +42,7 @@ export interface ChurchWidgetConfig {
   custom_title?: string;
 }
 
-export const SAMPLE_CHURCHES: ChurchProfile[] = [
-  {
-    id: 'church-grace-city',
-    name: 'Grace City Church',
-    denomination: 'Non-Denominational / Evangelical',
-    city: 'Atlanta',
-    state_province: 'GA',
-    country: 'United States',
-    website: 'https://gracecity.example.org',
-    contact_email: 'pastoralcare@gracecity.example.org',
-    invite_code: 'GC2026',
-    member_count: 340,
-    is_verified: true,
-    created_at: '2026-01-10T12:00:00Z',
-  },
-  {
-    id: 'church-hope-chapel',
-    name: 'Hope Community Chapel',
-    denomination: 'Reformed Baptist',
-    city: 'London',
-    country: 'United Kingdom',
-    website: 'https://hopechapel.example.org',
-    contact_email: 'prayer@hopechapel.example.org',
-    invite_code: 'HOPE77',
-    member_count: 185,
-    is_verified: true,
-    created_at: '2026-02-14T09:30:00Z',
-  },
-  {
-    id: 'church-living-waters',
-    name: 'Living Waters Fellowship',
-    denomination: 'Pentecostal / Charismatic',
-    city: 'Nairobi',
-    country: 'Kenya',
-    website: 'https://livingwaters.example.org',
-    contact_email: 'office@livingwaters.example.org',
-    invite_code: 'WATERS1',
-    member_count: 520,
-    is_verified: true,
-    created_at: '2026-03-01T15:00:00Z',
-  },
-];
+// Verified Registered Churches registry (starts empty until real congregations register)
+export const DEFAULT_CHURCHES: ChurchProfile[] = [];
+export const SAMPLE_CHURCHES: ChurchProfile[] = [];
+

@@ -28,14 +28,17 @@ import {
   Bell,
   ChevronRight,
   TrendingUp,
+  BookOpen,
+  Languages,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
 import PrayerEscalationModal from '@/components/PrayerEscalationModal/PrayerEscalationModal';
+import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
+import { extractScriptureReferences, extractStrongsNumbers } from '@/lib/universalIndexer';
 import { getBrowserClient } from '@/lib/supabase';
 import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
 import type { MissionMapPin } from '@/types/map';
-import { DEFAULT_MAP_PINS } from '@/types/map';
 import { createWhatsAppShareLink } from '@/lib/whatsapp';
 import { 
   PrayerContact, 
@@ -118,6 +121,13 @@ export default function PrayerBoardPage() {
   const [publicCategory, setPublicCategory] = useState<string>('community');
   const [locationPrivacy, setLocationPrivacy] = useState<'approximate' | 'precise' | 'restricted'>('approximate');
   const [prayedSession, setPrayedSession] = useState<Record<string, boolean>>({});
+
+  // Connected Knowledge states
+  const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
+  const [activeDrawerTarget, setActiveDrawerTarget] = useState<{ type: 'verse' | 'strongs' | 'sermon' | 'prayer'; id: string }>({
+    type: 'prayer',
+    id: '',
+  });
 
   // ── Prayer Care Workflow State (Local-first & Supabase synced) ───────────
   const [contacts, setContacts] = useState<PrayerContact[]>([]);
@@ -311,12 +321,30 @@ export default function PrayerBoardPage() {
         };
       });
 
-    const merged = [...DEFAULT_MAP_PINS];
-    for (const pin of submittedPins) {
-      if (!merged.find(m => m.id === pin.id)) merged.push(pin);
-    }
-    return merged;
-  }, [prayers]);
+    const localPins: MissionMapPin[] = commitments
+      .filter(c => c.country_code)
+      .map(c => {
+        const country = getCountryByCode(c.country_code || '');
+        if (!country) return null;
+        return {
+          id: `local-${c.id}`,
+          latitude: country.lat,
+          longitude: country.lng,
+          label: `${c.contact?.display_name || c.title || 'My Circle'} • ${country.name}`,
+          category: (c.contact?.category || 'other').toLowerCase(),
+          privacy_mode: 'approximate' as const,
+          text: c.private_details || c.title || 'Personal prayer commitment',
+          urgency: 'normal' as const,
+          isRestricted: country.isRestricted,
+          source: 'circle' as const,
+          country_code: country.code,
+          country_name: country.name,
+        };
+      })
+      .filter(Boolean) as MissionMapPin[];
+
+    return [...submittedPins, ...localPins];
+  }, [prayers, commitments]);
 
   // ── Actions: Check-in & Care Workflow ────────────────────────────────────
 
@@ -752,6 +780,43 @@ export default function PrayerBoardPage() {
                         <p className={styles.careCardDetails}>{c.private_details}</p>
                       )}
 
+                      {/* Auto-detected Scripture & Strong's references */}
+                      {(() => {
+                        const detectedRefs = extractScriptureReferences(`${c.title} ${c.private_details || ''}`);
+                        const detectedStrongs = extractStrongsNumbers(`${c.title} ${c.private_details || ''}`);
+                        if (detectedRefs.length === 0 && detectedStrongs.length === 0) return null;
+                        return (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', margin: '4px 0 8px' }}>
+                            {detectedRefs.map(r => (
+                              <button
+                                key={r}
+                                type="button"
+                                onClick={() => {
+                                  setActiveDrawerTarget({ type: 'verse', id: r });
+                                  setIsKnowledgeDrawerOpen(true);
+                                }}
+                                style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              >
+                                <BookOpen size={10} /> {r}
+                              </button>
+                            ))}
+                            {detectedStrongs.map(s => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => {
+                                  setActiveDrawerTarget({ type: 'strongs', id: s });
+                                  setIsKnowledgeDrawerOpen(true);
+                                }}
+                                style={{ background: 'rgba(79, 156, 249, 0.1)', border: '1px solid rgba(79, 156, 249, 0.3)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              >
+                                <Languages size={10} /> {s}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
+
                       {/* Action Bar — Thumb-friendly 48px Jakob's Law */}
                       <div className={styles.careCardActions}>
                         <button
@@ -951,6 +1016,43 @@ export default function PrayerBoardPage() {
                     )}
                   </div>
                   <p className={styles.communityText}>{p.request}</p>
+
+                  {/* Auto-detected Scripture & Strong's references */}
+                  {(() => {
+                    const detectedRefs = extractScriptureReferences(p.request);
+                    const detectedStrongs = extractStrongsNumbers(p.request);
+                    if (detectedRefs.length === 0 && detectedStrongs.length === 0) return null;
+                    return (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', margin: '4px 0 8px' }}>
+                        {detectedRefs.map(r => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => {
+                              setActiveDrawerTarget({ type: 'verse', id: r });
+                              setIsKnowledgeDrawerOpen(true);
+                            }}
+                            style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <BookOpen size={10} /> {r}
+                          </button>
+                        ))}
+                        {detectedStrongs.map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => {
+                              setActiveDrawerTarget({ type: 'strongs', id: s });
+                              setIsKnowledgeDrawerOpen(true);
+                            }}
+                            style={{ background: 'rgba(79, 156, 249, 0.1)', border: '1px solid rgba(79, 156, 249, 0.3)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <Languages size={10} /> {s}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <div className={styles.communityFooter}>
                     <button
                       className={`${styles.prayBtn} ${prayedSession[p.id] ? styles.prayBtnActive : ''}`}
@@ -1476,6 +1578,13 @@ export default function PrayerBoardPage() {
           }}
           prayer={selectedEscalationPrayer}
           onEscalate={handleEscalateSubmit}
+        />
+
+        <ConnectedKnowledgeDrawer
+          isOpen={isKnowledgeDrawerOpen}
+          onClose={() => setIsKnowledgeDrawerOpen(false)}
+          entityType={activeDrawerTarget.type}
+          entityId={activeDrawerTarget.id}
         />
       </div>
     </main>

@@ -157,11 +157,13 @@ export function useStreamingAsk(): UseStreamingAskReturn {
               break;
             }
             case 'answer': {
-              const p = payload as { answer: BibleAnswer; shareSlug: string };
+              const p = payload as any;
+              const ans: BibleAnswer = p.answer || (p.id && p.dimensions ? p : null);
+              const slug: string = p.shareSlug || (ans?.id ? ans.id.slice(0, 8) : '');
               setState((s) => ({
                 ...s,
-                answer: p.answer,
-                shareSlug: p.shareSlug,
+                answer: ans,
+                shareSlug: slug,
               }));
               break;
             }

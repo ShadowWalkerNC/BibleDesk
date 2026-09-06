@@ -3,6 +3,7 @@ import { sendWhatsAppMessage, formatBibleAnswerForWhatsApp } from '@/lib/whatsap
 import { generateBibleAnswer } from '@/lib/claude';
 import { DAILY_DEVOTIONALS } from '@/lib/dailyData';
 import { parseReference } from '@/lib/books';
+import { getAppUrl } from '@/lib/appUrl';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
         `*Prayer:*`,
         devotional.prayer_focus,
         '',
-        `🔗 ${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/daily`,
+        `🔗 ${getAppUrl()}/daily`,
       ].join('\n');
 
       await sendWhatsAppMessage(from, reply);
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
       const question = text.replace(/^(ask|study|q):\s*/i, '').trim();
       if (question.length > 3) {
         const answer = await generateBibleAnswer(question, { translation: 'web' });
-        const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/share/${answer.id.slice(0, 8)}`;
+        const shareUrl = `${getAppUrl()}/share/${answer.id.slice(0, 8)}`;
         const reply = formatBibleAnswerForWhatsApp(answer, shareUrl);
 
         await sendWhatsAppMessage(from, reply);
@@ -99,7 +100,7 @@ export async function POST(req: NextRequest) {
         `Passage: *${parsedRef.book} ${parsedRef.chapter || 1}*`,
         '',
         `Read online with Strong's Lexicons & 6 Translations:`,
-        `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/bible?ref=${encodeURIComponent(text)}`,
+        `${getAppUrl()}/bible?ref=${encodeURIComponent(text)}`,
       ].join('\n');
 
       await sendWhatsAppMessage(from, reply);
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
       `• *<Book Chapter:Verse>* (e.g. _John 3:16_) — Look up any Bible passage`,
       `• *ask: <question>* (e.g. _ask: What is the armor of God?_) — 5-Dimension AI Study Guide`,
       '',
-      `🌐 Web: ${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}`,
+      `🌐 Web: ${getAppUrl()}`,
     ].join('\n');
 
     await sendWhatsAppMessage(from, helpReply);

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { generateBibleAnswer } from '@/lib/claude';
 import type { TranslationId } from '@/types';
+import { getAppUrl } from '@/lib/appUrl';
 
 function verifySignature(body: string, signature: string): boolean {
   const secret = process.env.BIBLEDESK_WEBHOOK_SECRET;
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
           { title: dim.title, content: dim.content.slice(0, 400), citations: dim.citations },
         ])
       ),
-      share_url: `${process.env.NEXT_PUBLIC_APP_URL}/share/${answer.id.slice(0, 8)}`,
+      share_url: `${getAppUrl()}/share/${answer.id.slice(0, 8)}`,
       confidence: answer.confidence,
     });
   } catch (err) {

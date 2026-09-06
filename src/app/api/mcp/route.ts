@@ -5,6 +5,7 @@ import { generateBibleAnswer } from '@/lib/claude';
 import { searchLocalBible, getLocalPassage } from '@/lib/bible-local';
 import { getStrongsDefinition, getCrossReferences } from '@/lib/lexicon';
 import { TRANSLATIONS, type TranslationId } from '@/types';
+import { getAppUrl } from '@/lib/appUrl';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -410,9 +411,7 @@ async function handleAskBibleQuestion(args: Record<string, unknown>) {
     status: answer.status,
     disclaimer: answer.disclaimer,
     dimensions: answer.dimensions,
-    share_url: process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/share/${answer.id.slice(0, 8)}`
-      : null,
+    share_url: `${getAppUrl()}/share/${answer.id.slice(0, 8)}`,
   };
 }
 

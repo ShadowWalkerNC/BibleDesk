@@ -14,8 +14,9 @@
 // No D3 install needed beyond the existing Next.js bundle — D3 is loaded
 // as a dynamic import so it doesn't bloat the initial JS bundle.
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import type { GraphNode, GraphEdge } from '@/lib/graph';
+import { getLocalSermons, getLocalPrayers, extractScriptureReferences } from '@/lib/universalIndexer';
 import styles from './GraphView.module.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -55,6 +56,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   person:    '#fb7185',   // --dim-practical
   place:     '#60a5fa',
   book:      '#fbbf24',
+  sermon:    '#f97316',   // warm flame for sermons
+  prayer:    '#ec4899',   // rose/pink for prayers
 };
 
 function nodeColor(category: string): string {
@@ -79,6 +82,8 @@ const CATEGORY_RADIUS: Record<string, number> = {
   question: 14,
   doctrine: 12,
   concept:  10,
+  sermon:   11,
+  prayer:    9,
   verse:     7,
   theme:    10,
   person:    9,
@@ -107,8 +112,15 @@ export default function GraphView({
   const [error,     setError]     = useState<string | null>(null);
   const [selected,  setSelected]  = useState<GraphNode | null>(null);
   const [meta,      setMeta]      = useState<{ nodeCount: number; edgeCount: number; subgraph: boolean } | null>(null);
+  const [enabledLayers, setEnabledLayers] = useState<Record<string, boolean>>({
+    doctrine: true,
+    verse:    true,
+    concept:  true,
+    sermon:   true,
+    prayer:   true,
+  });
 
-  // ── Fetch graph data ────────────────────────────────────────────────────────
+  // ── Fetch graph data + synthesize local sermons & prayers ───────────────────
 
   const fetchGraph = useCallback(async () => {
     setLoading(true);
@@ -122,13 +134,97 @@ export default function GraphView({
       const res  = await fetch(url);
       const json = await res.json();
 
+      let fetchedNodes: GraphNode[] = [];
+      let fetchedEdges: GraphEdge[] = [];
+
       if (!json.success) {
         setError(json.error ?? 'Failed to load graph.');
       } else {
-        setNodes(json.nodes ?? []);
-        setEdges(json.edges ?? []);
-        setMeta(json.meta ?? null);
+        fetchedNodes = json.nodes ?? [];
+        fetchedEdges = json.edges ?? [];
       }
+
+      // Synthesize user sermons from local storage as first-class nodes
+      const localSermons = getLocalSermons();
+      const sermonNodes: GraphNode[] = [];
+      const sermonEdges: GraphEdge[] = [];
+
+      localSermons.forEach((s) => {
+        const sNodeId = `local_sermon_${s.id}`;
+        sermonNodes.push({
+          id: sNodeId,
+          node_key: `sermon:${s.id}`,
+          label: s.title || 'Untitled Sermon',
+          category: 'sermon',
+          source_type: 'sermon',
+          dimension: 'Theological',
+          description: s.content?.slice(0, 120) || 'Community & Pastoral Sermon',
+        });
+
+        // If sermon references a passage, link to any existing or synthesized verse node
+        const refs = extractScriptureReferences(`${s.title} ${s.content}`);
+        refs.forEach((ref) => {
+          const matchVerse = fetchedNodes.find(
+            (n) => n.category === 'verse' && (n.label.toLowerCase().includes(ref.toLowerCase()) || ref.toLowerCase().includes(n.label.toLowerCase()))
+          );
+          if (matchVerse && matchVerse.id) {
+            sermonEdges.push({
+              source_id: sNodeId,
+              target_id: matchVerse.id,
+              relation: 'preached_from',
+              confidence: 'EXTRACTED',
+              weight: 0.9,
+            });
+          }
+        });
+      });
+
+      // Synthesize user prayers from local storage as first-class nodes
+      const localPrayers = getLocalPrayers();
+      const prayerNodes: GraphNode[] = [];
+      const prayerEdges: GraphEdge[] = [];
+
+      localPrayers.forEach((p) => {
+        const pNodeId = `local_prayer_${p.id}`;
+        prayerNodes.push({
+          id: pNodeId,
+          node_key: `prayer:${p.id}`,
+          label: p.title || 'Prayer Request',
+          category: 'prayer',
+          source_type: 'prayer',
+          dimension: 'Practical Application',
+          description: p.private_details || p.contact?.category || 'Personal or Intercessory Prayer',
+          encourage_category: p.contact?.category,
+        });
+
+        // Find matches in private_details or title
+        const refs = extractScriptureReferences(`${p.title} ${p.private_details || ''}`);
+        refs.forEach((ref) => {
+          const matchVerse = fetchedNodes.find(
+            (n) => n.category === 'verse' && (n.label.toLowerCase().includes(ref.toLowerCase()) || ref.toLowerCase().includes(n.label.toLowerCase()))
+          );
+          if (matchVerse && matchVerse.id) {
+            prayerEdges.push({
+              source_id: pNodeId,
+              target_id: matchVerse.id,
+              relation: 'prayed_with',
+              confidence: 'EXTRACTED',
+              weight: 0.85,
+            });
+          }
+        });
+      });
+
+      const combinedNodes = [...fetchedNodes, ...sermonNodes, ...prayerNodes];
+      const combinedEdges = [...fetchedEdges, ...sermonEdges, ...prayerEdges];
+
+      setNodes(combinedNodes);
+      setEdges(combinedEdges);
+      setMeta({
+        nodeCount: combinedNodes.length,
+        edgeCount: combinedEdges.length,
+        subgraph: Boolean(nodeKey),
+      });
     } catch (e) {
       setError(String(e));
     } finally {
@@ -141,11 +237,22 @@ export default function GraphView({
      
   }, [fetchGraph]);
 
+  // ── Filter nodes and edges by enabled layers ───────────────────────────────
+
+  const visibleNodes = useMemo(() => {
+    return nodes.filter((n) => {
+      if (n.category in enabledLayers) {
+        return enabledLayers[n.category];
+      }
+      return true;
+    });
+  }, [nodes, enabledLayers]);
+
   // ── D3 simulation ───────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (loading || error || !svgRef.current || !wrapRef.current) return;
-    if (nodes.length === 0) return;
+    if (visibleNodes.length === 0) return;
 
     const width  = wrapRef.current.clientWidth || 800;
     const svgEl  = svgRef.current;
@@ -185,7 +292,7 @@ export default function GraphView({
       svg.call(zoom);
 
       // Build D3 node/edge arrays (clone to avoid mutation)
-      const d3Nodes: D3Node[] = nodes.map((n) => ({ ...n }));
+      const d3Nodes: D3Node[] = visibleNodes.map((n) => ({ ...n }));
       const nodeById = new Map(d3Nodes.map((n) => [n.id!, n]));
 
       const d3Edges: D3Edge[] = edges
@@ -280,11 +387,18 @@ export default function GraphView({
 
       return () => { simulation.stop(); };
     });
-  }, [nodes, edges, loading, error, height, onNodeClick]);
+  }, [visibleNodes, edges, loading, error, height, onNodeClick]);
 
   // ── Legend data ─────────────────────────────────────────────────────────────
 
   const legendItems = Object.entries(CATEGORY_COLORS);
+
+  const toggleLayer = (layer: string) => {
+    setEnabledLayers((prev) => ({
+      ...prev,
+      [layer]: !prev[layer],
+    }));
+  };
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -295,9 +409,26 @@ export default function GraphView({
         <span className={styles.toolbarTitle}>
           {nodeKey ? `Subgraph: ${nodeKey}` : 'Knowledge Graph'}
         </span>
+        <div className={styles.layerToolbar}>
+          <span className={styles.layerLabel}>Layers:</span>
+          {(['doctrine', 'verse', 'concept', 'sermon', 'prayer'] as const).map((layer) => (
+            <button
+              key={layer}
+              type="button"
+              className={`${styles.layerBtn} ${enabledLayers[layer] ? styles.layerBtnActive : ''}`}
+              onClick={() => toggleLayer(layer)}
+            >
+              <span
+                className={styles.layerDot}
+                style={{ background: CATEGORY_COLORS[layer] ?? '#fff' }}
+              />
+              {layer}
+            </button>
+          ))}
+        </div>
         {meta && (
           <span className={styles.toolbarMeta}>
-            {meta.nodeCount} nodes · {meta.edgeCount} edges
+            {visibleNodes.length}/{meta.nodeCount} nodes · {meta.edgeCount} edges
           </span>
         )}
         <button
@@ -384,6 +515,45 @@ export default function GraphView({
           {selected.description && (
             <p className={styles.nodePanelDesc}>{selected.description}</p>
           )}
+          <div className={styles.nodePanelActions}>
+            {(selected.strongs_num || selected.scripture_ref || selected.category === 'verse') && (
+              <a
+                className={styles.nodePanelActionBtn}
+                href={
+                  selected.strongs_num
+                    ? `/bible?strongs=${encodeURIComponent(selected.strongs_num)}`
+                    : `/bible?q=${encodeURIComponent(selected.scripture_ref || selected.label)}`
+                }
+              >
+                📖 Read in Bible
+              </a>
+            )}
+            {(selected.catechism_ref || selected.category === 'doctrine') && (
+              <a
+                className={styles.nodePanelActionBtn}
+                href="/catechism"
+              >
+                📜 Catechism
+              </a>
+            )}
+            <a
+              className={styles.nodePanelActionBtn}
+              href={`/encourage?q=${encodeURIComponent(selected.label)}`}
+            >
+              🌟 Encouragement
+            </a>
+            {selected.node_key && (
+              <button
+                type="button"
+                className={styles.nodePanelActionBtn}
+                onClick={() => {
+                  onNodeClick?.(selected);
+                }}
+              >
+                🔍 Focus Node
+              </button>
+            )}
+          </div>
           {selected.node_key && (
             <a
               className={styles.nodePanelLink}

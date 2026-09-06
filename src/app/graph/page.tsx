@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import PageHeader from '@/components/PageHeader/PageHeader';
-import { Network, Search, RefreshCw, Cpu, Database } from 'lucide-react';
+import {
+  Network,
+  Search,
+  RefreshCw,
+  Cpu,
+  Database,
+  BookOpen,
+  ScrollText,
+  Sparkles,
+  Compass,
+} from 'lucide-react';
 import GraphView from '@/components/GraphView';
 import type { GraphNode } from '@/lib/graph';
 import styles from './page.module.css';
@@ -76,18 +86,59 @@ export default function GraphPage() {
 
       {lastNode && (
         <section className={styles.lastSelected}>
-          <span className={styles.lastSelectedLabel}>Last selected:</span>
-          <strong>{lastNode.label}</strong>
-          <span className={styles.lastSelectedMeta}>
-            {lastNode.category}
-            {lastNode.dimension ? ` · ${lastNode.dimension}` : ''}
-          </span>
-          <button
-            className={styles.drillBtn}
-            onClick={() => { setFocusKey(lastNode.node_key); setSearch(lastNode.node_key); }}
-          >
-            Drill into subgraph →
-          </button>
+          <div className={styles.selectedHeader}>
+            <div className={styles.selectedTitleRow}>
+              <span className={styles.lastSelectedLabel}>Selected Concept:</span>
+              <strong className={styles.selectedTitle}>{lastNode.label}</strong>
+              <span className={styles.lastSelectedMeta}>
+                {lastNode.category}
+                {lastNode.dimension ? ` · ${lastNode.dimension}` : ''}
+              </span>
+            </div>
+            {lastNode.description && (
+              <p className={styles.selectedDesc}>{lastNode.description}</p>
+            )}
+          </div>
+
+          <div className={styles.actionButtonGroup}>
+            {(lastNode.strongs_num || lastNode.scripture_ref || lastNode.category === 'verse') && (
+              <a
+                className={styles.actionLink}
+                href={
+                  lastNode.strongs_num
+                    ? `/bible?strongs=${encodeURIComponent(lastNode.strongs_num)}`
+                    : `/bible?q=${encodeURIComponent(lastNode.scripture_ref || lastNode.label)}`
+                }
+              >
+                <BookOpen size={14} />
+                <span>Read in Bible ({lastNode.strongs_num || lastNode.scripture_ref || lastNode.label})</span>
+              </a>
+            )}
+
+            {(lastNode.catechism_ref || lastNode.category === 'doctrine') && (
+              <a className={styles.actionLink} href="/catechism">
+                <ScrollText size={14} />
+                <span>Explore in Catechism</span>
+              </a>
+            )}
+
+            <a
+              className={styles.actionLink}
+              href={`/encourage?q=${encodeURIComponent(lastNode.label)}`}
+            >
+              <Sparkles size={14} />
+              <span>Words of Encouragement</span>
+            </a>
+
+            <button
+              type="button"
+              className={styles.drillBtn}
+              onClick={() => { setFocusKey(lastNode.node_key); setSearch(lastNode.node_key); }}
+            >
+              <Compass size={14} />
+              <span>Drill into subgraph</span>
+            </button>
+          </div>
         </section>
       )}
     </main>

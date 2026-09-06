@@ -74,9 +74,8 @@ async function callClaude(
   maxTokens = 1024,
   apiKey?: string
 ): Promise<string> {
-  void maxTokens;
   try {
-    return await callGemini(system, userMessage, apiKey);
+    return await callGemini(system, userMessage, apiKey, { maxOutputTokens: maxTokens });
   } catch (err: any) {
     if (err.message && err.message.includes('RESOURCE_EXHAUSTED')) {
       throw new Error('AI Assistant is currently offline due to rate-limits or depleted credits. Please try again later.');
@@ -227,14 +226,15 @@ async function runStage1(
   apiKey?: string
 ): Promise<ClassificationResult> {
   const t0 = Date.now();
-  const contextBlock = ragContext
-    ? `\n\nMODERATOR-APPROVED CONTEXT FOR REFERENCE:\n${ragContext}\n`
+  const safeRag = ragContext ? ragContext.slice(0, 1500) : '';
+  const contextBlock = safeRag
+    ? `\n\nMODERATOR-APPROVED CONTEXT FOR REFERENCE:\n${safeRag}\n`
     : '';
 
   const raw = await callClaude(
     STAGE1_SYSTEM,
     `Question: ${question}${contextBlock}`,
-    512,
+    300,
     apiKey
   );
 
@@ -290,7 +290,7 @@ async function runStage3(
   const raw = await callClaude(
     STAGE3_SYSTEM,
     `Question: ${question}\n\nVerses to evaluate:\n${verseBlock}`,
-    768,
+    400,
     apiKey
   );
 
@@ -339,14 +339,15 @@ async function runStage4(
     .map((v) => `${v.reference}: "${v.text}"`)
     .join('\n');
 
-  const contextSnippet = ragContext
-    ? `\n\nHISTORICAL DOCTRINAL & CONFESSIONAL REFERENCE (use to cite exact catechisms/confessions):\n${ragContext}\n`
+  const safeRag = ragContext ? ragContext.slice(0, 1500) : '';
+  const contextSnippet = safeRag
+    ? `\n\nHISTORICAL DOCTRINAL & CONFESSIONAL REFERENCE (use to cite exact catechisms/confessions):\n${safeRag}\n`
     : '';
 
   const raw = await callClaude(
     STAGE4_SYSTEM,
     `Question: ${question}\n\nVerified Scripture passages:\n${verseBlock || '(none fetched — reason from scripture knowledge)'}${contextSnippet}`,
-    1024,
+    650,
     apiKey
   );
 
@@ -381,7 +382,7 @@ async function runStage5(
       `\nVerified Scripture:\n${verseBlock || '(none)'}`,
       `\nHistorical Analysis:\n${JSON.stringify(historicalAnalysis, null, 2)}`,
     ].join('\n'),
-    1024,
+    900,
     apiKey
   );
 
@@ -422,7 +423,7 @@ async function runStage6(
     `\nTHEOLOGICAL SYNTHESIS:\n${JSON.stringify(synthesis, null, 2)}`,
   ].join('\n');
 
-  const raw = await callClaude(STAGE6_SYSTEM, assemblyPrompt, 4096, apiKey);
+  const raw = await callClaude(STAGE6_SYSTEM, assemblyPrompt, 1600, apiKey);
 
   type RawAnswer = Omit<BibleAnswer, 'id' | 'question' | 'translation_used' | 'created_at' | 'status'>;
   let parsed = tryParseJSON<RawAnswer>(raw);
@@ -432,7 +433,7 @@ async function runStage6(
       STAGE6_SYSTEM,
       assemblyPrompt +
         '\n\nYour previous response was not valid JSON. Return ONLY the raw JSON object. Start with { and end with }.'
-    , 4096, apiKey);
+    , 1600, apiKey);
     parsed = tryParseJSON<RawAnswer>(retryRaw);
     if (!parsed) throw new Error(`Stage 6 (Assembly) returned invalid JSON after retry`);
   }

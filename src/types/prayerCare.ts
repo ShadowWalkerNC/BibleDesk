@@ -82,6 +82,8 @@ export interface PrayerCommitment {
   church_id?: string | null;
   urgency_level?: PrayerUrgencyLevel;
   is_anonymous?: boolean;
+  country_code?: string;
+  country_name?: string;
   created_at: string;
   updated_at: string;
   // Computed / local helper

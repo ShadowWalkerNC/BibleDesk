@@ -16,6 +16,11 @@ function getServerGeminiClient(): GoogleGenAI | null {
   return _serverAi;
 }
 
+export interface GeminiCallOptions {
+  maxOutputTokens?: number;
+  temperature?: number;
+}
+
 /**
  * Common call helper to complete a text prompt using Gemini 2.5 Flash.
  * Supports Bring-Your-Own-Key (BYOK) passed from client requests,
@@ -24,7 +29,8 @@ function getServerGeminiClient(): GoogleGenAI | null {
 export async function callGemini(
   systemInstruction: string,
   prompt: string,
-  apiKeyOverride?: string
+  apiKeyOverride?: string,
+  options?: GeminiCallOptions
 ): Promise<string> {
   let ai: GoogleGenAI | null = null;
 
@@ -45,6 +51,8 @@ export async function callGemini(
     contents: prompt,
     config: {
       systemInstruction: systemInstruction,
+      maxOutputTokens: options?.maxOutputTokens ?? 1024,
+      temperature: options?.temperature ?? 0.3,
     },
   });
 

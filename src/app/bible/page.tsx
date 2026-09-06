@@ -32,6 +32,8 @@ import {
   Columns3,
 } from 'lucide-react';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
+import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
+import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
@@ -82,7 +84,8 @@ function BibleReaderContent() {
   // AI Study states
   const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search'>('search');
+  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search' | 'connected'>('search');
+  const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
   const [studyData, setStudyData] = useState<AIStudyData | null>(null);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [studyError, setStudyError] = useState<string | null>(null);
@@ -1097,6 +1100,15 @@ function BibleReaderContent() {
                 >
                   Notes
                 </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'connected'}
+                  aria-controls="connected-tab"
+                  className={`${styles.tabLink} ${activeTab === 'connected' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('connected')}
+                >
+                  Connected
+                </button>
 
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '2px' }}>
                   <button
@@ -1353,6 +1365,116 @@ function BibleReaderContent() {
                   )}
                   </>
                 )}
+
+                {/* TAB 5: Connected Knowledge */}
+                {activeTab === 'connected' && (() => {
+                  const currentRef = `${selectedBook} ${selectedChapter}${selectedVerse ? `:${selectedVerse.verse}` : ''}`;
+                  const conn = resolveConnectionsForVerse(currentRef);
+                  return (
+                    <div id="connected-tab" role="tabpanel" className={styles.tabPanel}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(181, 132, 20, 0.2)' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Linked to {currentRef}</span>
+                          <button
+                            onClick={() => setIsKnowledgeDrawerOpen(true)}
+                            style={{ background: 'none', border: '1px solid var(--gold-600)', color: 'var(--gold-600)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            <ExternalLink size={11} /> Open Drawer
+                          </button>
+                        </div>
+
+                        {/* Strong's */}
+                        <div>
+                          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--text-muted)' }}>
+                            Original Languages (Strong&apos;s)
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.3rem' }}>
+                            {conn.strongs.map((s) => (
+                              <button
+                                key={s.code}
+                                onClick={() => {
+                                  setSearchQuery(s.code);
+                                  setActiveTab('search');
+                                }}
+                                style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', padding: '3px 8px', fontSize: '0.78rem', cursor: 'pointer' }}
+                                title={s.definition}
+                              >
+                                <strong>{s.code}</strong> {s.lemma} ({s.transliteration})
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Sermons */}
+                        <div>
+                          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--text-muted)' }}>
+                            Linked Sermons ({conn.sermons.length})
+                          </span>
+                          {conn.sermons.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.3rem' }}>
+                              {conn.sermons.map((s) => (
+                                <a
+                                  key={s.id}
+                                  href="/sermons"
+                                  style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                                >
+                                  <strong>{s.title}</strong>
+                                  {s.excerpt && <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{s.excerpt}</p>}
+                                </a>
+                              ))}
+                            </div>
+                          ) : (
+                            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.3rem 0 0' }}>No local sermon outlines reference this chapter yet.</p>
+                          )}
+                        </div>
+
+                        {/* Prayers */}
+                        <div>
+                          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--text-muted)' }}>
+                            Linked Prayers ({conn.prayers.length})
+                          </span>
+                          {conn.prayers.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.3rem' }}>
+                              {conn.prayers.map((p) => (
+                                <a
+                                  key={p.id}
+                                  href="/prayer"
+                                  style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                                >
+                                  <strong>{p.title}</strong>
+                                  {p.text && <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{p.text}</p>}
+                                </a>
+                              ))}
+                            </div>
+                          ) : (
+                            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.3rem 0 0' }}>No prayers tagged with this passage.</p>
+                          )}
+                        </div>
+
+                        {/* Catechisms */}
+                        {conn.catechisms.length > 0 && (
+                          <div>
+                            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--text-muted)' }}>
+                              Catechisms & Creeds
+                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.3rem' }}>
+                              {conn.catechisms.map((c, i) => (
+                                <a
+                                  key={i}
+                                  href="/catechism"
+                                  style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                                >
+                                  <div style={{ fontWeight: 600, color: 'var(--gold-600)' }}>{c.catechism} Q{c.qNum}</div>
+                                  <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{c.question}</div>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -1360,6 +1482,13 @@ function BibleReaderContent() {
 
         </div>
       </main>
+
+      <ConnectedKnowledgeDrawer
+        isOpen={isKnowledgeDrawerOpen}
+        onClose={() => setIsKnowledgeDrawerOpen(false)}
+        entityType="verse"
+        entityId={`${selectedBook} ${selectedChapter}${selectedVerse ? `:${selectedVerse.verse}` : ''}`}
+      />
 
       <QuickJumpModal
         isOpen={isQuickJumpOpen}

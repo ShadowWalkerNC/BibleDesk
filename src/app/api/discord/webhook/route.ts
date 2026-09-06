@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendDiscordWebhook, formatBibleAnswerDiscordEmbed } from '@/lib/discord';
+import { getAppUrl } from '@/lib/appUrl';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,13 +22,13 @@ export async function POST(req: NextRequest) {
 
     if (type === 'answer' && answer) {
       const shareUrl = answer.id
-        ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/share/${answer.id.slice(0, 8)}`
+        ? `${getAppUrl()}/share/${answer.id.slice(0, 8)}`
         : undefined;
       payload = formatBibleAnswerDiscordEmbed(answer, shareUrl);
     } else {
       payload = {
         username: 'BibleDesk Community',
-        avatar_url: 'https://bibledesk.org/icon-512.png',
+        avatar_url: `${getAppUrl()}/icon-512.png`,
         embeds: [
           {
             title: title || '✦ BibleDesk Shared Update',

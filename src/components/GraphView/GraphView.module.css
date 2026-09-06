@@ -38,6 +38,60 @@
   font-variant-numeric: tabular-nums;
 }
 
+.layerToolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+.layerLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 0.2rem;
+}
+
+.layerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.layerBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.layerBtnActive {
+  background: rgba(181, 132, 20, 0.22);
+  border-color: var(--gold-500);
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.layerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .refreshBtn {
   background: none;
   border: 1px solid var(--glass-border);
@@ -286,10 +340,44 @@
   margin-bottom: 0.75rem;
 }
 
+.nodePanelActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.nodePanelActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-400);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nodePanelActionBtn:hover {
+  background: rgba(181, 132, 20, 0.24);
+  color: #ffffff;
+  border-color: var(--gold-400);
+}
+
 .nodePanelLink {
+  display: block;
   font-size: 0.72rem;
   color: var(--gold-500);
   text-decoration: none;
+  text-align: center;
 }
 
 .nodePanelLink:hover {

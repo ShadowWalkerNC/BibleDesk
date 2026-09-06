@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   X,
   TrendingUp,
@@ -13,7 +13,7 @@ import {
   Send,
 } from 'lucide-react';
 import { PrayerEscalationLevel, PrayerUrgencyLevel } from '@/types/prayerCare';
-import { SAMPLE_CHURCHES } from '@/types/church';
+import type { ChurchProfile } from '@/types/church';
 import styles from './PrayerEscalationModal.module.css';
 
 interface PrayerEscalationModalProps {
@@ -82,10 +82,39 @@ export default function PrayerEscalationModal({
   const [selectedUrgency, setSelectedUrgency] = useState<PrayerUrgencyLevel>(
     prayer.urgency_level || 'normal'
   );
-  const [selectedChurchId, setSelectedChurchId] = useState<string>(SAMPLE_CHURCHES[0].id);
+  const [churches, setChurches] = useState<ChurchProfile[]>([]);
+  const [selectedChurchId, setSelectedChurchId] = useState<string>('');
+  const [customChurchCode, setCustomChurchCode] = useState<string>('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [updateNote, setUpdateNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function loadChurches() {
+      try {
+        const res = await fetch('/api/church');
+        const data = await res.json();
+        let list: ChurchProfile[] = data.churches || [];
+        if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('bibledesk_my_churches');
+          if (local) {
+            const parsed = JSON.parse(local);
+            const ids = new Set(list.map((c: ChurchProfile) => c.id));
+            for (const c of parsed) {
+              if (!ids.has(c.id)) list.unshift(c);
+            }
+          }
+        }
+        setChurches(list);
+        if (list.length > 0) {
+          setSelectedChurchId(list[0].id);
+        }
+      } catch (err) {
+        console.warn('Could not load churches in modal:', err);
+      }
+    }
+    loadChurches();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,18 +183,32 @@ export default function PrayerEscalationModal({
           {selectedLevel === 'church' && (
             <div className={styles.ladderSection}>
               <span className={styles.sectionLabel}>Select Affiliated Church</span>
-              <select
-                className={styles.textarea}
-                style={{ minHeight: '44px' }}
-                value={selectedChurchId}
-                onChange={e => setSelectedChurchId(e.target.value)}
-              >
-                {SAMPLE_CHURCHES.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.city}, {c.country})
-                  </option>
-                ))}
-              </select>
+              {churches.length > 0 ? (
+                <select
+                  className={styles.textarea}
+                  style={{ minHeight: '44px' }}
+                  value={selectedChurchId}
+                  onChange={e => setSelectedChurchId(e.target.value)}
+                >
+                  {churches.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.city ? `${c.city}, ` : ''}{c.country || 'USA'})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={styles.textarea}
+                  style={{ minHeight: '44px' }}
+                  placeholder="Enter Church Invite Code (e.g. GC2026)"
+                  value={customChurchCode}
+                  onChange={e => {
+                    setCustomChurchCode(e.target.value);
+                    setSelectedChurchId(e.target.value);
+                  }}
+                />
+              )}
             </div>
           )}
 

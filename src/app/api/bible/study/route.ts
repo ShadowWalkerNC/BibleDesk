@@ -106,7 +106,7 @@ Analyze this verse and generate the structured JSON study guide. Ensure original
 
     let responseText = '';
     try {
-      responseText = await callGemini(SYSTEM_PROMPT, prompt, userApiKey);
+      responseText = await callGemini(SYSTEM_PROMPT, prompt, userApiKey, { maxOutputTokens: 700 });
     } catch (apiErr: any) {
       console.warn('[bible/study] Gemini API call failed (credits depleted or quota exceeded). Returning offline fallback study guide:', apiErr.message);
       const mockStudy = {

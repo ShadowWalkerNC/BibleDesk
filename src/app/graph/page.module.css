@@ -180,45 +180,107 @@
 
 .lastSelected {
   display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(252, 249, 242, 0.95);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(90, 70, 40, 0.06);
+}
+
+.selectedHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.selectedTitleRow {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding: 0.75rem 1.25rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  font-size: 0.88rem;
 }
 
 .lastSelectedLabel {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.selectedTitle {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-primary);
 }
 
 .lastSelectedMeta {
-  color: var(--text-muted);
-  font-size: 0.78rem;
+  color: var(--gold-600);
+  background: rgba(181, 132, 20, 0.1);
+  border: 1px solid rgba(181, 132, 20, 0.22);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: capitalize;
 }
 
-.drillBtn {
-  margin-left: auto;
-  background: none;
-  border: 1px solid var(--gold-600);
+.selectedDesc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.actionButtonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.actionLink, .drillBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid rgba(181, 132, 20, 0.28);
   border-radius: var(--radius-sm);
-  color: var(--gold-400);
-  cursor: pointer;
+  color: var(--text-primary);
+  text-decoration: none;
   font-size: 0.82rem;
-  padding: 0.35rem 0.9rem;
-  transition: background 0.2s;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 5px rgba(90, 70, 40, 0.04);
+}
+
+.actionLink:hover {
+  background: #fffdf8;
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+  transform: translateY(-1px);
+}
+
+.drillBtn {
+  background: linear-gradient(135deg, #b58414 0%, #7d5605 100%);
+  color: #ffffff;
+  border: 1px solid #7d5605;
 }
 
 .drillBtn:hover {
-  background: var(--gold-glow);
+  background: linear-gradient(135deg, #c8940e 0%, #916307 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
   .page { padding: 1.25rem 1rem 3rem; }
   .searchInput { max-width: 100%; }
-  .drillBtn { margin-left: 0; }
+  .actionButtonGroup { flex-direction: column; align-items: stretch; }
+  .actionLink, .drillBtn { justify-content: center; }
 }

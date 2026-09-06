@@ -34,6 +34,10 @@ import {
   writeGraphFromAnswer,
   type GraphData,
 } from '@/lib/graph';
+import {
+  getCanonicalGraph,
+  getCanonicalSubgraph,
+} from '@/lib/canonicalGraph';
 import type { BibleAnswer } from '@/types';
 
 const GRAPH_WRITE_SECRET = process.env.GRAPH_WRITE_SECRET;
@@ -51,26 +55,22 @@ export async function GET(req: NextRequest) {
   );
 
   try {
+    const canonical = nodeKey ? getCanonicalSubgraph(nodeKey) : getCanonicalGraph();
+
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      // Mock data so the graph page doesn't crash
       return NextResponse.json({
         success: true,
-        nodes: [
-          { id: '1', node_key: 'grace', label: 'Grace', category: 'doctrine', source_type: 'canonical' },
-          { id: '2', node_key: 'faith', label: 'Faith', category: 'doctrine', source_type: 'canonical' },
-          { id: '3', node_key: 'repentance', label: 'Repentance', category: 'doctrine', source_type: 'canonical' },
-          { id: '4', node_key: 'forgiveness', label: 'Forgiveness', category: 'concept', source_type: 'canonical' }
-        ],
-        edges: [
-          { id: 'e1', source_id: '1', target_id: '2', relation: 'leads_to', confidence: 'EXTRACTED', label: 'leads to' },
-          { id: 'e2', source_id: '2', target_id: '3', relation: 'leads_to', confidence: 'INFERRED', label: 'triggers' },
-          { id: 'e3', source_id: '1', target_id: '4', relation: 'leads_to', confidence: 'EXTRACTED', label: 'grants' }
-        ],
-        meta: { nodeCount: 4, edgeCount: 3, subgraph: false }
+        nodes: canonical.nodes,
+        edges: canonical.edges,
+        meta: {
+          nodeCount: canonical.nodes.length,
+          edgeCount: canonical.edges.length,
+          subgraph: !!nodeKey,
+        },
       });
     }
 
-    let graph: GraphData;
+    let dbGraph: GraphData;
 
     if (nodeKey) {
       if (nodeKey.length > 200) {
@@ -79,37 +79,45 @@ export async function GET(req: NextRequest) {
           { status: 400 }
         );
       }
-      graph = await getSubgraph(nodeKey);
+      dbGraph = await getSubgraph(nodeKey);
     } else {
-      graph = await getFullGraph();
-      // Honour limit for full graph (already DB-limited to 2000)
-      graph.nodes = graph.nodes.slice(0, limit);
-      graph.edges = graph.edges.slice(0, limit);
+      dbGraph = await getFullGraph();
     }
+
+    // Merge canonical dataset with dynamic DB nodes
+    const nodeMap = new Map();
+    for (const n of canonical.nodes) nodeMap.set(n.node_key, n);
+    for (const n of dbGraph.nodes) nodeMap.set(n.node_key, n);
+
+    const edgeMap = new Map();
+    for (const e of canonical.edges) edgeMap.set(`${e.source_id}->${e.target_id}`, e);
+    for (const e of dbGraph.edges) edgeMap.set(`${e.source_id}->${e.target_id}`, e);
+
+    const mergedNodes = Array.from(nodeMap.values()).slice(0, limit);
+    const mergedEdges = Array.from(edgeMap.values()).slice(0, limit);
 
     return NextResponse.json({
       success:  true,
-      nodes:    graph.nodes,
-      edges:    graph.edges,
+      nodes:    mergedNodes,
+      edges:    mergedEdges,
       meta: {
-        nodeCount: graph.nodes.length,
-        edgeCount: graph.edges.length,
+        nodeCount: mergedNodes.length,
+        edgeCount: mergedEdges.length,
         subgraph:  !!nodeKey,
       },
     });
   } catch (err) {
-    console.error('[graph] GET error:', err);
-    // Return dummy data fallback instead of 500 error
+    console.error('[graph] GET error, falling back to canonical graph:', err);
+    const fallback = getCanonicalGraph();
     return NextResponse.json({
       success: true,
-      nodes: [
-        { id: '1', node_key: 'grace', label: 'Grace', category: 'doctrine', source_type: 'canonical' },
-        { id: '2', node_key: 'faith', label: 'Faith', category: 'doctrine', source_type: 'canonical' }
-      ],
-      edges: [
-        { id: 'e1', source_id: '1', target_id: '2', relation: 'leads_to', confidence: 'EXTRACTED', label: 'leads to' }
-      ],
-      meta: { nodeCount: 2, edgeCount: 1, subgraph: false, warning: 'Fallback to mock data' }
+      nodes: fallback.nodes,
+      edges: fallback.edges,
+      meta: {
+        nodeCount: fallback.nodes.length,
+        edgeCount: fallback.edges.length,
+        subgraph: false,
+      },
     });
   }
 }

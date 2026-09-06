@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { getServerClient } from '@/lib/supabase';
+import { getAppUrl } from '@/lib/appUrl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.app';
+  const baseUrl = getAppUrl();
 
   // Base routes
   const routes = ['', '/graph', '/history'].map((route) => ({

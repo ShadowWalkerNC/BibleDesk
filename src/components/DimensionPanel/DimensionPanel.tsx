@@ -4,7 +4,8 @@ import type { BibleAnswer, DimensionKey } from '@/types';
 import { DIMENSION_META } from '@/types';
 import { useToast } from '@/components/Toast/Toast';
 import { useBookmark } from '@/hooks/useBookmark';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAppUrl } from '@/lib/appUrl';
 import { 
   BookOpen, 
   Landmark, 
@@ -47,9 +48,12 @@ const DIMENSION_ICONS: Record<DimensionKey, any> = {
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
+
+  const effectiveSlug = shareSlug || (answer?.id ? answer.id.slice(0, 8) : null);
+
   const { bookmarked, loading: bookmarkLoading, toggle: toggleBookmark } = useBookmark(
     answer,
-    shareSlug ?? null
+    effectiveSlug ?? null
   );
 
   const activeDim   = answer.dimensions[activeTab];
@@ -57,9 +61,24 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
   const accentColor = DIMENSION_COLORS[activeTab];
   const ActiveIcon  = DIMENSION_ICONS[activeTab];
 
-  const shareUrl = shareSlug
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareSlug}`
-    : typeof window !== 'undefined' ? window.location.href : '';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : getAppUrl();
+  const shareUrl = effectiveSlug
+    ? `${baseUrl}/share/${effectiveSlug}`
+    : `${baseUrl}`;
+
+  // Cache answer locally so /share/[slug] can always render even if offline or DB is unconfigured
+  useEffect(() => {
+    if (answer && effectiveSlug && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('bibledesk_recent_answers');
+        const cache = stored ? JSON.parse(stored) : {};
+        cache[effectiveSlug] = answer;
+        localStorage.setItem('bibledesk_recent_answers', JSON.stringify(cache));
+      } catch (err) {
+        console.warn('Could not cache recent answer locally:', err);
+      }
+    }
+  }, [answer, effectiveSlug]);
 
   function handleCopyText() {
     const text = [
@@ -87,7 +106,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
   }
 
   async function handleBookmark() {
-    if (!shareSlug) {
+    if (!effectiveSlug) {
       toast('Answer must be saved before bookmarking', 'error');
       return;
     }
@@ -142,9 +161,9 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
           <span className={styles.translationTag}>
             {answer.translation_used.toUpperCase()} translation
           </span>
-          {shareSlug && (
+          {effectiveSlug && (
             <a
-              href={`/share/${shareSlug}`}
+              href={`/share/${effectiveSlug}`}
               className={styles.permalinkBadge}
               target="_blank"
               rel="noopener noreferrer"
@@ -259,7 +278,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
             Copy
           </button>
 
-          {shareSlug && (
+          {effectiveSlug && (
             <button
               className={`${styles.shareBtn} ${styles.shareBtnLink}`}
               onClick={handleCopyLink}

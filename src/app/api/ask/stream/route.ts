@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
 
         const shareSlug = answer.id.slice(0, 8);
         emit('answer', {
+          answer,
           ...answer,
           shareSlug,
           rateLimit: {

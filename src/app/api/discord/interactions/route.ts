@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyDiscordInteraction, formatBibleAnswerDiscordEmbed } from '@/lib/discord';
 import { generateBibleAnswer } from '@/lib/claude';
 import { DAILY_DEVOTIONALS } from '@/lib/dailyData';
+import { getAppUrl } from '@/lib/appUrl';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: `📖 **Reading Passage:** ${refOption}\nRead directly on BibleDesk: ${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/bible?ref=${encodeURIComponent(refOption)}`,
+          content: `📖 **Reading Passage:** ${refOption}\nRead directly on BibleDesk: ${getAppUrl()}/bible?ref=${encodeURIComponent(refOption)}`,
         },
       });
     }
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
       try {
         const answer = await generateBibleAnswer(question, { translation: 'web' });
-        const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibledesk.org'}/share/${answer.id.slice(0, 8)}`;
+        const shareUrl = `${getAppUrl()}/share/${answer.id.slice(0, 8)}`;
         const discordPayload = formatBibleAnswerDiscordEmbed(answer, shareUrl);
 
         return NextResponse.json({

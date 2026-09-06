@@ -23,6 +23,12 @@
 
 ## 🔴 Deploy Checklist & Production Readiness
 
+- [x] Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network
+- [x] Connected Knowledge Drawer (`src/components/ConnectedKnowledgeDrawer/`) embedded across `/bible`, `/sermons`, and `/prayer`
+- [x] Toggleable Multi-Layer Knowledge Graph (`GraphView.tsx`) synthesizing local sermons, prayers, scripture verses, doctrines, and concepts with layer filter pills
+- [x] Production Share URL Canonicalization (`https://bible-desk.vercel.app/share/[slug]`)
+- [x] Gemini API Token Budget Optimization (capped maxOutputTokens across pipeline stages and `/api/bible/study` to eliminate rate limits)
+- [x] Verified church registry & real data foundation (removed unverified demo placeholders; church self-registration model via `/church`)
 - [x] Full local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT) with zero network dependency for text
 - [x] OpenScriptures Strong's Greek/Hebrew lexicons + Treasury of Scripture Knowledge (TSK) cross-refs engine
 - [x] Persistent App Shell & Sidebar navigation (Logos/Obsidian workspace feel, mobile bottom rail)
