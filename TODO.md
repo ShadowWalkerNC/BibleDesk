@@ -58,8 +58,8 @@
 - [x] Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST API reference, copyable cURL/TS snippets, and MCP setup guides
 - [x] Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`, `src/lib/pipeline.ts`) covering 8 classical theological loci with Scripture proofs, historical consensus, and fair multi-tradition perspectives (Reformed, Lutheran, Baptist, Anglican, Wesleyan, Pentecostal)
 - [x] Multi-Tradition Catechisms & Confessions (`src/lib/catechismData.ts`, `/catechism`) expanding Westminster & Heidelberg with Luther's Small Catechism (1529), 1689 Baptist Catechism, 39 Articles (1571), and Assemblies of God 16 Truths (1916)
-- [x] Live Christian Worship Radio Dock (`src/components/LiveRadioPlayer/`) with open sacred & instrumental streams, volume/playback controls, and 1-click official partner docks (K-LOVE, Air1, Moody)
-- [x] Church Live Sermon Theatre (`src/components/ChurchLivePlayer/`, `/sermons`) supporting YouTube Live & Facebook Live video embeds with zero server bandwidth cost
+- [x] Live Christian Worship Radio Dock (`LiveRadioPlayer.tsx`) with verified, high-availability HTTPS streams (Abiding Radio Sacred & Instrumental, Moody Radio Chicago WMBI Live, Great Songs of the Faith, Christian Life Radio, Abiding Kids), responsive audio error recovery with Retry / Next Station controls, and 1-click external station docks (K-LOVE, Air1, Moody)
+- [x] Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with zero-cost YouTube Live & Facebook Live embeds
 - [x] 1-Click ProPresenter 7 & Presentation Slide Exporter (`/sermons`) auto-chunking Scripture passages and outline headers for Sunday church projectors
 - [x] Church Tech Interoperability Hub (`/church`) detailing zero-cost integration workflows for Planning Center, ProPresenter, and website embed widgets
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
