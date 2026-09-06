@@ -79,19 +79,7 @@ export default function PrayerAtlas({
       });
   }, []);
 
-  // 2. Sync activePin when selectedPinId prop changes
-  useEffect(() => {
-    if (!selectedPinId) {
-      setActivePin(null);
-      return;
-    }
-    const matched = pins.find(p => p.id === selectedPinId);
-    if (matched) {
-      setActivePin(matched);
-    }
-  }, [selectedPinId, pins]);
-
-  // 3. Natural Earth Projection & Path Generator (2D vector, no 3D loop)
+  // 2. Natural Earth Projection & Path Generator (2D vector, no 3D loop)
   const projection = useMemo(() => {
     return d3.geoNaturalEarth1().fitSize([WIDTH, HEIGHT], { type: 'Sphere' });
   }, []);
@@ -103,6 +91,29 @@ export default function PrayerAtlas({
   const graticuleData = useMemo(() => {
     return d3.geoGraticule()();
   }, []);
+
+  // 3. Sync activePin and smooth zoom-in when selectedPinId changes
+  useEffect(() => {
+    if (!selectedPinId) {
+      setActivePin(null);
+      return;
+    }
+    const matched = pins.find(p => p.id === selectedPinId);
+    if (matched) {
+      setActivePin(matched);
+      if (svgRef.current && zoomBehaviorRef.current) {
+        const coords = projection([Number(matched.longitude), Number(matched.latitude)]);
+        if (coords && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          const [cx, cy] = coords;
+          const transform = d3.zoomIdentity
+            .translate(WIDTH / 2, HEIGHT / 2)
+            .scale(2.2)
+            .translate(-cx, -cy);
+          d3.select(svgRef.current).transition().duration(500).call(zoomBehaviorRef.current.transform, transform);
+        }
+      }
+    }
+  }, [selectedPinId, pins, projection]);
 
   // 4. D3 Zoom & Pan Setup
   useEffect(() => {
@@ -285,8 +296,11 @@ export default function PrayerAtlas({
 
             {/* 4. Active Prayer Pins & Highlight Areas */}
             {filteredPins.map((pin) => {
-              const coords = projection([pin.longitude, pin.latitude]);
-              if (!coords) return null;
+              const lngNum = Number(pin.longitude);
+              const latNum = Number(pin.latitude);
+              if (isNaN(lngNum) || isNaN(latNum)) return null;
+              const coords = projection([lngNum, latNum]);
+              if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return null;
               const [x, y] = coords;
               const meta = getCategoryMeta(pin.category, pin.isRestricted);
               const isSelected = activePin?.id === pin.id;

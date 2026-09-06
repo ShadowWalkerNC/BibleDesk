@@ -38,8 +38,11 @@ export async function POST(req: NextRequest) {
         likes_count: 0,
         created_at: new Date().toISOString(),
         country_code: body.country_code ?? null,
+        country_name: body.country_name ?? null,
         latitude: body.latitude ?? null,
         longitude: body.longitude ?? null,
+        category: body.category ?? 'community',
+        privacy_mode: body.privacy_mode ?? 'approximate',
         is_restricted: body.is_restricted ?? false,
       };
       return NextResponse.json({ success: true, prayer: mockResult });

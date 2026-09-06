@@ -102,5 +102,100 @@ export const COUNTRIES_SORTED = [...COUNTRIES].sort((a, b) => a.name.localeCompa
 
 /** Look up a country by its code */
 export function getCountryByCode(code: string): CountryEntry | undefined {
-  return COUNTRIES.find(c => c.code === code);
+  if (!code) return undefined;
+  const upper = code.trim().toUpperCase();
+  return COUNTRIES.find(c => c.code === upper);
 }
+
+/** Look up a country by name or common alias */
+export function getCountryByName(name: string): CountryEntry | undefined {
+  if (!name) return undefined;
+  const lower = name.trim().toLowerCase();
+  
+  if (['usa', 'us', 'america', 'united states of america'].includes(lower)) {
+    return getCountryByCode('US');
+  }
+  if (['uk', 'britain', 'great britain', 'england', 'scotland', 'wales'].includes(lower)) {
+    return getCountryByCode('GB');
+  }
+  if (['korea', 'south korea', 'republic of korea'].includes(lower)) {
+    return getCountryByCode('KR');
+  }
+  if (['north korea', 'dprk'].includes(lower)) {
+    return getCountryByCode('KP');
+  }
+  if (['drc', 'congo', 'dr congo'].includes(lower)) {
+    return getCountryByCode('CD');
+  }
+  if (['uae', 'emirates'].includes(lower)) {
+    return getCountryByCode('AE');
+  }
+
+  return COUNTRIES.find(c => c.name.toLowerCase() === lower || lower.includes(c.name.toLowerCase()));
+}
+
+/** Find country mention within freeform prayer text */
+export function findCountryInText(text: string): CountryEntry | undefined {
+  if (!text) return undefined;
+  const lower = text.toLowerCase();
+
+  // Common aliases
+  if (/\b(usa|united states|america)\b/.test(lower)) return getCountryByCode('US');
+  if (/\b(uk|united kingdom|britain|england|scotland)\b/.test(lower)) return getCountryByCode('GB');
+  if (/\b(south korea|korea)\b/.test(lower)) return getCountryByCode('KR');
+  if (/\b(north korea)\b/.test(lower)) return getCountryByCode('KP');
+
+  for (const c of COUNTRIES) {
+    const pattern = new RegExp(`\\b${c.name.toLowerCase()}\\b`, 'i');
+    if (pattern.test(lower)) {
+      return c;
+    }
+  }
+  return undefined;
+}
+
+/** Deterministic jitter based on an ID string so pins from the same nation centroid spread out cleanly */
+export function getPinJitter(seed: string): { lat: number; lng: number } {
+  if (!seed) return { lat: 0, lng: 0 };
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  const angle = Math.abs(hash % 360) * (Math.PI / 180);
+  const distance = 0.4 + (Math.abs((hash >> 3) % 100) / 100) * 1.6; // 0.4 to 2.0 degrees
+  return {
+    lat: Math.sin(angle) * distance,
+    lng: Math.cos(angle) * distance,
+  };
+}
+
+/** Global centroid fallback hubs for prayers without an explicit country */
+const GLOBAL_HUBS: CountryEntry[] = [
+  { name: 'United States', code: 'US', lat: 39.8283, lng: -98.5795, isRestricted: false },
+  { name: 'Nigeria', code: 'NG', lat: 9.082, lng: 8.6753, isRestricted: false },
+  { name: 'Brazil', code: 'BR', lat: -14.235, lng: -51.9253, isRestricted: false },
+  { name: 'United Kingdom', code: 'GB', lat: 55.3781, lng: -3.436, isRestricted: false },
+  { name: 'India', code: 'IN', lat: 20.5937, lng: 78.9629, isRestricted: false },
+  { name: 'Kenya', code: 'KE', lat: -0.0236, lng: 37.9062, isRestricted: false },
+  { name: 'South Korea', code: 'KR', lat: 35.9078, lng: 127.7669, isRestricted: false },
+  { name: 'Ukraine', code: 'UA', lat: 48.3794, lng: 31.1656, isRestricted: false },
+  { name: 'Philippines', code: 'PH', lat: 12.8797, lng: 121.774, isRestricted: false },
+  { name: 'Australia', code: 'AU', lat: -25.2744, lng: 133.7751, isRestricted: false },
+];
+
+/** Get an approximate global coordinates fallback for any prayer */
+export function getApproximateCoordsForText(text: string, seedId: string = ''): CountryEntry {
+  const detected = findCountryInText(text);
+  if (detected) return detected;
+
+  let hash = 0;
+  const combined = (seedId || '') + (text || '');
+  for (let i = 0; i < combined.length; i++) {
+    hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % GLOBAL_HUBS.length;
+  return GLOBAL_HUBS[index];
+}
+

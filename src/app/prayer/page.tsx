@@ -37,8 +37,15 @@ import PrayerEscalationModal from '@/components/PrayerEscalationModal/PrayerEsca
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
 import { extractScriptureReferences, extractStrongsNumbers } from '@/lib/universalIndexer';
 import { getBrowserClient } from '@/lib/supabase';
-import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
-import type { MissionMapPin } from '@/types/map';
+import { 
+  COUNTRIES_SORTED, 
+  getCountryByCode, 
+  getCountryByName, 
+  findCountryInText, 
+  getApproximateCoordsForText, 
+  getPinJitter 
+} from '@/lib/countryCoords';
+import { type MissionMapPin, DEFAULT_MAP_PINS } from '@/types/map';
 import { createWhatsAppShareLink } from '@/lib/whatsapp';
 import { 
   PrayerContact, 
@@ -216,12 +223,46 @@ export default function PrayerBoardPage() {
   async function fetchPublicPrayers() {
     setLoadingPublic(true);
     try {
-      const res = await fetch('/api/prayer');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = await res.text();
-      if (!text.trim()) { setPrayers([]); return; }
-      const data = JSON.parse(text);
-      if (data.success) setPrayers(data.prayers);
+      let localPrayers: PublicPrayerRequest[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('bibledesk_public_prayers_local');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) localPrayers = parsed;
+          }
+        } catch (e) {
+          console.warn('Could not read local prayers', e);
+        }
+      }
+
+      let serverPrayers: PublicPrayerRequest[] = [];
+      try {
+        const res = await fetch('/api/prayer');
+        if (res.ok) {
+          const text = await res.text();
+          if (text.trim()) {
+            const data = JSON.parse(text);
+            if (data.success && Array.isArray(data.prayers)) {
+              serverPrayers = data.prayers;
+            }
+          }
+        }
+      } catch (networkErr) {
+        console.warn('Server prayers fetch error, falling back to local store:', networkErr);
+      }
+
+      // Combine local guest prayers with server prayers, deduplicated by ID
+      const seen = new Set<string>();
+      const combined: PublicPrayerRequest[] = [];
+      for (const p of [...localPrayers, ...serverPrayers]) {
+        if (!seen.has(p.id)) {
+          seen.add(p.id);
+          combined.push(p);
+        }
+      }
+
+      setPrayers(combined);
     } catch (err) {
       console.error('Failed to fetch public prayers:', err);
     } finally {
@@ -319,42 +360,92 @@ export default function PrayerBoardPage() {
 
   // Globe Pins: Unifies active community prayers with global beacons
   const globePins = useMemo<MissionMapPin[]>(() => {
-    const submittedPins: MissionMapPin[] = prayers
-      .filter(p => p.latitude != null && p.longitude != null)
-      .map(p => {
-        const isRestr = Boolean(p.is_restricted || p.privacy_mode === 'restricted');
-        const cat = inferPrayerCategory(p.request, isRestr, p.category);
-        const privMode = p.privacy_mode || (isRestr ? 'restricted' : 'approximate');
+    const submittedPins: MissionMapPin[] = prayers.map(p => {
+      let lat = p.latitude != null ? Number(p.latitude) : null;
+      let lng = p.longitude != null ? Number(p.longitude) : null;
+      let countryCode = p.country_code;
+      let countryName = p.country_name;
+      let isRestr = Boolean(p.is_restricted || p.privacy_mode === 'restricted');
 
-        return {
-          id: p.id,
-          latitude: p.latitude!,
-          longitude: p.longitude!,
-          label: isRestr 
-            ? 'Restricted Region' 
-            : (p.country_name ? `${p.country_name} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
-          category: cat,
-          privacy_mode: privMode,
-          text: isRestr
-            ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
-            : p.request,
-          urgency: 'normal',
-          isRestricted: isRestr,
-          source: 'public' as const,
-          country_code: p.country_code,
-          country_name: p.country_name,
-        };
-      });
+      if ((lat == null || lng == null || isNaN(lat) || isNaN(lng)) && countryCode) {
+        const c = getCountryByCode(countryCode);
+        if (c) {
+          lat = c.lat;
+          lng = c.lng;
+          countryName = countryName || c.name;
+          if (c.isRestricted) isRestr = true;
+        }
+      }
+
+      if ((lat == null || lng == null || isNaN(lat) || isNaN(lng)) && countryName) {
+        const c = getCountryByName(countryName);
+        if (c) {
+          lat = c.lat;
+          lng = c.lng;
+          countryCode = countryCode || c.code;
+          if (c.isRestricted) isRestr = true;
+        }
+      }
+
+      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
+        const detected = findCountryInText(p.request);
+        if (detected) {
+          lat = detected.lat;
+          lng = detected.lng;
+          countryCode = countryCode || detected.code;
+          countryName = countryName || detected.name;
+          if (detected.isRestricted) isRestr = true;
+        }
+      }
+
+      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
+        const fallback = getApproximateCoordsForText(p.request, p.id);
+        lat = fallback.lat;
+        lng = fallback.lng;
+        countryName = countryName || fallback.name;
+        countryCode = countryCode || fallback.code;
+        if (fallback.isRestricted) isRestr = true;
+      }
+
+      const jitter = getPinJitter(p.id);
+      const finalLat = (lat ?? 0) + jitter.lat;
+      const finalLng = (lng ?? 0) + jitter.lng;
+
+      const cat = inferPrayerCategory(p.request, isRestr, p.category);
+      const privMode = p.privacy_mode || (isRestr ? 'restricted' : 'approximate');
+
+      return {
+        id: p.id,
+        latitude: finalLat,
+        longitude: finalLng,
+        label: isRestr 
+          ? 'Restricted Region' 
+          : (countryName ? `${countryName} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
+        category: cat,
+        privacy_mode: privMode,
+        text: isRestr
+          ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
+          : p.request,
+        urgency: 'normal',
+        isRestricted: isRestr,
+        source: 'public' as const,
+        country_code: countryCode,
+        country_name: countryName,
+      };
+    });
 
     const localPins: MissionMapPin[] = commitments
-      .filter(c => c.country_code)
       .map(c => {
-        const country = getCountryByCode(c.country_code || '');
+        let country = c.country_code ? getCountryByCode(c.country_code) : undefined;
+        if (!country && c.private_details) country = findCountryInText(c.private_details);
+        if (!country && c.title) country = findCountryInText(c.title);
         if (!country) return null;
+
+        const jitter = getPinJitter(c.id);
         return {
           id: `local-${c.id}`,
-          latitude: country.lat,
-          longitude: country.lng,
+          latitude: country.lat + jitter.lat,
+          longitude: country.lng + jitter.lng,
           label: `${c.contact?.display_name || c.title || 'My Circle'} • ${country.name}`,
           category: (c.contact?.category || 'other').toLowerCase(),
           privacy_mode: 'approximate' as const,
@@ -368,7 +459,10 @@ export default function PrayerBoardPage() {
       })
       .filter(Boolean) as MissionMapPin[];
 
-    return [...submittedPins, ...localPins];
+    const seenIds = new Set<string>([...submittedPins.map(p => p.id), ...localPins.map(p => p.id)]);
+    const nonDuplicatedSeeds = DEFAULT_MAP_PINS.filter(seed => !seenIds.has(seed.id));
+
+    return [...submittedPins, ...localPins, ...nonDuplicatedSeeds];
   }, [prayers, commitments]);
 
   // ── Actions: Check-in & Care Workflow ────────────────────────────────────
@@ -584,38 +678,99 @@ export default function PrayerBoardPage() {
     setSubmittingPublic(true);
     setMessage(null);
 
-    const selectedCountry = countryCode ? getCountryByCode(countryCode) : null;
+    let selectedCountry = countryCode ? getCountryByCode(countryCode) : null;
+    if (!selectedCountry) {
+      selectedCountry = findCountryInText(newRequest) || null;
+    }
+    if (!selectedCountry) {
+      selectedCountry = getApproximateCoordsForText(newRequest);
+    }
+
     const isRestrictedSetting = locationPrivacy === 'restricted' || Boolean(selectedCountry?.isRestricted);
+    const countryCodeToUse = selectedCountry?.code ?? 'US';
+    const countryNameToUse = isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? 'Global');
+    const latToUse = selectedCountry ? selectedCountry.lat : 38.8951;
+    const lngToUse = selectedCountry ? selectedCountry.lng : -77.0364;
+    const authorName = (anonymous || isRestrictedSetting) ? 'Anonymous Believer' : (displayName || 'Community Member');
+
+    const tempId = `local-prayer-${Date.now()}`;
+    const optimisticPrayer: PublicPrayerRequest = {
+      id: tempId,
+      user_id: userId,
+      display_name: authorName,
+      request: newRequest.trim(),
+      likes_count: 0,
+      created_at: new Date().toISOString(),
+      country_code: countryCodeToUse,
+      country_name: countryNameToUse,
+      latitude: latToUse,
+      longitude: lngToUse,
+      category: publicCategory,
+      privacy_mode: locationPrivacy,
+      is_restricted: isRestrictedSetting,
+    };
+
+    // 1. Optimistically add to state immediately
+    setPrayers(prev => [optimisticPrayer, ...prev]);
+
+    // 2. Persist in local storage for guest/offline continuity
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('bibledesk_public_prayers_local');
+        const existing: PublicPrayerRequest[] = raw ? JSON.parse(raw) : [];
+        localStorage.setItem(
+          'bibledesk_public_prayers_local',
+          JSON.stringify([optimisticPrayer, ...existing].slice(0, 50))
+        );
+      } catch (storageErr) {
+        console.warn('Could not save prayer locally:', storageErr);
+      }
+    }
 
     try {
       const res = await fetch('/api/prayer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          request: newRequest,
-          display_name: (anonymous || isRestrictedSetting) ? 'Anonymous Believer' : (displayName || 'Community Member'),
+          request: newRequest.trim(),
+          display_name: authorName,
           anonymous: anonymous || isRestrictedSetting,
           user_id: userId,
-          country_code: selectedCountry?.code ?? null,
-          country_name: isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? null),
-          latitude: selectedCountry ? selectedCountry.lat : null,
-          longitude: selectedCountry ? selectedCountry.lng : null,
+          country_code: countryCodeToUse,
+          country_name: countryNameToUse,
+          latitude: latToUse,
+          longitude: lngToUse,
           category: publicCategory,
           privacy_mode: locationPrivacy,
           is_restricted: isRestrictedSetting,
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to submit request');
+      let finalId = tempId;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.prayer) {
+          finalId = data.prayer.id;
+          setPrayers(prev =>
+            prev.map(p => (p.id === tempId ? { ...p, id: data.prayer.id } : p))
+          );
+        }
+      }
 
       setMessage({ text: 'Prayer request pinned to the global map!', type: 'success' });
       setNewRequest('');
       setCountryCode('');
       setIsSubmitModalOpen(false);
-      fetchPublicPrayers();
+      setSelectedPinId(finalId);
+      setActiveTab('world');
     } catch (err: any) {
-      setMessage({ text: err.message || 'Error submitting prayer request', type: 'error' });
+      console.warn('Network submission warning, local prayer retained:', err);
+      setMessage({ text: 'Prayer pinned to your local map view!', type: 'success' });
+      setNewRequest('');
+      setCountryCode('');
+      setIsSubmitModalOpen(false);
+      setSelectedPinId(tempId);
+      setActiveTab('world');
     } finally {
       setSubmittingPublic(false);
     }
@@ -1106,6 +1261,18 @@ export default function PrayerBoardPage() {
                     >
                       <Heart size={14} />
                       <span>{p.likes_count} {prayedSession[p.id] ? 'Prayed' : 'Pray'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.viewOnMapBtn}
+                      onClick={() => {
+                        setSelectedPinId(p.id);
+                        setActiveTab('world');
+                      }}
+                      title="View prayer beacon on World PrayerAtlas"
+                    >
+                      <Globe size={13} />
+                      <span>View on Map</span>
                     </button>
                   </div>
                 </article>

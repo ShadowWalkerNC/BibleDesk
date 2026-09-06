@@ -571,6 +571,37 @@
   font-weight: 500;
 }
 
+.communityFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed rgba(107, 142, 123, 0.15);
+}
+
+.viewOnMapBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(107, 142, 123, 0.08);
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.viewOnMapBtn:hover {
+  background: rgba(107, 142, 123, 0.2);
+  color: var(--gold-500);
+  border-color: var(--gold-400);
+}
+
 .emptyFeed {
   padding: 3rem 1.5rem;
   text-align: center;
