@@ -1,4 +1,4 @@
-/* ── App Shell ──────────────────────────────────────────────── */
+/* ── App Shell — Tinted Sage Devotional ─────────────────────── */
 
 .shell {
   display: flex;
@@ -15,10 +15,9 @@
   margin-left: 220px;
   transition: margin-left 0.25s var(--ease-out);
   background: var(--navy-950);
-  /* Subtle inner vellum gradient */
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 230, 200, 0.5), transparent 75%),
-    radial-gradient(ellipse 60% 60% at 15% 75%, rgba(255, 252, 245, 0.4), transparent);
+    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
+    linear-gradient(125deg, rgba(107, 142, 123, 0.16), transparent 42%);
   min-height: 100vh;
 }
 
@@ -30,13 +29,13 @@
 .main::-webkit-scrollbar { width: 6px; }
 .main::-webkit-scrollbar-track { background: transparent; }
 .main::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 3px; }
-.main::-webkit-scrollbar-thumb:hover { background: var(--gold-600); }
+.main::-webkit-scrollbar-thumb:hover { background: var(--sage); }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* Space for bottom nav rail on mobile */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
   .mainCollapsed {
     margin-left: 0;

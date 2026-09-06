@@ -24,6 +24,7 @@ import {
   Tv,
   Presentation,
   Scroll,
+  Brain,
 } from 'lucide-react';
 import styles from './MarketingShowcase.module.css';
 
@@ -36,6 +37,8 @@ export default function MarketingShowcase() {
     <div className={styles.container}>
       {/* ── 1. Hero Section ── */}
       <section className={styles.hero}>
+        <img className={styles.heroImage} src="https://media.base44.com/images/public/6a9dbd4e73e396871759885a/7eedc9af3_generated_17af0daf.jpg" alt="" />
+        <div className={styles.heroCopy}>
         <div className={styles.heroBadge}>
           <Sparkles size={15} />
           <span>The Open, Local-First Bible Study Platform &amp; Global Prayer Network</span>
@@ -66,6 +69,7 @@ export default function MarketingShowcase() {
             <Code size={18} />
             <span>Developer SDK</span>
           </Link>
+        </div>
         </div>
 
         {/* Feature Highlights Bar */}
@@ -99,6 +103,39 @@ export default function MarketingShowcase() {
             <span>Official Client SDK &amp; MCP Engine</span>
           </div>
         </div>
+      </section>
+
+      {/* ── Feature Grid ── */}
+      <h2 className={styles.featureSectionTitle}>Study, prayer, and community in one place</h2>
+      <section className={styles.featureGrid} aria-label="Key features">
+        <article className={styles.glassCard}>
+          <div className={styles.featureIcon}><BookOpen size={18} /></div>
+          <h3>Study Desk</h3>
+          <p>Read Scripture, follow plans, and study with notes.</p>
+        </article>
+        <article className={styles.glassCard}>
+          <div className={styles.featureIcon}><Globe size={18} /></div>
+          <h3>Prayer Atlas</h3>
+          <p>Connect prayer with the people and places that need it.</p>
+        </article>
+        <article className={styles.glassCard}>
+          <div className={styles.featureIcon}><Brain size={18} /></div>
+          <h3>Verse Memory</h3>
+          <p>Keep the words you are learning close each day.</p>
+        </article>
+      </section>
+
+      {/* ── Showcase ── */}
+      <section className={styles.showcase}>
+        <article className={styles.showcaseCard}>
+          <img src="https://media.base44.com/images/public/6a9dbd4e73e396871759885a/0cae2598a_generated_ef405181.jpg" alt="" />
+          <h2>Global prayer network</h2>
+          <p>Bring Scripture, encouragement, and shared prayer into one gentle rhythm.</p>
+        </article>
+        <blockquote className={styles.verseBlock}>
+          <p>"Your word is a lamp to my feet and a light to my path."</p>
+          <cite>Psalm 119:105 · KJV</cite>
+        </blockquote>
       </section>
 
       {/* ── 2. Two Core Personas Section ── */}
