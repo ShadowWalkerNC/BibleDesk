@@ -253,15 +253,12 @@
   border-radius: 11px;
   background: var(--sage-light);
   color: var(--sage-dark);
-  animation: sway 3.4s ease-in-out infinite;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.featureGrid .glassCard:nth-child(2) .featureIcon {
-  animation-delay: 0.45s;
-}
-
-.featureGrid .glassCard:nth-child(3) .featureIcon {
-  animation-delay: 0.9s;
+.glassCard:hover .featureIcon {
+  transform: translateY(-2px);
+  background: rgba(107, 142, 123, 0.28);
 }
 
 /* ── Showcase Section ─────────────────────────────────────── */

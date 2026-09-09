@@ -16,7 +16,6 @@
   box-shadow: 8px 0 28px rgba(71, 92, 76, 0.08);
   transition: width 0.25s var(--ease-out);
   overflow: hidden;
-  animation: rise 0.7s ease-out both;
 }
 
 .sidebarCollapsed {

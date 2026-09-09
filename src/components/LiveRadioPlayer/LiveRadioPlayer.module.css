@@ -153,6 +153,19 @@
   flex-shrink: 0;
 }
 
+.spinningVinyl {
+  animation: rotateVinyl 8s linear infinite;
+}
+
+@keyframes rotateVinyl {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .stationInfo {
   flex: 1;
   min-width: 0;

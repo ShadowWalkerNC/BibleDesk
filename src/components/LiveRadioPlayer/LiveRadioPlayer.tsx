@@ -229,7 +229,7 @@ export default function LiveRadioPlayer() {
               {isLoading ? (
                 <Loader2 size={22} className="animate-spin" />
               ) : isPlaying ? (
-                <Disc size={24} className="animate-spin" />
+                <Disc size={24} className={styles.spinningVinyl} />
               ) : (
                 <Music size={22} />
               )}

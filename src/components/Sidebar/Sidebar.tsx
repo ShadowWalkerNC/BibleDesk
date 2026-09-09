@@ -87,14 +87,56 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   // Auth state
   useEffect(() => {
+    function checkUser() {
+      const supabase = getBrowserClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else if (typeof window !== 'undefined') {
+          const local = localStorage.getItem('bibledesk_local_user');
+          if (local) {
+            try {
+              setUser(JSON.parse(local));
+            } catch {
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      });
+    }
+
+    checkUser();
     const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+      } else if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('bibledesk_local_user');
+        if (local) {
+          try {
+            setUser(JSON.parse(local));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
     });
-    return () => subscription.unsubscribe();
+
+    const handleStorage = () => checkUser();
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // Ctrl+K shortcut
@@ -115,8 +157,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }, [pathname]);
 
   async function handleSignOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('bibledesk_local_user');
+    }
     const supabase = getBrowserClient();
     await supabase.auth.signOut();
+    setUser(null);
     router.push('/');
     router.refresh();
   }
