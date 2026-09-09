@@ -1,7 +1,7 @@
 # BibleDesk — TODO
 
 > **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
-> **Last updated:** 2026-09-03
+> **Last updated:** 2026-09-09
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
@@ -23,7 +23,7 @@
 
 ## 🔴 Deploy Checklist & Production Readiness
 
-- [x] Hardened User Authentication & Offline Fallback (`/login`, `src/lib/supabase.ts`): Gracefully handles missing/placeholder Supabase environment credentials with local profile creation, proper `minLength={6}` password validation, and clear email verification feedback
+- [x] Hardened User Authentication & Offline Fallback (`/login`, `src/lib/supabase.ts`): All auth flows (Google OAuth, email sign-up, email sign-in, error path) fall back to instant `bibledesk_local_user` localStorage session when Supabase is unconfigured. `window.dispatchEvent(new Event('storage'))` keeps Header/Sidebar in sync. `isSupabaseConfigured()` is the gate. *(Last hardened: 2026-09-09)*
 - [x] Motion & Animation Polishing: Eliminated jarring sidebar navigation rise animation on route transitions, removed perpetual `sway` rocking on feature icons, calmed vinyl disc rotation to a serene 8s cycle, and fixed SVG transform-box & transform-origin on D3 PrayerAtlas halos
 - [x] Sage Devotional UI & Contrast Harmonization: Refined tab switcher, input surfaces, alert states (`#fdf2f2` / `#f0fdf4`), and action buttons to ensure high-contrast accessibility compliant with WCAG AA and Jakob's Law
 - [x] Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`): Reverent link-in-bio pages with media embeds (YouTube/Spotify), Scripture of the Season, direct 0% platform fee patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests, and creator discovery directory

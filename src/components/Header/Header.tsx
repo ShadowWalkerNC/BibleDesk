@@ -86,6 +86,7 @@ export default function Header() {
   async function handleSignOut() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('bibledesk_local_user');
+      window.dispatchEvent(new Event('storage'));
     }
     const supabase = getBrowserClient();
     await supabase.auth.signOut();
