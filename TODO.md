@@ -23,6 +23,9 @@
 
 ## 🔴 Deploy Checklist & Production Readiness
 
+- [x] Hardened User Authentication & Offline Fallback (`/login`, `src/lib/supabase.ts`): Gracefully handles missing/placeholder Supabase environment credentials with local profile creation, proper `minLength={6}` password validation, and clear email verification feedback
+- [x] Motion & Animation Polishing: Eliminated jarring sidebar navigation rise animation on route transitions, removed perpetual `sway` rocking on feature icons, calmed vinyl disc rotation to a serene 8s cycle, and fixed SVG transform-box & transform-origin on D3 PrayerAtlas halos
+- [x] Sage Devotional UI & Contrast Harmonization: Refined tab switcher, input surfaces, alert states (`#fdf2f2` / `#f0fdf4`), and action buttons to ensure high-contrast accessibility compliant with WCAG AA and Jakob's Law
 - [x] Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`): Reverent link-in-bio pages with media embeds (YouTube/Spotify), Scripture of the Season, direct 0% platform fee patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests, and creator discovery directory
 - [x] Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network
 - [x] Connected Knowledge Drawer (`src/components/ConnectedKnowledgeDrawer/`) embedded across `/bible`, `/sermons`, and `/prayer`
