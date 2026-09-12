@@ -1,0 +1,36 @@
+/* BibleDesk Desktop — home page */
+
+.page {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.graphHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.graphTitle {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.resetBtn {
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.75rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.resetBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}

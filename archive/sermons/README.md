@@ -1,0 +1,3 @@
+# Archived: Sermons Workspace (cut P3)
+
+This code was archived — not deleted — per cut proposal P3 (owner-approved, 2026-09-12), removing the `/sermons` page and `/api/sermons` routes from the shipped product. The API was archived because of a confirmed P0 IDOR: in `route.ts:8-141`, the GET/POST/DELETE handlers took caller-supplied `userId`/`user_id` with zero session validation while running on the service-role Supabase client, letting any caller read, create, or delete any user's sermons. The fix recipe for restoring this feature safely (session-validated handlers, RLS-enforced table, per-user scoping) is documented in deep-dive doc 14 §5 (P0#1). To restore, move `app/sermons/` and `app/api/sermons/` back under `src/` and apply that recipe before exposing the routes.

@@ -1,0 +1,32 @@
+{
+  "appId": "org.bibledesk.app",
+  "appName": "BibleDesk",
+  "webDir": "../../out",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#f7f3e8",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "buildOptions": {
+      "keystorePath": "release-key.keystore",
+      "keystoreAlias": "bibledesk"
+    }
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#f7f3e8",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#ede4d0"
+    }
+  },
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
