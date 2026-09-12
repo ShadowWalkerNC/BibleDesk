@@ -42,15 +42,15 @@ CREATE INDEX IF NOT EXISTS idx_church_members_user ON public.church_members(user
 CREATE INDEX IF NOT EXISTS idx_church_members_church ON public.church_members(church_id);
 
 -- 3. Extend prayers table with 4-tier escalation & church linkage
-ALTER TABLE public.prayers
+ALTER TABLE public.prayer_requests
   ADD COLUMN IF NOT EXISTS escalation_level TEXT DEFAULT 'private' CHECK (escalation_level IN ('private', 'circle', 'church', 'atlas')),
   ADD COLUMN IF NOT EXISTS urgency_level TEXT DEFAULT 'normal' CHECK (urgency_level IN ('low', 'normal', 'urgent', 'crisis')),
   ADD COLUMN IF NOT EXISTS church_id TEXT REFERENCES public.churches(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT FALSE;
 
-CREATE INDEX IF NOT EXISTS idx_prayers_escalation ON public.prayers(escalation_level);
-CREATE INDEX IF NOT EXISTS idx_prayers_church_id ON public.prayers(church_id);
-CREATE INDEX IF NOT EXISTS idx_prayers_urgency ON public.prayers(urgency_level);
+CREATE INDEX IF NOT EXISTS idx_prayers_escalation ON public.prayer_requests(escalation_level);
+CREATE INDEX IF NOT EXISTS idx_prayers_church_id ON public.prayer_requests(church_id);
+CREATE INDEX IF NOT EXISTS idx_prayers_urgency ON public.prayer_requests(urgency_level);
 
 -- 4. Enable RLS
 ALTER TABLE public.churches ENABLE ROW LEVEL SECURITY;
@@ -84,9 +84,9 @@ CREATE POLICY "Users can manage own membership"
 
 -- Prayers Church Escalation RLS:
 -- Church members can view prayers escalated to their church
-DROP POLICY IF EXISTS "Church members view church-escalated prayers" ON public.prayers;
+DROP POLICY IF EXISTS "Church members view church-escalated prayers" ON public.prayer_requests;
 CREATE POLICY "Church members view church-escalated prayers"
-  ON public.prayers FOR SELECT
+  ON public.prayer_requests FOR SELECT
   USING (
     escalation_level = 'church' AND
     church_id IN (

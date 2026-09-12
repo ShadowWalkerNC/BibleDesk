@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Sparkles, Eye, EyeOff, Mail, CheckCircle } from 'lucide-react';
+import { BookOpen, Sparkles, Eye, EyeOff, Mail } from 'lucide-react';
 import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import { syncGuestDataToAccount } from '@/lib/syncGuestData';
 import styles from './page.module.css';
@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   // Check if session already active
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (!isSupabaseConfigured()) {
       const local = localStorage.getItem('bibledesk_local_user');
       if (local) {
         router.push('/bible');
@@ -52,7 +52,7 @@ export default function LoginPage() {
       localStorage.setItem('bibledesk_local_user', JSON.stringify(localUser));
       window.dispatchEvent(new Event('storage'));
       await syncGuestDataToAccount();
-      setMessage({ text: 'Signed in! Entering your Study Desk...', type: 'success' });
+      setMessage({ text: 'Local study profile ready. Data stays on this device.', type: 'success' });
       setTimeout(() => { router.push('/bible'); router.refresh(); }, 600);
       return;
     }
@@ -68,18 +68,7 @@ export default function LoginPage() {
 
       if (error) throw error;
     } catch (err: any) {
-      // OAuth failed (network error, misconfiguration, etc.) — fall back to local session
-      console.warn('Google OAuth failed, activating local session:', err.message);
-      const localUser = {
-        id: 'local-user-' + Date.now().toString(36),
-        email: 'google-user@local.bibledesk',
-        user_metadata: { name: 'Bible Student', role: 'member' },
-      };
-      localStorage.setItem('bibledesk_local_user', JSON.stringify(localUser));
-      window.dispatchEvent(new Event('storage'));
-      await syncGuestDataToAccount();
-      setMessage({ text: 'Signed in! Entering your Study Desk...', type: 'success' });
-      setTimeout(() => { router.push('/bible'); router.refresh(); }, 600);
+      setMessage({ text: err instanceof Error ? err.message : 'Google sign-in failed. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -107,7 +96,7 @@ export default function LoginPage() {
         window.dispatchEvent(new Event('storage'));
         await syncGuestDataToAccount();
         setMessage({
-          text: customMsg || (isSignUp ? 'Account created! Welcome to BibleDesk...' : 'Signed in! Redirecting...'),
+          text: customMsg || 'Local study profile ready. Data stays on this device.',
           type: 'success',
         });
         setTimeout(() => {
@@ -136,16 +125,12 @@ export default function LoginPage() {
           },
         });
 
-        if (error) {
-          console.warn('Supabase signUp error, falling back to instant local session:', error.message);
-          await fallbackLocalLogin('Account created! Welcome to BibleDesk...');
-          return;
-        }
+        if (error) throw error;
 
         // Auto-merge local guest bookmarks, notes, and prayer requests
         await syncGuestDataToAccount();
 
-        // If email confirmation is required by Supabase or session is null, enable instant access locally
+        // Email confirmation must complete before treating the user as signed in.
         if (data.session) {
           window.dispatchEvent(new Event('storage'));
           setMessage({ text: 'Account created! Welcome to BibleDesk...', type: 'success' });
@@ -154,26 +139,7 @@ export default function LoginPage() {
             router.refresh();
           }, 800);
         } else {
-          // Keep local user session so the user is immediately unlocked without being blocked by SMTP
-          const localUser = {
-            id: data.user?.id || 'local-user-' + Date.now().toString(36),
-            email: email.trim(),
-            user_metadata: {
-              name: name.trim() || email.split('@')[0],
-              church_name: churchName.trim() || undefined,
-              role,
-            },
-          };
-          localStorage.setItem('bibledesk_local_user', JSON.stringify(localUser));
-          window.dispatchEvent(new Event('storage'));
-          setMessage({ 
-            text: 'Account created! Entering your Study Desk...', 
-            type: 'success' 
-          });
-          setTimeout(() => {
-            router.push('/bible');
-            router.refresh();
-          }, 800);
+          setMessage({ text: 'Check your email to confirm your account, then sign in. You can continue reading as a guest.', type: 'success' });
         }
       } else {
         // Sign In
@@ -182,13 +148,7 @@ export default function LoginPage() {
           password,
         });
 
-        if (error) {
-          // If login failed against remote Supabase (e.g. invalid credentials or placeholder DB),
-          // fallback to local user session so dev/offline mode works
-          console.warn('Supabase signIn error, checking local fallback:', error.message);
-          await fallbackLocalLogin('Signed in! Redirecting to Bible reader...');
-          return;
-        }
+        if (error) throw error;
 
         // Auto-merge local guest items on successful login
         await syncGuestDataToAccount();
@@ -201,27 +161,7 @@ export default function LoginPage() {
         }, 800);
       }
     } catch (err: any) {
-      console.error('Auth error, activating instant local access:', err);
-      const localUser = {
-        id: 'local-user-' + Date.now().toString(36),
-        email: email.trim(),
-        user_metadata: {
-          name: name.trim() || email.split('@')[0],
-          church_name: churchName.trim() || undefined,
-          role,
-        },
-      };
-      localStorage.setItem('bibledesk_local_user', JSON.stringify(localUser));
-      window.dispatchEvent(new Event('storage'));
-      await syncGuestDataToAccount();
-      setMessage({
-        text: 'Signed in! Your study desk and prayer circle are active.',
-        type: 'success',
-      });
-      setTimeout(() => {
-        router.push('/bible');
-        router.refresh();
-      }, 700);
+      setMessage({ text: err instanceof Error ? err.message : 'Sign-in failed. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }

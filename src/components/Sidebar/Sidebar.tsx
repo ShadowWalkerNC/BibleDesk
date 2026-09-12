@@ -33,7 +33,7 @@ import {
   Radio,
   Palette,
 } from 'lucide-react';
-import { getBrowserClient } from '@/lib/supabase';
+import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
 import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal';
@@ -92,7 +92,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setUser(session.user);
-        } else if (typeof window !== 'undefined') {
+        } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
           const local = localStorage.getItem('bibledesk_local_user');
           if (local) {
             try {
@@ -114,7 +114,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         setUser(session.user);
-      } else if (typeof window !== 'undefined') {
+      } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {
@@ -283,7 +283,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </div>
               {!collapsed && (
                 <span className={styles.userName}>
-                  {user.user_metadata?.name || user.email?.split('@')[0]}
+                  {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
                 </span>
               )}
               <button
@@ -470,7 +470,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {user ? (
                 <div className={styles.mobileUserRow}>
                   <div className={styles.userAvatar}><User size={14} /></div>
-                  <span className={styles.userName}>{user.user_metadata?.name || user.email?.split('@')[0]}</span>
+                  <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
                   <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
                     <LogOut size={14} />
                   </button>

@@ -279,14 +279,18 @@ export default function PrayerBoardPage() {
     updateNote?: string;
   }) {
     try {
+      const { data: { session } } = await getBrowserClient().auth.getSession();
+      if (!session) throw new Error('Sign in before changing visibility. Local prayer-circle entries remain private.');
       const res = await fetch('/api/prayer/escalate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify(data),
       });
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || 'Unable to change visibility.');
       if (res.ok) {
         setMessage({
-          text: `Prayer successfully escalated to ${data.targetLevel.toUpperCase()} tier!`,
+          text: data.targetLevel === 'atlas' ? 'Prayer submitted for public review.' : 'Prayer visibility updated.',
           type: 'success',
         });
         // Update commitment state
@@ -306,7 +310,7 @@ export default function PrayerBoardPage() {
       }
     } catch (err) {
       console.error('Failed to escalate prayer:', err);
-      setMessage({ text: 'Failed to escalate prayer. Please try again.', type: 'error' });
+      setMessage({ text: err instanceof Error ? err.message : 'Failed to escalate prayer.', type: 'error' });
     }
   }
 
@@ -728,9 +732,10 @@ export default function PrayerBoardPage() {
     }
 
     try {
+      const { data: { session } } = await getBrowserClient().auth.getSession();
       const res = await fetch('/api/prayer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
         body: JSON.stringify({
           request: newRequest.trim(),
           display_name: authorName,
@@ -746,6 +751,7 @@ export default function PrayerBoardPage() {
         }),
       });
 
+      if (!res.ok) throw new Error('Submission was not saved remotely.');
       let finalId = tempId;
       if (res.ok) {
         const data = await res.json();
@@ -757,7 +763,7 @@ export default function PrayerBoardPage() {
         }
       }
 
-      setMessage({ text: 'Prayer request pinned to the global map!', type: 'success' });
+      setMessage({ text: 'Prayer received for review. This pin is currently visible only on your device.', type: 'success' });
       setNewRequest('');
       setCountryCode('');
       setIsSubmitModalOpen(false);

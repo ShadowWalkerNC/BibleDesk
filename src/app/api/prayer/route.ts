@@ -1,208 +1,81 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerClient } from '@/lib/supabase';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.warn('[api/prayer] Supabase is unconfigured, returning dummy empty list.');
-      return NextResponse.json({ success: true, prayers: [] });
-    }
-    const supabase = getServerClient();
-    const { data, error } = await supabase
-      .from('prayer_requests')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
+const PUBLIC_FIELDS = 'id,display_name,request,likes_count,created_at,country_code,country_name,latitude,longitude,category,privacy_mode,is_anonymous';
+const unavailable = () => NextResponse.json({ success: false, error: 'Prayer service unavailable. Local records remain on this device.' }, { status: 503 });
+const configured = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-    if (error) throw error;
-    return NextResponse.json({ success: true, prayers: data ?? [] });
-  } catch (err: any) {
-    console.error('[api/prayer] GET Error:', err);
-    // Return empty list instead of crashing client page rendering
-    return NextResponse.json({ success: true, prayers: [], warning: err.message });
-  }
+export async function GET() {
+  if (!configured()) return NextResponse.json({ success: true, prayers: [], offline: true });
+  try {
+    const { data, error } = await getServerClient().from('prayer_requests').select(PUBLIC_FIELDS)
+      .eq('status', 'published').eq('escalation_level', 'atlas')
+      .eq('is_restricted', false).eq('is_restricted_region', false).is('deleted_at', null)
+      .in('privacy_mode', ['approximate', 'precise']).order('created_at', { ascending: false }).limit(100);
+    if (error) return unavailable(); // Missing privacy fields must never broaden access.
+    const prayers = (data || []).map(row => ({
+      ...row,
+      display_name: row.is_anonymous ? 'Anonymous' : row.display_name,
+      latitude: row.privacy_mode === 'precise' ? row.latitude : null,
+      longitude: row.privacy_mode === 'precise' ? row.longitude : null,
+    }));
+    return NextResponse.json({ success: true, prayers });
+  } catch { return unavailable(); }
 }
 
 export async function POST(req: NextRequest) {
+  if (!configured()) return unavailable();
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.warn('[api/prayer] Supabase is unconfigured, bypass write and return mock successful write.');
-      const body = await req.json();
-      const mockResult = {
-        id: crypto.randomUUID ? crypto.randomUUID() : 'dummy-uuid-376',
-        display_name: body.anonymous ? 'Anonymous' : (body.display_name || 'Anonymous'),
-        request: body.request.trim(),
-        likes_count: 0,
-        created_at: new Date().toISOString(),
-        country_code: body.country_code ?? null,
-        country_name: body.country_name ?? null,
-        latitude: body.latitude ?? null,
-        longitude: body.longitude ?? null,
-        category: body.category ?? 'community',
-        privacy_mode: body.privacy_mode ?? 'approximate',
-        is_restricted: body.is_restricted ?? false,
-      };
-      return NextResponse.json({ success: true, prayer: mockResult });
-    }
-    const supabase = getServerClient();
+    const user = await getAuthenticatedUser(req);
+    if (req.headers.has('authorization') && !user) return NextResponse.json({ error: 'Invalid session.' }, { status: 401 });
     const body = await req.json();
-    const { 
-      request, 
-      display_name = 'Anonymous', 
-      anonymous = false, 
-      user_id = null,
-      country_code = null,
-      country_name = null,
-      latitude = null,
-      longitude = null,
-      category = 'community',
-      privacy_mode = 'approximate',
-      is_restricted = false
-    } = body;
-
-    if (!request || request.trim().length < 5) {
-      return NextResponse.json(
-        { success: false, error: 'Prayer request must be at least 5 characters.' },
-        { status: 400 }
-      );
+    if (!body || typeof body.request !== 'string' || body.request.trim().length < 5 || body.request.length > 4000 ||
+        (body.display_name != null && (typeof body.display_name !== 'string' || body.display_name.length > 100)) ||
+        (body.privacy_mode != null && !['approximate', 'precise', 'restricted'].includes(body.privacy_mode))) {
+      return NextResponse.json({ success: false, error: 'Provide a prayer of 5–4000 characters and a valid privacy setting.' }, { status: 400 });
     }
-
-    const nameToStore = anonymous ? 'Anonymous' : display_name.trim();
-
-    // Insert prayer request into Supabase (try with extended columns, fallback to base)
-    let data: any = null;
-    try {
-      const result = await supabase
-        .from('prayer_requests')
-        .insert({
-          user_id: user_id || null,
-          display_name: nameToStore,
-          request: request.trim(),
-          likes_count: 0,
-          country_code: country_code ?? null,
-          country_name: country_name ?? null,
-          latitude: latitude != null ? Number(latitude) : null,
-          longitude: longitude != null ? Number(longitude) : null,
-          category: category || 'community',
-          privacy_mode: privacy_mode || 'approximate',
-          is_restricted: Boolean(is_restricted),
-        })
-        .select()
-        .single();
-
-      if (result.error) throw result.error;
-      data = result.data;
-    } catch (insertErr: any) {
-      console.warn('[api/prayer] Extended column insert failed, falling back to basic columns:', insertErr.message);
-      const fallbackResult = await supabase
-        .from('prayer_requests')
-        .insert({
-          user_id: user_id || null,
-          display_name: nameToStore,
-          request: request.trim(),
-          likes_count: 0,
-        })
-        .select()
-        .single();
-
-      if (fallbackResult.error) throw fallbackResult.error;
-      data = {
-        ...fallbackResult.data,
-        country_code,
-        country_name,
-        latitude,
-        longitude,
-        category,
-        privacy_mode,
-        is_restricted,
-      };
+    const key = user?.id || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const limit = await checkRateLimit('prayer-submit:' + key);
+    if (!limit.allowed) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
+    const privacy = body.privacy_mode || 'approximate';
+    const restricted = body.is_restricted === true || privacy === 'restricted';
+    const precise = privacy === 'precise' && !restricted;
+    if (precise && (!Number.isFinite(body.latitude) || Math.abs(body.latitude) > 90 || !Number.isFinite(body.longitude) || Math.abs(body.longitude) > 180)) {
+      return NextResponse.json({ error: 'Valid coordinates required for a precise pin.' }, { status: 400 });
     }
-
-    // Send Webhook to Discord (Sigil Bot trigger)
-    const webhookUrl = process.env.PRAYER_DISCORD_WEBHOOK_URL || process.env.SIGIL_PRAYER_WEBHOOK_URL;
-    if (webhookUrl) {
-      try {
-        const payload = {
-          embeds: [
-            {
-              title: '🙏 New Prayer Request',
-              description: request.trim(),
-              color: 0x4f9cf9, // Blue matching Scripture dimension
-              fields: [
-                {
-                  name: 'Submitted By',
-                  value: nameToStore,
-                  inline: true,
-                },
-                {
-                  name: 'Date',
-                  value: new Date().toLocaleDateString(),
-                  inline: true,
-                },
-              ],
-              footer: {
-                text: 'BibleDesk Community',
-              },
-            },
-          ],
-        };
-
-        await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } catch (webhookErr) {
-        console.warn('[api/prayer] Discord Webhook call failed (non-fatal):', webhookErr);
-      }
-    }
-
-    return NextResponse.json({ success: true, prayer: data });
-  } catch (err: any) {
-    console.error('[api/prayer] POST Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-  }
+    const anonymous = body.anonymous === true || restricted;
+    const { data, error } = await getServerClient().from('prayer_requests').insert({
+      user_id: user?.id || null, request: body.request.trim(),
+      display_name: anonymous ? 'Anonymous' : (body.display_name?.trim() || 'Anonymous'),
+      is_anonymous: anonymous, privacy_mode: restricted ? 'restricted' : privacy,
+      is_restricted: restricted, is_restricted_region: restricted,
+      status: 'pending', escalation_level: restricted ? 'private' : 'atlas',
+      country_code: typeof body.country_code === 'string' ? body.country_code.slice(0, 3) : null,
+      country_name: typeof body.country_name === 'string' ? body.country_name.slice(0, 100) : null,
+      latitude: precise ? body.latitude : null, longitude: precise ? body.longitude : null,
+      category: typeof body.category === 'string' ? body.category.slice(0, 50) : 'community', likes_count: 0,
+    }).select('id,status,escalation_level').single();
+    if (error || !data) return unavailable();
+    // No automatic external forwarding. A submission cannot self-approve publication.
+    return NextResponse.json({ success: true, prayer: data, message: 'Prayer received for review.' }, { status: 201 });
+  } catch { return NextResponse.json({ success: false, error: 'Unable to submit prayer.' }, { status: 400 }); }
 }
 
-// Support updating prayers likes / "I prayed for this" count
 export async function PUT(req: NextRequest) {
+  if (!configured()) return unavailable();
   try {
     const { id } = await req.json();
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
-    }
-
-    // Offline / unconfigured Supabase — acknowledge silently
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ success: true });
-    }
-
-    const supabase = getServerClient();
-
-    // Call RPC to increment count to prevent race conditions or fetch-modify races
-    // But since it's simple, we can do a increment selection:
-    const { data: current } = await supabase
-      .from('prayer_requests')
-      .select('likes_count')
-      .eq('id', id)
-      .single();
-
-    const count = current ? current.likes_count + 1 : 1;
-
-    const { data, error } = await supabase
-      .from('prayer_requests')
-      .update({ likes_count: count })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return NextResponse.json({ success: true, prayer: data });
-  } catch (err: any) {
-    console.error('[api/prayer] PUT Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-  }
+    if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Valid ID required.' }, { status: 400 });
+    const limit = await checkRateLimit('prayer-like:' + (req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'));
+    if (!limit.allowed) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
+    const { data, error } = await getServerClient().rpc('increment_public_prayer_likes', { prayer_id: id });
+    if (error) return unavailable();
+    if (data == null) return NextResponse.json({ error: 'Prayer not found.' }, { status: 404 });
+    return NextResponse.json({ success: true, prayer: { id, likes_count: data } });
+  } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }); }
 }

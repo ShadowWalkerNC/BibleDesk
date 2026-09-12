@@ -1,13 +1,15 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 0 Complete & Multi-Platform Suite Deployed · Local Bible Foundation & Open MCP/API Engine  
-> **Last updated:** 2026-08-30  
+> **Status:** Phase 0 — Local-first Bible foundation (security hardening; release verification pending)
+> **Last updated:** 2026-09-11
 > **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · Model Context Protocol (MCP) · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Greek/Hebrew Lexicons · Capacitor (Android) · Electron (Desktop)  
 > **Work tracker:** [TODO.md](TODO.md) · **Ops Audit:** [OPS_REPORT.md](OPS_REPORT.md) · **Product Vision:** [README.md](README.md)
 
 ---
 
 ## 1. System Overview
+
+**Current security boundary:** sermon routes and prayer escalation derive identity from a verified Supabase bearer token; client-supplied owner IDs are not authority. Local profiles are device-only and accepted by login/navigation only when Supabase is unconfigured. Public prayer reads use an explicit safe projection and require published Atlas visibility, nonrestricted privacy, and no deletion. Anonymous names and approximate coordinates are redacted. Prayer submissions remain pending review and do not automatically forward to Discord. Shared-circle escalation is unavailable; church escalation requires the church administrator. A restrictive migration makes `prayer_requests` accessible through server APIs rather than direct anonymous/authenticated database access and adds an atomic public-only likes function. This migration remains unapplied and unverified against PostgreSQL. See [batch details](docs/SECURITY_BATCH_1.md); older feature descriptions do not establish production readiness.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐

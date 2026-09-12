@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedUser } from '@/lib/auth';
 import { getServerClient } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const userId = searchParams.get('userId');
+  const user = await getAuthenticatedUser(req);
+  const userId = user?.id;
 
   if (!userId) {
     return NextResponse.json({ success: false, error: 'User session is required.' }, { status: 401 });
@@ -29,16 +30,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const user = await getAuthenticatedUser(req);
+  if (!user) return NextResponse.json({ success: false, error: 'Sign in required.' }, { status: 401 });
   const supabase = getServerClient();
   try {
     const body = await req.json();
-    const { id, user_id, title, content, publishToDiscord = false } = body;
+    const { id, title, content, publishToDiscord = false } = body;
+    const user_id = user.id;
 
     if (!user_id) {
       return NextResponse.json({ success: false, error: 'User session is required.' }, { status: 401 });
     }
 
-    if (!title || !content) {
+    if (typeof title !== 'string' || !title.trim() || title.length > 250 || typeof content !== 'string' || !content.trim() || content.length > 100000 || (id != null && (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)))) {
       return NextResponse.json({ success: false, error: 'Title and content are required.' }, { status: 400 });
     }
 
@@ -52,9 +56,10 @@ export async function POST(req: NextRequest) {
         .eq('id', id)
         .eq('user_id', user_id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return NextResponse.json({ success: false, error: 'Outline not found.' }, { status: 404 });
       result = data;
     } else {
       // Insert new outline
@@ -123,7 +128,9 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const id = searchParams.get('id');
-  const userId = searchParams.get('userId');
+  const user = await getAuthenticatedUser(req);
+  if (!user) return NextResponse.json({ success: false, error: 'Sign in required.' }, { status: 401 });
+  const userId = user.id;
 
   if (!id || !userId) {
     return NextResponse.json({ success: false, error: 'ID and userId are required.' }, { status: 400 });
@@ -131,13 +138,15 @@ export async function DELETE(req: NextRequest) {
 
   const supabase = getServerClient();
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('sermon_notes')
       .delete()
       .eq('id', id)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .select('id').maybeSingle();
 
     if (error) throw error;
+    if (!data) return NextResponse.json({ success: false, error: 'Outline not found.' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('[api/sermons] DELETE Error:', err);

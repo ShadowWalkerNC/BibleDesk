@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-09
+> **Updated:** 2026-09-11
 
 ---
 
@@ -14,7 +14,7 @@ Description:  Bible-first study platform — local Scripture foundation,
               AI assistant for 5-dimension sourced answers
               Scripture · Historical · Original Language · Theological · Practical Application
 Status:       in development
-Phase:        Phase 0 — Local-first Bible foundation
+Phase:        Phase 0 — Local-first Bible foundation (security hardening; release verification pending)
 ```
 
 ---
@@ -67,7 +67,7 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
 9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
 10. **Mobile UX adheres to Jakob's Law.** Mobile apps & responsive web experiences must align with standard platform conventions and user expectations (thumb-friendly bottom navigation/action sheets, standard touch targets >= 48px, predictable back navigation, standard search/keyboard inputs, safe area insets, and universally recognizable iconography). Do not create unorthodox UX patterns where standard mobile conventions exist.
-11. **Auth always falls back to local session.** When `isSupabaseConfigured()` returns false (no real `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY`), all auth flows — Google OAuth, email sign-up, email sign-in — must create a `bibledesk_local_user` in `localStorage` and redirect to `/bible`. Never throw an error or show a dead screen when Supabase is unconfigured. See `src/app/login/page.tsx` for the canonical `fallbackLocalLogin` helper pattern.
+11. **Local profiles are available only when Supabase is unconfigured.** When `isSupabaseConfigured()` returns false, Google/email flows may create a labeled device-only `bibledesk_local_user` and redirect to `/bible`. Configured authentication failures must display an error, never manufacture a local authenticated identity. Pending email confirmation must not imply a signed-in session. Local profiles never authorize server access. See `src/app/login/page.tsx`.
 12. **Dispatch `storage` event after every auth state change.** After writing or removing `bibledesk_local_user` from `localStorage`, always call `window.dispatchEvent(new Event('storage'))`. This is the only mechanism that keeps `Header` and `Sidebar` user state in sync without a full page reload. All three files (`login/page.tsx`, `Header/Header.tsx`, `Sidebar/Sidebar.tsx`) must follow this pattern.
 
 ---
@@ -85,7 +85,7 @@ Already shipped (keep; do not rip out):
   ✓ Graph, MCP, prayer, sermons, catechism/creeds/memory/plans
   ✓ Moderation UI, login wiring, Electron shell
 
-Active work (Phase 0 Complete):
+Feature inventory (implementation does not establish release readiness):
   ✓ Module format + 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT)
   ✓ Local read + concordance search path
   ✓ Strong's Greek (5.5k) & Hebrew (8.6k) lexicon data + TSK cross-refs

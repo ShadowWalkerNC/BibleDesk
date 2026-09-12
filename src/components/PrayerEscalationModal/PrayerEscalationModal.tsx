@@ -45,19 +45,19 @@ const TIERS: {
   {
     level: 'private',
     title: 'Tier 1: Private Journal',
-    description: 'Only you see this prayer. Stored locally/encrypted in personal journal.',
+    description: 'Only you see this prayer. Local journal data is stored on this device.',
     icon: Lock,
   },
   {
     level: 'circle',
     title: 'Tier 2: Prayer Circle',
-    description: 'Shared with your invited trusted intercessors & family prayer partners.',
+    description: 'Shared circles are not yet available. Personal prayer-circle entries remain private.',
     icon: Users,
   },
   {
     level: 'church',
     title: 'Tier 3: Church Pastoral Chain',
-    description: 'Escalated to your verified local church pastoral team for corporate intercession.',
+    description: 'Church administration is required. Team delivery is not yet available.',
     icon: Church,
   },
   {
@@ -74,13 +74,11 @@ export default function PrayerEscalationModal({
   prayer,
   onEscalate,
 }: PrayerEscalationModalProps) {
-  if (!isOpen || !prayer) return null;
-
   const [selectedLevel, setSelectedLevel] = useState<PrayerEscalationLevel>(
-    prayer.escalation_level === 'private' ? 'circle' : (prayer.escalation_level || 'circle')
+    prayer?.escalation_level === 'private' ? 'circle' : (prayer?.escalation_level || 'circle')
   );
   const [selectedUrgency, setSelectedUrgency] = useState<PrayerUrgencyLevel>(
-    prayer.urgency_level || 'normal'
+    prayer?.urgency_level || 'normal'
   );
   const [churches, setChurches] = useState<ChurchProfile[]>([]);
   const [selectedChurchId, setSelectedChurchId] = useState<string>('');
@@ -94,7 +92,7 @@ export default function PrayerEscalationModal({
       try {
         const res = await fetch('/api/church');
         const data = await res.json();
-        let list: ChurchProfile[] = data.churches || [];
+        const list: ChurchProfile[] = data.churches || [];
         if (typeof window !== 'undefined') {
           const local = localStorage.getItem('bibledesk_my_churches');
           if (local) {
@@ -115,6 +113,8 @@ export default function PrayerEscalationModal({
     }
     loadChurches();
   }, []);
+
+  if (!isOpen || !prayer) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

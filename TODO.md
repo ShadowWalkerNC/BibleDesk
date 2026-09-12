@@ -1,12 +1,25 @@
 # BibleDesk — TODO
 
-> **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
-> **Last updated:** 2026-09-09
+> **Current phase:** Phase 0 — Local-first Bible foundation (security hardening; release verification pending)
+> **Last updated:** 2026-09-11
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
 
 ## Status Snapshot
+
+### Security batch 1 (2026-09-11)
+
+- [x] Verified identity and ownership for sermon reads/writes/deletes and prayer escalation.
+- [x] Public prayer filtering, safe response fields, pending review on submission, no automatic Discord forwarding.
+- [x] Configured authentication errors remain errors; unconfigured login creates a labeled device-only profile.
+- [x] Nine focused security regressions pass; production build exits 0.
+- [ ] Focused lint: 6 errors and 20 warnings remain in the checked files; full lint not rerun in this batch.
+- [ ] Validate and apply `supabase/migrations/20260911130215_secure_prayer_visibility.sql` in a disposable/staging database after legacy schema reconciliation. Local Docker was unavailable; no database changes have been executed.
+- [ ] Exercise real sessions, database grants/RLS, moderation, and anonymous/owner/other-user prayer access end to end.
+- [ ] Complete remaining release work: grounded AI failures, guest-sync retention, other route/integration authorization, rate-limit durability, dependency remediation, deployment configuration and deployed smoke tests.
+
+See [validation and rollout details](docs/SECURITY_BATCH_1.md). Historical feature checklists below are not release acceptance evidence.
 
 | Area | Reality |
 |---|---|
@@ -14,7 +27,7 @@
 | Codebase | Complete multi-platform feature surface shipped in-repo (reader, AI pipeline, church tools, creators, SDK) |
 | Bible data | Fully local static public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) with zero network requirement |
 | Original language | OpenScriptures Strong's Greek (5.5k) & Hebrew (8.6k) lexicons + TSK cross-refs engine |
-| Deploy | Production build verified across all 34 routes (`npm run build`); ready for live Supabase schema execution (v1→v9) & Vercel deployment |
+| Deploy | Production build passes; deployment blocked pending database validation, remaining security/correctness remediation, and release checks |
 | Docs | Aligned across all documents (`README.md`, `ARCHITECTURE.md`, `TODO.md`, `AGENTS.md`) |
 
 **GitHub hygiene:** Close issue [#1 REPO RESET](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) — it describes an empty stub from 2026-06-15 and is obsolete.

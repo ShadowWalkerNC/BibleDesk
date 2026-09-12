@@ -165,9 +165,9 @@ export default function SermonWorkspacePage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  async function fetchOutlines(userId: string) {
+  async function fetchOutlines(accessToken: string) {
     try {
-      const res = await fetch(`/api/sermons?userId=${userId}`);
+      const res = await fetch('/api/sermons', { headers: { Authorization: `Bearer ${accessToken}` } });
       const data = await res.json();
       if (data.success && data.outlines.length > 0) {
         setOutlines(data.outlines);
@@ -190,7 +190,7 @@ export default function SermonWorkspacePage() {
       setSession(session);
       setCheckingSession(false);
       if (session?.user) {
-        fetchOutlines(session.user.id);
+        fetchOutlines(session.access_token);
       } else {
         // Guest offline fallback
         const localData = localStorage.getItem('bibledesk_sermons_guest');
@@ -264,10 +264,9 @@ export default function SermonWorkspacePage() {
     try {
       const res = await fetch('/api/sermons', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(await getBrowserClient().auth.getSession()).data.session?.access_token || ''}` },
         body: JSON.stringify({
           id: selectedOutlineId,
-          user_id: session.user.id,
           title: title.trim(),
           content: content.trim(),
           publishToDiscord,
@@ -309,8 +308,9 @@ export default function SermonWorkspacePage() {
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/sermons?id=${selectedOutlineId}&userId=${session.user.id}`, {
+      const res = await fetch(`/api/sermons?id=${selectedOutlineId}`, {
         method: 'DELETE',
+        headers: { Authorization: `Bearer ${(await getBrowserClient().auth.getSession()).data.session?.access_token || ''}` },
       });
       
       const data = await res.json();
