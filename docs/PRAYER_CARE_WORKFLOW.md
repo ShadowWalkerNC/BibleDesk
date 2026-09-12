@@ -4,7 +4,9 @@
 > Added: 2026-09-03
 > Schema: supabase/schema-v5.sql
 > Product area: Church tools / personal prayer
-> Related surface: `/prayer` & `/api/prayer/circle`
+> Related surface: `/prayer` (device-local prayer circle)
+>
+> 2026-09-12 (C05): the server-side `/api/prayer/circle` route and the prayer-circle tables were removed — the circle is local-only for the MVP (`src/lib/prayerCareLocal.ts`). Server sections below are historical design reference, not current behavior.
 
 ## Product Idea
 

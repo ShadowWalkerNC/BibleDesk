@@ -2,7 +2,8 @@
 
 .shell {
   display: flex;
-  height: 100vh;
+  height: 100vh; /* fallback */
+  height: 100dvh;
   overflow: hidden;
   background: var(--navy-950);
 }
@@ -18,7 +19,8 @@
   background-image:
     radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
     linear-gradient(125deg, rgba(107, 142, 123, 0.16), transparent 42%);
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
 }
 
 .mainCollapsed {
@@ -30,6 +32,25 @@
 .main::-webkit-scrollbar-track { background: transparent; }
 .main::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 3px; }
 .main::-webkit-scrollbar-thumb:hover { background: var(--sage); }
+
+/* ── Skip link (first tab stop; visible on focus) ──────────── */
+.skipLink {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 10000;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: top 0.2s var(--ease-out);
+}
+.skipLink:focus-visible {
+  top: 0.75rem;
+}
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 768px) {

@@ -1,5 +1,14 @@
 // BibleDesk — Local-First Prayer Care Engine
 // Handles offline-ready persistence, recurrence calculation, checkins, and care drafts.
+//
+// C05 (2026-09-12) — OWNER DECISION (b): the prayer circle is LOCAL-ONLY for
+// the MVP. This module is the single committed data model for the circle tab:
+// contacts, commitments, check-ins, and follow-ups live in localStorage and are
+// never synced to a server. The old server write-through route
+// (src/app/api/prayer/circle/route.ts) was deleted along with the v5 circle
+// tables. Server-backed circle sharing is parked as a Phase-D epic (needs
+// auth + RLS + moderation). Prayer content is sensitive; local-first is the
+// project's identity.
 
 import { 
   PrayerContact, 
@@ -81,29 +90,64 @@ export const DEFAULT_COMMITMENTS: PrayerCommitment[] = [
   }
 ];
 
-export function calculateNextDue(rule: RecurrenceRule, fromDate: Date = new Date()): string {
-  const d = new Date(fromDate);
+// ── Timezone-aware recurrence math ─────────────────────────────────────────
+// All recurrence arithmetic runs on the commitment's stored `timezone` wall
+// clock, so "daily" always means "same local time tomorrow" even across DST
+// boundaries. Plain Date arithmetic would drift by an hour at transitions.
+
+export function getTimezoneOffsetMinutes(at: Date, timezone: string): number {
+  try {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hourCycle: 'h23',
+    });
+    const parts: Record<string, string> = {};
+    for (const p of dtf.formatToParts(at)) parts[p.type] = p.value;
+    const asUTC = Date.UTC(
+      Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+      Number(parts.hour), Number(parts.minute), Number(parts.second)
+    );
+    return Math.round((asUTC - at.getTime()) / 60000);
+  } catch {
+    return 0; // unknown/invalid timezone → treat as UTC
+  }
+}
+
+export function calculateNextDue(
+  rule: RecurrenceRule,
+  fromDate: Date = new Date(),
+  timezone: string = 'UTC'
+): string | null {
+  // One-off commitments complete on check-in — they never reschedule.
+  if (rule === 'once') return null;
+
+  // Shift the instant onto the stored timezone's wall clock (held as UTC), so
+  // day/month arithmetic and weekday checks use local calendar semantics.
+  const shifted = new Date(fromDate.getTime() + getTimezoneOffsetMinutes(fromDate, timezone) * 60000);
+
   switch (rule) {
     case 'daily':
-      d.setDate(d.getDate() + 1);
+      shifted.setUTCDate(shifted.getUTCDate() + 1);
       break;
     case 'weekdays':
       do {
-        d.setDate(d.getDate() + 1);
-      } while (d.getDay() === 0 || d.getDay() === 6);
+        shifted.setUTCDate(shifted.getUTCDate() + 1);
+      } while (shifted.getUTCDay() === 0 || shifted.getUTCDay() === 6);
       break;
     case 'weekly':
-      d.setDate(d.getDate() + 7);
+      shifted.setUTCDate(shifted.getUTCDate() + 7);
       break;
     case 'monthly':
-      d.setMonth(d.getMonth() + 1);
-      break;
-    case 'once':
-      // Move far in future or complete
-      d.setFullYear(d.getFullYear() + 10);
+      shifted.setUTCMonth(shifted.getUTCMonth() + 1);
       break;
   }
-  return d.toISOString();
+
+  // Convert the local wall-clock result back to a UTC instant, using the
+  // offset in effect at the new time so DST transitions stay correct.
+  const newOffset = getTimezoneOffsetMinutes(new Date(shifted.getTime()), timezone);
+  return new Date(shifted.getTime() - newOffset * 60000).toISOString();
 }
 
 export function loadPrayerCareStore(): PrayerCareStore {
@@ -218,9 +262,14 @@ export function performCheckin(
     // Snooze 24h
     const snoozeDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     nextDue = snoozeDate.toISOString();
+  } else if (commitment.recurrence_rule === 'once') {
+    // One-off commitment completes on check-in (prayed/skipped) — it archives
+    // instead of rescheduling. (calculateNextDue returns null for 'once'.)
+    newStatus = 'archived';
+    nextDue = null;
   } else {
     // Prayed or skipped
-    nextDue = calculateNextDue(commitment.recurrence_rule, now);
+    nextDue = calculateNextDue(commitment.recurrence_rule, now, commitment.timezone);
   }
 
   const checkin: PrayerCheckin = {

@@ -17,7 +17,6 @@ import { runPipeline } from '@/lib/pipeline';
 
 export interface ClaudeAnswerOptions {
   translation?: TranslationId;
-  maxTokens?: number;
   /** RAG context string from rag.ts — injected into pipeline Stage 1 */
   ragContext?: string;
   apiKey?: string;
@@ -35,11 +34,10 @@ export async function generateBibleAnswer(
   question: string,
   options: ClaudeAnswerOptions = {}
 ): Promise<BibleAnswer> {
-  const { translation = 'web', maxTokens = 4096, ragContext = '', apiKey } = options;
+  const { translation = 'web', ragContext = '', apiKey } = options;
 
   const result = await runPipeline(question, {
     translation,
-    maxTokens,
     ragContext,
     apiKey,
   });
@@ -58,7 +56,10 @@ export async function generateBibleAnswerLegacy(
 ): Promise<BibleAnswer> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
   const { v4: uuidv4 } = await import('uuid');
-  const { translation = 'web', maxTokens = 4096 } = options;
+  const { translation = 'web' } = options;
+  // Legacy single-shot path keeps its own fixed token budget; it is NOT
+  // connected to the pipeline and maxTokens is not a pipeline option.
+  const maxTokens = 4096;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');

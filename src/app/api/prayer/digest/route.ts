@@ -1,13 +1,23 @@
 // BibleDesk — Prayer Digest API Route
-// Generates and sends daily/weekly prayer intercession digests.
-// Supports both authenticated user on-demand generation and cron automation.
-
+// Generates a preview of daily/weekly prayer intercession digests.
+// NOTE: no mail provider is wired, so this route never sends email — it only
+// renders a preview. Wiring a real provider is an explicit product decision
+// tracked separately.
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerClient } from '@/lib/supabase';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+function escapeHtml(value: string | null | undefined): string {
+  return (value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 interface DigestCommitment {
   id: string;
@@ -26,8 +36,6 @@ interface DigestCommitment {
 export async function GET(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
-    const { searchParams } = new URL(req.url);
-    const sendEmail = searchParams.get('send') === 'true';
 
     if (!user) {
       return NextResponse.json({ 
@@ -90,14 +98,14 @@ export async function GET(req: NextRequest) {
       itemsText = 'You are all caught up on scheduled prayer commitments for today. Rest in God\'s grace.\n';
     } else {
       itemsHtml = dueCommitments.map((item, idx) => {
-        const contactName = item.contact?.display_name || 'Personal Intention';
-        const category = item.contact?.category ? `(${item.contact.category})` : '';
-        const details = item.private_details ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">${item.private_details}</div>` : '';
+        const contactName = escapeHtml(item.contact?.display_name) || 'Personal Intention';
+        const category = item.contact?.category ? `(${escapeHtml(item.contact.category)})` : '';
+        const details = item.private_details ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">${escapeHtml(item.private_details)}</div>` : '';
         
         return `
           <div style="padding: 12px 16px; margin-bottom: 10px; background: #f8fafc; border-left: 4px solid #d4a017; border-radius: 4px;">
             <strong style="color: #0f172a; font-size: 15px;">${idx + 1}. ${contactName} ${category}</strong>
-            <div style="font-size: 14px; color: #1e293b; margin-top: 4px;">${item.title}</div>
+            <div style="font-size: 14px; color: #1e293b; margin-top: 4px;">${escapeHtml(item.title)}</div>
             ${details}
           </div>
         `;
@@ -116,7 +124,7 @@ export async function GET(req: NextRequest) {
           <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Daily Intercession Rhythm &bull; ${dateStr}</p>
         </div>
         <div style="padding: 20px 0;">
-          <p>Grace and peace to you, ${userName}.</p>
+          <p>Grace and peace to you, ${escapeHtml(userName)}.</p>
           <p>Here are the people and needs you committed to hold in prayer today:</p>
           ${itemsHtml}
           <div style="margin-top: 24px; padding: 16px; background: #fefce8; border-radius: 6px; font-size: 13px; color: #854d0e;">
@@ -131,6 +139,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      preview: true,
+      emailSent: false,
+      reason: 'no mail provider configured',
       dueCount: dueCommitments.length,
       digest: {
         subject,
@@ -139,10 +150,7 @@ export async function GET(req: NextRequest) {
         html: htmlBody,
         text: itemsText,
       },
-      emailSent: sendEmail,
-      message: sendEmail 
-        ? `Digest prepared for ${user.email}. ${dueCommitments.length} prayers scheduled.`
-        : 'Digest generated successfully.',
+      message: 'Digest preview generated. Preview only — no mail provider is configured.',
     });
   } catch (err: any) {
     console.error('[api/prayer/digest] Error:', err);
@@ -165,7 +173,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ success: true, message: 'Supabase unconfigured; simulated cron.' });
+      return NextResponse.json({
+        success: true,
+        preview: true,
+        emailSent: false,
+        message: 'Supabase unconfigured; digest preview only, nothing mailed out.',
+      });
     }
 
     const supabase = getServerClient();
@@ -182,7 +195,9 @@ export async function POST(req: NextRequest) {
       const processedCount = (prefs || []).length;
       return NextResponse.json({
         success: true,
-        message: `Cron executed successfully. Processed ${processedCount} subscribed users.`,
+        preview: true,
+        emailSent: false,
+        message: `Cron ran. ${processedCount} users have digests enabled; nothing mailed out — no mail provider is configured.`,
         processedCount,
       });
     }

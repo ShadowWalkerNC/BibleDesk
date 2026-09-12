@@ -81,6 +81,11 @@ interface PublicPrayerRequest {
   is_restricted?: boolean;
   category?: string;
   privacy_mode?: 'approximate' | 'precise' | 'restricted';
+  // B14 hardening: the wall shows approved public rows; the atlas shows only
+  // rows with explicit consent (consent_atlas=true).
+  is_public?: boolean;
+  consent_atlas?: boolean;
+  status?: string;
 }
 
 type MainTab = 'today' | 'circle' | 'community' | 'world' | 'answered';
@@ -107,6 +112,8 @@ export default function PrayerBoardPage() {
   const [loadingPublic, setLoadingPublic] = useState(true);
   const [submittingPublic, setSubmittingPublic] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  // B14: explicit opt-in for the World PrayerAtlas map (default off).
+  const [consentAtlas, setConsentAtlas] = useState(false);
 
   // View mode for Public Board: 'split' | 'globe' | 'feed'
   const [viewMode, setViewMode] = useState<'split' | 'globe' | 'feed'>('split');
@@ -188,8 +195,13 @@ export default function PrayerBoardPage() {
     setCommitments(store.commitments);
 
     // 2. Check URL search params for quick action prefill (e.g. from /encourage)
+    //    and for slash-command deep links (e.g. /atlas -> tab=world).
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      if (tab === 'today' || tab === 'circle' || tab === 'community' || tab === 'world' || tab === 'answered') {
+        setActiveTab(tab);
+      }
       if (urlParams.get('action') === 'new') {
         const title = urlParams.get('title') || '';
         const text = urlParams.get('text') || '';
@@ -223,22 +235,19 @@ export default function PrayerBoardPage() {
   async function fetchPublicPrayers() {
     setLoadingPublic(true);
     try {
-      let localPrayers: PublicPrayerRequest[] = [];
-      if (typeof window !== 'undefined') {
-        try {
-          const raw = localStorage.getItem('bibledesk_public_prayers_local');
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) localPrayers = parsed;
-          }
-        } catch (e) {
-          console.warn('Could not read local prayers', e);
-        }
+      // B14: the Community Wall reads only the server's approved public rows.
+      // Local draft/guest prayers are never mixed into the public feed — that
+      // was the mock-success seam ("pinned to your local map view").
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
       let serverPrayers: PublicPrayerRequest[] = [];
       try {
-        const res = await fetch('/api/prayer');
+        const res = await fetch('/api/prayer', { headers });
         if (res.ok) {
           const text = await res.text();
           if (text.trim()) {
@@ -249,20 +258,10 @@ export default function PrayerBoardPage() {
           }
         }
       } catch (networkErr) {
-        console.warn('Server prayers fetch error, falling back to local store:', networkErr);
+        console.warn('Server prayers fetch error:', networkErr);
       }
 
-      // Combine local guest prayers with server prayers, deduplicated by ID
-      const seen = new Set<string>();
-      const combined: PublicPrayerRequest[] = [];
-      for (const p of [...localPrayers, ...serverPrayers]) {
-        if (!seen.has(p.id)) {
-          seen.add(p.id);
-          combined.push(p);
-        }
-      }
-
-      setPrayers(combined);
+      setPrayers(serverPrayers);
     } catch (err) {
       console.error('Failed to fetch public prayers:', err);
     } finally {
@@ -277,8 +276,10 @@ export default function PrayerBoardPage() {
     isAnonymous: boolean;
     churchId?: string;
     updateNote?: string;
+    atlasConsent?: boolean;
   }) {
     try {
+<<<<<<< HEAD
       const { data: { session } } = await getBrowserClient().auth.getSession();
       if (!session) throw new Error('Sign in before changing visibility. Local prayer-circle entries remain private.');
       const res = await fetch('/api/prayer/escalate', {
@@ -291,26 +292,67 @@ export default function PrayerBoardPage() {
       if (res.ok) {
         setMessage({
           text: data.targetLevel === 'atlas' ? 'Prayer submitted for public review.' : 'Prayer visibility updated.',
+=======
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch('/api/prayer/escalate', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+      });
+      const result = await res.json().catch(() => ({}));
+
+      if (res.ok && result.success) {
+        // B14: report what actually happened — the server says it honestly.
+        setMessage({
+          text: result.message || `Prayer escalated to ${data.targetLevel.toUpperCase()} tier.`,
+>>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
           type: 'success',
         });
-        // Update commitment state
-        setCommitments(prev =>
-          prev.map(c =>
-            c.id === data.prayerId
-              ? {
-                  ...c,
-                  escalation_level: data.targetLevel,
-                  urgency_level: data.urgencyLevel,
-                  church_id: data.churchId,
-                  is_anonymous: data.isAnonymous,
-                }
-              : c
-          )
-        );
+        setTimeout(() => setMessage(null), 5000);
+      } else if (res.status === 404 && result.localOnly) {
+        // Local-only circle commitment: the choice was already recorded on the
+        // device below; nothing was persisted server-side.
+        setMessage({ text: result.error, type: 'success' });
+        setTimeout(() => setMessage(null), 5000);
+      } else {
+        setMessage({ text: result.error || 'Failed to escalate prayer. Please try again.', type: 'error' });
+        setTimeout(() => setMessage(null), 5000);
+      }
+
+      // Update local commitment state (circle commitments are device-local).
+      setCommitments(prev =>
+        prev.map(c =>
+          c.id === data.prayerId
+            ? {
+                ...c,
+                escalation_level: data.targetLevel,
+                urgency_level: data.urgencyLevel,
+                church_id: data.churchId,
+                is_anonymous: data.isAnonymous,
+              }
+            : c
+        )
+      );
+
+      // A Tier-4 (atlas) promotion that actually published is now visible —
+      // refresh the wall/map so the new beacon appears.
+      if (res.ok && result.publishedToAtlas) {
+        fetchPublicPrayers();
       }
     } catch (err) {
       console.error('Failed to escalate prayer:', err);
+<<<<<<< HEAD
       setMessage({ text: err instanceof Error ? err.message : 'Failed to escalate prayer.', type: 'error' });
+=======
+      setMessage({ text: 'Failed to escalate prayer. Please try again.', type: 'error' });
+      setTimeout(() => setMessage(null), 5000);
+>>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
     }
   }
 
@@ -362,9 +404,15 @@ export default function PrayerBoardPage() {
     });
   }, [prayers, filterRestricted, filterCountry, communityCategoryFilter, searchQuery]);
 
-  // Globe Pins: Unifies active community prayers with global beacons
+  // Globe Pins: community prayers with explicit atlas consent + global beacons.
+  // B14 (P0 leak fix): the atlas renders ONLY prayers with consent_atlas=true.
+  // Private / today / circle prayers NEVER appear here — circle commitments
+  // are device-local (C05) and were previously pinned to the world map, which
+  // leaked private prayer text onto a public surface. Those local pins are gone.
   const globePins = useMemo<MissionMapPin[]>(() => {
-    const submittedPins: MissionMapPin[] = prayers.map(p => {
+    const submittedPins: MissionMapPin[] = prayers
+      .filter(p => p.consent_atlas === true)
+      .map(p => {
       let lat = p.latitude != null ? Number(p.latitude) : null;
       let lng = p.longitude != null ? Number(p.longitude) : null;
       let countryCode = p.country_code;
@@ -438,36 +486,11 @@ export default function PrayerBoardPage() {
       };
     });
 
-    const localPins: MissionMapPin[] = commitments
-      .map(c => {
-        let country = c.country_code ? getCountryByCode(c.country_code) : undefined;
-        if (!country && c.private_details) country = findCountryInText(c.private_details);
-        if (!country && c.title) country = findCountryInText(c.title);
-        if (!country) return null;
-
-        const jitter = getPinJitter(c.id);
-        return {
-          id: `local-${c.id}`,
-          latitude: country.lat + jitter.lat,
-          longitude: country.lng + jitter.lng,
-          label: `${c.contact?.display_name || c.title || 'My Circle'} • ${country.name}`,
-          category: (c.contact?.category || 'other').toLowerCase(),
-          privacy_mode: 'approximate' as const,
-          text: c.private_details || c.title || 'Personal prayer commitment',
-          urgency: 'normal' as const,
-          isRestricted: country.isRestricted,
-          source: 'circle' as const,
-          country_code: country.code,
-          country_name: country.name,
-        };
-      })
-      .filter(Boolean) as MissionMapPin[];
-
-    const seenIds = new Set<string>([...submittedPins.map(p => p.id), ...localPins.map(p => p.id)]);
+    const seenIds = new Set<string>(submittedPins.map(p => p.id));
     const nonDuplicatedSeeds = DEFAULT_MAP_PINS.filter(seed => !seenIds.has(seed.id));
 
-    return [...submittedPins, ...localPins, ...nonDuplicatedSeeds];
-  }, [prayers, commitments]);
+    return [...submittedPins, ...nonDuplicatedSeeds];
+  }, [prayers]);
 
   // ── Actions: Check-in & Care Workflow ────────────────────────────────────
 
@@ -596,7 +619,7 @@ export default function PrayerBoardPage() {
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
       if (permission === 'granted') {
-        setMessage({ text: 'Prayer reminders enabled! You will be notified when prayers are due.', type: 'success' });
+        setMessage({ text: 'Prayer reminders enabled! Due commitments are listed in the Today tab \u2014 that is your daily reminder.', type: 'success' });
         setTimeout(() => setMessage(null), 3500);
       } else {
         setMessage({ text: 'Notifications were denied. Please enable them in your browser settings.', type: 'error' });
@@ -626,7 +649,7 @@ export default function PrayerBoardPage() {
     setTimeout(() => setMessage(null), 3500);
   }
 
-  async function handleSendEmailDigest() {
+  async function handlePreviewDigest() {
     setDigestSending(true);
     try {
       const supabase = getBrowserClient();
@@ -636,23 +659,23 @@ export default function PrayerBoardPage() {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const res = await fetch('/api/prayer/digest?send=true', { headers });
+      const res = await fetch('/api/prayer/digest', { headers });
       const data = await res.json();
 
       if (data.success) {
         setMessage({ 
-          text: `Daily Prayer Digest generated! (${data.dueCount} prayers scheduled). Check your email inbox.`, 
+          text: `Digest preview ready (${data.dueCount} prayers scheduled). Preview only — no mail provider is configured.`, 
           type: 'success' 
         });
       } else {
         setMessage({ 
-          text: data.error || 'Please sign in to email daily prayer digests.', 
+          text: data.error || 'Please sign in to preview the daily prayer digest.', 
           type: 'error' 
         });
       }
     } catch (err) {
-      console.error('Email digest error:', err);
-      setMessage({ text: 'Failed to generate prayer digest email.', type: 'error' });
+      console.error('Digest preview error:', err);
+      setMessage({ text: 'Failed to generate the prayer digest preview.', type: 'error' });
     } finally {
       setDigestSending(false);
       setTimeout(() => setMessage(null), 4000);
@@ -678,6 +701,14 @@ export default function PrayerBoardPage() {
   async function handlePublicSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!newRequest.trim()) return;
+
+    // B14: posting requires sign-in. Anonymous visitors are read-only and see
+    // the sign-in prompt in the composer instead of this handler ever firing.
+    if (!userId) {
+      setMessage({ text: 'Please sign in to share a prayer request on the Community Wall.', type: 'error' });
+      setTimeout(() => setMessage(null), 4000);
+      return;
+    }
 
     setSubmittingPublic(true);
     setMessage(null);
@@ -712,35 +743,36 @@ export default function PrayerBoardPage() {
       category: publicCategory,
       privacy_mode: locationPrivacy,
       is_restricted: isRestrictedSetting,
+      is_public: true,
+      consent_atlas: consentAtlas,
+      status: 'pending',
     };
 
     // 1. Optimistically add to state immediately
     setPrayers(prev => [optimisticPrayer, ...prev]);
 
-    // 2. Persist in local storage for guest/offline continuity
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('bibledesk_public_prayers_local');
-        const existing: PublicPrayerRequest[] = raw ? JSON.parse(raw) : [];
-        localStorage.setItem(
-          'bibledesk_public_prayers_local',
-          JSON.stringify([optimisticPrayer, ...existing].slice(0, 50))
-        );
-      } catch (storageErr) {
-        console.warn('Could not save prayer locally:', storageErr);
-      }
-    }
-
     try {
+<<<<<<< HEAD
       const { data: { session } } = await getBrowserClient().auth.getSession();
       const res = await fetch('/api/prayer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+=======
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch('/api/prayer', {
+        method: 'POST',
+        headers,
+>>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
         body: JSON.stringify({
           request: newRequest.trim(),
           display_name: authorName,
           anonymous: anonymous || isRestrictedSetting,
-          user_id: userId,
           country_code: countryCodeToUse,
           country_name: countryNameToUse,
           latitude: latToUse,
@@ -748,9 +780,11 @@ export default function PrayerBoardPage() {
           category: publicCategory,
           privacy_mode: locationPrivacy,
           is_restricted: isRestrictedSetting,
+          consent_atlas: consentAtlas,
         }),
       });
 
+<<<<<<< HEAD
       if (!res.ok) throw new Error('Submission was not saved remotely.');
       let finalId = tempId;
       if (res.ok) {
@@ -764,19 +798,52 @@ export default function PrayerBoardPage() {
       }
 
       setMessage({ text: 'Prayer received for review. This pin is currently visible only on your device.', type: 'success' });
+=======
+      const result = await res.json().catch(() => ({}));
+
+      if (res.ok && result.success && result.prayer) {
+        // Replace the optimistic row with the real server row (carries the
+        // authoritative status: approved, or held pending moderation review).
+        setPrayers(prev =>
+          prev.map(p => (p.id === tempId ? { ...result.prayer } : p))
+        );
+        setMessage({
+          text: result.held
+            ? 'Received — your request is awaiting a quick moderation review before it appears on the wall.'
+            : 'Your prayer request was shared on the Community Wall.',
+          type: 'success',
+        });
+        setSelectedPinId(result.prayer.id);
+      } else {
+        // Honest failure: drop the optimistic row, keep the modal + draft so
+        // the user can retry. No fake "pinned locally" success anymore.
+        setPrayers(prev => prev.filter(p => p.id !== tempId));
+        setMessage({
+          text: result.error || 'Could not share your prayer request. Nothing was posted — please try again.',
+          type: 'error',
+        });
+        setSubmittingPublic(false);
+        setTimeout(() => setMessage(null), 5000);
+        return;
+      }
+
+>>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
       setNewRequest('');
       setCountryCode('');
+      setConsentAtlas(false);
       setIsSubmitModalOpen(false);
-      setSelectedPinId(finalId);
       setActiveTab('world');
     } catch (err: any) {
-      console.warn('Network submission warning, local prayer retained:', err);
-      setMessage({ text: 'Prayer pinned to your local map view!', type: 'success' });
-      setNewRequest('');
-      setCountryCode('');
-      setIsSubmitModalOpen(false);
-      setSelectedPinId(tempId);
-      setActiveTab('world');
+      // Network failure: drop the optimistic row, keep the draft, say so.
+      setPrayers(prev => prev.filter(p => p.id !== tempId));
+      console.warn('Prayer submission failed:', err);
+      setMessage({
+        text: 'Could not reach the server. Your request was not shared — please check your connection and try again.',
+        type: 'error',
+      });
+      setSubmittingPublic(false);
+      setTimeout(() => setMessage(null), 5000);
+      return;
     } finally {
       setSubmittingPublic(false);
     }
@@ -881,8 +948,8 @@ export default function PrayerBoardPage() {
                   <h4 className={styles.remindersTitle}>Daily Intercession Reminders</h4>
                   <p className={styles.remindersSubtitle}>
                     {notificationPermission === 'granted'
-                      ? 'Device push reminders are active. You will be alerted when commitments are due.'
-                      : 'Enable gentle browser notifications to be reminded when friends need prayer.'}
+                      ? 'Browser notifications are enabled on this device for manual alerts. Due commitments are listed here in the Today tab \u2014 that is your daily reminder.'
+                      : 'Enable browser notifications for manual reminder alerts. Due commitments are always listed here in the Today tab.'}
                   </p>
                 </div>
               </div>
@@ -913,12 +980,12 @@ export default function PrayerBoardPage() {
                 <button
                   type="button"
                   disabled={digestSending}
-                  onClick={handleSendEmailDigest}
+                  onClick={handlePreviewDigest}
                   className={styles.reminderDigestBtn}
-                  title="Generate and email today's intercession digest to your inbox"
+                  title="Preview today's intercession digest — no mail provider is configured"
                 >
                   <Mail size={14} />
-                  <span>{digestSending ? 'Sending Digest...' : "Email Today's Digest"}</span>
+                  <span>{digestSending ? 'Loading Preview...' : "Preview Today's Digest"}</span>
                 </button>
               </div>
             </div>
@@ -1070,6 +1137,8 @@ export default function PrayerBoardPage() {
         )}
 
         {/* ── 2. Tab: My Circle ──────────────────────────────────────── */}
+        {/* C05 (owner decision (b)): the circle tab is local-only — it reads/writes
+            localStorage via prayerCareLocal.ts only. No server sync exists. */}
         {activeTab === 'circle' && (
           <section className={styles.sectionContainer}>
             <div className={styles.filterRow}>
@@ -1707,6 +1776,28 @@ export default function PrayerBoardPage() {
                 </button>
               </div>
 
+              {/* B14: posting requires sign-in. Anonymous visitors get a
+                  read-only wall and a sign-in prompt here. */}
+              {!userId ? (
+                <div className={styles.modalForm}>
+                  <p className={styles.sectionDesc}>
+                    The Community Wall and PrayerAtlas are public. Please sign in to share
+                    a prayer request — anonymous posting is not supported.
+                  </p>
+                  <div className={styles.modalActions}>
+                    <button
+                      type="button"
+                      className={styles.modalCancelBtn}
+                      onClick={() => setIsSubmitModalOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <a href="/login" className={styles.modalSubmitBtn} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      Sign In to Share
+                    </a>
+                  </div>
+                </div>
+              ) : (
               <form onSubmit={handlePublicSubmit} className={styles.modalForm}>
                 <label className={styles.formLabel}>
                   Your Prayer Request *
@@ -1767,6 +1858,20 @@ export default function PrayerBoardPage() {
                   </label>
                 </div>
 
+                {/* B14: explicit opt-in — the atlas shows ONLY consented prayers.
+                    Without this, the request appears on the Community Wall only. */}
+                <div className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    id="atlas_consent_check"
+                    checked={consentAtlas}
+                    onChange={(e) => setConsentAtlas(e.target.checked)}
+                  />
+                  <label htmlFor="atlas_consent_check">
+                    Show on the World PrayerAtlas map (approximate region only). I understand this prayer becomes public.
+                  </label>
+                </div>
+
                 <div className={styles.modalActions}>
                   <button
                     type="button"
@@ -1784,6 +1889,7 @@ export default function PrayerBoardPage() {
                   </button>
                 </div>
               </form>
+              )}
             </div>
           </div>
         )}

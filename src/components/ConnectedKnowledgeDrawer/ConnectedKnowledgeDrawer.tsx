@@ -299,7 +299,7 @@ export default function ConnectedKnowledgeDrawer({
                     <strong>Q: {c.question}</strong>
                   </p>
                   <p className={styles.cardBody}>A: {c.answer}</p>
-                  <a className={styles.cardLink} href="/catechism">
+                  <a className={styles.cardLink} href="/study-resources?tab=catechism">
                     Explore Catechisms <ExternalLink size={11} />
                   </a>
                 </div>

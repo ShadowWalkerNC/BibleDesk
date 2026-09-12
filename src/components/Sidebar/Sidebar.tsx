@@ -5,15 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
   BookOpen,
-  Calendar,
-  Sun,
-  Brain,
   Church,
-  Scroll,
-  Bookmark,
-  History,
-  Network,
-  MessageSquare,
   Heart,
   Search,
   ChevronLeft,
@@ -30,8 +22,7 @@ import {
   Layers,
   Globe,
   Code,
-  Radio,
-  Palette,
+  ShieldCheck,
 } from 'lucide-react';
 import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -40,28 +31,25 @@ import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal'
 import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
-  { href: '/bible',     label: 'Study Desk',    icon: BookOpen },
-  { href: '/encourage', label: 'Encouragement', icon: Sparkles },
-  { href: '/daily',     label: 'Daily Verse',   icon: Sun },
-  { href: '/plans',     label: 'Reading Plans', icon: Calendar },
-  { href: '/memory',    label: 'Verse Memory',  icon: Brain },
+  { href: '/bible',            label: 'Study Desk',     icon: BookOpen },
+  { href: '/study-resources',  label: 'Study Resources', icon: Layers },
 ];
 
 const CHURCH_LINKS = [
-  { href: '/church',    label: 'Church Hub',    icon: Church },
-  { href: '/creators',  label: 'Creator Hub',   icon: Palette },
   { href: '/prayer',    label: 'Prayer Atlas',  icon: Globe },
-  { href: '/sermons',   label: 'Sermons',       icon: Church },
-  { href: '/catechism', label: 'Catechism',     icon: MessageSquare },
-  { href: '/creeds',    label: 'Creeds',        icon: Scroll },
 ];
 
 const TOOL_LINKS = [
   { href: '/developers',label: 'Developers & SDK', icon: Code },
-  { href: '/bookmarks', label: 'Bookmarks',     icon: Bookmark },
-  { href: '/history',   label: 'History',       icon: History },
-  { href: '/graph',     label: 'Concept Graph', icon: Network },
   { href: '/download',  label: 'Install App',   icon: Download },
+];
+
+// C01: /mod has no usable client-side role check (src/lib/mod-auth.ts is
+// server-only), so the link is rendered for everyone and the /mod page itself
+// gates: non-moderators see "Access Denied". Do not rely on this link for
+// authorization — the /api/mod/* routes enforce it server-side.
+const MOD_LINKS = [
+  { href: '/mod', label: 'Moderation', icon: ShieldCheck },
 ];
 
 interface SidebarProps {
@@ -178,6 +166,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <Link
         href={href}
         className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+        aria-current={active ? 'page' : undefined}
         title={collapsed ? label : undefined}
       >
         <Icon size={18} className={styles.navIcon} />
@@ -214,6 +203,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <button
           className={styles.quickJump}
           onClick={() => setIsJumpOpen(true)}
+          aria-label="Jump to book or chapter (Ctrl+K)"
           title="Jump to book or chapter (Ctrl+K)"
         >
           <Search size={15} className={styles.navIcon} />
@@ -235,29 +225,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {!collapsed && <p className={styles.sectionLabel}>Tools</p>}
           {TOOL_LINKS.map(link => <NavItem key={link.href} {...link} />)}
+
+          {!collapsed && <p className={styles.sectionLabel}>Moderation</p>}
+          {MOD_LINKS.map(link => <NavItem key={link.href} {...link} />)}
           
           <button
             className={styles.navItem}
             onClick={() => setIsIntegrationsOpen(true)}
-            title={collapsed ? 'Discord & WhatsApp' : undefined}
+            title={collapsed ? 'WhatsApp' : undefined}
             style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
           >
             <Share2 size={18} className={styles.navIcon} />
-            {!collapsed && <span className={styles.navLabel}>Integrations</span>}
-          </button>
-
-          <button
-            className={styles.navItem}
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
-              }
-            }}
-            title={collapsed ? 'Live Worship Radio' : undefined}
-            style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-          >
-            <Radio size={18} className={styles.navIcon} />
-            {!collapsed && <span className={styles.navLabel}>Worship Radio</span>}
+            {!collapsed && <span className={styles.navLabel}>WhatsApp Sharing</span>}
           </button>
         </nav>
 
@@ -289,6 +268,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <button
                 onClick={handleSignOut}
                 className={styles.signOutBtn}
+                aria-label="Sign Out"
                 title="Sign Out"
               >
                 <LogOut size={14} />
@@ -308,30 +288,26 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <Link
           href="/bible"
           className={`${styles.mobileNavItem} ${isActive('/bible') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/bible') ? 'page' : undefined}
         >
           <BookOpen size={20} />
           <span>Bible</span>
         </Link>
         <Link
-          href="/daily"
-          className={`${styles.mobileNavItem} ${isActive('/daily') ? styles.mobileNavItemActive : ''}`}
+          href="/study-resources"
+          className={`${styles.mobileNavItem} ${isActive('/study-resources') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/study-resources') ? 'page' : undefined}
         >
-          <Sun size={20} />
-          <span>Daily</span>
+          <Layers size={20} />
+          <span>Resources</span>
         </Link>
         <Link
           href="/prayer"
           className={`${styles.mobileNavItem} ${isActive('/prayer') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/prayer') ? 'page' : undefined}
         >
           <Globe size={20} />
           <span>Prayer</span>
-        </Link>
-        <Link
-          href="/plans"
-          className={`${styles.mobileNavItem} ${isActive('/plans') ? styles.mobileNavItemActive : ''}`}
-        >
-          <Calendar size={20} />
-          <span>Plans</span>
         </Link>
         <button
           className={`${styles.mobileNavItem} ${isMobileMenuOpen ? styles.mobileNavItemActive : ''}`}
@@ -386,6 +362,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -403,6 +380,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -420,6 +398,25 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} className={styles.mobileCategoryIcon} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.mobileCategory}>
+                <span className={styles.mobileCategoryTitle}>Moderation</span>
+                <div className={styles.mobileCategoryGrid}>
+                  {MOD_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -451,27 +448,19 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 }}
               >
                 <Share2 size={16} />
-                <span>Discord &amp; WhatsApp Connect</span>
-              </button>
-
-              <button
-                className={styles.mobileActionBtn}
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
-                  }
-                }}
-              >
-                <Radio size={16} />
-                <span>Live Worship Radio</span>
+                <span>WhatsApp Connect</span>
               </button>
 
               {user ? (
                 <div className={styles.mobileUserRow}>
                   <div className={styles.userAvatar}><User size={14} /></div>
+<<<<<<< HEAD
                   <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
                   <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
+=======
+                  <span className={styles.userName}>{user.user_metadata?.name || user.email?.split('@')[0]}</span>
+                  <button onClick={handleSignOut} className={styles.signOutBtn} aria-label="Sign Out" title="Sign Out">
+>>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
                     <LogOut size={14} />
                   </button>
                 </div>

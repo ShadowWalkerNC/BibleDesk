@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { fetchPassage } from '@/lib/bible';
-import { getFullGraph, getSubgraph } from '@/lib/graph';
+import { getSubgraph } from '@/lib/graph';
+import type { GraphNode } from '@/lib/graph';
+import { getCanonicalGraph } from '@/lib/canonicalGraph';
 import { generateBibleAnswer } from '@/lib/claude';
 import { searchLocalBible, getLocalPassage } from '@/lib/bible-local';
 import { getStrongsDefinition, getCrossReferences } from '@/lib/lexicon';
 import { TRANSLATIONS, type TranslationId } from '@/types';
 import { getAppUrl } from '@/lib/appUrl';
+import { checkRateLimit, RateLimitNamespace } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,6 +30,34 @@ function ok(id: unknown, result: unknown) {
 
 function err(id: unknown, code: number, message: string) {
   return NextResponse.json({ jsonrpc: '2.0', id, error: { code, message } });
+}
+
+// ─── Fail-closed bearer auth + rate limiting ─────────────────────────────────
+
+// SECURITY: MCP_SECRET is REQUIRED. If it is unset, or the presented bearer
+// token does not match, EVERY request is refused (401). There is no dev-mode
+// bypass and no unauthenticated access to any tool — a missing secret must
+// never silently become an open endpoint.
+function isAuthorized(req: NextRequest, secret: string | undefined): boolean {
+  if (!secret) return false;
+  const presented = Buffer.from(req.headers.get('authorization') ?? '');
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return presented.length === expected.length && crypto.timingSafeEqual(presented, expected);
+}
+
+function unauthorized(message: string) {
+  return NextResponse.json(
+    { success: false, error: message, code: 'unauthorized' },
+    { status: 401 }
+  );
+}
+
+function rateLimited(resetAt: Date) {
+  const retryAfter = Math.max(1, Math.ceil((resetAt.getTime() - Date.now()) / 1000));
+  return NextResponse.json(
+    { success: false, error: 'Too many requests', code: 'rate_limited' },
+    { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+  );
 }
 
 // ─── Tool manifest ──────────────────────────────────────────────────────────────
@@ -106,13 +138,13 @@ const TOOL_MANIFEST = [
   },
   {
     name: 'get_concept_subgraph',
-    description: 'Get the 1-hop theology knowledge graph around a concept node. Returns the node and all directly connected nodes and edges from the BibleDesk graph database.',
+    description: 'Get the neighbourhood subgraph around a concept node from the BibleDesk knowledge graph. Depth 1 = immediate neighbours (default); depth 2 = neighbours of neighbours (bounded, never the full graph).',
     inputSchema: {
       type: 'object',
       properties: {
         node_key: {
           type: 'string',
-          description: 'The concept node key, e.g. "salvation", "grace", "covenant". Use snake_case.',
+          description: 'The concept node key as a hyphenated lowercase slug, e.g. "theology-proper", "john-3-16".',
         },
         depth: {
           type: 'number',
@@ -297,47 +329,82 @@ async function handleGetStrongsLexicon(args: Record<string, unknown>) {
 }
 
 async function handleGetConceptSubgraph(args: Record<string, unknown>) {
-  const nodeKey = String(args.node_key ?? '').trim().toLowerCase().replace(/\s+/g, '_');
+  // Graph node keys are hyphenated lowercase slugs (e.g. "theology-proper",
+  // "john-3-16") — spaces in input are hyphenated, never underscored.
+  const nodeKey = String(args.node_key ?? '').trim().toLowerCase().replace(/\s+/g, '-');
   if (!nodeKey) return { error: 'node_key is required' };
 
   const depth = Math.min(2, Math.max(1, Number(args.depth ?? 1)));
 
-  try {
-    const data = depth === 1
-      ? await getSubgraph(nodeKey)
-      : await getFullGraph();
-
-    if (!data) return { error: 'Graph data unavailable — Supabase may not be configured' };
-
-    const { nodes, edges } = data;
-    const rootNode = nodes.find((n) => n.node_key === nodeKey);
-    if (!rootNode) return { error: `Concept node not found: ${nodeKey}` };
-
-    const rootId = rootNode.id;
-    if (!rootId) return { error: 'Root node has no database ID' };
-
-    const connectedIds = new Set<string>();
-    connectedIds.add(rootId);
-    for (const edge of edges) {
-      if (edge.source_id === rootId) connectedIds.add(edge.target_id);
-      if (edge.target_id === rootId) connectedIds.add(edge.source_id);
-    }
-
-    const subNodes = nodes.filter((n) => n.id && connectedIds.has(n.id));
-    const subEdges = edges.filter(
-      (e) => connectedIds.has(e.source_id) && connectedIds.has(e.target_id)
-    );
-
-    return {
-      root: rootNode,
-      nodes: subNodes,
-      edges: subEdges,
-      node_count: subNodes.length,
-      edge_count: subEdges.length,
-    };
-  } catch {
-    return { error: 'Failed to load graph data' };
+  // Dataset: the canonical static graph (bundled constant, not a DB fetch)
+  // merged with a bounded 1-hop DB neighbourhood around the root node.
+  // Depth 2 is traversed from this bounded data — the full graph is never fetched.
+  const canonical = getCanonicalGraph();
+  const nodeByKey = new Map<string, GraphNode>();
+  for (const n of canonical.nodes) {
+    if (n.node_key) nodeByKey.set(n.node_key.toLowerCase(), n);
   }
+  const edgeList = [...canonical.edges];
+  try {
+    const db = await getSubgraph(nodeKey);
+    for (const n of db.nodes) {
+      if (n.node_key) nodeByKey.set(n.node_key.toLowerCase(), n);
+    }
+    edgeList.push(...db.edges);
+  } catch {
+    // DB unavailable — proceed with canonical data only.
+  }
+
+  const root = nodeByKey.get(nodeKey);
+  if (!root) return { error: `Concept node not found: ${nodeKey}` };
+
+  const nodeById = new Map<string, GraphNode>();
+  for (const n of nodeByKey.values()) {
+    const id = n.id ?? n.node_key;
+    if (id) nodeById.set(String(id), n);
+  }
+  const edgePairs = edgeList.map((e) => ({
+    s: String(e.source_id),
+    t: String(e.target_id),
+  }));
+
+  // Bounded BFS from the root to the requested depth (max 2).
+  const MAX_NODES = 250;
+  const rootId = String(root.id ?? root.node_key);
+  const visited = new Set<string>([rootId]);
+  let frontier = [rootId];
+  for (let d = 0; d < depth && frontier.length > 0; d++) {
+    const next: string[] = [];
+    for (const id of frontier) {
+      for (const { s, t } of edgePairs) {
+        if (s === id && !visited.has(t)) {
+          visited.add(t);
+          next.push(t);
+        } else if (t === id && !visited.has(s)) {
+          visited.add(s);
+          next.push(s);
+        }
+      }
+      if (visited.size >= MAX_NODES) break;
+    }
+    frontier = next;
+    if (visited.size >= MAX_NODES) break;
+  }
+
+  const subNodes = [...visited]
+    .map((id) => nodeById.get(id))
+    .filter((n): n is GraphNode => !!n);
+  const subEdges = edgeList.filter(
+    (e) => visited.has(String(e.source_id)) && visited.has(String(e.target_id))
+  );
+
+  return {
+    root,
+    nodes: subNodes,
+    edges: subEdges,
+    node_count: subNodes.length,
+    edge_count: subEdges.length,
+  };
 }
 
 async function handleGetAnswerHistory(args: Record<string, unknown>) {
@@ -419,14 +486,19 @@ async function handleAskBibleQuestion(args: Record<string, unknown>) {
 
 export async function POST(req: NextRequest) {
   const secret = process.env.MCP_SECRET;
-  if (secret) {
-    const auth = req.headers.get('authorization') ?? '';
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json(
-        { jsonrpc: '2.0', id: null, error: { code: -32001, message: 'Unauthorized' } },
-        { status: 401 }
-      );
-    }
+  if (!isAuthorized(req, secret)) {
+    return unauthorized(
+      secret ? 'Unauthorized' : 'MCP server is not configured (MCP_SECRET is unset)'
+    );
+  }
+
+  // Per-secret rate budget (the limiter hashes the secret; raw value is never stored).
+  const rate = await checkRateLimit(secret as string, {
+    namespace: RateLimitNamespace.mcp,
+    limit: 100,
+  });
+  if (!rate.allowed) {
+    return rateLimited(rate.resetAt);
   }
 
   let body: JsonRpcRequest;
@@ -479,7 +551,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Fail-closed: the discovery endpoint is gated too — with MCP_SECRET unset,
+  // every MCP request is refused.
+  const secret = process.env.MCP_SECRET;
+  if (!isAuthorized(req, secret)) {
+    return unauthorized(
+      secret ? 'Unauthorized' : 'MCP server is not configured (MCP_SECRET is unset)'
+    );
+  }
   return NextResponse.json({
     name: 'BibleDesk MCP Server',
     version: '1.0.0',

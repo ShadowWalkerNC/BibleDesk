@@ -7,20 +7,12 @@ import {
   Sparkles,
   Heart,
   TrendingUp,
-  Church,
   Code,
-  Calendar,
   Brain,
-  Sun,
-  Network,
   Globe,
   X,
   Search,
-  Radio,
-  Tv,
-  Presentation,
   Scroll,
-  Palette,
 } from 'lucide-react';
 import styles from './SlashCommandPalette.module.css';
 
@@ -34,17 +26,6 @@ interface SlashCommand {
 }
 
 const COMMANDS: SlashCommand[] = [
-  {
-    id: 'creator',
-    name: '/creator',
-    category: 'Creatives',
-    description: 'Explore Christian Creator Hub or manage your ministry profile',
-    icon: Palette,
-    action: (arg, router) => {
-      const q = arg.trim();
-      router.push(q ? `/c/${encodeURIComponent(q)}` : '/creators');
-    },
-  },
   {
     id: 'verse',
     name: '/verse',
@@ -64,7 +45,9 @@ const COMMANDS: SlashCommand[] = [
     icon: Sparkles,
     action: (arg, router) => {
       const q = arg.trim();
-      router.push(`/encourage${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+      // C01: /encourage merged into the Study Resources hub (A12); the hub's
+      // EncouragePanel seeds its search box from the ?q= param.
+      router.push(`/study-resources?tab=encourage${q ? `&q=${encodeURIComponent(q)}` : ''}`);
     },
   },
   {
@@ -85,17 +68,8 @@ const COMMANDS: SlashCommand[] = [
     description: 'Open prayer escalation ladder (Private -> Circle -> Church -> Atlas)',
     icon: TrendingUp,
     action: (_arg, router) => {
-      router.push('/prayer');
-    },
-  },
-  {
-    id: 'church',
-    name: '/church',
-    category: 'Ministry',
-    description: 'Open Church Hub, member invite links, and embeddable website widgets',
-    icon: Church,
-    action: (_arg, router) => {
-      router.push('/church');
+      // B14: escalation happens from the Today tab on your own commitments.
+      router.push('/prayer?tab=today');
     },
   },
   {
@@ -115,7 +89,8 @@ const COMMANDS: SlashCommand[] = [
     description: 'Explore the 2D global interactive vector PrayerAtlas',
     icon: Globe,
     action: (_arg, router) => {
-      router.push('/prayer');
+      // B14: the atlas renders only prayers with explicit atlas consent.
+      router.push('/prayer?tab=world');
     },
   },
   {
@@ -130,75 +105,14 @@ const COMMANDS: SlashCommand[] = [
     },
   },
   {
-    id: 'plan',
-    name: '/plan',
-    category: 'Discipleship',
-    description: 'Track Bible reading plans and devotional goals',
-    icon: Calendar,
-    action: (_arg, router) => {
-      router.push('/plans');
-    },
-  },
-  {
     id: 'memory',
     name: '/memory',
     category: 'Discipleship',
     description: 'Practice verse memorization with active recall flashcards',
     icon: Brain,
     action: (_arg, router) => {
-      router.push('/memory');
-    },
-  },
-  {
-    id: 'daily',
-    name: '/daily',
-    category: 'Daily Rhythms',
-    description: 'View today’s Scripture passage and audio devotional reflection',
-    icon: Sun,
-    action: (_arg, router) => {
-      router.push('/daily');
-    },
-  },
-  {
-    id: 'graph',
-    name: '/graph',
-    category: 'Study',
-    description: 'Explore the bidirectional Biblical Knowledge Concept Graph',
-    icon: Network,
-    action: (_arg, router) => {
-      router.push('/graph');
-    },
-  },
-  {
-    id: 'radio',
-    name: '/radio',
-    category: 'Worship',
-    description: 'Launch Live Worship Radio dock with ambient hymns, K-LOVE & Air1',
-    icon: Radio,
-    action: () => {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('bibledesk:open-radio'));
-      }
-    },
-  },
-  {
-    id: 'sermon',
-    name: '/sermon',
-    category: 'Ministry',
-    description: 'Open Church Live Sermon Theatre and sermon outline study notes',
-    icon: Tv,
-    action: (_arg, router) => {
-      router.push('/sermons');
-    },
-  },
-  {
-    id: 'slides',
-    name: '/slides',
-    category: 'Ministry',
-    description: 'Launch 1-Click ProPresenter 7 projector slide generator',
-    icon: Presentation,
-    action: (_arg, router) => {
-      router.push('/sermons');
+      // C01: /memory merged into the Study Resources hub (A12).
+      router.push('/study-resources?tab=memory');
     },
   },
   {
@@ -208,7 +122,8 @@ const COMMANDS: SlashCommand[] = [
     description: 'Explore 6 historic confessions & catechisms with interactive quiz mode',
     icon: Scroll,
     action: (_arg, router) => {
-      router.push('/catechism');
+      // C01: /catechism merged into the Study Resources hub (A12).
+      router.push('/study-resources?tab=catechism');
     },
   },
 ];

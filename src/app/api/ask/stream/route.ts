@@ -13,36 +13,64 @@
  */
 
 import { NextRequest } from 'next/server';
-import type { TranslationId } from '@/types';
+import { TRANSLATIONS, type TranslationId, type BibleAnswer } from '@/types';
+import { MIN_QUESTION_LENGTH } from '@/lib/ask-validation';
 import { runPipeline, type PipelineOptions } from '@/lib/pipeline';
 import { runRAG } from '@/lib/rag';
 import { saveAnswer } from '@/lib/supabase';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkAutoFlag, saveFlag } from '@/lib/moderation';
+import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const VALID_TRANSLATIONS: TranslationId[] = ['web', 'kjv', 'asv'];
-const RATE_LIMIT_PER_HOUR = 15;
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    '127.0.0.1'
-  );
-}
+const VALID_TRANSLATIONS: TranslationId[] = TRANSLATIONS.map((t) => t.id);
+const ASK_LIMIT_PER_DAY = 5;
 
 function sse(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
+// ── Auto-moderation ───────────────────────────────────────────────────────────
+// The pipeline's Stage-1 self-grading (answer.status) stays recorded as a
+// signal, but it is NO LONGER the moderation decision on its own: the
+// DB-backed checkAutoFlag result is authoritative for creating a persisted
+// flag. Runs on the completed answer, fire-and-forget, so the SSE contract
+// (stage → answer → close) is never delayed or altered. The answer row must
+// already exist because saveFlag flips that row's status to 'under_review'.
+async function runAutoModeration(question: string, answer: BibleAnswer): Promise<void> {
+  const result = await checkAutoFlag(question, answer);
+  console.log(
+    `[stream] Auto-flag check for answer ${answer.id}: ${result.flagged ? 'FLAGGED' : 'clear'} ` +
+    `(pipeline self-grade status: ${answer.status})`
+  );
+  if (!result.flagged) return;
+
+  const flagReason = [
+    `categories: ${result.categories.join(', ') || 'none'}`,
+    `keywords: ${result.reasons.join(', ') || 'none'}`,
+  ].join('; ');
+
+  const flagId = await saveFlag({
+    answerId:   answer.id,
+    question,
+    flagType:   'auto',
+    flagReason,
+  });
+
+  if (flagId) {
+    console.log(`[stream] Auto-flag saved for answer ${answer.id} (flag ${flagId}): ${flagReason}`);
+  } else {
+    // Loud failure: flagged content did NOT reach the moderation queue.
+    console.error(`[stream] saveFlag FAILED for flagged answer ${answer.id}: ${flagReason}`);
+  }
+}
+
 export async function POST(req: NextRequest) {
   let question: string;
   let translation: TranslationId;
-  let geminiApiKey: string | undefined;
 
   try {
     const body = await req.json();
@@ -50,7 +78,6 @@ export async function POST(req: NextRequest) {
     translation = VALID_TRANSLATIONS.includes(body.translation)
       ? (body.translation as TranslationId)
       : 'web';
-    geminiApiKey = body.geminiApiKey?.trim();
   } catch {
     return new Response(sse('error', { message: 'Invalid request body' }), {
       status: 400,
@@ -58,16 +85,17 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  if (!question || question.length < 3) {
+  if (!question || question.length < MIN_QUESTION_LENGTH) {
     return new Response(sse('error', { message: 'Question too short' }), {
       status: 400,
       headers: { 'Content-Type': 'text/event-stream' },
     });
   }
 
-  // Authenticate user & validate AI permissions
+  // Authenticate user & validate AI permissions.
+  // BYOK keys travel by header ONLY (x-gemini-api-key) — never the request body.
   const user = await getAuthenticatedUser(req);
-  const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || geminiApiKey;
+  const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || undefined;
 
   if (!user && !userApiKey) {
     return new Response(
@@ -81,14 +109,14 @@ export async function POST(req: NextRequest) {
 
   // Rate limit check before opening stream (keyed by user ID if authenticated, else IP)
   const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
-  const rateLimit = await checkRateLimit(rateLimitKey);
+  const rateLimit = await checkRateLimit(rateLimitKey, { namespace: RateLimitNamespace.ask });
 
   if (!rateLimit.allowed) {
     return new Response(
       sse('error', {
-        message: `You've reached the limit of ${RATE_LIMIT_PER_HOUR} questions per hour. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
+        message: `You've reached the limit of ${ASK_LIMIT_PER_DAY} free AI answers per day. Add your own free Gemini API key (BYOK) for unlimited answers, or try again tomorrow. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
         code: 'RATE_LIMITED',
-        rateLimit: { remaining: 0, limit: RATE_LIMIT_PER_HOUR, resetAt: rateLimit.resetAt.toISOString() },
+        rateLimit: { remaining: 0, limit: ASK_LIMIT_PER_DAY, resetAt: rateLimit.resetAt.toISOString() },
       }),
       { status: 429, headers: { 'Content-Type': 'text/event-stream' } }
     );
@@ -119,9 +147,14 @@ export async function POST(req: NextRequest) {
 
         const { answer } = await runPipeline(question, options);
 
-        saveAnswer(answer).catch((e: unknown) =>
-          console.error('[stream] saveAnswer failed:', e)
-        );
+        // Persist, then run the authoritative auto-flag check — chained so the
+        // answer row exists before saveFlag can flip its status; still
+        // non-blocking, so the SSE stream closes without delay.
+        saveAnswer(answer)
+          .then(() => runAutoModeration(question, answer))
+          .catch((e: unknown) =>
+            console.error('[stream] saveAnswer failed:', e)
+          );
 
         const shareSlug = answer.id.slice(0, 8);
         emit('answer', {
@@ -130,7 +163,7 @@ export async function POST(req: NextRequest) {
           shareSlug,
           rateLimit: {
             remaining: rateLimit.remaining,
-            limit: RATE_LIMIT_PER_HOUR,
+            limit: ASK_LIMIT_PER_DAY,
           },
         });
       } catch (err: unknown) {

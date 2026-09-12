@@ -1,6 +1,11 @@
 -- BibleDesk — Schema v7 (Phase 3D: 2D PrayerAtlas Geolocation & Category Attributes)
 -- Run in the Supabase SQL editor AFTER schema-v6.sql
 -- Safe to re-run: uses IF NOT EXISTS / DO $$ blocks throughout
+--
+-- Order: 7 — apply after supabase/schema-v6.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 
 -- ─── 1. Enhance prayer_requests with Geospatial and Privacy Metadata ─────────────
 -- Adds optional geolocation coordinates, country badges, category tags, and privacy settings.

@@ -20,9 +20,7 @@ import {
   Lock,
   Layers,
   Terminal,
-  Radio,
   Tv,
-  Presentation,
   Scroll,
   Brain,
 } from 'lucide-react';
@@ -60,11 +58,6 @@ export default function MarketingShowcase() {
             <ArrowRight size={16} />
           </Link>
 
-          <Link href="/church" className={styles.secondaryCta}>
-            <Church size={18} />
-            <span>Church &amp; Ministry Hub ($0)</span>
-          </Link>
-
           <Link href="/developers" className={styles.sdkCta}>
             <Code size={18} />
             <span>Developer SDK</span>
@@ -80,15 +73,11 @@ export default function MarketingShowcase() {
           </div>
           <div className={styles.featurePillItem}>
             <Tv size={16} color="#ef4444" />
-            <span>Live Sermon Theatre &amp; ProPresenter 7 Export</span>
+            <span>Live Sermon Theatre</span>
           </div>
           <div className={styles.featurePillItem}>
             <ShieldCheck size={16} color="#059669" />
             <span>100% Free Forever for Churches</span>
-          </div>
-          <div className={styles.featurePillItem}>
-            <Radio size={16} color="#b58414" />
-            <span>Worship Radio (K-LOVE, Air1, Moody &amp; Sacred Hymns)</span>
           </div>
           <div className={styles.featurePillItem}>
             <Scroll size={16} color="#b58414" />
@@ -171,7 +160,7 @@ export default function MarketingShowcase() {
               <Church size={22} />
             </div>
             <span className={styles.personaTabTitle} style={{ fontSize: '1.05rem', fontWeight: 700 }}>Churches, Ministries &amp; Creators</span>
-            <span className={styles.personaTabRole}>Prayer Chains · Sermons · Creator Hub · Missions</span>
+            <span className={styles.personaTabRole}>Prayer Chains · Creator Hub · Missions</span>
           </button>
         </div>
 
@@ -211,7 +200,7 @@ export default function MarketingShowcase() {
                   <span>Start Studying Scripture</span>
                   <ArrowRight size={16} />
                 </Link>
-                <Link href="/encourage" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                <Link href="/study-resources?tab=encourage" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
                   <span>Words of Encouragement</span>
                 </Link>
               </div>
@@ -251,7 +240,7 @@ export default function MarketingShowcase() {
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Church Live Sermon Theatre &amp; Slides:</strong> Broadcast YouTube Live sermons and export 1-click ProPresenter 7 projector slides.</span>
+                  <span><strong>Church Live Sermon Theatre:</strong> Broadcast YouTube Live sermons with synced Scripture study.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
@@ -263,10 +252,6 @@ export default function MarketingShowcase() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <Link href="/church" className={styles.primaryCta}>
-                  <span>Open Church Ministry Hub</span>
-                  <ArrowRight size={16} />
-                </Link>
                 <Link href="/creators" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
                   <span>Explore Creator Hub</span>
                 </Link>
@@ -325,7 +310,7 @@ export default function MarketingShowcase() {
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
-                <span>Live Sermon Theatre &amp; Slide Exporter</span>
+                <span>Live Sermon Theatre</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
@@ -336,10 +321,6 @@ export default function MarketingShowcase() {
                 <span>Christian Creator / Ministry Page</span>
               </div>
             </div>
-
-            <Link href="/church" className={styles.primaryCta} style={{ width: '100%', justifyContent: 'center' }}>
-              <span>Register Your Church Free</span>
-            </Link>
           </div>
 
           {/* Tier 2: Individual Believers */}
@@ -369,10 +350,6 @@ export default function MarketingShowcase() {
               <div className={styles.tierFeatureItem}>
                 <Check size={16} color="#059669" />
                 <span>Unlimited AI with Free Gemini Key (BYOK)</span>
-              </div>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Optional Supporter Tier ($4.99/mo)</span>
               </div>
             </div>
 
@@ -496,31 +473,11 @@ export default function MarketingShowcase() {
 
           <div className={styles.integrationCard}>
             <div className={styles.integrationIconBox}>
-              <Radio size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>Live Worship Radio Dock</div>
-              <div className={styles.integrationDesc}>Ambient sacred hymns and direct 1-click player docks for K-LOVE, Air1, and Moody Radio.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
               <Tv size={20} />
             </div>
             <div>
               <div className={styles.integrationTitle}>Church Live Sermon Theatre</div>
               <div className={styles.integrationDesc}>Embed zero-cost YouTube Live &amp; Facebook Live broadcasts with synced Scripture study.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
-              <Presentation size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>ProPresenter 7 Slide Exporter</div>
-              <div className={styles.integrationDesc}>1-Click projector slide export auto-chunking sermon points and Scriptures for Sunday services.</div>
             </div>
           </div>
 

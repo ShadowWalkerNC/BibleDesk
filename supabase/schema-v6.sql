@@ -1,6 +1,11 @@
 -- BibleDesk — Schema v6 (Phase 3C: User-Scoped Bookmarks & RLS Audit)
 -- Run in the Supabase SQL editor AFTER schema-v5.sql
 -- Safe to re-run: uses IF NOT EXISTS / DO $$ blocks throughout
+--
+-- Order: 6 — apply after supabase/schema-v5.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 
 -- ─── 1. Bookmarks Table with Strict User RLS ────────────────────────────────
 -- Stores user-saved 5-dimension AI study answers and shared insights.

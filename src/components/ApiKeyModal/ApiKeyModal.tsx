@@ -94,7 +94,7 @@ export default function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
             </div>
             <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
               You are signed in as <strong>{user.user_metadata?.name || user.email}</strong>. 
-              Your account includes automatic access to Google Gemini 2.5 Flash for 5-dimension study questions (15 questions/hr). No personal API key is required.
+              Your account includes automatic access to Google Gemini 2.5 Flash for 5-dimension study questions (5 free AI answers/day, then BYOK for unlimited). No personal API key is required.
             </p>
           </div>
         ) : (

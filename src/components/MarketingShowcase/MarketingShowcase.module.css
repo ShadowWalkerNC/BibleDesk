@@ -1,7 +1,8 @@
 /* ── MarketingShowcase — Tinted Sage Devotional ────────────── */
 
 .container {
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   background: var(--navy-950);
   background-image:
     radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
