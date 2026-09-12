@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-09
+> **Updated:** 2026-09-12
 
 ---
 
@@ -28,7 +28,7 @@ Database:     Supabase (PostgreSQL + pgvector + RLS)
 AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
-Integrations: Discord Slash Bot & Webhook · WhatsApp Meta Cloud API · MCP Server · Sigil Webhook
+Integrations: MCP Server · Sigil Webhook (Discord/WhatsApp bots removed in the MVP)
 Hosting:      Vercel preferred (Render also viable)
 Desktop:      Electron wrapper in apps/desktop/
 Extension:    Chrome Manifest V3 Side Panel in apps/extension/
@@ -79,6 +79,8 @@ Phase goal:     Local-first Bible foundation
                 Read + search + compare installed public-domain text without bible-api.com
 
 Already shipped (keep; do not rip out):
+
+> **MVP scope (2026-09-12):** Discord/WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/`. The ✓ items below describing those surfaces are pre-cut history, not current product.
   ✓ AI 5-dimension pipeline + streaming
   ✓ Rate limiting, RAG, share pages, history
   ✓ /bible UI with 3-Column Study Desk workspace
@@ -101,7 +103,7 @@ Active work (Phase 0 Complete):
   ✓ PrayerAtlas 2D Interactive Vector Global Prayer Map (D3 Natural Earth, category color-coding, approximate halos vs precise beacons, restricted shields, offline TopoJSON)
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
-  ✓ Marketing Showcase on `/` with 2 core personas (Individual Believers & Discipleship vs Churches, Ministries & Creators) & transparent pricing ($0 Free with 5 daily AI answers vs $4.99/mo Supporter tier; $0 for Churches forever)
+  ✓ Marketing Showcase on `/` for individual believers & discipleship, with transparent pricing ($0 free with 5 daily AI answers; unlimited with a free BYOK Gemini key)
   ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`)
   ✓ Words of Encouragement Hub (`/encourage`) with topical promises & kingdom creativity meditations
   ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql
@@ -128,14 +130,15 @@ Deploy (parallel):
 src/
   app/
     page.tsx                     ← Homepage (Bible-first hero + assistant)
-    bible/                       ← Reader UI
-    daily|plans|catechism|creeds|memory|prayer|sermons|bookmarks|history|graph|mod|login|share/
+    bible/                       ← Reader UI + Study Desk
+    study-resources/             ← Catechism, creeds, memory, encouragement panels (merged reader hub)
+    developers|download|login|mod|prayer|share/
     api/
       ask/                       ← AI answer (+ stream/)
       bible/                     ← chapter, search, study
-      graph|history|bookmarks|daily|mcp|mod|prayer|sermons|export/
+      graph|history|bookmarks|daily|mcp|mod|prayer|export/
       v1/bible/answer/           ← Sigil webhook
-  components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
+  components/                    ← SearchBar, DimensionPanel, …
   lib/
     bible.ts                     ← bible-api.com client (interim)
     claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|auth.ts|syncGuestData.ts
@@ -171,4 +174,4 @@ The app runs via `docker-compose.base44.yml` (Node 22 + Next.js 16 dev server, l
 
 **Verify it works:** `curl -sf -H "Host: external-preview.example.com" http://localhost:3000/` → HTTP 200 with "BibleDesk" in the body.
 
-*Updated: 2026-09-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-12 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

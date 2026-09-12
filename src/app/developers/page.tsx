@@ -12,7 +12,6 @@ import {
   BookOpen,
   Network,
   Heart,
-  Church,
   Shield,
   Layers,
 } from 'lucide-react';
@@ -87,7 +86,7 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
         </div>
         <h1 className={styles.title}>BibleDesk Developer Platform</h1>
         <p className={styles.subtitle}>
-          Build Christian applications, AI agents, church integrations, and research workflows with our open
+          Build Christian applications, AI agents, ministry tools, and research workflows with our open
           REST APIs, TypeScript SDK, and standard Model Context Protocol (MCP) server.
         </p>
 
@@ -258,7 +257,7 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
                 <span className={styles.endpointPath}>/api/ask</span>
               </div>
               <p className={styles.endpointDesc}>
-                Ask the AI study assistant a Bible question. Rate-limited (15 questions/hour); answers are grounded in Scripture.
+                Ask the AI study assistant a Bible question. Rate-limited (5 free AI answers per day; unlimited with your own free Gemini key); answers are grounded in Scripture.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
                 <pre className={styles.codePre}>
@@ -369,24 +368,6 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
                 className={styles.linkBtn}
               >
                 <span>Submit Lexicon Issues</span>
-                <ExternalLink size={14} />
-              </a>
-            </div>
-
-            <div className={styles.guideCard}>
-              <div>
-                <h3 className={styles.guideTitle}>3. Church Embed Widgets</h3>
-                <p className={styles.guideText}>
-                  Build plugins and embed packages for church platforms like Subsplash, Church Community Builder, Planning Center, and WordPress.
-                </p>
-              </div>
-              <a
-                href="https://github.com/ShadowWalkerNC/BibleDesk/pulls"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.linkBtn}
-              >
-                <span>Open a Pull Request</span>
                 <ExternalLink size={14} />
               </a>
             </div>
