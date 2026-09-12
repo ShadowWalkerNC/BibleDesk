@@ -1,6 +1,11 @@
 -- ==============================================================================
 -- BibleDesk Schema Migration v8 — Church Integrations & 4-Tier Prayer Escalation
 -- Applies on top of schema-v7.sql
+--
+-- Order: 8 — apply after supabase/schema-v7.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 -- ==============================================================================
 
 -- 1. Churches Directory & Ministry Profiles
@@ -41,26 +46,32 @@ CREATE TABLE IF NOT EXISTS public.church_members (
 CREATE INDEX IF NOT EXISTS idx_church_members_user ON public.church_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_church_members_church ON public.church_members(church_id);
 
--- 3. Extend prayers table with 4-tier escalation & church linkage
-ALTER TABLE public.prayers
+-- 3. Extend prayer_requests with 4-tier escalation & church linkage
+-- NOTE (B04): this previously targeted a never-created public.prayers table.
+-- The canonical table is public.prayer_requests (defined in schema-v4.sql).
+ALTER TABLE public.prayer_requests
   ADD COLUMN IF NOT EXISTS escalation_level TEXT DEFAULT 'private' CHECK (escalation_level IN ('private', 'circle', 'church', 'atlas')),
   ADD COLUMN IF NOT EXISTS urgency_level TEXT DEFAULT 'normal' CHECK (urgency_level IN ('low', 'normal', 'urgent', 'crisis')),
   ADD COLUMN IF NOT EXISTS church_id TEXT REFERENCES public.churches(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT FALSE;
 
-CREATE INDEX IF NOT EXISTS idx_prayers_escalation ON public.prayers(escalation_level);
-CREATE INDEX IF NOT EXISTS idx_prayers_church_id ON public.prayers(church_id);
-CREATE INDEX IF NOT EXISTS idx_prayers_urgency ON public.prayers(urgency_level);
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_escalation ON public.prayer_requests(escalation_level);
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_church_id ON public.prayer_requests(church_id);
+CREATE INDEX IF NOT EXISTS idx_prayer_requests_urgency ON public.prayer_requests(urgency_level);
 
 -- 4. Enable RLS
 ALTER TABLE public.churches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.church_members ENABLE ROW LEVEL SECURITY;
 
--- Churches: Anyone can read verified church directory; admins can update
+-- Churches: directory rows carry contact_email / phone / invite_code.
+-- B05: SELECT is restricted to the church's admin (admin_user_id). The app
+-- serves public directory reads through the /api/church server route
+-- (service role, bypasses RLS), so no client ever needs anon-key SELECT.
 DROP POLICY IF EXISTS "Public can view churches" ON public.churches;
-CREATE POLICY "Public can view churches"
+DROP POLICY IF EXISTS "Church admins can view church profile" ON public.churches;
+CREATE POLICY "Church admins can view church profile"
   ON public.churches FOR SELECT
-  USING (true);
+  USING (auth.uid() = admin_user_id);
 
 DROP POLICY IF EXISTS "Admins can manage church profile" ON public.churches;
 CREATE POLICY "Admins can manage church profile"
@@ -84,9 +95,10 @@ CREATE POLICY "Users can manage own membership"
 
 -- Prayers Church Escalation RLS:
 -- Church members can view prayers escalated to their church
-DROP POLICY IF EXISTS "Church members view church-escalated prayers" ON public.prayers;
+-- NOTE (B04): retargeted from phantom public.prayers → public.prayer_requests.
+DROP POLICY IF EXISTS "Church members view church-escalated prayers" ON public.prayer_requests;
 CREATE POLICY "Church members view church-escalated prayers"
-  ON public.prayers FOR SELECT
+  ON public.prayer_requests FOR SELECT
   USING (
     escalation_level = 'church' AND
     church_id IN (

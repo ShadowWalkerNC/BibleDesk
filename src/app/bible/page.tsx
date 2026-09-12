@@ -14,13 +14,11 @@ import {
   ExternalLink,
   BookMarked,
   RotateCcw,
-  Languages,
-  Church,
-  Heart,
   Calendar,
   Sun,
   Bookmark,
   Brain,
+  History,
   CheckCircle2,
   PanelLeftClose,
   PanelLeftOpen,
@@ -30,38 +28,17 @@ import {
   Minimize2,
   Columns2,
   Columns3,
+  Download,
 } from 'lucide-react';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
+import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
+import ProvenanceBadge from '@/components/ProvenanceBadge/ProvenanceBadge';
 import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
-import { TRANSLATIONS, type TranslationId, type BibleVerse } from '@/types';
+import { TRANSLATIONS, type TranslationId, type BibleVerse, type BibleAnswer } from '@/types';
 import styles from './page.module.css';
-
-interface OriginalWordStudy {
-  word: string;
-  originalWord: string;
-  strongsNumber: string;
-  pronunciation: string;
-  definition: string;
-}
-
-interface CrossReference {
-  reference: string;
-  text: string;
-  connectionReason: string;
-}
-
-interface AIStudyData {
-  reference: string;
-  translation: string;
-  selectedWordStudy?: OriginalWordStudy | null;
-  originalLanguageWords: OriginalWordStudy[];
-  commentary: string;
-  crossReferences: CrossReference[];
-  practicalApplication: string;
-}
 
 function BibleReaderContent() {
   const searchParams = useSearchParams();
@@ -86,17 +63,39 @@ function BibleReaderContent() {
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search' | 'connected'>('search');
   const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
-  const [studyData, setStudyData] = useState<AIStudyData | null>(null);
+  // AI Study states (B02: served by the gated /api/ask pipeline; rendered as a real BibleAnswer)
+  const [studyAnswer, setStudyAnswer] = useState<BibleAnswer | null>(null);
+  const [studyShareSlug, setStudyShareSlug] = useState<string | null>(null);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [studyError, setStudyError] = useState<string | null>(null);
 
   // e-Sword parity states
-  const [showInlineStrongs, setShowInlineStrongs] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchTotal, setSearchTotal] = useState(0);
+
+  // Cross-references (B03: real TSK data via /api/bible/lexicon?reference=)
+  interface CrossRefItem { reference: string; text: string; connectionReason: string; }
+  const [crossRefs, setCrossRefs] = useState<CrossRefItem[]>([]);
+  const [loadingRefs, setLoadingRefs] = useState(false);
+  const [refsError, setRefsError] = useState<string | null>(null);
+
+  // Strong's definition lookup (B03: real dictionary data via /api/bible/lexicon?strongs=)
+  interface LexiconDefinition {
+    number: string;
+    lemma: string;
+    translit: string;
+    pronunciation?: string;
+    derivation?: string;
+    strongs_def: string;
+    kjv_def: string;
+  }
+  const [strongsCode, setStrongsCode] = useState<string | null>(null);
+  const [strongsDef, setStrongsDef] = useState<LexiconDefinition | null>(null);
+  const [loadingStrongs, setLoadingStrongs] = useState(false);
+  const [strongsError, setStrongsError] = useState<string | null>(null);
 
   // Dynamic panel layout & expansion states
   const [showLeftHub, setShowLeftHub] = useState(true);
@@ -132,21 +131,50 @@ function BibleReaderContent() {
     return styles.deskGrid;
   };
 
-  // Sync URL query params (?book=...&chapter=...&verse=...) or auto-resume from localStorage
+  // Sync URL query params — deep links (C02):
+  //   ?book=John&chapter=3   -> navigate the reader (validated; invalid -> honest "not found")
+  //   ?verse=16              -> target a verse after the chapter loads
+  //   ?q=grace               -> seed the search input and run the search
+  //   ?strongs=G2889         -> open the lexicon view for that code (B03 fetch path)
+  // ...or auto-resume from localStorage when no navigation params were provided
   useEffect(() => {
     const bookParam = searchParams.get('book');
     const chapterParam = searchParams.get('chapter');
     const verseParam = searchParams.get('verse');
 
+    // ?book=...&chapter=... — validate against local data before touching reader
+    // state. Invalid values produce an honest "not found" error, never a
+    // silent ignore or a crash.
+    let navValid = true;
     if (bookParam) {
       const match = BIBLE_BOOKS.find(b => b.name.toLowerCase() === bookParam.toLowerCase());
-      if (match) setSelectedBook(match.name);
-    }
-    if (chapterParam) {
+      if (!match) {
+        navValid = false;
+        setChapterError(`Book "${bookParam}" not found. Check the spelling and try again.`);
+      } else if (chapterParam) {
+        const ch = parseInt(chapterParam, 10);
+        const maxCh = getBookChapters(match.name);
+        if (isNaN(ch) || ch < 1 || ch > maxCh) {
+          navValid = false;
+          setChapterError(`Chapter "${chapterParam}" not found in ${match.name} (${maxCh} chapter${maxCh === 1 ? '' : 's'}).`);
+        }
+      }
+      if (navValid) {
+        setSelectedBook(match!.name);
+        if (chapterParam) setSelectedChapter(parseInt(chapterParam, 10));
+      }
+    } else if (chapterParam) {
+      // Chapter without a book: validate against the currently selected book.
       const ch = parseInt(chapterParam, 10);
-      if (!isNaN(ch) && ch > 0) setSelectedChapter(ch);
+      const maxCh = getBookChapters(selectedBook);
+      if (isNaN(ch) || ch < 1 || ch > maxCh) {
+        navValid = false;
+        setChapterError(`Chapter "${chapterParam}" not found in ${selectedBook} (${maxCh} chapter${maxCh === 1 ? '' : 's'}).`);
+      } else {
+        setSelectedChapter(ch);
+      }
     }
-    if (verseParam) {
+    if (navValid && verseParam) {
       const v = parseInt(verseParam, 10);
       if (!isNaN(v) && v > 0) setPendingVerseTarget(v);
     }
@@ -164,6 +192,20 @@ function BibleReaderContent() {
       } catch (e) {
         console.error('Failed to load last read position:', e);
       }
+    }
+
+    // ?q=... — seed the search input and run the search.
+    const qParam = searchParams.get('q');
+    if (qParam && qParam.trim()) {
+      setActiveTab('search');
+      void runSearch(qParam.trim());
+    }
+
+    // ?strongs=... — open the lexicon view for that code via B03's fetch path.
+    const strongsParam = searchParams.get('strongs');
+    if (strongsParam && strongsParam.trim()) {
+      setActiveTab('connected');
+      void openStrongsDefinition(strongsParam.trim());
     }
   }, [searchParams]);
 
@@ -201,9 +243,19 @@ function BibleReaderContent() {
   const [, startTransition] = useTransition();
 
   // Left Study Hub state
-  const [hubTab, setHubTab] = useState<'daily' | 'plans' | 'bookmarks'>('daily');
+  const [hubTab, setHubTab] = useState<'daily' | 'plans' | 'bookmarks' | 'history'>('daily');
   const [hubDaily, setHubDaily] = useState<any>(null);
   const [hubPlansProgress, setHubPlansProgress] = useState<Record<string, boolean>>({});
+
+  // History tab state (A12: /history absorbed into the desk)
+  interface HubHistoryAnswer { id: string; question: string; }
+  const [hubHistory, setHubHistory] = useState<HubHistoryAnswer[]>([]);
+  const [hubHistoryLoading, setHubHistoryLoading] = useState(false);
+  const [hubHistoryError, setHubHistoryError] = useState<string | null>(null);
+
+  // Export menu state (A12: Obsidian vault export)
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportingObsidian, setExportingObsidian] = useState(false);
 
   useEffect(() => {
     // Fetch daily devotional snippet
@@ -218,6 +270,18 @@ function BibleReaderContent() {
       if (saved) setHubPlansProgress(JSON.parse(saved));
     } catch {}
   }, []);
+
+  // A12: lazy-load recent study history when the History hub tab opens
+  useEffect(() => {
+    if (hubTab !== 'history' || hubHistory.length > 0 || hubHistoryLoading) return;
+    setHubHistoryLoading(true);
+    setHubHistoryError(null);
+    fetch('/api/history?page=1&limit=8')
+      .then(res => res.json())
+      .then(data => { setHubHistory(data.answers ?? []); })
+      .catch(() => setHubHistoryError('Could not load history.'))
+      .finally(() => setHubHistoryLoading(false));
+  }, [hubTab]);
 
   const handleSetHighlight = (vKey: string, color: string | null) => {
     setHighlights((prev) => {
@@ -353,15 +417,19 @@ function BibleReaderContent() {
     };
   }, [selectedBook, selectedChapter, selectedTranslation, translationB, parallelMode, pendingVerseTarget]);
 
-  // 2. Fetch AI Study Data when selectedVerse or selectedWord changes
+  // 2. Fetch AI Study Data when selectedVerse or selectedWord changes — B02:
+  // only fire while the Study tab is visible, and use the gated /api/ask
+  // pipeline. Clicking verses with any other tab open makes ZERO AI calls.
   useEffect(() => {
-    if (!selectedVerse) return;
+    if (!selectedVerse || activeTab !== 'study') return;
     const verse = selectedVerse;
 
     let active = true;
     async function fetchStudy() {
       setLoadingStudy(true);
       setStudyError(null);
+      setStudyAnswer(null);
+      setStudyShareSlug(null);
       try {
         const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -369,30 +437,37 @@ function BibleReaderContent() {
           headers['x-gemini-api-key'] = userGeminiKey;
         }
 
-        const res = await fetch('/api/bible/study', {
+        const reference = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
+        const question = selectedWord
+          ? `Word study for "${selectedWord}" in ${reference} (${selectedTranslation.toUpperCase()}): explain its meaning, historical context, original-language insights, theological significance, and practical application.`
+          : `Study guide for ${reference} (${selectedTranslation.toUpperCase()}): explain its meaning, historical context, key original-language insights, theological significance, and practical application.`;
+
+        const res = await fetch('/api/ask', {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            reference: `${verse.book_name} ${verse.chapter}:${verse.verse}`,
-            verseText: verse.text,
+            question,
             translation: selectedTranslation,
-            selectedWord: selectedWord || undefined,
           }),
         });
         const data = await res.json();
 
         if (!active) return;
 
-        if (!res.ok || !data.success) {
-          setStudyError(data.error || 'Failed to generate AI study guide.');
-          setStudyData(null);
+        if (!res.ok || !data.success || !data.answer) {
+          setStudyError(data.error || 'Study content unavailable right now.');
+          setStudyAnswer(null);
+          setStudyShareSlug(null);
         } else {
-          setStudyData(data.study);
+          setStudyAnswer(data.answer);
+          setStudyShareSlug(data.shareSlug ?? null);
         }
       } catch (err) {
         console.error('[bible] study fetch error:', err);
         if (active) {
-          setStudyError('Network error. Failed to load AI companion analysis.');
+          setStudyError('Study content unavailable right now.');
+          setStudyAnswer(null);
+          setStudyShareSlug(null);
         }
       } finally {
         if (active) setLoadingStudy(false);
@@ -403,7 +478,49 @@ function BibleReaderContent() {
     return () => {
       active = false;
     };
-  }, [selectedVerse, selectedWord, selectedTranslation]);
+  }, [selectedVerse, selectedWord, selectedTranslation, activeTab]);
+
+  // 2b. Fetch TSK cross-references for the References tab (B03). Only fires
+  // while the References tab is visible; uses the real local lexicon route.
+  useEffect(() => {
+    if (!selectedVerse || activeTab !== 'references') return;
+    const verse = selectedVerse;
+
+    let active = true;
+    async function fetchRefs() {
+      setLoadingRefs(true);
+      setRefsError(null);
+      setCrossRefs([]);
+      try {
+        const reference = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
+        const res = await fetch(`/api/bible/lexicon?reference=${encodeURIComponent(reference)}`);
+        const data = await res.json();
+
+        if (!active) return;
+
+        if (!res.ok || !data.success) {
+          setRefsError('Cross-references unavailable right now.');
+          setCrossRefs([]);
+        } else {
+          // The engine returns what TSK has for this verse (truncated at 15 upstream) — display it as-is.
+          setCrossRefs(data.crossReferences ?? []);
+        }
+      } catch (err) {
+        console.error('[bible] cross-refs fetch error:', err);
+        if (active) {
+          setRefsError('Cross-references unavailable right now.');
+          setCrossRefs([]);
+        }
+      } finally {
+        if (active) setLoadingRefs(false);
+      }
+    }
+
+    fetchRefs();
+    return () => {
+      active = false;
+    };
+  }, [selectedVerse, activeTab]);
 
   // 3. Fetch Comparison Translations
   useEffect(() => {
@@ -480,6 +597,40 @@ function BibleReaderContent() {
       .catch(() => showToast('Failed to copy text.', 'error'));
   };
 
+  // A12: Export the knowledge graph as an Obsidian-ready zip.
+  // The route requires the graph write secret, so a 401 is surfaced honestly.
+  const handleExportObsidian = async () => {
+    setExportingObsidian(true);
+    try {
+      const res = await fetch('/api/export/obsidian');
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        showToast(
+          data?.error === 'Unauthorized'
+            ? 'Obsidian export needs the graph write secret (admin setup).'
+            : 'Obsidian export failed.',
+          'error'
+        );
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bibledesk-vault-${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Obsidian vault downloaded.');
+    } catch {
+      showToast('Obsidian export failed.', 'error');
+    } finally {
+      setExportingObsidian(false);
+      setExportOpen(false);
+    }
+  };
+
   // Chapter navigation handlers
   const handleNext = () => {
     const next = getNextChapter(selectedBook, selectedChapter);
@@ -512,14 +663,15 @@ function BibleReaderContent() {
   };
 
   // Concordance Search Handlers
-  const handleSearchSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  const runSearch = async (query: string) => {
+    const q = query.trim();
+    if (!q) return;
 
+    setSearchQuery(q);
     setSearching(true);
     setSearchError(null);
     try {
-      const res = await fetch(`/api/bible/search?query=${encodeURIComponent(searchQuery)}&translation=${selectedTranslation}`);
+      const res = await fetch(`/api/bible/search?query=${encodeURIComponent(q)}&translation=${selectedTranslation}`);
       const data = await res.json();
       if (data.success) {
         setSearchResults(data.results);
@@ -537,6 +689,11 @@ function BibleReaderContent() {
     } finally {
       setSearching(false);
     }
+  };
+
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await runSearch(searchQuery);
   };
 
   const handleNavigateFromSearch = (res: any) => {
@@ -580,6 +737,32 @@ function BibleReaderContent() {
     }
   };
 
+  // B03: fetch a real Strong's definition from the local lexicon route when a
+  // Strong's chip is clicked. Chips carry real codes (curated map); the
+  // definition card below shows the dictionary data with a Dictionary badge.
+  async function openStrongsDefinition(code: string) {
+    setStrongsCode(code);
+    setStrongsDef(null);
+    setStrongsError(null);
+    setLoadingStrongs(true);
+    try {
+      const res = await fetch(`/api/bible/lexicon?strongs=${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.definition) {
+        setStrongsError(data.error || 'Definition unavailable right now.');
+        setStrongsDef(null);
+      } else {
+        setStrongsDef(data.definition);
+      }
+    } catch (err) {
+      console.error('[bible] strongs fetch error:', err);
+      setStrongsError('Definition unavailable right now.');
+      setStrongsDef(null);
+    } finally {
+      setLoadingStrongs(false);
+    }
+  }
+
   // Clean words helper (splits sentence and strips punctuation)
   const renderInteractiveVerseText = (v: BibleVerse) => {
     const words = v.text.trim().split(/\s+/);
@@ -588,11 +771,10 @@ function BibleReaderContent() {
       const cleanWord = w.replace(/[^\w\s\']/g, '').trim();
       const isSelected = selectedVerse?.verse === v.verse && selectedWord?.toLowerCase() === cleanWord.toLowerCase();
 
-      // e-Sword matching: check if this word matches an entry in our loaded AI concordance dictionary for this verse
-      const isSameVerse = selectedVerse?.verse === v.verse;
-      const wordMatch = showInlineStrongs && isSameVerse && studyData?.originalLanguageWords?.find(
-        (olw) => olw.word.toLowerCase() === cleanWord.toLowerCase()
-      );
+      // B03: inline Strong's chips removed. Their only word->Strong's data
+      // source was the fabricated AI concordance, and no real per-word
+      // Strong's tagging exists in the bundled data. Strong's lookups live in
+      // the Connected tab (chips wired to /api/bible/lexicon?strongs= below).
 
       return (
         <span key={idx} className={styles.wordWrapper}>
@@ -607,20 +789,6 @@ function BibleReaderContent() {
           >
             {w}
           </span>
-          {wordMatch && (
-            <sup
-              className={`${styles.inlineStrongsBadge} ${isSelected ? styles.activeInlineStrongs : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedVerse(v);
-                setSelectedWord(cleanWord);
-                setActiveTab('study');
-              }}
-              title={`${wordMatch.originalWord} - Pronunciation: ${wordMatch.pronunciation} | Click to study`}
-            >
-              {wordMatch.strongsNumber}
-            </sup>
-          )}
           {' '}
         </span>
       );
@@ -706,17 +874,6 @@ function BibleReaderContent() {
               <label htmlFor="parallel-toggle" className={styles.checkboxLabel}>Parallel View</label>
             </div>
 
-            <div className={styles.checkboxGroup}>
-              <input
-                type="checkbox"
-                id="strongs-toggle"
-                checked={showInlineStrongs}
-                onChange={(e) => setShowInlineStrongs(e.target.checked)}
-                className={styles.checkbox}
-              />
-              <label htmlFor="strongs-toggle" className={styles.checkboxLabel}>Inline Strong&apos;s</label>
-            </div>
-
             {parallelMode && (
               <div className={styles.selectGroup}>
                 <label htmlFor="translation-b-select" className={styles.selectLabel}>Translation B</label>
@@ -735,6 +892,51 @@ function BibleReaderContent() {
           </div>
 
           <div className={styles.navButtons}>
+            {/* Export menu (A12: Obsidian vault export) */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setExportOpen((o) => !o)}
+                className={styles.navBtn}
+                aria-haspopup="menu"
+                aria-expanded={exportOpen}
+                title="Export study data"
+              >
+                <Download size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                Export
+              </button>
+              {exportOpen && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 'calc(100% + 6px)',
+                    zIndex: 50,
+                    minWidth: '240px',
+                    background: 'var(--navy-900)',
+                    border: '1px solid rgba(181, 132, 20, 0.3)',
+                    borderRadius: '8px',
+                    padding: '4px',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+                  }}
+                >
+                  <button
+                    role="menuitem"
+                    onClick={handleExportObsidian}
+                    className={styles.actionBtn}
+                    style={{ width: '100%', justifyContent: 'flex-start', padding: '8px 10px' }}
+                    disabled={exportingObsidian}
+                  >
+                    <Download size={13} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                    {exportingObsidian ? 'Exporting…' : 'Export Obsidian vault (.zip)'}
+                  </button>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', padding: '4px 10px', margin: 0 }}>
+                    Knowledge graph as Obsidian-ready Markdown. Requires the graph write secret (admin setup).
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Panel Layout / Expand Controls */}
             <div className={styles.panelControlGroup} role="toolbar" aria-label="Panel layout controls">
               <button
@@ -814,6 +1016,13 @@ function BibleReaderContent() {
               >
                 <Bookmark size={13} />
                 <span>Saved</span>
+              </button>
+              <button
+                className={`${styles.hubTabBtn} ${hubTab === 'history' ? styles.hubTabBtnActive : ''}`}
+                onClick={() => setHubTab('history')}
+              >
+                <History size={13} />
+                <span>History</span>
               </button>
               <button
                 className={styles.panelCloseBtn}
@@ -909,6 +1118,33 @@ function BibleReaderContent() {
                     </div>
                   ) : (
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No verse highlights saved yet.</p>
+                  )}
+                </div>
+              )}
+
+              {hubTab === 'history' && (
+                <div>
+                  <div className={styles.hubSectionTitle}>Recent Study History</div>
+                  {hubHistoryLoading ? (
+                    <div className="skeleton" style={{ height: '60px' }} />
+                  ) : hubHistoryError ? (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{hubHistoryError}</p>
+                  ) : hubHistory.length > 0 ? (
+                    <div className={styles.hubPlansList}>
+                      {hubHistory.map((a) => (
+                        <a
+                          key={a.id}
+                          href={`/share/${a.id.slice(0, 8)}`}
+                          className={styles.hubPlanItem}
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                          <span>{a.question}</span>
+                          <span style={{ color: 'var(--text-muted)' }}>→</span>
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No study history yet.</p>
                   )}
                 </div>
               )}
@@ -1235,7 +1471,7 @@ function BibleReaderContent() {
                       {loadingStudy ? (
                         <div className={styles.tabLoading}>
                           <span className={styles.pulseGlow} />
-                          <p>AI analyzing original languages & context…</p>
+                          <p>AI analyzing scripture & context…</p>
                         </div>
                       ) : studyError ? (
                         <div className={styles.errorBox}>
@@ -1251,66 +1487,15 @@ function BibleReaderContent() {
                             Retry
                           </button>
                         </div>
-                      ) : studyData ? (
-                        <div className={styles.studyBody}>
-                          
-                          {/* Selected Word Concordance study */}
-                          {selectedWord && studyData?.selectedWordStudy && (
-                            <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
-                              <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                <Languages size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                                Original Language: &quot;{selectedWord}&quot;
-                              </h3>
-                              <div className={styles.lexiconCard}>
-                                <div className={styles.lexiconHeader}>
-                                  <span className={styles.originalWord}>{studyData.selectedWordStudy.originalWord}</span>
-                                  <span className={styles.strongsBadge}>{studyData.selectedWordStudy.strongsNumber}</span>
-                                </div>
-                                <p className={styles.pronunciation}>Pronunciation: <em>{studyData.selectedWordStudy.pronunciation}</em></p>
-                                <p className={styles.definition}>{studyData.selectedWordStudy.definition}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Verse Key Words */}
-                          {!selectedWord && (studyData?.originalLanguageWords?.length ?? 0) > 0 && (
-                            <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-language)' }}>
-                              <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-language)' }}>
-                                <Languages size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                                Key Original Words (Strong&apos;s)
-                              </h3>
-                              <div className={styles.concordanceList}>
-                                {studyData?.originalLanguageWords?.map((wordStudy, i) => (
-                                  <div key={i} className={styles.concordanceItem}>
-                                    <div className={styles.lexiconHeader}>
-                                      <strong>{wordStudy.word}</strong> → <span className={styles.originalWord}>{wordStudy.originalWord}</span>
-                                      <span className={styles.strongsBadge}>{wordStudy.strongsNumber}</span>
-                                    </div>
-                                    <p className={styles.definitionText}>{wordStudy.definition}</p>
-                                  </div>
-                                ))}
-                              </div>
-                              <p className={styles.hintText}>Click any word in the verse text to run a specific original language lookup.</p>
-                            </div>
-                          )}
-
-                          {/* Commentary */}
-                          <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-theological)' }}>
-                            <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-theological)' }}>
-                              <Church size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                              Theological Commentary
-                            </h3>
-                            <p className={styles.commentaryText}>{studyData.commentary}</p>
+                      ) : studyAnswer ? (
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                            <ProvenanceBadge variant="ai" />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              AI-generated study guide — verify against Scripture.
+                            </span>
                           </div>
-
-                          {/* Practical Application */}
-                          <div className={styles.sectionBox} style={{ borderLeftColor: 'var(--dim-practical)' }}>
-                            <h3 className={styles.sectionTitle} style={{ color: 'var(--dim-practical)' }}>
-                              <Heart size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                              Life Application
-                            </h3>
-                            <p className={styles.applicationText}>{studyData.practicalApplication}</p>
-                          </div>
+                          <DimensionPanel answer={studyAnswer} shareSlug={studyShareSlug ?? undefined} />
                         </div>
                       ) : (
                         <p className={styles.emptyState}>No study guide loaded.</p>
@@ -1342,32 +1527,49 @@ function BibleReaderContent() {
                   {/* TAB 3: Cross-References */}
                   {activeTab === 'references' && (
                     <div id="references-tab" role="tabpanel" className={styles.tabPanel}>
-                      {loadingStudy ? (
+                      {/* B03: real Treasury of Scripture Knowledge cross-references
+                          from the local lexicon route. */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                        <ProvenanceBadge variant="dictionary" />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          Treasury of Scripture Knowledge
+                        </span>
+                      </div>
+                      {loadingRefs ? (
                         <div className={styles.tabLoading}>
                           <span className={styles.pulseGlow} />
-                          <p>Finding cross-references…</p>
+                          <p>Loading cross-references…</p>
                         </div>
-                      ) : (studyData?.crossReferences?.length ?? 0) > 0 ? (
-                        <div className={styles.crossReferencesList}>
-                          {studyData?.crossReferences?.map((ref, i) => (
-                            <div key={i} className={styles.crossReferenceCard}>
-                              <div className={styles.crossRefHeader}>
-                                <button
-                                  className={styles.crossRefLink}
-                                  onClick={() => handleJumpToReference(ref.reference)}
-                                  title={`Jump to ${ref.reference} in the reader`}
-                                >
-                                  <BookOpen size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                                  {ref.reference}
-                                </button>
-                              </div>
-                              <p className={`${styles.crossRefText} text-serif`}>&quot;{ref.text}&quot;</p>
-                              <p className={styles.crossRefReason}><strong>Link:</strong> {ref.connectionReason}</p>
+                      ) : refsError ? (
+                        <div className={styles.errorBox}>
+                          <p>⚠️ {refsError}</p>
+                          <button
+                            onClick={() => {
+                              const v = selectedVerse;
+                              setSelectedVerse(null);
+                              setTimeout(() => setSelectedVerse(v), 50);
+                            }}
+                            className={styles.retryBtn}
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      ) : crossRefs.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          {crossRefs.map((r, i) => (
+                            <div
+                              key={i}
+                              className={styles.searchCard}
+                              onClick={() => handleJumpToReference(r.reference)}
+                              title={`Jump to ${r.reference} in the reader`}
+                            >
+                              <span className={styles.searchRef}><BookOpen size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />{r.reference}</span>
+                              {r.text && <p className={`${styles.searchText} text-serif`}>&quot;{r.text}&quot;</p>}
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className={styles.emptyState}>No cross-references loaded.</p>
+                        <p className={styles.emptyState}>No cross-references found for this verse in the Treasury of Scripture Knowledge.</p>
                       )}
                     </div>
                   )}
@@ -1416,22 +1618,66 @@ function BibleReaderContent() {
                         <div>
                           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--text-muted)' }}>
                             Original Languages (Strong&apos;s)
-                          </span>
+                          </span>{' '}
+                          <ProvenanceBadge variant="curated" />
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.3rem' }}>
                             {conn.strongs.map((s) => (
-                              <button
+                              <a
                                 key={s.code}
-                                onClick={() => {
-                                  setSearchQuery(s.code);
-                                  setActiveTab('search');
+                                href={`/bible?strongs=${encodeURIComponent(s.code)}`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  openStrongsDefinition(s.code);
                                 }}
-                                style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', padding: '3px 8px', fontSize: '0.78rem', cursor: 'pointer' }}
+                                style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', padding: '3px 8px', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
                                 title={s.definition}
                               >
                                 <strong>{s.code}</strong> {s.lemma} ({s.transliteration})
-                              </button>
+                              </a>
                             ))}
                           </div>
+                          {/* B03: real dictionary definition for the clicked chip */}
+                          {strongsCode && (
+                            <div className={styles.searchCard} style={{ cursor: 'default', marginTop: '0.5rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                                <span className={styles.searchRef}>
+                                  <BookOpen size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                                  {strongsCode}{strongsDef ? ` — ${strongsDef.lemma}` : ''}
+                                </span>
+                                <ProvenanceBadge variant="dictionary" />
+                              </div>
+                              {loadingStrongs ? (
+                                <p className={styles.searchHint}>Loading definition…</p>
+                              ) : strongsError ? (
+                                <p className={styles.searchError}>⚠️ {strongsError}</p>
+                              ) : strongsDef ? (
+                                <>
+                                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.35rem 0 0' }}>
+                                    {strongsDef.translit}
+                                    {strongsDef.pronunciation && ` · ${strongsDef.pronunciation}`}
+                                  </p>
+                                  <p className={`${styles.searchText} text-serif`} style={{ marginTop: '0.35rem' }}>
+                                    {strongsDef.strongs_def}
+                                  </p>
+                                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.35rem 0 0' }}>
+                                    KJV gloss: {strongsDef.kjv_def}
+                                  </p>
+                                  {strongsDef.derivation && (
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>
+                                      {strongsDef.derivation}
+                                    </p>
+                                  )}
+                                </>
+                              ) : null}
+                              <button
+                                onClick={() => { setStrongsCode(null); setStrongsDef(null); setStrongsError(null); }}
+                                className={styles.retryBtn}
+                                style={{ marginTop: '0.5rem' }}
+                              >
+                                Close
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Sermons */}
@@ -1442,14 +1688,13 @@ function BibleReaderContent() {
                           {conn.sermons.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.3rem' }}>
                               {conn.sermons.map((s) => (
-                                <a
+                                <div
                                   key={s.id}
-                                  href="/sermons"
-                                  style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                                  style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', color: 'var(--text-primary)', fontSize: '0.82rem' }}
                                 >
                                   <strong>{s.title}</strong>
                                   {s.excerpt && <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{s.excerpt}</p>}
-                                </a>
+                                </div>
                               ))}
                             </div>
                           ) : (
@@ -1490,7 +1735,7 @@ function BibleReaderContent() {
                               {conn.catechisms.map((c, i) => (
                                 <a
                                   key={i}
-                                  href="/catechism"
+                                  href="/study-resources?tab=catechism"
                                   style={{ padding: '6px 10px', background: '#ffffff', border: '1px solid rgba(181, 132, 20, 0.2)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.8rem' }}
                                 >
                                   <div style={{ fontWeight: 600, color: 'var(--gold-600)' }}>{c.catechism} Q{c.qNum}</div>

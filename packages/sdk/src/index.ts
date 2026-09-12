@@ -24,7 +24,7 @@ export interface LexiconRequest {
 
 export interface PrayerSubmitRequest {
   title: string;
-  text: string;
+  request: string; // Server contract: POST /api/prayer expects `request` (not `text`)
   category?: string;
   privacy_mode?: 'approximate' | 'precise' | 'restricted';
   urgency?: 'low' | 'normal' | 'urgent' | 'crisis';
@@ -79,7 +79,7 @@ export class BibleDeskClient {
 
     search: async ({ query, translation = 'web', limit = 20 }: SearchRequest) => {
       const params = new URLSearchParams({
-        q: query,
+        query,
         translation,
         limit: String(limit),
       });
@@ -94,8 +94,8 @@ export class BibleDeskClient {
 
   // ── Biblical Knowledge Graph API ──
   public readonly graph = {
-    query: async ({ node }: { node: string }) => {
-      const params = new URLSearchParams({ node });
+    query: async ({ nodeKey }: { nodeKey: string }) => {
+      const params = new URLSearchParams({ nodeKey });
       return this.request<any>(`/api/graph?${params.toString()}`);
     },
   };

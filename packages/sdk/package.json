@@ -4,20 +4,23 @@
   "description": "Official isomorphic TypeScript client SDK for BibleDesk — Public domain Scripture, Strong's lexicons, Knowledge Graph, Prayer Care, and Church Hub API.",
   "license": "MIT",
   "author": "BibleDesk Contributors",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node -e \"require('fs').renameSync('dist/esm/index.js','dist/esm/index.mjs')\""
+  },
   "homepage": "https://bible-desk.vercel.app/developers",
   "repository": {
     "type": "git",
     "url": "https://github.com/ShadowWalkerNC/BibleDesk.git",
     "directory": "packages/sdk"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js"
     }
   },
   "files": [

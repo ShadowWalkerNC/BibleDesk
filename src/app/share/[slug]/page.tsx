@@ -13,7 +13,16 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const answer   = await getAnswerBySlug(slug);
+
+  // Supabase may be unconfigured (service-role key missing) — getAnswerBySlug
+  // then throws instead of returning null. Catch and treat as not-found so the
+  // page renders its designed not-found state instead of throwing a 500.
+  let answer = null;
+  try {
+    answer = await getAnswerBySlug(slug);
+  } catch {
+    answer = null;
+  }
 
   const appUrl = getAppUrl();
   const canonical = `${appUrl}/share/${slug}`;
@@ -52,7 +61,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SharePage({ params }: Props) {
   const { slug } = await params;
-  const answer   = await getAnswerBySlug(slug);
+
+  // Same guard as generateMetadata: unconfigured Supabase throws instead of
+  // returning null. SharePageClient already renders the designed not-found UI
+  // when initialAnswer is null, so fall back to null here.
+  let answer = null;
+  try {
+    answer = await getAnswerBySlug(slug);
+  } catch {
+    answer = null;
+  }
 
   return <SharePageClient initialAnswer={answer} shareSlug={slug} />;
 }

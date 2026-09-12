@@ -22,8 +22,8 @@
   --sage-tint: rgba(107, 142, 123, 0.16);
 
   /* Illuminated Manuscript Gold Leaf */
-  --gold-400: #b58414; /* Deep illuminated manuscript gold */
-  --gold-500: #94690a;
+  --gold-400: #7c5804; /* Deep illuminated manuscript gold — darkened for WCAG AA (5.16:1 on canvas) */
+  --gold-500: #7a5608; /* CTA gold — darkened so light CTA text passes WCAG AA (5.31:1) */
   --gold-600: #6e4e04;
   --gold-glow: rgba(181, 132, 20, 0.14);
 
@@ -34,16 +34,16 @@
 
   --text-primary: #34483d; /* Deep sage ink */
   --text-secondary: #405548; /* Sage secondary */
-  --text-muted: #879087; /* Sage muted gray */
-  --text-tertiary: #a0a89e;
+  --text-muted: #57625a; /* Sage muted gray — darkened for WCAG AA (5.09:1 on canvas) */
+  --text-tertiary: #5f685f; /* WCAG AA (4.62:1 on canvas) */
   --surface-2: var(--navy-900);
   --text-inverse: #fdfbf7;
 
   /* 5 Dimensions Sourced Color Palette */
   --dim-scripture:    #185ea5; /* Deep Royal Sanctuary Blue */
-  --dim-historical:   #b84c16; /* Antique Clay / Terra Cotta */
+  --dim-historical:   #a04113; /* Antique Clay / Terra Cotta — darkened for WCAG AA (5.15:1 on canvas) */
   --dim-language:     #6b35b8; /* Royal Codex Purple */
-  --dim-theological:  #0b7a54; /* Olive Branch Green */
+  --dim-theological:  #0a6b48; /* Olive Branch Green — darkened for WCAG AA (5.23:1 on canvas) */
   --dim-practical:    #b81d58; /* Crimson Rubric Pink */
 
   /* Sage Frosted Glass Surface */
@@ -104,7 +104,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--navy-950);
   color: var(--text-primary);
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   line-height: 1.6;
   background-image:
     radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
@@ -265,4 +266,19 @@ a:hover {
 @media (max-width: 640px) {
   html { font-size: 15px; }
   .container { padding: 0 1rem; }
+}
+
+/* ── Reduced Motion (Accessibility) ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

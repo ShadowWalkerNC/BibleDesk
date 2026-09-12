@@ -13,9 +13,9 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-First Bible Foundation & Open Multi-Platform Suite** |
-| **What exists in code** | Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`) empowering worship leaders, podcast hosts, writers, and Christian artists with reverent link-in-bio pages, embedded YouTube/Spotify media, Scripture of the Season, 0% platform fee direct patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests with 1-click intercession, and discovery directory; Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network; Connected Knowledge Drawer (`ConnectedKnowledgeDrawer.tsx`) embedded in Bible Reader, Sermon Studio, and Prayer Care; Toggleable Multi-Layer Knowledge Graph (`GraphView.tsx`) synthesizing doctrines, verses, concepts, sermons, and prayers; Production share URL canonicalization (`https://bible-desk.vercel.app/share/[slug]`); Gemini API token budget optimizations; Marketing Showcase on `/` with 2 consolidated target pillars (Individual Believers & Discipleship vs Churches, Ministries & Creators) and transparent pricing ($0 for churches forever; $0 free with 5 server AI answers/day or unlimited BYOK; optional $4.99/mo supporter tier); Centralized 3-Column Study Desk workspace (`/bible`); Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`) with 8 classical loci of theology; Multi-Tradition Catechisms & Confessions (`/catechism`) covering Westminster, Heidelberg, Luther's Small Catechism, 1689 Baptist, 39 Articles, and Assemblies of God 16 Truths; Live Worship Radio Dock (`LiveRadioPlayer.tsx`) with ambient sacred streams & 1-click K-LOVE/Air1 docks; Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with YouTube/Facebook Live embeds; 1-Click ProPresenter 7 Presentation Slide Exporter; Church Ministry Hub (`/church`) with prayer chain, embed widgets, and Planning Center interop; Universal & Inline Slash Commands (`/creator`, `/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`); Words of Encouragement Hub (`/encourage`); 4-tier prayer escalation system (Private → Circle → Church → Global Atlas); PrayerAtlas 2D vector global map (`/prayer`); official BibleDesk Client SDK (`src/lib/sdk.ts`, `packages/sdk`); Developer Platform (`/developers`); Jakob's Law mobile UX; local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT); Strong's Greek/Hebrew lexicons; TSK cross-references; Quick Jump (Ctrl+K); Chrome Extension MV3 side panel; Discord & WhatsApp bots; Open MCP server (`/api/mcp`); Open REST APIs; bidirectional Biblical Knowledge Graph; multi-platform build suite (`npm run package:all`); Android APK (`apps/android`, Community Beta); Desktop Electron shell (`apps/desktop`); and dedicated `/download` install hub. |
+| **What exists in code** | Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`) empowering worship leaders, podcast hosts, writers, and Christian artists with reverent link-in-bio pages, embedded YouTube/Spotify media, Scripture of the Season, 0% platform fee direct patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests with 1-click intercession, and discovery directory; Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network; Connected Knowledge Drawer (`ConnectedKnowledgeDrawer.tsx`) embedded in Bible Reader, Sermon Studio, and Prayer Care; Toggleable Multi-Layer Knowledge Graph (`GraphView.tsx`) synthesizing doctrines, verses, concepts, sermons, and prayers; Production share URL canonicalization (`https://bible-desk.vercel.app/share/[slug]`); Gemini API token budget optimizations; Marketing Showcase on `/` with 2 consolidated target pillars (Individual Believers & Discipleship vs Churches, Ministries & Creators) and transparent pricing ($0 for churches forever; $0 free with 5 server AI answers/day or unlimited BYOK); Centralized 3-Column Study Desk workspace (`/bible`); Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`) with 8 classical loci of theology; Multi-Tradition Catechisms & Confessions (`/catechism`) covering Westminster, Heidelberg, Luther's Small Catechism, 1689 Baptist, 39 Articles, and Assemblies of God 16 Truths; Live Worship Radio Dock (`LiveRadioPlayer.tsx`) with ambient sacred streams & 1-click K-LOVE/Air1 docks; Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with YouTube/Facebook Live embeds; 1-Click ProPresenter 7 Presentation Slide Exporter; Church Ministry Hub (`/church`) with prayer chain, embed widgets, and Planning Center interop; Universal & Inline Slash Commands (`/creator`, `/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`); Words of Encouragement Hub (`/encourage`); 4-tier prayer escalation system (Private → Circle → Church → Global Atlas); PrayerAtlas 2D vector global map (`/prayer`); official BibleDesk Client SDK (`src/lib/sdk.ts`, `packages/sdk`); Developer Platform (`/developers`); Jakob's Law mobile UX; local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT); Strong's Greek/Hebrew lexicons; TSK cross-references; Quick Jump (Ctrl+K); Chrome Extension MV3 side panel; Discord & WhatsApp bots; Open MCP server (`/api/mcp`); Open REST APIs; bidirectional Biblical Knowledge Graph; multi-platform build suite (`npm run package:all`); Android APK (`apps/android`, Community Beta); Desktop Electron shell (`apps/desktop`); and dedicated `/download` install hub. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/prayer/escalate`, `/api/church`, `/api/daily` |
+| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/church`, `/api/daily` |
 | **Deploy & Build** | Production Next.js 16 build verified across all 34 routes (`0` type errors) |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
@@ -24,7 +24,7 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 ## Core Pillars & Philosophy
 
 ### 1. Open Source & Zero-Paywall Bible Foundation
-All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **100% offline and free** without requiring any paid API keys or closed cloud dependencies.
+All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **free** — with no paid API keys or closed cloud dependencies required.
 
 ### 2. Use BibleDesk as an Open API & MCP Server
 - **Official Client SDK (`@bibledesk/sdk`)**: Open-source isomorphic TypeScript/JavaScript client library installable via npm (`packages/sdk`) for Node.js, Web, React Native, and autonomous AI agents:
@@ -36,14 +36,14 @@ All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew
   const client = createBibleDeskClient();
   const chapter = await client.bible.getChapter({ book: 'John', chapter: 3 });
   ```
-- **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`lookup_passage`, `search_bible`, `lookup_strongs`, `get_daily_verse`, `query_knowledge_graph`).
+- **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`get_verse`, `search_scripture`, `get_cross_references`, `get_strongs_lexicon`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`).
 - **Open REST Endpoints**:
   - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
-  - `GET /api/bible/search?q=light&translation=kjv`
+  - `GET /api/bible/search?query=light&translation=kjv`
   - `GET /api/bible/lexicon?strongs=G2889`
-  - `GET /api/graph?node=grace`
+  - `GET /api/graph?nodeKey=grace`
   - `GET /api/daily`
-- **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 15 questions/hr) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
+- **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 5 free questions/day, then BYOK for unlimited) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
 - **Pastoral Prayer Care Workflow & Reminders**: Private intercession circles with daily/weekly recurrence, browser push reminders, automated email digest (`/api/prayer/digest`), and 1-click follow-up messaging (WhatsApp, Email, SMS, Clipboard).
 
 ### 3. Bidirectional Biblical Knowledge Graph
@@ -65,9 +65,9 @@ BibleDesk is packaged as a single unified ecosystem installable on any device:
 
 | Platform | Location / Artifact | Key Capabilities |
 |---|---|---|
-| **Web & PWA** | Root Web App (`/download`) | Zero-install browser access + 1-click Progressive Web App (PWA) installation with offline caching. |
+| **Web** | Root Web App (`/download`) | Zero-install browser access. |
 | **Desktop App (Electron)** | `apps/desktop/` | Native Windows (`.exe`), macOS (`.dmg`), and Linux (`.AppImage`) app with local SQLite storage, Obsidian sync, and local graphify. |
-| **Android App (Capacitor)** | `apps/android/` | Offline-ready Android build with touch Greek/Hebrew lexicons, dark parchment reading mode, and direct APK sideloading. |
+| **Android App (Capacitor)** | `apps/android/` | Android build with touch Greek/Hebrew lexicons, dark parchment reading mode, and direct APK sideloading. |
 | **Chrome Extension (MV3)** | `apps/extension/` | Manifest V3 Side Panel companion for reading Scripture and looking up Strong's terms while browsing any webpage. |
 | **Discord Bot & Webhooks** | `/api/discord/*` | Ed25519-verified slash commands (`/ask`, `/daily`, `/bible`) and 1-click study embed broadcasting to Discord channels. |
 | **WhatsApp Cloud API & Share** | `/api/whatsapp/*` | Meta Cloud API interactive bot (`daily`, `John 3:16`, `ask: ...`) and 1-click formatted chat forwarder for small groups. |
@@ -84,7 +84,7 @@ Assemble all platform distributions into a single `/dist` artifact folder with o
 npm run package:all
 
 # Target-specific builds
-npm run build:web        # Production Next.js SSR + PWA
+npm run build:web        # Production Next.js SSR
 npm run build:desktop    # Electron packages
 npm run build:android    # Android assets & Capacitor workspace
 npm run build:extension  # Pack Chrome extension ZIP

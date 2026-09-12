@@ -50,16 +50,12 @@ const greekWord = await bibledesk.bible.getLexicon({ strongs: 'G2889' }); // Kos
 console.log(greekWord.lemma, greekWord.definition);
 
 // 3. Query Biblical Concept Knowledge Graph
-const graphData = await bibledesk.graph.query({ node: 'grace' });
+const graphData = await bibledesk.graph.query({ nodeKey: 'grace' });
 console.log(graphData.nodes, graphData.edges);
 
-// 4. Church Prayer Chain Escalation
-await bibledesk.prayer.escalate({
-  prayerId: 'prayer-uuid-123',
-  targetLevel: 'church',
-  urgencyLevel: 'urgent',
-  isAnonymous: false,
-});`;
+// 4. Full-Text Scripture Search
+const searchResults = await bibledesk.bible.search({ query: 'grace', translation: 'kjv', limit: 5 });
+console.log(searchResults.total, searchResults.results[0].reference);`;
 
   const MCP_CLAUDE_CONFIG = `{
   "mcpServers": {
@@ -198,7 +194,7 @@ await bibledesk.prayer.escalate({
                 <span>Open REST API Endpoints</span>
               </h2>
               <p style={{ margin: '0.35rem 0 0', color: '#685e4c', fontSize: '0.92rem' }}>
-                Standard JSON endpoints with CORS enabled for all legitimate web apps.
+                Standard JSON endpoints. CORS is not yet configured — browser apps should proxy; API keys + CORS policy are a planned decision (see C07).
               </p>
             </div>
           </div>
@@ -226,7 +222,7 @@ await bibledesk.prayer.escalate({
                 High-performance full-text search across all 31,102 verses of the Bible.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/search?q=grace&amp;translation=kjv&amp;limit=10"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/search?query=grace&amp;translation=kjv&amp;limit=10"</pre>
               </div>
             </div>
 
@@ -252,21 +248,21 @@ await bibledesk.prayer.escalate({
                 Query the bidirectional Biblical Knowledge Graph connecting scripture verses, theological themes, and TSK cross-references.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/graph?node=grace"</pre>
+                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/graph?nodeKey=grace"</pre>
               </div>
             </div>
 
             <div className={styles.endpointCard}>
               <div className={styles.endpointHeader}>
                 <span className={styles.methodPost}>POST</span>
-                <span className={styles.endpointPath}>/api/prayer/escalate</span>
+                <span className={styles.endpointPath}>/api/ask</span>
               </div>
               <p className={styles.endpointDesc}>
-                Escalate a prayer request up the 4-tier privacy ladder (Private $\rightarrow$ Circle $\rightarrow$ Church $\rightarrow$ Global Atlas).
+                Ask the AI study assistant a Bible question. Rate-limited (15 questions/hour); answers are grounded in Scripture.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
                 <pre className={styles.codePre}>
-                  {`curl -X POST "https://bible-desk.vercel.app/api/prayer/escalate" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "prayerId": "id-123", "targetLevel": "church", "urgencyLevel": "urgent" }'`}
+                  {`curl -X POST "https://bible-desk.vercel.app/api/ask" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "question": "What does the Bible say about grace?", "translation": "web" }'`}
                 </pre>
               </div>
             </div>
@@ -320,7 +316,7 @@ await bibledesk.prayer.escalate({
           </div>
 
           <div style={{ marginTop: '1.5rem', background: '#fbf9f4', borderLeft: '3px solid #b58414', padding: '1rem 1.25rem', borderRadius: '0 10px 10px 0', fontSize: '0.9rem', color: '#574c38', lineHeight: 1.55 }}>
-            ✦ <strong>Exposed MCP Tools:</strong> <code>lookup_passage</code>, <code>search_bible</code>, <code>lookup_strongs</code>, <code>get_daily_verse</code>, <code>query_knowledge_graph</code>, and <code>list_community_prayers</code>.
+            ✦ <strong>Exposed MCP Tools:</strong> <code>get_verse</code>, <code>search_scripture</code>, <code>get_cross_references</code>, <code>get_strongs_lexicon</code>, <code>get_concept_subgraph</code>, <code>get_answer_history</code>, <code>get_dimension</code>, and <code>ask_bible_question</code>.
           </div>
         </section>
       )}

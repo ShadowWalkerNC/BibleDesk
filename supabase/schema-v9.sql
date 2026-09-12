@@ -1,5 +1,10 @@
 -- BibleDesk — Schema v9: Christian Creator Profiles
 -- Link-in-bio, ministry profiles, and external patronage support
+--
+-- Order: 9 — apply after supabase/schema-v8.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 
 CREATE TABLE IF NOT EXISTS public.creator_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -34,23 +39,28 @@ CREATE INDEX IF NOT EXISTS idx_creator_profiles_category ON public.creator_profi
 ALTER TABLE public.creator_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Public can read active creator profiles
+-- B05: added DROP POLICY IF EXISTS for re-run safety (no semantics change).
+DROP POLICY IF EXISTS "Anyone can view active creator profiles" ON public.creator_profiles;
 CREATE POLICY "Anyone can view active creator profiles"
   ON public.creator_profiles
   FOR SELECT
   USING (is_active = TRUE);
 
 -- Authenticated creators can manage their own profile
+DROP POLICY IF EXISTS "Creators can insert their own profile" ON public.creator_profiles;
 CREATE POLICY "Creators can insert their own profile"
   ON public.creator_profiles
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Creators can update their own profile" ON public.creator_profiles;
 CREATE POLICY "Creators can update their own profile"
   ON public.creator_profiles
   FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Creators can delete their own profile" ON public.creator_profiles;
 CREATE POLICY "Creators can delete their own profile"
   ON public.creator_profiles
   FOR DELETE

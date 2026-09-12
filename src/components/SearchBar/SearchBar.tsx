@@ -74,7 +74,6 @@ export default function SearchBar({ onSubmit, isLoading, placeholder }: SearchBa
                   { cmd: '/verse', desc: 'Jump or search Scripture passage' },
                   { cmd: '/encourage', desc: 'Find topical promises & comfort' },
                   { cmd: '/pray', desc: 'Submit a prayer request' },
-                  { cmd: '/church', desc: 'Open church prayer chain & widgets' },
                   { cmd: '/strongs', desc: 'Lookup Strong’s Greek/Hebrew definition' },
                   { cmd: '/sdk', desc: 'Open Developer SDK & MCP docs' },
                 ]

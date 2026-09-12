@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStrongsDefinition, getCrossReferences } from '@/lib/lexicon';
 import { getLocalPassage } from '@/lib/bible-local';
-import type { TranslationId } from '@/types';
+import { TRANSLATIONS, type TranslationId } from '@/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,15 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const strongs = searchParams.get('strongs');
   const reference = searchParams.get('reference');
-  const translation = (searchParams.get('translation') || 'web') as TranslationId;
+  const translationParam = searchParams.get('translation') || 'web';
+
+  if (!TRANSLATIONS.some((t) => t.id === translationParam)) {
+    return NextResponse.json(
+      { error: `Invalid translation: "${translationParam}". Supported translations: ${TRANSLATIONS.map((t) => t.id).join(', ')}.` },
+      { status: 400 }
+    );
+  }
+  const translation = translationParam as TranslationId;
 
   // 1. Strong's Definition Lookup
   if (strongs) {

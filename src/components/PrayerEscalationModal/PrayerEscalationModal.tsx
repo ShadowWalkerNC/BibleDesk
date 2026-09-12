@@ -33,9 +33,13 @@ interface PrayerEscalationModalProps {
     isAnonymous: boolean;
     churchId?: string;
     updateNote?: string;
+    atlasConsent?: boolean;
   }) => void;
 }
 
+// B14: honest tier descriptions. Only Tier 4 changes visibility, and only with
+// explicit atlas consent. Everything else is recorded with the prayer; nothing
+// is sent anywhere automatically.
 const TIERS: {
   level: PrayerEscalationLevel;
   title: string;
@@ -45,25 +49,25 @@ const TIERS: {
   {
     level: 'private',
     title: 'Tier 1: Private Journal',
-    description: 'Only you see this prayer. Stored locally/encrypted in personal journal.',
+    description: 'Keep it private. The tier is recorded with this prayer; nothing is shared.',
     icon: Lock,
   },
   {
     level: 'circle',
     title: 'Tier 2: Prayer Circle',
-    description: 'Shared with your invited trusted intercessors & family prayer partners.',
+    description: 'Recorded with this prayer. Your Circle is stored on this device only — nothing is sent anywhere. Share it yourself with the follow-up composer.',
     icon: Users,
   },
   {
     level: 'church',
     title: 'Tier 3: Church Pastoral Chain',
-    description: 'Escalated to your verified local church pastoral team for corporate intercession.',
+    description: 'Recorded with this prayer and your selected church. Church delivery is not built yet — nothing is sent automatically. Share it yourself with the follow-up composer.',
     icon: Church,
   },
   {
     level: 'atlas',
     title: 'Tier 4: Global PrayerAtlas',
-    description: 'Broadcast to believers worldwide on the 2D PrayerAtlas (with approximate halo or pin).',
+    description: 'Shares this prayer on the Community Wall and the 2D PrayerAtlas at approximate region only (never a precise location). You must be signed in, and you must explicitly consent below.',
     icon: Globe,
   },
 ];
@@ -87,24 +91,17 @@ export default function PrayerEscalationModal({
   const [customChurchCode, setCustomChurchCode] = useState<string>('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [updateNote, setUpdateNote] = useState('');
+  const [atlasConsent, setAtlasConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function loadChurches() {
+    // Tier 3 church selection is local-only: churches a user saved on this
+    // device (the server-side /api/church suite was archived). Nothing here
+    // is fetched from or sent to a server.
+    function loadChurches() {
       try {
-        const res = await fetch('/api/church');
-        const data = await res.json();
-        let list: ChurchProfile[] = data.churches || [];
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('bibledesk_my_churches');
-          if (local) {
-            const parsed = JSON.parse(local);
-            const ids = new Set(list.map((c: ChurchProfile) => c.id));
-            for (const c of parsed) {
-              if (!ids.has(c.id)) list.unshift(c);
-            }
-          }
-        }
+        const local = localStorage.getItem('bibledesk_my_churches');
+        const list: ChurchProfile[] = local ? JSON.parse(local) : [];
         setChurches(list);
         if (list.length > 0) {
           setSelectedChurchId(list[0].id);
@@ -126,6 +123,7 @@ export default function PrayerEscalationModal({
       isAnonymous,
       churchId: selectedLevel === 'church' ? selectedChurchId : undefined,
       updateNote: updateNote.trim() || undefined,
+      atlasConsent: selectedLevel === 'atlas' ? atlasConsent : undefined,
     });
     setIsSubmitting(false);
     onClose();
@@ -239,6 +237,21 @@ export default function PrayerEscalationModal({
             />
             <span>Anonymize Request (Hide my name; post as "A Brother/Sister in Christ")</span>
           </label>
+
+          {/* Atlas consent — required for Tier 4; explicit opt-in only */}
+          {selectedLevel === 'atlas' && (
+            <label className={styles.toggleRow}>
+              <input
+                type="checkbox"
+                checked={atlasConsent}
+                onChange={e => setAtlasConsent(e.target.checked)}
+              />
+              <span>
+                I consent to share this prayer on the Community Wall and the PrayerAtlas
+                at approximate region only. I understand it becomes public.
+              </span>
+            </label>
+          )}
 
           {/* Optional update note */}
           <div className={styles.ladderSection}>

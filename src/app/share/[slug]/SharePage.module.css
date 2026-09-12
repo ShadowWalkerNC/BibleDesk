@@ -1,7 +1,8 @@
 /* BibleDesk — /share/[slug] page */
 
 .page {
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   padding-bottom: 4rem;
 }
 
@@ -93,6 +94,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0.6rem 1.4rem;
+  min-height: 48px;
   text-decoration: none;
   transition: background 0.2s;
   white-space: nowrap;
