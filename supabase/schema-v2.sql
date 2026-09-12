@@ -2,6 +2,11 @@
 -- Run this in the Supabase SQL editor AFTER schema.sql
 -- Safe to re-run: uses IF NOT EXISTS / DO $$ blocks throughout
 --
+-- Order: 2 — apply after supabase/schema.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
+--
 -- New tables:
 --   moderators          — invited pastors/theologians with Supabase Auth
 --   flagged_topics      — admin-editable sensitive keyword list

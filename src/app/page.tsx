@@ -4,11 +4,8 @@ import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
 import {
   BookOpen,
-  Calendar,
-  Sun,
   Brain,
   Scroll,
-  Church,
   Sparkles,
   Heart,
   ArrowRight,
@@ -27,12 +24,9 @@ import styles from './page.module.css';
 
 const QUICK_LINKS = [
   { label: 'Study Desk',    href: '/bible',    icon: BookOpen },
-  { label: 'Daily Verse',   href: '/daily',    icon: Sun },
-  { label: 'Plans',         href: '/plans',    icon: Calendar },
-  { label: 'Verse Memory',  href: '/memory',   icon: Brain },
-  { label: 'Encouragement', href: '/encourage',icon: Sparkles },
-  { label: 'Creator Hub',   href: '/creators', icon: Heart },
-  { label: 'Church Hub',    href: '/church',   icon: Church },
+  { label: 'Study Resources', href: '/study-resources', icon: Scroll },
+  { label: 'Encouragement', href: '/study-resources?tab=encourage', icon: Sparkles },
+  { label: 'Verse Memory',  href: '/study-resources?tab=memory', icon: Brain },
   { label: 'Prayer Atlas',  href: '/prayer',   icon: Heart },
   { label: 'Developers',    href: '/developers',icon: MessageSquare },
 ];

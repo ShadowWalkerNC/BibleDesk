@@ -16,25 +16,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateBibleAnswer } from '@/lib/claude';
 import { saveAnswer } from '@/lib/supabase';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkAutoFlag, saveFlag } from '@/lib/moderation';
+import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { runRAG } from '@/lib/rag';
 import { getAuthenticatedUser } from '@/lib/auth';
-import type { AskRequest, ApiResponse } from '@/types';
+import type { AskRequest, ApiResponse, BibleAnswer } from '@/types';
+import { MIN_QUESTION_LENGTH } from '@/lib/ask-validation';
 
 const MAX_QUESTION_LENGTH = 500;
-const MIN_QUESTION_LENGTH = 5;
-const RATE_LIMIT_PER_HOUR = 15;
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    '127.0.0.1'
-  );
-}
+const ASK_LIMIT_PER_DAY = 5;
 
 function sanitizeQuestion(q: string): string {
   return q.trim().replace(/\s+/g, ' ').slice(0, MAX_QUESTION_LENGTH);
+}
+
+// ── Auto-moderation ───────────────────────────────────────────────────────────
+// The pipeline's Stage-1 self-grading (answer.status) stays recorded as a
+// signal, but it is NO LONGER the moderation decision on its own: the
+// DB-backed checkAutoFlag result is authoritative for creating a persisted
+// flag. Runs fire-and-forget; the answer row must already exist because
+// saveFlag flips that row's status to 'under_review'.
+async function runAutoModeration(question: string, answer: BibleAnswer): Promise<void> {
+  const result = await checkAutoFlag(question, answer);
+  console.log(
+    `[ask] Auto-flag check for answer ${answer.id}: ${result.flagged ? 'FLAGGED' : 'clear'} ` +
+    `(pipeline self-grade status: ${answer.status})`
+  );
+  if (!result.flagged) return;
+
+  const flagReason = [
+    `categories: ${result.categories.join(', ') || 'none'}`,
+    `keywords: ${result.reasons.join(', ') || 'none'}`,
+  ].join('; ');
+
+  const flagId = await saveFlag({
+    answerId:   answer.id,
+    question,
+    flagType:   'auto',
+    flagReason,
+  });
+
+  if (flagId) {
+    console.log(`[ask] Auto-flag saved for answer ${answer.id} (flag ${flagId}): ${flagReason}`);
+  } else {
+    // Loud failure: flagged content did NOT reach the moderation queue.
+    console.error(`[ask] saveFlag FAILED for flagged answer ${answer.id}: ${flagReason}`);
+  }
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
@@ -62,7 +89,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // ── 2. Authenticate User & Validate AI Access ────────────────────────────
     const user = await getAuthenticatedUser(req);
-    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || (body as any).geminiApiKey?.trim();
+    // BYOK keys travel by header ONLY (x-gemini-api-key) — never the request body.
+    const userApiKey = req.headers.get('x-gemini-api-key')?.trim() || undefined;
 
     // Guests must provide a personal Gemini API key to use AI features
     if (!user && !userApiKey) {
@@ -78,19 +106,19 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // Rate limit check: keyed by user ID if authenticated, else IP
     const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
-    const rateLimit = await checkRateLimit(rateLimitKey);
+    const rateLimit = await checkRateLimit(rateLimitKey, { namespace: RateLimitNamespace.ask });
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
           success: false,
-          error: `You've reached the limit of ${RATE_LIMIT_PER_HOUR} questions per hour. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
+          error: `You've reached the limit of ${ASK_LIMIT_PER_DAY} free AI answers per day. Add your own free Gemini API key (BYOK) for unlimited answers, or try again tomorrow. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
           code: 'RATE_LIMITED',
         },
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit':     String(RATE_LIMIT_PER_HOUR),
+            'X-RateLimit-Limit':     String(ASK_LIMIT_PER_DAY),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset':     rateLimit.resetAt.toISOString(),
           },
@@ -130,9 +158,13 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // compute it here without waiting for the DB write to finish.
     const shareSlug = answer.id.slice(0, 8);
 
-    saveAnswer(answer).catch((err) =>
-      console.error('[ask] Failed to save answer to Supabase:', err)
-    );
+    // Moderation is chained after the answer row exists so saveFlag can flip
+    // that row's status; still non-blocking for the HTTP response.
+    saveAnswer(answer)
+      .then(() => runAutoModeration(question, answer))
+      .catch((err) =>
+        console.error('[ask] Failed to save answer to Supabase:', err)
+      );
 
     // ── 6. Return answer + shareSlug ─────────────────────────────────────────
     return NextResponse.json(

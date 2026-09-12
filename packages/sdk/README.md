@@ -48,10 +48,17 @@ const results = await bibledesk.bible.search({
 console.log(results.matches);
 
 // 4. Query Biblical Concept Knowledge Graph
-const graph = await bibledesk.graph.query({ node: 'grace' });
+const graph = await bibledesk.graph.query({ nodeKey: 'grace' });
 console.log(graph.nodes, graph.edges);
 
-// 5. Submit or Escalate Prayer Petition
+// 5. Submit a Prayer Request
+await bibledesk.prayer.submit({
+  title: 'Healing for a friend',
+  request: 'Please pray for my friend recovering from surgery.',
+  category: 'health',
+});
+
+// 6. Escalate a Prayer Petition
 await bibledesk.prayer.escalate({
   prayerId: 'prayer-uuid-123',
   targetLevel: 'church',

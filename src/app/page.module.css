@@ -3,7 +3,8 @@
 .startScreen {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   gap: 0;
 }
 
@@ -101,6 +102,7 @@
   background: var(--gold-400);
   color: #fff;
   padding: 0.95rem 1.4rem;
+  min-height: var(--touch-target-min, 48px);
   border-radius: 9px;
   font-size: 0.98rem;
   font-weight: 700;
@@ -161,6 +163,7 @@
   align-items: center;
   gap: 9px;
   padding: 0.7rem 0.95rem;
+  min-height: var(--touch-target-min, 48px);
   background: rgba(247, 248, 239, 0.57);
   border: 1px solid rgba(107, 142, 123, 0.25);
   border-radius: 12px;

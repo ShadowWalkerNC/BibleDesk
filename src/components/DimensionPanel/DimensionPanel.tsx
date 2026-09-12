@@ -120,32 +120,14 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
     window.open(link, '_blank');
   }
 
-  async function handleShareDiscord() {
-    const webhookUrl = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_discord_webhook') : null;
-    if (!webhookUrl) {
-      // Copy formatted Discord text
-      const discordText = `**📖 BibleDesk Study:** "${answer.question}"\n\n> ${answer.summary}\n\n🔗 ${shareUrl}`;
-      navigator.clipboard.writeText(discordText)
-        .then(() => toast('Discord text copied! Configure Discord Webhook in Integrations to auto-post.'))
-        .catch(() => toast('Could not copy Discord text', 'error'));
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/discord/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webhookUrl, type: 'answer', answer }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast('Answer dispatched to Discord channel!');
-      } else {
-        toast(data.error || 'Failed to send to Discord', 'error');
-      }
-    } catch {
-      toast('Network error sending to Discord', 'error');
-    }
+  function handleShareDiscord() {
+    // Copy formatted Discord text. (The auto-post webhook endpoint
+    // /api/discord/webhook was removed with the Discord bot cut — there is
+    // nothing to dispatch to, so this is copy-only.)
+    const discordText = `**📖 BibleDesk Study:** "${answer.question}"\n\n> ${answer.summary}\n\n🔗 ${shareUrl}`;
+    navigator.clipboard.writeText(discordText)
+      .then(() => toast('Discord-formatted text copied — paste it into your channel'))
+      .catch(() => toast('Could not copy Discord text', 'error'));
   }
 
   return (

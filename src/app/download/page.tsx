@@ -1,318 +1,121 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Download, 
-  Monitor, 
-  Smartphone, 
-  Globe, 
-  Layers, 
-  Check, 
-  ExternalLink, 
-  Sparkles, 
-  BookOpen, 
-  ShieldCheck, 
-  HardDrive, 
+import {
+  BookOpen,
+  Globe,
+  Monitor,
+  Smartphone,
   Terminal,
-  QrCode,
-  ArrowRight
+  ExternalLink,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import styles from './page.module.css';
 
 export default function DownloadPage() {
-  const [userOS, setUserOS] = useState<'windows' | 'macos' | 'linux' | 'android' | 'ios' | 'unknown'>('unknown');
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-
-  useEffect(() => {
-    // Detect OS
-    if (typeof window !== 'undefined') {
-      const ua = window.navigator.userAgent.toLowerCase();
-      if (ua.includes('win')) setUserOS('windows');
-      else if (ua.includes('mac') && !ua.includes('iphone') && !ua.includes('ipad')) setUserOS('macos');
-      else if (ua.includes('android')) setUserOS('android');
-      else if (ua.includes('iphone') || ua.includes('ipad')) setUserOS('ios');
-      else if (ua.includes('linux')) setUserOS('linux');
-
-      // PWA install event listener
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        setDeferredPrompt(e);
-      });
-
-      window.addEventListener('appinstalled', () => {
-        setIsInstalled(true);
-        setDeferredPrompt(null);
-      });
-    }
-  }, []);
-
-  async function handleInstallPWA() {
-    if (!deferredPrompt) {
-      alert('To install on your device, open your browser menu and tap "Add to Home Screen" or "Install BibleDesk".');
-      return;
-    }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-    }
-    setDeferredPrompt(null);
-  }
-
   return (
     <main className={styles.main}>
       <div className="container">
         <PageHeader
-          icon={Download}
-          title="Download BibleDesk"
-          subtitle="One unified Bible study suite available across Web, Desktop, Android, and Browser Side Panels."
+          icon={BookOpen}
+          title="Install BibleDesk"
+          subtitle="Honest install docs: use the web app as a PWA, or build the desktop and Android clients from source yourself."
         />
 
-        {/* Highlight Banner */}
-        <div className={styles.heroBanner}>
-          <div className={styles.heroBannerFlex}>
-            <div className={styles.heroContent}>
-              <span className={styles.detectedTag}>
-                Detected System: <strong>{userOS.toUpperCase()}</strong>
-              </span>
-              <h2 className={styles.heroTitle}>Install for your daily study workflow</h2>
-              <p className={styles.heroDesc}>
-                Read 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), search concordance terms, and inspect Strong&apos;s Greek/Hebrew definitions 100% offline.
-              </p>
-              <div className={styles.heroActionRow}>
-                {userOS === 'android' ? (
-                  <a href="#android" className={styles.primaryHeroBtn}>
-                    <Smartphone size={18} />
-                    <span>Download Android APK</span>
-                  </a>
-                ) : userOS === 'windows' || userOS === 'macos' || userOS === 'linux' ? (
-                  <a href="#desktop" className={styles.primaryHeroBtn}>
-                    <Monitor size={18} />
-                    <span>Download Desktop App</span>
-                  </a>
-                ) : (
-                  <button onClick={handleInstallPWA} className={styles.primaryHeroBtn}>
-                    <Globe size={18} />
-                    <span>Install Web App (PWA)</span>
-                  </button>
-                )}
-                <Link href="/bible" className={styles.secondaryHeroBtn}>
-                  <BookOpen size={16} />
-                  <span>Open in Web Browser →</span>
-                </Link>
-              </div>
-            </div>
+        <p className={styles.disclaimer}>
+          We do not publish hosted installers, APK downloads, or app-store listings.
+          The only builds available are the ones you create yourself from the
+          open-source repository.
+        </p>
 
-            <div className={styles.heroIconBadgeWrap}>
-              <img 
-                src="/icon-512.png" 
-                alt="BibleDesk App Icon" 
-                className={styles.heroAppIcon}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Non-Tech 1-Click Installation Helper */}
-        <div className={`${styles.nonTechGuideCard} glass-card`}>
-          <div className={styles.guideHeader}>
-            <Sparkles size={20} className={styles.guideIcon} />
+        {/* 1. Install as PWA */}
+        <section className={`${styles.card} glass-card`}>
+          <div className={styles.sectionHeader}>
+            <Globe size={22} className={styles.sectionIcon} />
             <div>
-              <h3 className={styles.guideTitle}>Easiest Way to Install (Zero Technical Steps)</h3>
-              <p className={styles.guideSubtitle}>No command line or coding required — install BibleDesk like an app in seconds.</p>
+              <h2 className={styles.sectionTitle}>Install as a PWA</h2>
+              <span className={styles.sectionTag}>Recommended — no downloads needed</span>
             </div>
           </div>
+          <p className={styles.sectionDesc}>
+            BibleDesk is a web app you install straight from your browser:
+          </p>
+          <ol className={styles.steps}>
+            <li>
+              <strong>Chrome / Edge (desktop or Android):</strong> open your browser
+              menu and tap &ldquo;Add to Home Screen&rdquo; or &ldquo;Install
+              BibleDesk&rdquo;. On desktop, an install icon also appears in the
+              address bar.
+            </li>
+            <li>
+              <strong>Safari (iPhone / iPad):</strong> tap the Share button (square
+              with an arrow pointing up), scroll down, and tap &ldquo;Add to Home
+              Screen&rdquo;.
+            </li>
+            <li>
+              <strong>Firefox:</strong> open the browser menu and choose
+              &ldquo;Install&rdquo; (or use your OS&rsquo;s &ldquo;Add to Home
+              Screen&rdquo; option on mobile).
+            </li>
+          </ol>
+          <Link href="/bible" className={styles.outlineLink}>
+            <span>Open the web reader first</span>
+            <BookOpen size={13} />
+          </Link>
+        </section>
 
-          <div className={styles.guideStepsGrid}>
-            <div className={styles.guideStepCard}>
-              <span className={styles.stepNum}>1</span>
-              <div>
-                <strong>Web App / PWA (Recommended)</strong>
-                <p>Click the <strong>&ldquo;Install PWA&rdquo;</strong> button below or tap the install icon in your browser address bar. It places a BibleDesk icon directly onto your desktop or phone home screen!</p>
-              </div>
-            </div>
-
-            <div className={styles.guideStepCard}>
-              <span className={styles.stepNum}>2</span>
-              <div>
-                <strong>Windows 1-Click Launcher</strong>
-                <p>If you downloaded the project folder on Windows, simply double-click <code>Launch-BibleDesk.bat</code>. It automatically sets up everything and opens BibleDesk for you!</p>
-              </div>
-            </div>
-
-            <div className={styles.guideStepCard}>
-              <span className={styles.stepNum}>3</span>
-              <div>
-                <strong>iPhone &amp; iPad (iOS)</strong>
-                <p>Open BibleDesk in Safari, tap the <strong>Share button</strong> (square with arrow pointing up), scroll down, and tap <strong>&ldquo;Add to Home Screen&rdquo;</strong>.</p>
-              </div>
+        {/* 2. Build desktop from source */}
+        <section className={`${styles.card} glass-card`}>
+          <div className={styles.sectionHeader}>
+            <Monitor size={22} className={styles.sectionIcon} />
+            <div>
+              <h2 className={styles.sectionTitle}>Build Desktop from Source</h2>
+              <span className={styles.devTag}>For developers</span>
             </div>
           </div>
-        </div>
+          <p className={styles.sectionDesc}>
+            The desktop client is an Electron shell in{' '}
+            <code>archive/desktop</code>. To package an installer for your OS, run:
+          </p>
+          <pre className={styles.codeBlock}>
+            <code>cd archive/desktop && npm run dist</code>
+          </pre>
+          <p className={styles.hint}>
+            <Terminal size={12} /> Requires Node.js and the repository cloned
+            locally.
+          </p>
+        </section>
 
-        {/* Platform Grid */}
-        <div className={styles.platformGrid}>
-          {/* 1. Web & PWA */}
-          <div className={`${styles.platformCard} glass-card`}>
-            <div className={styles.cardHeaderRow}>
-              <div className={styles.platformIconWrap}>
-                <Globe size={22} className={styles.platformIcon} />
-              </div>
-              <div>
-                <h3 className={styles.platformName}>Web App &amp; PWA</h3>
-                <span className={styles.platformType}>Zero install • Cross-Device</span>
-              </div>
-            </div>
-            <p className={styles.platformDesc}>
-              Instant access on any desktop or mobile browser. Install as a Progressive Web App for offline caching and home screen launch.
-            </p>
-            <ul className={styles.featureList}>
-              <li><Check size={14} className={styles.checkIcon} /> Works on all modern browsers (Chrome, Safari, Firefox, Edge)</li>
-              <li><Check size={14} className={styles.checkIcon} /> Offline cached reader &amp; concordance</li>
-              <li><Check size={14} className={styles.checkIcon} /> Instant synchronization with Supabase cloud</li>
-            </ul>
-            <div className={styles.cardFooter}>
-              <button
-                onClick={handleInstallPWA}
-                className={styles.downloadBtn}
-                title="Install PWA to Device"
-              >
-                <Download size={15} />
-                <span>{isInstalled ? 'Installed' : 'Install PWA to Device'}</span>
-              </button>
-              <Link href="/bible" className={styles.outlineLink}>
-                <span>Launch Web Reader</span>
-                <ArrowRight size={13} />
-              </Link>
+        {/* 3. Build Android from source */}
+        <section className={`${styles.card} glass-card`}>
+          <div className={styles.sectionHeader}>
+            <Smartphone size={22} className={styles.sectionIcon} />
+            <div>
+              <h2 className={styles.sectionTitle}>Build Android from Source</h2>
+              <span className={styles.devTag}>
+                For developers — not an official release
+              </span>
             </div>
           </div>
+          <p className={styles.sectionDesc}>
+            The Android client is a Capacitor project in{' '}
+            <code>archive/android</code>. To build it locally, run:
+          </p>
+          <pre className={styles.codeBlock}>
+            <code>cd archive/android && npx cap build android</code>
+          </pre>
+          <p className={styles.hint}>
+            This is an experimental, developer-built APK — no signed or official
+            release is published. For everyday mobile use, the PWA above is the
+            recommended install.
+          </p>
+        </section>
 
-          {/* 2. Desktop App */}
-          <div id="desktop" className={`${styles.platformCard} glass-card`}>
-            <div className={styles.cardHeaderRow}>
-              <div className={styles.platformIconWrap}>
-                <Monitor size={22} className={styles.platformIcon} />
-              </div>
-              <div>
-                <h3 className={styles.platformName}>Desktop App</h3>
-                <span className={styles.platformType}>Windows • macOS • Linux</span>
-              </div>
-            </div>
-            <p className={styles.platformDesc}>
-              Native Electron shell with offline SQLite storage, Obsidian markdown vault synchronization, and local graphify knowledge trees.
-            </p>
-            <ul className={styles.featureList}>
-              <li><Check size={14} className={styles.checkIcon} /> Windows installer (<code>.exe</code>) &amp; Portable</li>
-              <li><Check size={14} className={styles.checkIcon} /> macOS Apple Silicon &amp; Intel (<code>.dmg</code>)</li>
-              <li><Check size={14} className={styles.checkIcon} /> Linux AppImage (<code>.AppImage</code>) &amp; <code>.deb</code></li>
-            </ul>
-            <div className={styles.desktopDownloadRow}>
-              <button
-                className={styles.downloadBtn}
-                onClick={() => alert('To package for your OS, run:\n\ncd apps/desktop && npm run dist')}
-              >
-                <Download size={15} />
-                <span>Download Desktop Installer</span>
-              </button>
-            </div>
-            <div className={styles.cliHint}>
-              <Terminal size={12} />
-              <span>Or build from source: <code>npm run desktop:dist</code></span>
-            </div>
-          </div>
-
-          {/* 3. Android App */}
-          <div id="android" className={`${styles.platformCard} glass-card`}>
-            <div className={styles.cardHeaderRow}>
-              <div className={styles.platformIconWrap}>
-                <Smartphone size={22} className={styles.platformIcon} />
-              </div>
-              <div>
-                <h3 className={styles.platformName}>Android App (Community Beta)</h3>
-                <span className={styles.platformType}>Phones • Tablets (Sideload APK)</span>
-              </div>
-            </div>
-            <p className={styles.platformDesc}>
-              Experimental Capacitor Android build with fluid touch scrolling, Strong's lexicon lookup, dark parchment reading mode, and offline Scripture search. For everyday mobile use, the 1-click Web PWA above is recommended.
-            </p>
-            <ul className={styles.featureList}>
-              <li><Check size={14} className={styles.checkIcon} /> Direct APK Sideload (<code>BibleDesk.apk</code>)</li>
-              <li><Check size={14} className={styles.checkIcon} /> 100% Offline Bible text &amp; lexicon definitions</li>
-              <li><Check size={14} className={styles.checkIcon} /> WhatsApp &amp; Discord 1-click sharing</li>
-            </ul>
-            <div className={styles.cardFooter}>
-              <button
-                className={styles.downloadBtn}
-                onClick={() => alert('Android APK package available in apps/android. Run:\n\ncd apps/android && npx cap build android')}
-              >
-                <Download size={15} />
-                <span>Download Android APK</span>
-              </button>
-              <button
-                className={styles.qrToggleBtn}
-                onClick={() => setShowQR(!showQR)}
-                title="Show Mobile QR Code"
-              >
-                <QrCode size={16} />
-              </button>
-            </div>
-            {showQR && (
-              <div className={styles.qrBox}>
-                <p>Scan with your Android phone to open BibleDesk instantly:</p>
-                <code className={styles.qrUrl}>{typeof window !== 'undefined' ? window.location.origin : 'https://bibledesk.org'}</code>
-              </div>
-            )}
-          </div>
-
-          {/* 4. Chrome Extension */}
-          <div className={`${styles.platformCard} glass-card`}>
-            <div className={styles.cardHeaderRow}>
-              <div className={styles.platformIconWrap}>
-                <Layers size={22} className={styles.platformIcon} />
-              </div>
-              <div>
-                <h3 className={styles.platformName}>Chrome Side Panel</h3>
-                <span className={styles.platformType}>Manifest V3 Extension</span>
-              </div>
-            </div>
-            <p className={styles.platformDesc}>
-              Read Scripture, query Strong's Greek/Hebrew dictionaries, and review 5D study insights directly in Chrome's native Side Panel while browsing.
-            </p>
-            <ul className={styles.featureList}>
-              <li><Check size={14} className={styles.checkIcon} /> Context menu: Right click text → "Study in BibleDesk"</li>
-              <li><Check size={14} className={styles.checkIcon} /> Instant Strong's lookup (e.g. <code>G2889</code>, <code>H7225</code>)</li>
-              <li><Check size={14} className={styles.checkIcon} /> Works in Chrome, Brave, Edge, and Arc</li>
-            </ul>
-            <div className={styles.cardFooter}>
-              <button
-                className={styles.downloadBtn}
-                onClick={() => alert('To load the extension:\n1. Open chrome://extensions\n2. Enable Developer mode\n3. Click "Load unpacked" and choose the apps/extension folder.')}
-              >
-                <Download size={15} />
-                <span>Load Extension (Unpacked)</span>
-              </button>
-              <Link href="/apps/extension/README.md" className={styles.outlineLink}>
-                <span>Setup Guide</span>
-                <ExternalLink size={12} />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Multi-Platform Guarantee */}
-        <div className={styles.guaranteeCard}>
-          <ShieldCheck size={28} className={styles.guaranteeIcon} />
-          <div>
-            <h4 className={styles.guaranteeTitle}>Shared Offline Scripture Foundation</h4>
-            <p className={styles.guaranteeText}>
-              Every platform package includes the complete public-domain Bible corpus (KJV, ASV, WEB, BBE, Darby, YLT) and OpenScriptures Strong's Greek &amp; Hebrew lexicons locally. No subscriptions, no ads, and no internet required for core Bible study.
-            </p>
-          </div>
-        </div>
+        <Link
+          href="https://github.com/ShadowWalkerNC/BibleDesk#readme"
+          className={styles.outlineLink}
+        >
+          <span>Full setup details in the repo README</span>
+          <ExternalLink size={12} />
+        </Link>
       </div>
     </main>
   );

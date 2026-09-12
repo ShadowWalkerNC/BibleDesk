@@ -2,7 +2,8 @@
 // Returns the BibleDesk knowledge graph as JSON, ready for D3/Cytoscape.
 //
 // Query parameters (all optional):
-//   ?nodeKey=<slug>   — return 1-hop subgraph around that node
+//   ?nodeKey=<slug>   — return 1-hop subgraph around that node (canonical)
+//   ?node=<slug>      — legacy alias for ?nodeKey= (deprecated; prefer nodeKey)
 //   ?full=1           — return the full graph (default when no nodeKey)
 //   ?limit=<n>        — max nodes to return for full graph (default 500, max 2000)
 //
@@ -10,6 +11,7 @@
 //   200  { success: true, nodes: GraphNode[], edges: GraphEdge[],
 //          meta: { nodeCount, edgeCount, subgraph: boolean } }
 //   400  { success: false, error: '...', code: 'INVALID_INPUT' }
+//   404  { success: false, error: 'Unknown nodeKey.', code: 'NOT_FOUND' }
 //   500  { success: false, error: '...', code: 'DB_ERROR' }
 //
 // Auth: public read (no auth required — graph data is non-sensitive).
@@ -46,7 +48,14 @@ const GRAPH_WRITE_SECRET = process.env.GRAPH_WRITE_SECRET;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const nodeKey = searchParams.get('nodeKey')?.trim();
+  const rawNodeKey = searchParams.get('nodeKey')?.trim();
+  const legacyNode = searchParams.get('node')?.trim();
+  // Legacy alias: ?node=<slug> maps to ?nodeKey=<slug>. Log so callers migrate.
+  const nodeKey = rawNodeKey || legacyNode || null;
+  if (!rawNodeKey && legacyNode) {
+    console.warn('[graph] deprecated ?node= query param used; use ?nodeKey=');
+  }
+
   const limitParam = searchParams.get('limit');
 
   const limit = Math.min(
@@ -54,10 +63,34 @@ export async function GET(req: NextRequest) {
     2000
   );
 
+  if (nodeKey && nodeKey.length > 200) {
+    return NextResponse.json(
+      { success: false, error: 'nodeKey too long.', code: 'INVALID_INPUT' },
+      { status: 400 }
+    );
+  }
+
   try {
-    const canonical = nodeKey ? getCanonicalSubgraph(nodeKey) : getCanonicalGraph();
+    let canonical = nodeKey ? getCanonicalSubgraph(nodeKey) : getCanonicalGraph();
+    // getCanonicalSubgraph falls back to the full graph for unknown keys —
+    // detect that here so we can return an honest 404 instead of wrong data.
+    const canonicalHasKey =
+      !nodeKey ||
+      canonical.nodes.some(
+        (n) => n.node_key?.toLowerCase() === nodeKey.toLowerCase()
+      );
+    if (nodeKey && !canonicalHasKey) {
+      // Drop the full-graph fallback so DB-only keys merge cleanly below.
+      canonical = { nodes: [], edges: [] };
+    }
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      if (!canonicalHasKey) {
+        return NextResponse.json(
+          { success: false, error: 'Unknown nodeKey.', code: 'NOT_FOUND' },
+          { status: 404 }
+        );
+      }
       return NextResponse.json({
         success: true,
         nodes: canonical.nodes,
@@ -73,13 +106,14 @@ export async function GET(req: NextRequest) {
     let dbGraph: GraphData;
 
     if (nodeKey) {
-      if (nodeKey.length > 200) {
+      dbGraph = await getSubgraph(nodeKey);
+      // getSubgraph returns empty when the key is unknown to the DB too.
+      if (!canonicalHasKey && dbGraph.nodes.length === 0) {
         return NextResponse.json(
-          { success: false, error: 'nodeKey too long.', code: 'INVALID_INPUT' },
-          { status: 400 }
+          { success: false, error: 'Unknown nodeKey.', code: 'NOT_FOUND' },
+          { status: 404 }
         );
       }
-      dbGraph = await getSubgraph(nodeKey);
     } else {
       dbGraph = await getFullGraph();
     }

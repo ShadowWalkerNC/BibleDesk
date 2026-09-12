@@ -307,7 +307,7 @@ export default function LoginPage() {
           <Sparkles size={18} className={styles.includedAiIcon} />
           <div className={styles.includedAiText}>
             <strong>5-Dimension AI Study Assistant Included</strong>
-            <span>Creating an account unlocks Google Gemini-powered Scripture study (15 questions/hr). No API key setup required.</span>
+            <span>Creating an account unlocks Google Gemini-powered Scripture study (5 free AI answers/day, then BYOK for unlimited). No API key setup required.</span>
           </div>
         </div>
 

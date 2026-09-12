@@ -58,7 +58,6 @@ export interface PipelineResult {
 export interface PipelineOptions {
   translation?: TranslationId;
   ragContext?: string;
-  maxTokens?: number;
   apiKey?: string;
   /** Called after each stage completes — used by the SSE stream route */
   onStageComplete?: (stage: number, name: string, duration_ms: number) => void;
@@ -464,8 +463,7 @@ export async function runPipeline(
   question: string,
   options: PipelineOptions = {}
 ): Promise<PipelineResult> {
-  const { translation = 'web', ragContext = '', maxTokens, apiKey, onStageComplete } = options;
-  void maxTokens;
+  const { translation = 'web', ragContext = '', apiKey, onStageComplete } = options;
 
   const pipelineStart = Date.now();
   const stages: PipelineStageResult[] = [];

@@ -108,6 +108,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.4rem 0.75rem;
+  min-height: var(--touch-target-min, 48px);
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -372,6 +373,7 @@
   border: 1px solid rgba(107, 142, 123, 0.3);
   color: var(--gold-600);
   padding: 0.5rem 1rem;
+  min-height: var(--touch-target-min, 48px);
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   font-weight: 700;
@@ -446,7 +448,8 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: calc(100vh - 280px);
+  max-height: calc(100vh - 280px); /* fallback */
+  max-height: calc(100dvh - 280px);
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -551,6 +554,7 @@
   border: 1px solid rgba(107, 142, 123, 0.25);
   color: var(--gold-600);
   padding: 0.35rem 0.75rem;
+  min-height: var(--touch-target-min, 48px);
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   font-weight: 700;
@@ -619,6 +623,7 @@
   border: 1px solid var(--gold-400);
   color: var(--gold-600);
   padding: 0.4rem 0.9rem;
+  min-height: var(--touch-target-min, 48px);
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.8rem;
@@ -1236,7 +1241,7 @@
 
 .chipBtn {
   padding: 0.4rem 0.85rem;
-  min-height: 38px;
+  min-height: var(--touch-target-min, 48px);
   border-radius: 999px;
   background: rgba(235, 226, 210, 0.5);
   border: 1px solid rgba(107, 142, 123, 0.2);

@@ -531,14 +531,14 @@ export default function GraphView({
             {(selected.catechism_ref || selected.category === 'doctrine') && (
               <a
                 className={styles.nodePanelActionBtn}
-                href="/catechism"
+                href="/study-resources?tab=catechism"
               >
                 📜 Catechism
               </a>
             )}
             <a
               className={styles.nodePanelActionBtn}
-              href={`/encourage?q=${encodeURIComponent(selected.label)}`}
+              href={`/study-resources?tab=encourage`}
             >
               🌟 Encouragement
             </a>
