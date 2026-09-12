@@ -1,0 +1,178 @@
+.main {
+  padding: 2.5rem 0 4rem;
+  min-height: 100vh;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold-500);
+  background: rgba(181, 137, 19, 0.08);
+  border: 1px solid rgba(181, 137, 19, 0.25);
+  padding: 0.25rem 0.85rem;
+  border-radius: 99px;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.tabRow {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.tabBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--navy-950);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  border-color: var(--gold-400);
+  background: var(--navy-900);
+}
+
+.activeTabBtn {
+  border-color: var(--gold-400) !important;
+  background: rgba(181, 137, 19, 0.08) !important;
+}
+
+.tabName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tabYear {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.25rem;
+}
+
+.cardHeader {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.creedName {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.creedMeta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.creedSummary {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-style: italic;
+  background: var(--navy-900);
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--gold-400);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.sectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.sectionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gold-400);
+}
+
+.sectionText {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.refsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.refsLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  width: 100%;
+  margin-bottom: 0.1rem;
+}
+
+.refBadge {
+  font-size: 0.78rem;
+  color: var(--gold-400);
+  background: rgba(181, 137, 19, 0.08);
+  border: 1px solid rgba(181, 137, 19, 0.2);
+  border-radius: 4px;
+  padding: 0.15rem 0.6rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.refBadge:hover {
+  background: rgba(181, 137, 19, 0.2);
+  border-color: var(--gold-400);
+}
