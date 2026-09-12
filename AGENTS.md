@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-11
+> **Updated:** 2026-09-12
 
 ---
 
@@ -28,7 +28,7 @@ Database:     Supabase (PostgreSQL + pgvector + RLS)
 AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
-Integrations: Discord Slash Bot & Webhook · WhatsApp Meta Cloud API · MCP Server · Sigil Webhook
+Integrations: MCP Server · Sigil Webhook (Discord/WhatsApp bots removed in the MVP)
 Hosting:      Vercel preferred (Render also viable)
 Desktop:      Electron wrapper in apps/desktop/
 Extension:    Chrome Manifest V3 Side Panel in apps/extension/
@@ -67,13 +67,8 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
 9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
 10. **Mobile UX adheres to Jakob's Law.** Mobile apps & responsive web experiences must align with standard platform conventions and user expectations (thumb-friendly bottom navigation/action sheets, standard touch targets >= 48px, predictable back navigation, standard search/keyboard inputs, safe area insets, and universally recognizable iconography). Do not create unorthodox UX patterns where standard mobile conventions exist.
-<<<<<<< HEAD
-11. **Local profiles are available only when Supabase is unconfigured.** When `isSupabaseConfigured()` returns false, Google/email flows may create a labeled device-only `bibledesk_local_user` and redirect to `/bible`. Configured authentication failures must display an error, never manufacture a local authenticated identity. Pending email confirmation must not imply a signed-in session. Local profiles never authorize server access. See `src/app/login/page.tsx`.
-12. **Dispatch `storage` event after every auth state change.** After writing or removing `bibledesk_local_user` from `localStorage`, always call `window.dispatchEvent(new Event('storage'))`. This is the only mechanism that keeps `Header` and `Sidebar` user state in sync without a full page reload. All three files (`login/page.tsx`, `Header/Header.tsx`, `Sidebar/Sidebar.tsx`) must follow this pattern.
-=======
-11. **Auth always falls back to local session.** When `isSupabaseConfigured()` returns false (no real `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY`), all auth flows — Google OAuth, email sign-up, email sign-in — must create a `bibledesk_local_user` in `localStorage` and redirect to `/bible`. Never throw an error or show a dead screen when Supabase is unconfigured. See `src/app/login/page.tsx` for the canonical `fallbackLocalLogin` helper pattern.
+11. **Auth always falls back to local session.** When `isSupabaseConfigured()` returns false (no real `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY`), all auth flows — Google OAuth, email sign-up, email sign-in — must create a `bibledesk_local_user` in `localStorage` and redirect to `/bible`. Local profiles are device-only and never authorize server access. Configured authentication failures must display an error, never manufacture a local authenticated identity. Pending email confirmation must not imply a signed-in session. See `src/app/login/page.tsx` for the canonical `fallbackLocalLogin` helper pattern.
 12. **Dispatch `storage` event after every auth state change.** After writing or removing `bibledesk_local_user` from `localStorage`, always call `window.dispatchEvent(new Event('storage'))`. This is the only mechanism that keeps the `Sidebar` user state in sync without a full page reload. The pattern lives in `src/app/login/page.tsx` (dispatch) and `src/components/Sidebar/Sidebar.tsx` (listen). (`src/components/Header/Header.tsx` was removed by A13 — its auth-state surface moved into the AppShell/Sidebar layout.)
->>>>>>> 4b0b33e5316e85d0307cdb3e79295aa959e17999
 
 ---
 
@@ -84,6 +79,8 @@ Phase goal:     Local-first Bible foundation
                 Read + search + compare installed public-domain text without bible-api.com
 
 Already shipped (keep; do not rip out):
+
+> **MVP scope (2026-09-12):** Discord/WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/`. The ✓ items below describing those surfaces are pre-cut history, not current product.
   ✓ AI 5-dimension pipeline + streaming
   ✓ Rate limiting, RAG, share pages, history
   ✓ /bible UI with 3-Column Study Desk workspace
@@ -106,7 +103,7 @@ Feature inventory (implementation does not establish release readiness):
   ✓ PrayerAtlas 2D Interactive Vector Global Prayer Map (D3 Natural Earth, category color-coding, approximate halos vs precise beacons, restricted shields, offline TopoJSON)
   ✓ Single-command packaging CLI (`npm run package:all`) & official brand icon suite
   ✓ Modal & Dialog CSS Hardening (zero-bleed solid opaque cards, 9990 z-index, dark backdrops)
-  ✓ Marketing Showcase on `/` with 2 core personas (Individual Believers & Discipleship vs Churches, Ministries & Creators) & transparent pricing ($0 Free with 5 daily AI answers vs $4.99/mo Supporter tier; $0 for Churches forever)
+  ✓ Marketing Showcase on `/` for individual believers & discipleship, with transparent pricing ($0 free with 5 daily AI answers; unlimited with a free BYOK Gemini key)
   ✓ Universal & Inline Slash Commands (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`)
   ✓ Words of Encouragement Hub (`/encourage`) with topical promises & kingdom creativity meditations
   ✓ 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with schema-v8.sql
@@ -133,14 +130,15 @@ Deploy (parallel):
 src/
   app/
     page.tsx                     ← Homepage (Bible-first hero + assistant)
-    bible/                       ← Reader UI
-    daily|plans|catechism|creeds|memory|prayer|sermons|bookmarks|history|graph|mod|login|share/
+    bible/                       ← Reader UI + Study Desk
+    study-resources/             ← Catechism, creeds, memory, encouragement panels (merged reader hub)
+    developers|download|login|mod|prayer|share/
     api/
       ask/                       ← AI answer (+ stream/)
       bible/                     ← chapter, search, study
-      graph|history|bookmarks|daily|mcp|mod|prayer|sermons|export/
+      graph|history|bookmarks|daily|mcp|mod|prayer|export/
       v1/bible/answer/           ← Sigil webhook
-  components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
+  components/                    ← SearchBar, DimensionPanel, …
   lib/
     bible.ts                     ← bible-api.com client (interim)
     claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|auth.ts|syncGuestData.ts
@@ -176,4 +174,4 @@ The app runs via `docker-compose.base44.yml` (Node 22 + Next.js 16 dev server, l
 
 **Verify it works:** `curl -sf -H "Host: external-preview.example.com" http://localhost:3000/` → HTTP 200 with "BibleDesk" in the body.
 
-*Updated: 2026-09-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-12 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

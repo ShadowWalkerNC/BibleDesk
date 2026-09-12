@@ -61,12 +61,12 @@ See [validation and rollout details](docs/SECURITY_BATCH_1.md). Historical featu
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
 - [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
 - [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, SMS, Clipboard), answered gratitude log, browser push notifications, and schema-v5.sql
-- [x] Server Gemini AI Key Gating: strictly hidden on server; automatic access for signed-in users (15/hr), BYOK guest fallback
+- [x] Server Gemini AI Key Gating: strictly hidden on server; automatic access for signed-in users (now 5 free AI answers/day — C03), BYOK guest fallback
 - [x] Complete Authentication: Email/Password + Google OAuth one-click sign-in, password visibility toggle, auto profile creation
 - [x] Database RLS Hardening: schema-v6.sql user-scoped bookmarks with strict RLS (auth.uid() = user_id) and guest data auto-merge engine
 - [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
 - [x] Modal & Dialog CSS Hardening: zero-bleed solid opaque cards across QuickJumpModal, ApiKeyModal, IntegrationsModal, Pastoral Care Follow-up, Pin to Map, and Login with high z-index (9990) and darkened backdrops
-- [x] Marketing Showcase on `/` with 2 consolidated target pillars (Individual Believers & Discipleship vs Churches, Ministries & Creators), live feature showcases, and transparent pricing ($0 for churches forever; $0 free with 5 server AI answers/day or unlimited BYOK; optional $4.99/mo supporter tier)
+- [x] Marketing Showcase on `/` for individual believers & discipleship, with transparent pricing ($0 free with 5 server AI answers/day or unlimited BYOK)
 - [x] Universal & Inline Slash Commands System (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`, `/plan`, etc.) with global `/` key trigger and SearchBar popover autocomplete
 - [x] Words of Encouragement Engine (`/encourage`) with 8 topical promise categories, kingdom creativity & worship reflections, audio playback, and prayer conversion
 - [x] 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with urgency triage, anonymity, and audit tracking
