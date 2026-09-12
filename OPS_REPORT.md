@@ -31,7 +31,7 @@ This audit evaluates the codebase, user experience flows across three target per
   * Web Speech API TTS rate and voice selection cannot be customized by the user.
 
 ### 2.2 5-Dimension AI Pipeline & RAG (`/api/ask`, `/api/ask/stream`)
-* **Architecture:** Structured 6-stage execution pipeline ([`src/lib/pipeline.ts`](file:///c:/Users/white/OneDrive/Documents/GitHub/BibleDesk/src/lib/pipeline.ts)) leveraging Claude (Sonnet 4.5) for synthesis, OpenAI (`text-embedding-3-small`) for pgvector RAG lookups against historical canonical answers, and an IP-based rate limiter (15 questions/hour/IP).
+* **Architecture:** Structured 6-stage execution pipeline ([`src/lib/pipeline.ts`](file:///c:/Users/white/OneDrive/Documents/GitHub/BibleDesk/src/lib/pipeline.ts)) leveraging Claude (Sonnet 4.5) for synthesis, OpenAI (`text-embedding-3-small`) for pgvector RAG lookups against historical canonical answers, and an IP-based rate limiter (now 5 free AI answers/day — C03).
 * **UI Components:** [`DimensionPanel`](file:///c:/Users/white/OneDrive/Documents/GitHub/BibleDesk/src/components/DimensionPanel/DimensionPanel.tsx), [`StreamingProgress`](file:///c:/Users/white/OneDrive/Documents/GitHub/BibleDesk/src/components/StreamingProgress/StreamingProgress.tsx), [`RateLimitBar`](file:///c:/Users/white/OneDrive/Documents/GitHub/BibleDesk/src/components/RateLimitBar/RateLimitBar.tsx).
 * **Strengths:** High citation fidelity; transparent rate-limiting feedback; crisp 5-dimension structure.
 * **Friction Points:**
@@ -60,7 +60,7 @@ This audit evaluates the codebase, user experience flows across three target per
 * **Daily Devotion (`/daily`):** Daily passage, key theme breakdown, and prayer prompt.
 * **Verse Memory (`/memory`):** Interactive flashcards and text-masking drill exercises.
 * **Catechism (`/catechism`) & Creeds (`/creeds`):** Westminster Shorter Catechism, Heidelberg Catechism, Apostles', Nicene, Chalcedonian, and Athanasian Creeds with interactive quiz mode.
-* **Knowledge Graph (`/graph`):** D3 network graph explorer visualizing passage-to-concept linkages with single-click ZIP export for Obsidian notes vaults (`/api/export/obsidian`).
+* **Knowledge Graph (`/graph`):** D3 network graph explorer visualizing passage-to-concept linkages with single-click ZIP export for Obsidian notes vaults (`/api/export/obsidian`). [Explorer UI cut in the MVP; `/api/graph` remains.]
 
 ---
 

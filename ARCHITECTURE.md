@@ -13,14 +13,13 @@
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    CLIENT PLATFORMS (100% Free & Open Source)           │
 │                                                                         │
-│   Web & PWA (`/`) · Desktop Electron (`apps/desktop`) · Android (`apps/android`) │
-│   Chrome Side Panel Extension (`apps/extension`) · Discord Bot · WhatsApp Bot  │
+│   Web & PWA (`/`) · Native shells parked (`archive/`) — Discord/WhatsApp bots removed │
 │                                                                         │
 │   · AppShell Layout: Persistent Left Sidebar + Jakob's Law Mobile Rail/Sheet  │
 │   · /bible · 3-Column Centralized Study Desk (product core)             │
-│   · /download · Multi-Platform Installation Hub (PWA, Desktop, APK, Ext)│
+│   · /download · Install docs (PWA-first; native shells parked)                     │
 │   · Shadcn UI + Lucide Icons + PrayerAtlas 2D Vector Map (`/prayer`)    │
-│   · Bidirectional Biblical Knowledge Graph (`/graph`)                   │
+│   · Biblical Knowledge Graph API (`/api/graph`; explorer UI cut in MVP) │
 └────────┬────────────────────────────────┬───────────────────────────────┘
          │ /api/bible/*, /api/graph       │ /api/mcp (JSON-RPC 2.0)
          ▼                                ▼
@@ -263,7 +262,8 @@ To prevent AI hallucinations and generic consensus on theological matters, Bible
    - **Pentecostal / Evangelical**: Assemblies of God 16 Fundamental Truths (1916)
    - Grounded context is automatically fed into Stage 4 (Historical & Doctrinal) and Stage 5 (Synthesis) of the AI pipeline to guarantee fair representation and exact confessional citations.
 
-### 6.2 Live Worship Radio & Live Sermon Theatre (Solo Developer Zero-Cost Architecture)
+### 6.2 Live Worship Radio & Live Sermon Theatre — CUT in the MVP (2026-09-12)
+The worship radio dock, sermon theatre, and ProPresenter slide exporter were removed from the product. The section below describes the pre-cut architecture and is kept for historical reference only.
 - **Worship Radio Dock (`LiveRadioPlayer.tsx`)**: Embedded HTML5 audio dock delivering verified, non-commercial sacred hymn & instrumental Christian audio directly from public streams (Abiding Radio, Moody Radio) at $0 server bandwidth, paired with 1-click official station launchers for K-LOVE and Air1.
 - **Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`)**: Enables churches to broadcast Sunday sermons through embedded YouTube Live or Facebook Live feeds alongside synchronized Scripture lookups and sermon outline notes, eliminating expensive custom video transcoding infrastructure.
 - **ProPresenter 7 Slide Exporter (`/sermons`)**: 1-Click plain-text projector slide generator auto-chunking sermon headers and Scripture citations into ProPresenter/PowerPoint-ready slides.
@@ -458,7 +458,7 @@ flagged_topics (
 | Control | Implementation |
 |---|---|
 | **API key isolation** | `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` in `process.env` only — never in client bundle |
-| **Rate limiting** | 15 questions/hour/IP — checked before every Claude call |
+| **Rate limiting** | 5 free AI answers/day (`ask` bucket), 15/hour otherwise — checked before every AI call |
 | **IP privacy** | IPs are SHA-256 hashed with a salt — raw IPs never stored |
 | **Input validation** | Server-side: min 5 chars, max 500, whitespace-normalized |
 | **Supabase RLS** | `answers`: public SELECT, service-role INSERT. `canonical_answers`, `flags`, `moderation_votes`, `moderators`: service-role only |

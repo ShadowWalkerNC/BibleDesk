@@ -1,36 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
   Sparkles,
-  Heart,
-  Church,
   Globe,
-  Music,
-  ShieldCheck,
   Code,
   ArrowRight,
   Check,
-  ExternalLink,
   MessageCircle,
-  Mail,
-  Zap,
-  Lock,
   Layers,
   Terminal,
-  Tv,
   Scroll,
   Brain,
 } from 'lucide-react';
 import styles from './MarketingShowcase.module.css';
 
-type PersonaKey = 'believer' | 'organization';
-
 export default function MarketingShowcase() {
-  const [activePersona, setActivePersona] = useState<PersonaKey>('believer');
-
   return (
     <div className={styles.container}>
       {/* ── 1. Hero Section ── */}
@@ -48,7 +34,7 @@ export default function MarketingShowcase() {
 
         <p className={styles.heroSubtitle}>
           BibleDesk unites 6 public-domain translations (100% offline), Strong’s Greek &amp; Hebrew lexicons,
-          Treasury of Scripture Knowledge cross-references, church prayer networks, and an open developer SDK.
+          Treasury of Scripture Knowledge cross-references, a global prayer atlas, and an open developer SDK.
         </p>
 
         <div className={styles.heroActions}>
@@ -72,12 +58,8 @@ export default function MarketingShowcase() {
             <span>2D Vector PrayerAtlas</span>
           </div>
           <div className={styles.featurePillItem}>
-            <Tv size={16} color="#ef4444" />
-            <span>Live Sermon Theatre</span>
-          </div>
-          <div className={styles.featurePillItem}>
-            <ShieldCheck size={16} color="#059669" />
-            <span>100% Free Forever for Churches</span>
+            <Check size={16} color="#059669" />
+            <span>5 Free AI Answers Daily · Unlimited with BYOK</span>
           </div>
           <div className={styles.featurePillItem}>
             <Scroll size={16} color="#b58414" />
@@ -127,45 +109,17 @@ export default function MarketingShowcase() {
         </blockquote>
       </section>
 
-      {/* ── 2. Two Core Personas Section ── */}
+      {/* ── 2. Persona Section ── */}
       <section className={styles.personaSection} aria-label="Audience Personas">
         <div className={styles.sectionHeading}>
           <span className={styles.sectionBadge}>Tailored for the Body of Christ</span>
-          <h2 className={styles.sectionTitle}>Built for Believers &amp; Ministries</h2>
+          <h2 className={styles.sectionTitle}>Built for Believers</h2>
           <p className={styles.sectionSubtitle}>
-            Whether meditating in personal discipleship or leading a congregation, mission agency, or creative ministry, BibleDesk provides the local-first biblical foundation.
+            For personal discipleship and daily devotion, BibleDesk provides the local-first biblical foundation.
           </p>
         </div>
 
-        {/* Persona Switcher Tabs (2 Pillars) */}
-        <div className={styles.personaTabs} style={{ gridTemplateColumns: 'repeat(2, 1fr)', maxWidth: '720px', margin: '0 auto 2.5rem' }} role="tablist">
-          <button
-            type="button"
-            className={`${styles.personaTabBtn} ${activePersona === 'believer' ? styles.personaTabBtnActive : ''}`}
-            onClick={() => setActivePersona('believer')}
-          >
-            <div className={styles.personaIconBox}>
-              <BookOpen size={22} />
-            </div>
-            <span className={styles.personaTabTitle} style={{ fontSize: '1.05rem', fontWeight: 700 }}>Individual Believers &amp; Discipleship</span>
-            <span className={styles.personaTabRole}>Personal Devotion · Verse Memory · Daily Rhythms</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.personaTabBtn} ${activePersona === 'organization' ? styles.personaTabBtnActive : ''}`}
-            onClick={() => setActivePersona('organization')}
-          >
-            <div className={styles.personaIconBox}>
-              <Church size={22} />
-            </div>
-            <span className={styles.personaTabTitle} style={{ fontSize: '1.05rem', fontWeight: 700 }}>Churches, Ministries &amp; Creators</span>
-            <span className={styles.personaTabRole}>Prayer Chains · Creator Hub · Missions</span>
-          </button>
-        </div>
-
-        {/* Pillar 1: Individual Believers */}
-        {activePersona === 'believer' && (
+        {/* Individual Believers */}
           <div className={styles.personaCard}>
             <div className={styles.personaCardContent}>
               <h3>Uncompromised Personal Devotion &amp; Discipleship</h3>
@@ -219,60 +173,7 @@ export default function MarketingShowcase() {
               </div>
             </div>
           </div>
-        )}
 
-        {/* Pillar 2: Organizations, Churches & Creators */}
-        {activePersona === 'organization' && (
-          <div className={styles.personaCard}>
-            <div className={styles.personaCardContent}>
-              <h3>Equip Your Congregation, Ministry &amp; Calling ($0 Free Forever)</h3>
-              <p className={styles.personaCardDesc}>
-                Whether you pastor a local congregation, direct a mission team, or lead worship, BibleDesk provides the free digital infrastructure to rally your community.
-              </p>
-              <div className={styles.personaBulletList}>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>100% Free Forever for Churches &amp; Non-Profits:</strong> Never pay for prayer chains, member accounts, or website embed widgets.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Christian Creator &amp; Ministry Hub:</strong> Publish a reverent link-in-bio page (<code>/@yourname</code>) with embedded YouTube/Spotify media, seasonal Scripture, and 0% platform fee direct support links.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Church Live Sermon Theatre:</strong> Broadcast YouTube Live sermons with synced Scripture study.</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Congregation Prayer Chain:</strong> Member petitions with 4-tier privacy escalation (Private $\rightarrow$ Circle $\rightarrow$ Church $\rightarrow$ Atlas).</span>
-                </div>
-                <div className={styles.personaBullet}>
-                  <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Global Mission Shields:</strong> Restricted shields for international workers with masked coordinates for safety.</span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <Link href="/creators" className={styles.secondaryCta} style={{ border: '1px solid var(--gold-500)', padding: '0.65rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-                  <span>Explore Creator Hub</span>
-                </Link>
-              </div>
-            </div>
-
-            <div className={styles.personaInteractivePreview}>
-              <span className={styles.previewTag}>Church Prayer &amp; Creator Preview</span>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.94rem' }}>Grace Fellowship Prayer Chain</span>
-                <span style={{ fontSize: '0.72rem', background: '#dc2626', color: '#fff', padding: '2px 8px', borderRadius: '99px' }}>URGENT</span>
-              </div>
-              <p style={{ fontSize: '0.86rem', color: '#4a4030', margin: '0.4rem 0' }}>
-                "Standing in prayer for Elder Thomas and ministry partners on mission in Southeast Asia. 84 intercessors praying."
-              </p>
-              <div style={{ fontStyle: 'italic', fontFamily: 'Lora, serif', fontSize: '0.84rem', color: '#1e1913', background: 'rgba(181, 132, 20, 0.1)', padding: '0.45rem', borderRadius: '6px' }}>
-                "Oh, magnify the LORD with me, and let us exalt his name together!" — Psalm 34:3
-              </div>
-            </div>
-          </div>
-        )}
       </section>
 
       {/* ── 3. Transparent Pricing Grid ── */}
@@ -282,48 +183,12 @@ export default function MarketingShowcase() {
           <h2 className={styles.sectionTitle}>Simple, Kingdom-First Pricing</h2>
           <p className={styles.sectionSubtitle}>
             We believe the Word of God should never be locked behind a paywall. Scripture reading, concordance
-            lookups, Strong’s lexicons, and church prayer chains remain free forever.
+            lookups, and Strong’s lexicons remain free forever.
           </p>
         </div>
 
         <div className={styles.pricingGrid}>
-          {/* Tier 1: Churches & Ministries */}
-          <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
-            <span className={styles.pricingFeaturedBadge}>Free Forever Guarantee</span>
-            <h3 className={styles.tierName}>Churches &amp; Non-Profits</h3>
-            <div className={styles.tierPriceRow}>
-              <span className={styles.tierPrice}>$0</span>
-              <span className={styles.tierPeriod}>/ month forever</span>
-            </div>
-            <p className={styles.tierDesc}>
-              For local churches, fellowship groups, mission agencies, and Christian charities.
-            </p>
-
-            <div className={styles.tierFeatureList}>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Unlimited Congregation Members</span>
-              </div>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Church-Wide Prayer Chain</span>
-              </div>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Live Sermon Theatre</span>
-              </div>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Embeddable Website Widgets</span>
-              </div>
-              <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#059669" />
-                <span>Christian Creator / Ministry Page</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tier 2: Individual Believers */}
+          {/* Tier 1: Individual Believers */}
           <div className={styles.pricingCard}>
             <h3 className={styles.tierName}>Individual Believers</h3>
             <div className={styles.tierPriceRow}>
@@ -358,7 +223,7 @@ export default function MarketingShowcase() {
             </Link>
           </div>
 
-          {/* Tier 3: Developers & Open Source */}
+          {/* Tier 2: Developers & Open Source */}
           <div className={styles.pricingCard}>
             <h3 className={styles.tierName}>Developers &amp; AI Agents</h3>
             <div className={styles.tierPriceRow}>
@@ -405,8 +270,8 @@ export default function MarketingShowcase() {
           <span className={styles.sectionBadge}>Universal Accessibility</span>
           <h2 className={styles.sectionTitle}>Connected Across Every Platform</h2>
           <p className={styles.sectionSubtitle}>
-            Access BibleDesk on your desktop, browser, smartphone, Discord server, WhatsApp chat, and personal
-            Obsidian notes.
+            Access BibleDesk in your browser and as an installable PWA, share verses over WhatsApp,
+            and export to your personal Obsidian notes.
           </p>
         </div>
 
@@ -416,18 +281,8 @@ export default function MarketingShowcase() {
               <MessageCircle size={20} />
             </div>
             <div>
-              <div className={styles.integrationTitle}>Discord Slash Bot</div>
-              <div className={styles.integrationDesc}>Share daily verses, ask study questions, and broadcast church prayer alerts.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
-              <MessageCircle size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>WhatsApp Cloud API</div>
-              <div className={styles.integrationDesc}>Interactive bot responds to Scripture lookups and 1-click care follow-up drafts.</div>
+              <div className={styles.integrationTitle}>WhatsApp Sharing</div>
+              <div className={styles.integrationDesc}>Share verses and encouragements straight into WhatsApp chats with wa.me links — no bot, no server needed.</div>
             </div>
           </div>
 
@@ -448,36 +303,6 @@ export default function MarketingShowcase() {
             <div>
               <div className={styles.integrationTitle}>Obsidian Markdown Export</div>
               <div className={styles.integrationDesc}>Export chapters with [[wikilinks]] for local personal knowledge management.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
-              <Globe size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>Chrome Side Panel (MV3)</div>
-              <div className={styles.integrationDesc}>Read Scripture and lookup Strong’s definitions in a browser side panel while surfing.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
-              <Zap size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>Desktop &amp; Android APK</div>
-              <div className={styles.integrationDesc}>Native Electron desktop app and Capacitor Android APK available for offline use.</div>
-            </div>
-          </div>
-
-          <div className={styles.integrationCard}>
-            <div className={styles.integrationIconBox}>
-              <Tv size={20} />
-            </div>
-            <div>
-              <div className={styles.integrationTitle}>Church Live Sermon Theatre</div>
-              <div className={styles.integrationDesc}>Embed zero-cost YouTube Live &amp; Facebook Live broadcasts with synced Scripture study.</div>
             </div>
           </div>
 

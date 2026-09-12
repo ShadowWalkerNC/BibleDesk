@@ -1,5 +1,6 @@
 // BibleDesk — rate limiting via Supabase
-// Default: 15 requests per hour per feature bucket.
+// Default: 15 requests per hour per feature bucket (the `ask` bucket is
+// 5 free AI answers per DAY — see the exception below).
 // EXCEPTION (owner decision 2026-09-12, task C03): the `ask` bucket is
 // 5 free AI answers per DAY, then BYOK (bring-your-own Gemini key) for
 // unlimited. Marketing, README, and this limiter all state the same policy.
