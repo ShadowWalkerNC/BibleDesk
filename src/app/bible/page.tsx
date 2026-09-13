@@ -38,6 +38,7 @@ import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse, type BibleAnswer } from '@/types';
+import { getBrowserClient } from '@/lib/supabase';
 import styles from './page.module.css';
 
 function BibleReaderContent() {
@@ -60,7 +61,6 @@ function BibleReaderContent() {
 
   // AI Study states
   const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
-  const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search' | 'connected'>('search');
   const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
   // AI Study states (B02: served by the gated /api/ask pipeline; rendered as a real BibleAnswer)
@@ -387,7 +387,6 @@ function BibleReaderContent() {
               ? dataA.passage.verses.find((x: BibleVerse) => x.verse === pendingVerseTarget) || dataA.passage.verses[0]
               : dataA.passage.verses[0];
             setSelectedVerse(targetVerse);
-            setSelectedWord(null);
             setPendingVerseTarget(null); // Reset after select
 
             // Scroll to the targeted verse if page loaded in dynamic search context
@@ -417,7 +416,7 @@ function BibleReaderContent() {
     };
   }, [selectedBook, selectedChapter, selectedTranslation, translationB, parallelMode, pendingVerseTarget]);
 
-  // 2. Fetch AI Study Data when selectedVerse or selectedWord changes — B02:
+  // 2. Fetch AI Study Data for the selected verse — B02:
   // only fire while the Study tab is visible, and use the gated /api/ask
   // pipeline. Clicking verses with any other tab open makes ZERO AI calls.
   useEffect(() => {
@@ -433,14 +432,16 @@ function BibleReaderContent() {
       try {
         const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const { data: { session } } = await getBrowserClient().auth.getSession();
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+        }
         if (userGeminiKey) {
           headers['x-gemini-api-key'] = userGeminiKey;
         }
 
         const reference = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
-        const question = selectedWord
-          ? `Word study for "${selectedWord}" in ${reference} (${selectedTranslation.toUpperCase()}): explain its meaning, historical context, original-language insights, theological significance, and practical application.`
-          : `Study guide for ${reference} (${selectedTranslation.toUpperCase()}): explain its meaning, historical context, key original-language insights, theological significance, and practical application.`;
+        const question = `Study guide for ${reference} (${selectedTranslation.toUpperCase()}): explain its meaning, historical context, key original-language insights, theological significance, and practical application. Do not assign a Greek or Hebrew lemma unless it is supported by cited source data.`;
 
         const res = await fetch('/api/ask', {
           method: 'POST',
@@ -478,7 +479,7 @@ function BibleReaderContent() {
     return () => {
       active = false;
     };
-  }, [selectedVerse, selectedWord, selectedTranslation, activeTab]);
+  }, [selectedVerse, selectedTranslation, activeTab]);
 
   // 2b. Fetch TSK cross-references for the References tab (B03). Only fires
   // while the References tab is visible; uses the real local lexicon route.
@@ -701,7 +702,6 @@ function BibleReaderContent() {
     startTransition(() => {
       setSelectedBook(res.book);
       setSelectedChapter(res.chapter);
-      setSelectedWord(null);
       // Auto switch to study tab when navigating to target verse
       setActiveTab('study');
     });
@@ -724,7 +724,6 @@ function BibleReaderContent() {
           setSelectedBook(bookName);
           setSelectedChapter(chapterNum);
           setActiveTab('study');
-          setSelectedWord(null);
           // Temporary listener to highlight the target verse after it loads
           const selectVerseAfterLoad = () => {
             document.removeEventListener('bibledesk:chapter-loaded', selectVerseAfterLoad);
@@ -763,36 +762,9 @@ function BibleReaderContent() {
     }
   }
 
-  // Clean words helper (splits sentence and strips punctuation)
+  // Render translation text without pretending it has word-level Strong's tags.
   const renderInteractiveVerseText = (v: BibleVerse) => {
-    const words = v.text.trim().split(/\s+/);
-    return words.map((w, idx) => {
-      // Strip punctuation to find the clean word base for analysis
-      const cleanWord = w.replace(/[^\w\s\']/g, '').trim();
-      const isSelected = selectedVerse?.verse === v.verse && selectedWord?.toLowerCase() === cleanWord.toLowerCase();
-
-      // B03: inline Strong's chips removed. Their only word->Strong's data
-      // source was the fabricated AI concordance, and no real per-word
-      // Strong's tagging exists in the bundled data. Strong's lookups live in
-      // the Connected tab (chips wired to /api/bible/lexicon?strongs= below).
-
-      return (
-        <span key={idx} className={styles.wordWrapper}>
-          <span
-            className={`${styles.interactiveWord} ${isSelected ? styles.selectedWord : ''}`}
-            onClick={(e) => {
-              e.stopPropagation(); // Stop selecting the row
-              setSelectedVerse(v);
-              setSelectedWord(cleanWord);
-              setActiveTab('study');
-            }}
-          >
-            {w}
-          </span>
-          {' '}
-        </span>
-      );
-    });
+    return v.text;
   };
 
   // Trigger custom event once chapter finishes loading
@@ -1204,7 +1176,6 @@ function BibleReaderContent() {
                         className={`${styles.verseRow} ${isSelected ? styles.activeVerseRow : ''} ${hlClass} ${parallelMode ? styles.parallelVerseRow : ''}`}
                         onClick={() => {
                           setSelectedVerse(v);
-                          setSelectedWord(null);
                         }}
                       >
                         <span className={styles.verseNumber}>
@@ -1272,7 +1243,6 @@ function BibleReaderContent() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedVerse(v);
-                              setSelectedWord(null);
                               setActiveTab('study');
                             }}
                             className={styles.actionBtn}
@@ -1285,7 +1255,6 @@ function BibleReaderContent() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedVerse(v);
-                              setSelectedWord(null);
                               setActiveTab('compare');
                             }}
                             className={styles.actionBtn}
@@ -1458,11 +1427,6 @@ function BibleReaderContent() {
                     {/* Selected Verse Info Bar */}
                     <div className={styles.verseInfoBanner}>
                       <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
-                      {selectedWord && (
-                        <span className={styles.selectedWordBadge}>
-                          Word: &quot;{selectedWord}&quot;
-                        </span>
-                      )}
                     </div>
 
                     {/* TAB 1: AI Study */}
@@ -1635,6 +1599,11 @@ function BibleReaderContent() {
                                 <strong>{s.code}</strong> {s.lemma} ({s.transliteration})
                               </a>
                             ))}
+                            {conn.strongs.length === 0 && !strongsCode && (
+                              <span className={styles.searchHint}>
+                                No verse-level Strong&apos;s tags are available for this passage yet. Look up a known G/H number directly; BibleDesk will not guess the underlying word.
+                              </span>
+                            )}
                           </div>
                           {/* B03: real dictionary definition for the clicked chip */}
                           {strongsCode && (

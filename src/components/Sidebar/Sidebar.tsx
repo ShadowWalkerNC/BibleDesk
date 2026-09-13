@@ -24,7 +24,7 @@ import {
   Code,
   ShieldCheck,
 } from 'lucide-react';
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
 import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal';
@@ -80,7 +80,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setUser(session.user);
-        } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+        } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
           const local = localStorage.getItem('bibledesk_local_user');
           if (local) {
             try {
@@ -102,7 +102,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         setUser(session.user);
-      } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+      } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {

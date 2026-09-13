@@ -134,7 +134,7 @@ export default function MarketingShowcase() {
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Strong’s Greek &amp; Hebrew Lexicons:</strong> Tap any verse to inspect 14,000+ original language lemmas, transliterations, and definitions.</span>
+                  <span><strong>Strong’s Greek &amp; Hebrew Dictionaries:</strong> Look up a known Strong’s number in the bundled source dictionaries. Word-by-word verse tagging is not yet included.</span>
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />

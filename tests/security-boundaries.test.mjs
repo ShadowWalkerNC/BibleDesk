@@ -145,7 +145,11 @@ function loginHarness({ configured = true, signUp = false, error = null } = {}) 
     react: { useState: initial => { const index = hook++; return [index < values.length ? values[index] : initial, value => { if (index === 8) messages.push(value); }]; }, useEffect() {} },
     'react/jsx-runtime': { jsx, jsxs: jsx },
     'next/navigation': { useRouter: () => ({ push: path => routes.push(path), refresh() {} }) },
-    'lucide-react': {}, '@/lib/supabase': { getBrowserClient: () => ({ auth }), isSupabaseConfigured: () => configured },
+    'lucide-react': {}, '@/lib/supabase': {
+      getBrowserClient: () => ({ auth }),
+      isSupabaseConfigured: () => configured,
+      isLocalStudyProfileEnabled: () => false,
+    },
     '@/lib/syncGuestData': { syncGuestDataToAccount: async () => ({}) }, './page.module.css': { default: {} },
   };
   const component = moduleAt('src/app/login/page.tsx', imports, {
@@ -180,12 +184,13 @@ test('pending email confirmation does not grant an authenticated-looking local i
   await h.submit(); assert.equal(h.writes.length, 0); assert.equal(h.routes.length, 0);
   assert.match(h.messages.at(-1).text, /confirm/);
 });
-test('unconfigured email and Google flows preserve labeled local study and storage events', async () => {
+test('unconfigured production auth cannot create an authenticated-looking local identity', async () => {
   for (const signUp of [false, true]) {
     const h = loginHarness({ configured: false, signUp });
-    await h.submit(); assert.equal(h.writes.length, 1); assert.deepEqual(h.events, ['storage']);
-    assert.match(h.messages.at(-1).text, /Local study/); assert.deepEqual(h.routes, ['/bible']);
+    await h.submit(); assert.equal(h.writes.length, 0); assert.deepEqual(h.events, []);
+    assert.match(h.messages.at(-1).text, /authentication has not been configured/); assert.deepEqual(h.routes, []);
   }
   const h = loginHarness({ configured: false }); await h.google();
-  assert.equal(h.writes.length, 1); assert.deepEqual(h.events, ['storage']);
+  assert.equal(h.writes.length, 0); assert.deepEqual(h.events, []);
+  assert.match(h.messages.at(-1).text, /authentication has not been configured/);
 });

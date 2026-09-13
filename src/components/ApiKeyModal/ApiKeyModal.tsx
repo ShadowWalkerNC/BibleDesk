@@ -112,7 +112,7 @@ export default function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
               </strong>
             </div>
             <p style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-              Creating a free account unlocks our server-hosted Gemini AI model automatically. Or, enter your own free Gemini key below to continue as a guest.
+              A verified account can use the server-hosted Gemini model when authentication is configured. You can also enter your own Gemini key to use the assistant as a guest.
             </p>
             <Link
               href="/login"

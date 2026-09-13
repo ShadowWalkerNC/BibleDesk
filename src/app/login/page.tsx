@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Sparkles, Eye, EyeOff, Mail } from 'lucide-react';
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import { syncGuestDataToAccount } from '@/lib/syncGuestData';
 import styles from './page.module.css';
 
@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   // Check if session already active
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
+    if (!isSupabaseConfigured() && isLocalStudyProfileEnabled()) {
       const local = localStorage.getItem('bibledesk_local_user');
       if (local) {
         router.push('/bible');
@@ -42,8 +42,13 @@ export default function LoginPage() {
     setLoading(true);
     setMessage(null);
 
-    // If Supabase isn't configured, skip OAuth entirely and create a local session
+    // Local profiles are permitted only in explicitly local/development builds.
     if (!isSupabaseConfigured()) {
+      if (!isLocalStudyProfileEnabled()) {
+        setMessage({ text: 'Account sign-in is temporarily unavailable because authentication has not been configured for this deployment.', type: 'error' });
+        setLoading(false);
+        return;
+      }
       const localUser = {
         id: 'local-user-' + Date.now().toString(36),
         email: 'google-user@local.bibledesk',
@@ -107,6 +112,10 @@ export default function LoginPage() {
 
       // Local / Offline fallback when Supabase is not configured with live credentials
       if (!isSupabaseConfigured()) {
+        if (!isLocalStudyProfileEnabled()) {
+          setMessage({ text: 'Account sign-in is temporarily unavailable because authentication has not been configured for this deployment.', type: 'error' });
+          return;
+        }
         await fallbackLocalLogin();
         return;
       }
@@ -176,6 +185,12 @@ export default function LoginPage() {
     setLoading(true);
     setMessage(null);
 
+    if (!isSupabaseConfigured()) {
+      setMessage({ text: 'Magic-link sign-in is unavailable because authentication has not been configured for this deployment.', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
     const supabase = getBrowserClient();
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -232,7 +247,7 @@ export default function LoginPage() {
         </h1>
         <p className={styles.subtitle}>
           {isSignUp 
-            ? 'Join our study community, sync prayer circles, and unlock the 5D AI Assistant' 
+            ? 'Create an account for authenticated study and Prayer Care features'
             : 'Sign in to access your notes, private prayer circle, and study desk'}
         </p>
 
@@ -247,7 +262,7 @@ export default function LoginPage() {
           <Sparkles size={18} className={styles.includedAiIcon} />
           <div className={styles.includedAiText}>
             <strong>5-Dimension AI Study Assistant Included</strong>
-            <span>Creating an account unlocks Google Gemini-powered Scripture study (5 free AI answers/day, then BYOK for unlimited). No API key setup required.</span>
+            <span>A verified account can use 5 server AI answers per day when authentication and the server AI key are configured. You can also use your own Gemini key.</span>
           </div>
         </div>
 

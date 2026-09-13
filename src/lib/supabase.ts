@@ -16,6 +16,12 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && key && !url.includes('placeholder-project.supabase.co'));
 }
 
+// Local profiles are a development convenience only. They are not authenticated
+// accounts and must never impersonate one on a public deployment.
+export function isLocalStudyProfileEnabled(): boolean {
+  return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_LOCAL_PROFILE === 'true';
+}
+
 export function getBrowserClient(): SupabaseClient {
   if (!_browserClient) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';

@@ -231,7 +231,7 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
                 <span className={styles.endpointPath}>/api/bible/lexicon</span>
               </div>
               <p className={styles.endpointDesc}>
-                Retrieve OpenScriptures Strong's Greek (5,523 words) or Hebrew (8,674 words) lexical roots, morphology, and transliterations.
+                Retrieve a bundled Strong's Greek or Hebrew dictionary entry by a known Strong's number. Verse-level word tagging and morphology are not currently exposed.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
                 <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/lexicon?strongs=G2889"</pre>

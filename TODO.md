@@ -33,6 +33,7 @@
 
 - [ ] Reduce the remaining ESLint warnings in active code, especially hook dependency and unused-value warnings.
 - [ ] Add live migration/RLS tests; mocked route tests are insufficient for the database boundary.
+- [ ] Import and attribute a complete verse-level Greek and Hebrew tagging corpus before enabling clickable original-language words. Candidate sources are OSHB for the Hebrew Bible and an openly licensed tagged Greek New Testament; validate versification and Strong's alignment during ingestion.
 - [ ] Add behavior tests for Google token refresh, revoked consent and duplicate Calendar/draft requests.
 - [ ] Decide whether authenticated local prayer data should sync to Supabase; do not claim sync until implemented and tested.
 - [ ] Add a service worker and cache policy before describing the whole PWA as offline. Bundled Scripture reading/search is the verified offline capability.

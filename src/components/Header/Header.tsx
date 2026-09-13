@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Search, LogIn, LogOut } from 'lucide-react';
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
@@ -34,7 +34,7 @@ export default function Header() {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setUser(session.user);
-        } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+        } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
           const local = localStorage.getItem('bibledesk_local_user');
           if (local) {
             try {
@@ -56,7 +56,7 @@ export default function Header() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-      } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+      } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {

@@ -4,6 +4,8 @@
 
 BibleDesk provides a completely free, open-source foundation for Scripture study with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek & Hebrew lexicons, Treasury of Scripture Knowledge (TSK) cross-references, and a bidirectional Biblical Knowledge Graph.
 
+The bundled Strong's dictionaries are real source data and accept direct number lookups. The current Bible modules do not yet contain word-by-word Greek/Hebrew tagging, so BibleDesk does not claim that an English word click identifies its underlying lemma. A properly licensed, attributed, verse-level source corpus is required before that interaction returns.
+
 Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MCP Server** from external tools. Native desktop, Android, and Chrome extension shells are preserved under `archive/` and are not current releases. Scripture reading and local study data need no paid subscription; AI features require host configuration or a user-provided Gemini key.
 
 ---

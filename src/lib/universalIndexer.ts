@@ -250,31 +250,10 @@ export function resolveConnectionsForVerse(
     }
   }
 
-  // 3. Match relevant Strong's lemmas
+  // 3. Verse-level Strong's links require a tagged source-text corpus. The
+  // bundled English translations do not contain those tags, so do not infer
+  // them from a reference or inject generic theological terms.
   const matchedStrongs: ConnectedStrongs[] = [];
-  const lowerRef = verseRef.toLowerCase();
-  if (lowerRef.includes('john 3:16') || lowerRef.includes('john 3')) {
-    matchedStrongs.push(CURATED_STRONGS_MAP['G26']);   // agape
-    matchedStrongs.push(CURATED_STRONGS_MAP['G2889']);  // kosmos
-    matchedStrongs.push(CURATED_STRONGS_MAP['G3439']);  // monogenes
-    matchedStrongs.push(CURATED_STRONGS_MAP['G4102']);  // pistis
-    matchedStrongs.push(CURATED_STRONGS_MAP['G2222']);  // zoe
-  } else if (lowerRef.includes('gen 1') || lowerRef.includes('genesis 1')) {
-    matchedStrongs.push(CURATED_STRONGS_MAP['H7225']);  // bereshit
-    matchedStrongs.push(CURATED_STRONGS_MAP['H1254']);  // bara
-    matchedStrongs.push(CURATED_STRONGS_MAP['H430']);   // elohim
-    matchedStrongs.push(CURATED_STRONGS_MAP['H7307']);  // ruach
-  } else if (lowerRef.includes('rom 8') || lowerRef.includes('romans 8')) {
-    matchedStrongs.push(CURATED_STRONGS_MAP['G26']);    // agape
-    matchedStrongs.push(CURATED_STRONGS_MAP['G4151']);  // pneuma
-    matchedStrongs.push(CURATED_STRONGS_MAP['G5485']);  // charis
-    matchedStrongs.push(CURATED_STRONGS_MAP['G1343']);  // dikaiosyne
-  } else {
-    // Default foundational Greek & Hebrew lemmas
-    matchedStrongs.push(CURATED_STRONGS_MAP['G5485']);
-    matchedStrongs.push(CURATED_STRONGS_MAP['H2617']);
-    matchedStrongs.push(CURATED_STRONGS_MAP['H7965']);
-  }
 
   // 4. Match historical Catechisms
   const catechismMatches = searchCatechisms(verseRef).slice(0, 3);
