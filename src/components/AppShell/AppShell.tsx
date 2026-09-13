@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
+import SlashCommandPalette from '@/components/SlashCommandPalette/SlashCommandPalette';
 import styles from './AppShell.module.css';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={styles.shell}>
+      <a href="#main-content" className={styles.skipLink}>
+        Skip to content
+      </a>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
       <main
         className={`${styles.main} ${collapsed ? styles.mainCollapsed : ''}`}
@@ -27,6 +31,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
+      <SlashCommandPalette />
     </div>
   );
 }

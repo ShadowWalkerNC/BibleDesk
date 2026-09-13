@@ -15,7 +15,7 @@ HTTP MCP server at `/api/mcp`. Implements [Model Context Protocol](https://model
 
 ## Authentication
 
-Optional. Set `MCP_SECRET` in your environment. If set, all requests must include:
+Required. `MCP_SECRET` must be set in your environment — the server is fail-closed: every request (including discovery) without a valid bearer token is refused with 401, and with `MCP_SECRET` unset the server reports itself as not configured. All requests must include:
 
 ```
 Authorization: Bearer <MCP_SECRET>
@@ -95,6 +95,7 @@ curl https://your-app.onrender.com/api/mcp \
 ## Health check
 
 ```bash
-curl https://your-app.onrender.com/api/mcp
+curl https://your-app.onrender.com/api/mcp \
+  -H "Authorization: Bearer $MCP_SECRET"
 ```
-Returns the tool manifest as JSON — no auth required.
+Returns the tool manifest as JSON. Auth is required here too (fail-closed): without a valid token you get 401, and with `MCP_SECRET` unset the server responds that it is not configured.

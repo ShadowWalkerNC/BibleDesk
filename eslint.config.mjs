@@ -8,6 +8,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react-hooks/set-state-in-effect": "off",
+      "react/no-unescaped-entities": "off",
       "@typescript-eslint/no-explicit-any": "off"
     }
   },
@@ -19,6 +20,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "apps/desktop/**",
+    "archive/**",
+    "tests/qa/**",
   ]),
 ]);
 

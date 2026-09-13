@@ -1,0 +1,80 @@
+/* BibleDesk — /study-resources hub (A12) */
+
+.main {
+  padding: 2rem 0 4rem;
+  min-height: 70vh;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-600);
+  background: rgba(181, 132, 20, 0.1);
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  margin-bottom: 0.9rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.tabBar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 0.4rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 132, 20, 0.18);
+  border-radius: 12px;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+  background: rgba(181, 132, 20, 0.08);
+}
+
+.tabBtnActive {
+  color: #ffffff;
+  background: var(--gold-600, #b58414);
+  border-color: var(--gold-600, #b58414);
+}
+
+.tabPanel {
+  min-height: 40vh;
+}

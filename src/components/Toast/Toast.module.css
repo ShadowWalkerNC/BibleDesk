@@ -16,36 +16,32 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
+  padding: 0.65rem 1.25rem;
   border-radius: 99px;
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  background: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.22s var(--ease-out) forwards,
              fadeOut 0.3s var(--ease-out) 2.5s forwards;
 }
 
 /* Variants */
 .success {
-  background: rgba(245, 200, 66, 0.15);
-  border: 1px solid rgba(245, 200, 66, 0.4);
-  color: var(--gold-400);
+  border: 1.5px solid var(--gold-500);
+  color: var(--gold-600);
 }
 
 .error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  border: 1.5px solid #ef4444;
+  color: #b91c1c;
 }
 
 .info {
-  background: rgba(99, 179, 237, 0.12);
-  border: 1px solid rgba(99, 179, 237, 0.3);
-  color: #90cdf4;
+  border: 1.5px solid #3b82f6;
+  color: #1d4ed8;
 }
 
 .icon {

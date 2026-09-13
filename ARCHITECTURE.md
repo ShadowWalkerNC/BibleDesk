@@ -1,7 +1,7 @@
 # BibleDesk — Architecture
 
-> **Status:** Phase 0 Complete & Multi-Platform Suite Deployed · Local Bible Foundation & Open MCP/API Engine  
-> **Last updated:** 2026-09-03
+> **Status:** Phase 0 — Local-first Bible foundation (security hardening; release verification pending)
+> **Last updated:** 2026-09-13
 > **Stack:** Next.js 16 (App Router) · TypeScript 5 · Supabase · Google Gemini API · Model Context Protocol (MCP) · Shadcn UI · Three.js / R3F · Bundled Public Domain Modules · Strong's Greek/Hebrew Lexicons · Capacitor (Android) · Electron (Desktop)  
 > **Work tracker:** [TODO.md](TODO.md) · **Ops Audit:** [OPS_REPORT.md](OPS_REPORT.md) · **Product Vision:** [README.md](README.md)
 
@@ -9,18 +9,19 @@
 
 ## 1. System Overview
 
+**Current security boundary:** public prayer reads use an explicit safe projection and require published Atlas visibility, nonrestricted privacy, and no deletion. Anonymous names and approximate coordinates are redacted. A local Prayer Circle choice stays on the device; submitting a local commitment to the Atlas requires a verified Supabase session and explicit consent, creates a separate pending record, and does not publish immediately. Prayer Care's authenticated contacts and commitments use owner-derived server routes. Direct per-user Google OAuth stores encrypted tokens in a service-role-only table, Calendar export is user initiated, and Gmail access creates reviewed drafts only. These database migrations remain unapplied and unverified against PostgreSQL. Sermons, church, creators, and native shells are archived for the current web MVP.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    CLIENT PLATFORMS (100% Free & Open Source)           │
 │                                                                         │
-│   Web & PWA (`/`) · Desktop Electron (`apps/desktop`) · Android (`apps/android`) │
-│   Chrome Side Panel Extension (`apps/extension`) · Discord Bot · WhatsApp Bot  │
+│   Web & PWA (`/`) · Native shells parked (`archive/`) — Discord/WhatsApp bots removed │
 │                                                                         │
-│   · AppShell Layout: Persistent Left Sidebar + Mobile Bottom Rail       │
+│   · AppShell Layout: Persistent Left Sidebar + Jakob's Law Mobile Rail/Sheet  │
 │   · /bible · 3-Column Centralized Study Desk (product core)             │
-│   · /download · Multi-Platform Installation Hub (PWA, Desktop, APK, Ext)│
-│   · Shadcn UI + Three.js 3D Sacred Halo Canvas + Lucide Icons           │
-│   · Bidirectional Biblical Knowledge Graph (`/graph`)                   │
+│   · /download · Install docs (PWA-first; native shells parked)                     │
+│   · Shadcn UI + Lucide Icons + PrayerAtlas 2D Vector Map (`/prayer`)    │
+│   · Biblical Knowledge Graph API (`/api/graph`; explorer UI cut in MVP) │
 └────────┬────────────────────────────────┬───────────────────────────────┘
          │ /api/bible/*, /api/graph       │ /api/mcp (JSON-RPC 2.0)
          ▼                                ▼
@@ -31,10 +32,8 @@
 │  MCP Server: /api/mcp for Claude Code, Cursor, Windsurf, custom agents  │
 │  AI Engine: Google Gemini API (callGemini) powering 6-stage pipeline    │
 │  Embeddings: OpenAI text-embedding-3-small for pgvector RAG (optional)  │
-│  Prayer Care: authenticated private API + direct per-user Google OAuth  │
-│  Discord Integration: /api/discord/interactions · /api/discord/webhook  │
-│  WhatsApp Integration: /api/whatsapp/webhook (Meta Cloud API)           │
-│  Sigil Network: /api/v1/bible/answer (HMAC-SHA256)                      │
+│  Google export: Calendar events + reviewed Gmail drafts (OAuth)         │
+│  Internal Webhook: /api/v1/bible/answer (HMAC-SHA256)                   │
 └────────────────┬────────────────────────┬───────────────────────────────┘
                  ▼                        ▼
          Google Gemini (BYOK)         Supabase (PostgreSQL + pgvector)
@@ -49,15 +48,14 @@
 | **Framework** | Next.js 16 (App Router) | SSR for SEO, dynamic APIs, and zero client key leaks |
 | **Language** | TypeScript 5 | Full strict type safety across all 33 routes |
 | **Open API & MCP** | Model Context Protocol (`/api/mcp`) + REST | Exposes Bible data, Strong's, and Knowledge Graph to external AI agents |
-| **App Shell** | Persistent Sidebar + Bottom Rail (`AppShell.tsx`, `Sidebar.tsx`) | True desktop-class study application chrome |
+| **App Shell & Mobile** | Persistent Sidebar + Jakob's Law Bottom Rail & Drawer Sheet (`AppShell.tsx`, `Sidebar.tsx`) | Desktop-class workspace chrome and standard thumb-friendly mobile patterns |
 | **UI Components** | Shadcn UI (`components/ui`) | Polymorphic `Button` and `Card` primitives |
 | **3D & Animation** | Three.js + React Three Fiber (`@react-three/fiber`) | Interactive 3D Sacred Halo & Celestial Geometry Canvas |
 | **Design System** | Reverent Bible Manuscript Parchment + Apple Liquid Glass | Cinzel display typography + Lora serif + SF Pro + vellum glass |
 | **AI Answers & Pipeline** | Google Gemini API (`gemini-2.5-flash`) | Bring-Your-Own-Key (`x-gemini-api-key`) with server fallback |
 | **Bible Data Engine** | Local Static JSON Modules | KJV, ASV, WEB, BBE, Darby, YLT (zero network needed) |
 | **Lexicon & Cross-Refs** | Strong's Greek/Hebrew + TSK | 5.5k Greek + 8.6k Hebrew + 29k cross-references |
-| **Prayer Care exports** | Supabase Auth/RLS + Google OAuth 2.0 + AES-256-GCM | Owner-private prayer rhythms; Calendar events and reviewed Gmail drafts |
-| **Multi-Platform Suite** | Web PWA + Electron + Capacitor Android + Chrome MV3 | Shared `/prayer` flow for app wrappers; extension opens secure web actions |
+| **Current distribution** | Web/PWA | Native and extension shells are parked under `archive/` for the MVP |
 
 ---
 
@@ -68,32 +66,33 @@ BibleDesk/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited)
-│   │   │   ├── ask/stream/route.ts       ← SSE streaming ask
+│   │   │   ├── ask/route.ts              ← POST: AI endpoint (rate-limited, auth-gated)
+│   │   │   ├── ask/stream/route.ts       ← SSE streaming ask (server Gemini key gated)
 │   │   │   ├── bible/{chapter,search,study}/
-│   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|sermons/
-│   │   │   ├── prayer-care/{contacts,commitments,followups}/
-│   │   │   ├── google/{connect/start,callback,status,disconnect}/
+│   │   │   ├── graph|history|bookmarks|daily|mcp|prayer|church|sermons/
+│   │   │   ├── prayer/{circle,digest,escalate}/   ← Prayer Circle sync & 4-tier escalation
 │   │   │   ├── export/obsidian/
 │   │   │   ├── mod/{queue,vote,approve,invite}/
 │   │   │   └── v1/bible/answer/          ← Sigil HMAC webhook + health
-│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|sermons/
-│   │   ├── bookmarks|history|graph|share/[slug]|mod|login/
-│   │   ├── page.tsx                      ← Homepage (Bible-first + assistant)
+│   │   ├── bible|daily|plans|catechism|creeds|memory|prayer|encourage|church|developers|sermons|creators/
+│   │   ├── c/[handle]|bookmarks|history|graph|share/[slug]|mod|login/
+│   │   ├── page.tsx                      ← Homepage (Marketing Showcase or Study start)
 │   │   ├── layout.tsx · globals.css · robots.ts · sitemap.ts
-│   ├── components/                       ← Header, SearchBar, DimensionPanel,
-│   │                                       GraphView, StreamingProgress, …
-│   ├── hooks/                            ← useStreamingAsk, useBookmark
-│   ├── lib/
-│   │   ├── bible.ts                      ← bible-api.com (interim)
-│   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
-│   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
-│   │   ├── google-oauth.ts · prayer-care.ts · server-auth.ts
-│   │   └── *Data.ts                      ← catechism/creeds/plans/memory datasets
-│   └── types/
+│   │   ├── components/                   ← Header, SearchBar, DimensionPanel,
+│   │   │                                   SlashCommandPalette, CreatorProfileView, …
+│   │   ├── hooks/                        ← useStreamingAsk, useBookmark
+│   │   ├── lib/
+│   │   │   ├── sdk.ts                    ← Official BibleDesk Client SDK
+│   │   │   ├── creatorStore.ts · universalIndexer.ts
+│   │   │   ├── bible.ts · encouragementData.ts
+│   │   │   ├── claude.ts · pipeline.ts · rag.ts · gemini.ts
+│   │   │   ├── graph.ts · moderation.ts · rate-limit.ts · supabase.ts
+│   │   │   ├── auth.ts · syncGuestData.ts← Server auth validator & guest auto-merge
+│   │   │   └── *Data.ts                  ← catechism/creeds/plans/memory datasets
+│   │   └── types/                        ← index.ts · map.ts · prayerCare.ts · church.ts
 ├── apps/desktop/                         ← Electron shell
-├── supabase/                             ← schema.sql → schema-v5.sql (+ rpc.sql)
-├── public/                               ← manifest + icons
+├── supabase/                             ← schema.sql → schema-v8.sql (+ rpc.sql)
+├── public/                               ← manifest + icons + data/world-110m.json
 ├── AGENTS.md · ARCHITECTURE.md · README.md · TODO.md · .env.example
 └── next.config.ts
 ```
@@ -251,6 +250,24 @@ More questions → more moderation → more canonical answers
 | Month 1 | ~50 | ~20% of questions benefit |
 | Month 6 | ~500 | ~60% of questions benefit |
 | Year 1 | 2000+ | Near-encyclopedic; fine-tuning viable |
+
+### 6.1 Doctrinal Grounding & Confessional Corpus
+To prevent AI hallucinations and generic consensus on theological matters, BibleDesk uses a **dual RAG strategy**:
+1. **Vector RAG (`canonical_answers`)**: Searches moderator-reviewed, pastor-approved answers via pgvector (1536-dim OpenAI embeddings).
+2. **Deterministic Doctrinal Corpus (`src/lib/doctrinesData.ts`, `src/lib/catechismData.ts`)**: Instant, zero-latency local retrieval across 8 classical loci of Christian theology and 6 historic confessions:
+   - **Reformed / Presbyterian**: Westminster Shorter Catechism (1647)
+   - **Reformed / Continental**: Heidelberg Catechism (1563)
+   - **Lutheran**: Luther's Small Catechism (1529)
+   - **Baptist**: Keach's Baptist Catechism / 1689 London Baptist (1689)
+   - **Anglican**: Thirty-Nine Articles of Religion (1571)
+   - **Pentecostal / Evangelical**: Assemblies of God 16 Fundamental Truths (1916)
+   - Grounded context is automatically fed into Stage 4 (Historical & Doctrinal) and Stage 5 (Synthesis) of the AI pipeline to guarantee fair representation and exact confessional citations.
+
+### 6.2 Live Worship Radio & Live Sermon Theatre — CUT in the MVP (2026-09-12)
+The worship radio dock, sermon theatre, and ProPresenter slide exporter were removed from the product. The section below describes the pre-cut architecture and is kept for historical reference only.
+- **Worship Radio Dock (`LiveRadioPlayer.tsx`)**: Embedded HTML5 audio dock delivering verified, non-commercial sacred hymn & instrumental Christian audio directly from public streams (Abiding Radio, Moody Radio) at $0 server bandwidth, paired with 1-click official station launchers for K-LOVE and Air1.
+- **Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`)**: Enables churches to broadcast Sunday sermons through embedded YouTube Live or Facebook Live feeds alongside synchronized Scripture lookups and sermon outline notes, eliminating expensive custom video transcoding infrastructure.
+- **ProPresenter 7 Slide Exporter (`/sermons`)**: 1-Click plain-text projector slide generator auto-chunking sermon headers and Scripture citations into ProPresenter/PowerPoint-ready slides.
 
 ---
 
@@ -435,31 +452,6 @@ flagged_topics (
 )
 ```
 
-### Prayer Care schema v5 (migration ready, not applied)
-
-`schema-v5.sql` adds `prayer_contacts`, `prayer_commitments`, `prayer_checkins`, `prayer_followups`, and `prayer_notification_preferences`. Every private record is keyed to `auth.users`, child relationships enforce the same owner, and owner-only RLS governs browser access. `google_connections` stores only encrypted OAuth token envelopes, expiry, scopes, and Google account email; it has RLS enabled with no browser policies and explicit `anon`/`authenticated` grants revoked.
-
-The server verifies the Supabase bearer token for every Prayer Care and Google status/export route, then derives `owner_id` from the verified user. Request bodies cannot select an owner.
-
-### Google export flow
-
-```text
-Authenticated user
-  -> POST /api/google/connect/start (Bearer token)
-  -> signed, expiring OAuth state + httpOnly SameSite=Lax cookie
-  -> Google consent (openid/email, calendar.events, gmail.compose)
-  -> GET /api/google/callback
-  -> exchange code, encrypt tokens with AES-256-GCM, service-role upsert
-
-Commitment -> POST .../[id]/calendar -> primary-calendar event
-           -> GET  .../[id]/ics      -> private ICS download fallback
-
-Reviewed follow-up -> POST .../followups/gmail-draft -> Gmail draft only
-                   -> Gmail compose URL fallback
-```
-
-Calendar export persists Google event ID/link and returns the existing result on retries. Gmail has no send route. The browser extension does not duplicate auth or private storage; it opens `/prayer#prayer-care` on the configured HTTP(S) BibleDesk origin. PWA, Electron, and Android builds consume the same web route.
-
 ---
 
 ## 9. Security Model
@@ -467,14 +459,10 @@ Calendar export persists Google event ID/link and returns the existing result on
 | Control | Implementation |
 |---|---|
 | **API key isolation** | `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` in `process.env` only — never in client bundle |
-| **Rate limiting** | 15 questions/hour/IP — checked before every Claude call |
+| **Rate limiting** | 5 free AI answers/day (`ask` bucket), 15/hour otherwise — checked before every AI call |
 | **IP privacy** | IPs are SHA-256 hashed with a salt — raw IPs never stored |
 | **Input validation** | Server-side: min 5 chars, max 500, whitespace-normalized |
 | **Supabase RLS** | `answers`: public SELECT, service-role INSERT. `canonical_answers`, `flags`, `moderation_votes`, `moderators`: service-role only |
-| **Prayer ownership** | Supabase bearer token verified server-side; owner ID is never accepted from request JSON; private tables use strict owner-only RLS |
-| **Google OAuth** | Direct BibleDesk OAuth client, signed/expiring state plus httpOnly cookie, fixed callback/return path, least-privilege Calendar/Gmail draft scopes |
-| **Token storage** | Access/refresh tokens use AES-256-GCM envelopes; `google_connections` is service-role-only and APIs never return ciphertext |
-| **Follow-up safety** | Editable final recipient/subject/message with explicit review; Gmail draft creation only; no automatic send endpoint |
 | **Moderator auth** | Supabase Auth (email, invite-only) — all `/api/mod/*` routes validate session before any data access |
 | **Sigil webhook auth** | HMAC-SHA256 via `x-bibledesk-signature` header — timing-safe comparison |
 | **Build verification** | `next build` must pass with zero secrets in client chunks before every deploy |

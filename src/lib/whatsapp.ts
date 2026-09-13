@@ -7,9 +7,11 @@ import type { BibleAnswer } from '@/types';
 /**
  * Generate a WhatsApp Click-to-Chat link with pre-formatted text
  */
-export function createWhatsAppShareLink(text: string): string {
+export function createWhatsAppShareLink(text: string, phoneNumber?: string): string {
+  const cleanPhone = phoneNumber ? phoneNumber.replace(/[^0-9]/g, '') : '';
+  const phoneParam = cleanPhone ? `phone=${cleanPhone}&` : '';
   const encoded = encodeURIComponent(text);
-  return `https://api.whatsapp.com/send?text=${encoded}`;
+  return `https://api.whatsapp.com/send?${phoneParam}text=${encoded}`;
 }
 
 /**

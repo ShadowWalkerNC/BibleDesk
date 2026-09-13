@@ -141,7 +141,64 @@ export interface AskResponse {
 export interface ErrorResponse {
   success: false;
   error: string;
-  code: 'RATE_LIMITED' | 'INVALID_INPUT' | 'AI_ERROR' | 'BIBLE_API_ERROR' | 'UNKNOWN';
+  code: 'RATE_LIMITED' | 'INVALID_INPUT' | 'AI_ERROR' | 'BIBLE_API_ERROR' | 'AUTH_REQUIRED' | 'UNKNOWN';
 }
 
 export type ApiResponse = AskResponse | ErrorResponse;
+
+// ── Universal Connected Knowledge ──────────────────────────────────────────
+
+export interface ConnectedVerse {
+  ref: string;
+  book: string;
+  chapter: number;
+  verse?: number;
+  text?: string;
+}
+
+export interface ConnectedStrongs {
+  code: string;
+  lemma: string;
+  transliteration?: string;
+  definition: string;
+  partOfSpeech?: string;
+}
+
+export interface ConnectedPrayer {
+  id: string;
+  title: string;
+  text?: string;
+  category?: string;
+  urgency?: string;
+  isPrivate?: boolean;
+  contactName?: string;
+  createdAt?: string;
+}
+
+export interface ConnectedSermon {
+  id: string;
+  title: string;
+  excerpt?: string;
+  updated_at?: string;
+}
+
+export interface ConnectedCatechism {
+  catechism: string;
+  qNum: number;
+  question: string;
+  answer: string;
+  tradition?: string;
+}
+
+export interface ConnectedKnowledge {
+  queryEntity: {
+    type: 'verse' | 'strongs' | 'sermon' | 'prayer' | 'doctrine' | 'keyword';
+    identifier: string;
+    label: string;
+  };
+  verses: ConnectedVerse[];
+  strongs: ConnectedStrongs[];
+  prayers: ConnectedPrayer[];
+  sermons: ConnectedSermon[];
+  catechisms: ConnectedCatechism[];
+}

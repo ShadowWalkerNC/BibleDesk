@@ -21,15 +21,16 @@ import type { BibleAnswer } from '@/types';
 
 export type NodeCategory =
   | 'concept' | 'doctrine' | 'person' | 'place'
-  | 'book' | 'theme' | 'verse' | 'question';
+  | 'book' | 'theme' | 'verse' | 'question' | 'sermon' | 'prayer';
 
-export type NodeSourceType = 'question' | 'answer' | 'canonical' | 'obsidian';
+export type NodeSourceType = 'question' | 'answer' | 'canonical' | 'obsidian' | 'sermon' | 'prayer';
 
 export type EdgeRelation =
   | 'references' | 'quotes' | 'alludes_to'
   | 'supports' | 'contradicts' | 'qualifies' | 'fulfills'
   | 'related_to' | 'part_of' | 'leads_to' | 'contrasts_with'
-  | 'calls' | 'imports' | 'uses';
+  | 'calls' | 'imports' | 'uses'
+  | 'preached_from' | 'prayed_with';
 
 export type EdgeConfidence = 'EXTRACTED' | 'INFERRED' | 'AMBIGUOUS';
 
@@ -42,6 +43,10 @@ export interface GraphNode {
   source_type:  NodeSourceType;
   source_id?:   string;          // UUID of originating row
   dimension?:   string;
+  scripture_ref?: string;
+  strongs_num?:   string;
+  catechism_ref?: string;
+  encourage_category?: string;
   metadata?:    Record<string, unknown>;
 }
 

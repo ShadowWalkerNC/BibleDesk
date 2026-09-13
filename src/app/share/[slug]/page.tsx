@@ -2,9 +2,9 @@
 // SSR page: fetches a stored answer by its 8-char share slug and renders it.
 // Includes full OpenGraph + Twitter card meta for rich link previews.
 
-import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getAnswerBySlug } from '@/lib/supabase';
+import { getAppUrl } from '@/lib/appUrl';
 import SharePageClient from './SharePageClient';
 
 // ─── Dynamic metadata for OG previews ─────────────────────────────────────────────
@@ -13,16 +13,30 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const answer   = await getAnswerBySlug(slug);
+
+  // Supabase may be unconfigured (service-role key missing) — getAnswerBySlug
+  // then throws instead of returning null. Catch and treat as not-found so the
+  // page renders its designed not-found state instead of throwing a 500.
+  let answer = null;
+  try {
+    answer = await getAnswerBySlug(slug);
+  } catch {
+    answer = null;
+  }
+
+  const appUrl = getAppUrl();
+  const canonical = `${appUrl}/share/${slug}`;
 
   if (!answer) {
-    return { title: 'Answer not found — BibleDesk' };
+    return {
+      title: 'Shared Study — BibleDesk',
+      description: 'Explore deep 5-dimension sourced biblical answers on BibleDesk.',
+      alternates: { canonical },
+    };
   }
 
   const title       = `${answer.question} — BibleDesk`;
   const description = answer.summary;
-  const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? '';
-  const canonical   = `${appUrl}/share/${slug}`;
 
   return {
     title,
@@ -47,9 +61,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SharePage({ params }: Props) {
   const { slug } = await params;
-  const answer   = await getAnswerBySlug(slug);
 
-  if (!answer) notFound();
+  // Same guard as generateMetadata: unconfigured Supabase throws instead of
+  // returning null. SharePageClient already renders the designed not-found UI
+  // when initialAnswer is null, so fall back to null here.
+  let answer = null;
+  try {
+    answer = await getAnswerBySlug(slug);
+  } catch {
+    answer = null;
+  }
 
-  return <SharePageClient answer={answer} shareSlug={slug} />;
+  return <SharePageClient initialAnswer={answer} shareSlug={slug} />;
 }

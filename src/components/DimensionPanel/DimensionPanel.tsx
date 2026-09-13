@@ -4,7 +4,8 @@ import type { BibleAnswer, DimensionKey } from '@/types';
 import { DIMENSION_META } from '@/types';
 import { useToast } from '@/components/Toast/Toast';
 import { useBookmark } from '@/hooks/useBookmark';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAppUrl } from '@/lib/appUrl';
 import { 
   BookOpen, 
   Landmark, 
@@ -47,9 +48,12 @@ const DIMENSION_ICONS: Record<DimensionKey, any> = {
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
+
+  const effectiveSlug = shareSlug || (answer?.id ? answer.id.slice(0, 8) : null);
+
   const { bookmarked, loading: bookmarkLoading, toggle: toggleBookmark } = useBookmark(
     answer,
-    shareSlug ?? null
+    effectiveSlug ?? null
   );
 
   const activeDim   = answer.dimensions[activeTab];
@@ -57,9 +61,24 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
   const accentColor = DIMENSION_COLORS[activeTab];
   const ActiveIcon  = DIMENSION_ICONS[activeTab];
 
-  const shareUrl = shareSlug
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareSlug}`
-    : typeof window !== 'undefined' ? window.location.href : '';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : getAppUrl();
+  const shareUrl = effectiveSlug
+    ? `${baseUrl}/share/${effectiveSlug}`
+    : `${baseUrl}`;
+
+  // Cache answer locally so /share/[slug] can always render even if offline or DB is unconfigured
+  useEffect(() => {
+    if (answer && effectiveSlug && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('bibledesk_recent_answers');
+        const cache = stored ? JSON.parse(stored) : {};
+        cache[effectiveSlug] = answer;
+        localStorage.setItem('bibledesk_recent_answers', JSON.stringify(cache));
+      } catch (err) {
+        console.warn('Could not cache recent answer locally:', err);
+      }
+    }
+  }, [answer, effectiveSlug]);
 
   function handleCopyText() {
     const text = [
@@ -87,7 +106,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
   }
 
   async function handleBookmark() {
-    if (!shareSlug) {
+    if (!effectiveSlug) {
       toast('Answer must be saved before bookmarking', 'error');
       return;
     }
@@ -101,32 +120,14 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
     window.open(link, '_blank');
   }
 
-  async function handleShareDiscord() {
-    const webhookUrl = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_discord_webhook') : null;
-    if (!webhookUrl) {
-      // Copy formatted Discord text
-      const discordText = `**📖 BibleDesk Study:** "${answer.question}"\n\n> ${answer.summary}\n\n🔗 ${shareUrl}`;
-      navigator.clipboard.writeText(discordText)
-        .then(() => toast('Discord text copied! Configure Discord Webhook in Integrations to auto-post.'))
-        .catch(() => toast('Could not copy Discord text', 'error'));
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/discord/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webhookUrl, type: 'answer', answer }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast('Answer dispatched to Discord channel!');
-      } else {
-        toast(data.error || 'Failed to send to Discord', 'error');
-      }
-    } catch {
-      toast('Network error sending to Discord', 'error');
-    }
+  function handleShareDiscord() {
+    // Copy formatted Discord text. (The auto-post webhook endpoint
+    // /api/discord/webhook was removed with the Discord bot cut — there is
+    // nothing to dispatch to, so this is copy-only.)
+    const discordText = `**📖 BibleDesk Study:** "${answer.question}"\n\n> ${answer.summary}\n\n🔗 ${shareUrl}`;
+    navigator.clipboard.writeText(discordText)
+      .then(() => toast('Discord-formatted text copied — paste it into your channel'))
+      .catch(() => toast('Could not copy Discord text', 'error'));
   }
 
   return (
@@ -142,9 +143,9 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
           <span className={styles.translationTag}>
             {answer.translation_used.toUpperCase()} translation
           </span>
-          {shareSlug && (
+          {effectiveSlug && (
             <a
-              href={`/share/${shareSlug}`}
+              href={`/share/${effectiveSlug}`}
               className={styles.permalinkBadge}
               target="_blank"
               rel="noopener noreferrer"
@@ -259,7 +260,7 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
             Copy
           </button>
 
-          {shareSlug && (
+          {effectiveSlug && (
             <button
               className={`${styles.shareBtn} ${styles.shareBtnLink}`}
               onClick={handleCopyLink}

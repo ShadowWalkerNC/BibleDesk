@@ -15,19 +15,61 @@ import {
   X,
   Lock,
   Layers,
-  Send
+  Send,
+  Calendar,
+  Clock,
+  UserCheck,
+  MessageCircle,
+  Copy,
+  Mail,
+  Phone,
+  Smile,
+  RefreshCw,
+  Bell,
+  ChevronRight,
+  TrendingUp,
+  BookOpen,
+  Languages,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import PrayerAtlas from '@/components/PrayerAtlas/PrayerAtlas';
+import PrayerEscalationModal from '@/components/PrayerEscalationModal/PrayerEscalationModal';
 import PrayerCare from '@/components/PrayerCare/PrayerCare';
+import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
+import { extractScriptureReferences, extractStrongsNumbers } from '@/lib/universalIndexer';
 import { getBrowserClient } from '@/lib/supabase';
-import { COUNTRIES_SORTED, getCountryByCode } from '@/lib/countryCoords';
-import type { MissionMapPin } from '@/types/map';
-import { DEFAULT_MAP_PINS } from '@/types/map';
+import { 
+  COUNTRIES_SORTED, 
+  getCountryByCode, 
+  getCountryByName, 
+  findCountryInText, 
+  getApproximateCoordsForText, 
+  getPinJitter 
+} from '@/lib/countryCoords';
+import { type MissionMapPin, DEFAULT_MAP_PINS } from '@/types/map';
 import { createWhatsAppShareLink } from '@/lib/whatsapp';
+import { 
+  PrayerContact, 
+  PrayerCommitment, 
+  PrayerCategory, 
+  RecurrenceRule,
+  CheckinOutcome,
+  FollowupChannel,
+  PrayerEscalationLevel,
+  PrayerUrgencyLevel
+} from '@/types/prayerCare';
+import { 
+  loadPrayerCareStore, 
+  savePrayerCareStore,
+  addContactToStore, 
+  addCommitmentToStore, 
+  performCheckin, 
+  recordFollowupInStore,
+  FOLLOWUP_TEMPLATES 
+} from '@/lib/prayerCareLocal';
 import styles from './page.module.css';
 
-interface PrayerRequest {
+interface PublicPrayerRequest {
   id: string;
   user_id: string | null;
   display_name: string;
@@ -39,53 +81,141 @@ interface PrayerRequest {
   latitude?: number | null;
   longitude?: number | null;
   is_restricted?: boolean;
+  category?: string;
+  privacy_mode?: 'approximate' | 'precise' | 'restricted';
+  // B14 hardening: the wall shows approved public rows; the atlas shows only
+  // rows with explicit consent (consent_atlas=true).
+  is_public?: boolean;
+  consent_atlas?: boolean;
+  status?: string;
+}
+
+type MainTab = 'today' | 'circle' | 'community' | 'world' | 'answered';
+
+function inferPrayerCategory(text: string, isRestricted?: boolean, explicitCategory?: string): string {
+  if (isRestricted) return 'restricted';
+  if (explicitCategory && explicitCategory !== 'all') return explicitCategory.toLowerCase();
+  const lower = (text || '').toLowerCase();
+  if (/heal|sick|cancer|doctor|pain|health|surgery|hospital|recover|illness|disease/.test(lower)) return 'healing';
+  if (/church|pastor|congregation|elder|service|fellowship|ministry|sermon/.test(lower)) return 'church';
+  if (/mission|unreached|tribal|outreach|evangelism|gospel|field|bible translation/.test(lower)) return 'missions';
+  if (/family|father|mother|son|daughter|husband|wife|marriage|parent|child|kids/.test(lower)) return 'family';
+  if (/work|job|boss|career|colleague|business|interview|employment|financial/.test(lower)) return 'work';
+  if (/friend|neighbor|brother|sister|companion/.test(lower)) return 'friend';
+  return 'community';
 }
 
 export default function PrayerBoardPage() {
-  const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  // Navigation: Primary Segments
+  const [activeTab, setActiveTab] = useState<MainTab>('today');
 
-  // View mode: 'split' | 'globe' | 'feed'
+  // ── Public Prayers & Globe State ──────────────────────────────────────────
+  const [prayers, setPrayers] = useState<PublicPrayerRequest[]>([]);
+  const [loadingPublic, setLoadingPublic] = useState(true);
+  const [submittingPublic, setSubmittingPublic] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  // B14: explicit opt-in for the World PrayerAtlas map (default off).
+  const [consentAtlas, setConsentAtlas] = useState(false);
+
+  // View mode for Public Board: 'split' | 'globe' | 'feed'
   const [viewMode, setViewMode] = useState<'split' | 'globe' | 'feed'>('split');
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterRestricted, setFilterRestricted] = useState(false);
+  const [communityCategoryFilter, setCommunityCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Selected Pin / Prayer on the 3D Globe
+  // Selected Pin on Globe
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
-  const [selectedPrayer, setSelectedPrayer] = useState<PrayerRequest | null>(null);
+  const [selectedPrayer, setSelectedPrayer] = useState<PublicPrayerRequest | null>(null);
 
-  // Modal for new prayer submission
+  // Modal for new Public prayer submission
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [newRequest, setNewRequest] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState('');
-  const [locationPrivacy, setLocationPrivacy] = useState<'exact' | 'country_only' | 'restricted'>('country_only');
-
-  // Track prayers clicked in this session
+  const [publicCategory, setPublicCategory] = useState<string>('community');
+  const [locationPrivacy, setLocationPrivacy] = useState<'approximate' | 'precise' | 'restricted'>('approximate');
   const [prayedSession, setPrayedSession] = useState<Record<string, boolean>>({});
 
-  async function fetchPrayers() {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/prayer');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = await res.text();
-      if (!text.trim()) { setPrayers([]); return; }
-      const data = JSON.parse(text);
-      if (data.success) setPrayers(data.prayers);
-    } catch (err) {
-      console.error('Failed to fetch prayers:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Connected Knowledge states
+  const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
+  const [activeDrawerTarget, setActiveDrawerTarget] = useState<{ type: 'verse' | 'strongs' | 'sermon' | 'prayer'; id: string }>({
+    type: 'prayer',
+    id: '',
+  });
 
+  // ── Prayer Care Workflow State (Local-first & Supabase synced) ───────────
+  const [contacts, setContacts] = useState<PrayerContact[]>([]);
+  const [commitments, setCommitments] = useState<PrayerCommitment[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  // Modal: Add New Person & Prayer Commitment
+  const [isAddCommitmentModalOpen, setIsAddCommitmentModalOpen] = useState(false);
+  const [contactName, setContactName] = useState('');
+  const [contactCategory, setContactCategory] = useState<PrayerCategory>('Friend');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactSensitive, setContactSensitive] = useState(false);
+  const [commitmentTitle, setCommitmentTitle] = useState('');
+  const [commitmentDetails, setCommitmentDetails] = useState('');
+  const [commitmentRule, setCommitmentRule] = useState<RecurrenceRule>('daily');
+
+  // Modal: Care Follow-up Composer
+  const [followupModalOpen, setFollowupModalOpen] = useState(false);
+  const [selectedFollowupContact, setSelectedFollowupContact] = useState<PrayerContact | null>(null);
+  const [selectedFollowupCommitment, setSelectedFollowupCommitment] = useState<PrayerCommitment | null>(null);
+  const [followupMessage, setFollowupMessage] = useState(FOLLOWUP_TEMPLATES[0].text);
+  const [followupChannel, setFollowupChannel] = useState<FollowupChannel>('whatsapp');
+  const [copiedSuccess, setCopiedSuccess] = useState(false);
+
+  // Check-in Note Modal
+  const [checkinNoteModalOpen, setCheckinNoteModalOpen] = useState(false);
+  const [pendingCheckinCommitment, setPendingCheckinCommitment] = useState<PrayerCommitment | null>(null);
+  const [privateNote, setPrivateNote] = useState('');
+
+  // ── Multi-Channel Reminders & Digest State ────────────────────────────────
+  const [notificationPermission, setNotificationPermission] = useState<string>('default');
+  const [digestSending, setDigestSending] = useState(false);
+
+  // ── 4-Tier Prayer Escalation Modal State ─────────────────────────────────
+  const [escalationModalOpen, setEscalationModalOpen] = useState(false);
+  const [selectedEscalationPrayer, setSelectedEscalationPrayer] = useState<{
+    id: string;
+    title: string;
+    text: string;
+    escalation_level?: PrayerEscalationLevel;
+    urgency_level?: PrayerUrgencyLevel;
+  } | null>(null);
+
+  // Initial Load
   useEffect(() => {
+    // 1. Load Local Prayer Care Store
+    const store = loadPrayerCareStore();
+    setContacts(store.contacts);
+    setCommitments(store.commitments);
+
+    // 2. Check URL search params for quick action prefill (e.g. from /encourage)
+    //    and for slash-command deep links (e.g. /atlas -> tab=world).
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      if (tab === 'today' || tab === 'circle' || tab === 'community' || tab === 'world' || tab === 'answered') {
+        setActiveTab(tab);
+      }
+      if (urlParams.get('action') === 'new') {
+        const title = urlParams.get('title') || '';
+        const text = urlParams.get('text') || '';
+        if (title || text) {
+          setCommitmentTitle(title);
+          setCommitmentDetails(text);
+          setIsAddCommitmentModalOpen(true);
+        }
+      }
+    }
+
+    // 3. Auth Session Check
     const supabase = getBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -94,64 +224,443 @@ export default function PrayerBoardPage() {
         setDisplayName(name);
       }
     });
-    fetchPrayers();
+
+    // 4. Check browser notification support
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+
+    // 5. Fetch Public Community Prayers
+    fetchPublicPrayers();
   }, []);
 
-  // Derive 3D Globe Pins
-  const globePins = useMemo<MissionMapPin[]>(() => {
-    const submittedPins: MissionMapPin[] = prayers
-      .filter(p => p.latitude != null && p.longitude != null)
-      .map(p => ({
-        id: p.id,
-        latitude: p.latitude!,
-        longitude: p.longitude!,
-        label: p.is_restricted 
-          ? 'Restricted Region' 
-          : (p.country_name ? `${p.country_name} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
-        category: 'prayer',
-        text: p.is_restricted
-          ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
-          : p.request,
-        urgency: 'normal',
-        isRestricted: p.is_restricted ?? false,
-      }));
+  async function fetchPublicPrayers() {
+    setLoadingPublic(true);
+    try {
+      // B14: the Community Wall reads only the server's approved public rows.
+      // Local draft/guest prayers are never mixed into the public feed — that
+      // was the mock-success seam ("pinned to your local map view").
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
 
-    // Merge defaults + submitted pins
-    const merged = [...DEFAULT_MAP_PINS];
-    for (const pin of submittedPins) {
-      if (!merged.find(m => m.id === pin.id)) merged.push(pin);
-    }
-    return merged;
-  }, [prayers]);
+      let serverPrayers: PublicPrayerRequest[] = [];
+      try {
+        const res = await fetch('/api/prayer', { headers });
+        if (res.ok) {
+          const text = await res.text();
+          if (text.trim()) {
+            const data = JSON.parse(text);
+            if (data.success && Array.isArray(data.prayers)) {
+              serverPrayers = data.prayers;
+            }
+          }
+        }
+      } catch (networkErr) {
+        console.warn('Server prayers fetch error:', networkErr);
+      }
 
-  // Handle pin selection on the 3D globe
-  function handleSelectPin(pin: MissionMapPin) {
-    setSelectedPinId(pin.id);
-    const matchedPrayer = prayers.find(p => p.id === pin.id);
-    if (matchedPrayer) {
-      setSelectedPrayer(matchedPrayer);
-    } else {
-      // Default pin fallback
-      setSelectedPrayer({
-        id: pin.id,
-        user_id: null,
-        display_name: pin.label,
-        request: pin.text,
-        likes_count: 12,
-        created_at: new Date().toISOString(),
-        is_restricted: pin.isRestricted,
-      });
+      setPrayers(serverPrayers);
+    } catch (err) {
+      console.error('Failed to fetch public prayers:', err);
+    } finally {
+      setLoadingPublic(false);
     }
   }
 
-  // Handle Prayer increment
-  async function handlePray(id: string) {
+  async function handleEscalateSubmit(data: {
+    prayerId: string;
+    targetLevel: PrayerEscalationLevel;
+    urgencyLevel: PrayerUrgencyLevel;
+    isAnonymous: boolean;
+    churchId?: string;
+    updateNote?: string;
+    atlasConsent?: boolean;
+  }): Promise<boolean> {
+    try {
+      const commitment = commitments.find(item => item.id === data.prayerId);
+      if (!commitment) throw new Error('Prayer commitment not found on this device.');
+
+      if (data.targetLevel === 'atlas') {
+        if (data.atlasConsent !== true) throw new Error('Confirm consent before submitting this prayer for public review.');
+        const { data: { session } } = await getBrowserClient().auth.getSession();
+        if (!session) throw new Error('Sign in before submitting a prayer for public review.');
+        const res = await fetch('/api/prayer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            request: commitment.private_details || commitment.title,
+            display_name: 'BibleDesk member',
+            anonymous: data.isAnonymous,
+            privacy_mode: 'approximate',
+            category: 'community',
+            consent_atlas: true,
+          }),
+        });
+        const result = await res.json();
+        if (!res.ok || !result.success) throw new Error(result.error || 'Unable to submit prayer for review.');
+      }
+
+      const store = loadPrayerCareStore();
+      const updatedCommitments = store.commitments.map(item => item.id === data.prayerId ? {
+        ...item,
+        escalation_level: data.targetLevel,
+        urgency_level: data.urgencyLevel,
+        church_id: data.churchId,
+        is_anonymous: data.isAnonymous,
+        updated_at: new Date().toISOString(),
+      } : item);
+      savePrayerCareStore({ ...store, commitments: updatedCommitments });
+      setCommitments(updatedCommitments);
+      const text = data.targetLevel === 'atlas'
+        ? 'Prayer submitted for public review. It is not public until approved.'
+        : data.targetLevel === 'church'
+          ? 'Church tier recorded on this device. Nothing was sent automatically.'
+          : 'Prayer visibility preference saved on this device.';
+      setMessage({ text, type: 'success' });
+      setTimeout(() => setMessage(null), 5000);
+      return true;
+    } catch (err) {
+      console.error('Failed to escalate prayer:', err);
+      setMessage({ text: err instanceof Error ? err.message : 'Failed to escalate prayer.', type: 'error' });
+      return false;
+    }
+  }
+
+  // ── Due Commitments ("Today in Prayer" Queue) ────────────────────────────
+  const dueCommitments = useMemo(() => {
+    const now = new Date();
+    return commitments.filter(c => {
+      if (c.status !== 'active') return false;
+      const due = new Date(c.next_due_at);
+      return due <= now;
+    });
+  }, [commitments]);
+
+  // Answered Commitments
+  const answeredCommitments = useMemo(() => {
+    return commitments.filter(c => c.status === 'answered');
+  }, [commitments]);
+
+  // Filtered Contacts for "My Circle"
+  const filteredContacts = useMemo(() => {
+    return contacts.filter(c => {
+      if (c.is_archived) return false;
+      if (categoryFilter !== 'all' && c.category !== categoryFilter) return false;
+      return true;
+    });
+  }, [contacts, categoryFilter]);
+
+  // Filtered Community Prayers
+  const filteredPrayers = useMemo(() => {
+    return prayers.filter(p => {
+      if (filterRestricted && !p.is_restricted && p.privacy_mode !== 'restricted') {
+        return false;
+      }
+      if (filterCountry !== 'all' && p.country_code !== filterCountry) {
+        return false;
+      }
+      if (communityCategoryFilter !== 'all') {
+        const cat = inferPrayerCategory(p.request, p.is_restricted, p.category);
+        if (cat !== communityCategoryFilter) return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchText = (p.request || '').toLowerCase().includes(q);
+        const matchAuthor = (p.display_name || '').toLowerCase().includes(q);
+        const matchCountry = (p.country_name || '').toLowerCase().includes(q);
+        if (!matchText && !matchAuthor && !matchCountry) return false;
+      }
+      return true;
+    });
+  }, [prayers, filterRestricted, filterCountry, communityCategoryFilter, searchQuery]);
+
+  // Globe Pins: community prayers with explicit atlas consent + global beacons.
+  // B14 (P0 leak fix): the atlas renders ONLY prayers with consent_atlas=true.
+  // Private / today / circle prayers NEVER appear here — circle commitments
+  // are device-local (C05) and were previously pinned to the world map, which
+  // leaked private prayer text onto a public surface. Those local pins are gone.
+  const globePins = useMemo<MissionMapPin[]>(() => {
+    const submittedPins: MissionMapPin[] = prayers
+      .filter(p => p.consent_atlas === true)
+      .map(p => {
+      let lat = p.latitude != null ? Number(p.latitude) : null;
+      let lng = p.longitude != null ? Number(p.longitude) : null;
+      let countryCode = p.country_code;
+      let countryName = p.country_name;
+      let isRestr = Boolean(p.is_restricted || p.privacy_mode === 'restricted');
+
+      if ((lat == null || lng == null || isNaN(lat) || isNaN(lng)) && countryCode) {
+        const c = getCountryByCode(countryCode);
+        if (c) {
+          lat = c.lat;
+          lng = c.lng;
+          countryName = countryName || c.name;
+          if (c.isRestricted) isRestr = true;
+        }
+      }
+
+      if ((lat == null || lng == null || isNaN(lat) || isNaN(lng)) && countryName) {
+        const c = getCountryByName(countryName);
+        if (c) {
+          lat = c.lat;
+          lng = c.lng;
+          countryCode = countryCode || c.code;
+          if (c.isRestricted) isRestr = true;
+        }
+      }
+
+      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
+        const detected = findCountryInText(p.request);
+        if (detected) {
+          lat = detected.lat;
+          lng = detected.lng;
+          countryCode = countryCode || detected.code;
+          countryName = countryName || detected.name;
+          if (detected.isRestricted) isRestr = true;
+        }
+      }
+
+      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
+        const fallback = getApproximateCoordsForText(p.request, p.id);
+        lat = fallback.lat;
+        lng = fallback.lng;
+        countryName = countryName || fallback.name;
+        countryCode = countryCode || fallback.code;
+        if (fallback.isRestricted) isRestr = true;
+      }
+
+      const jitter = getPinJitter(p.id);
+      const finalLat = (lat ?? 0) + jitter.lat;
+      const finalLng = (lng ?? 0) + jitter.lng;
+
+      const cat = inferPrayerCategory(p.request, isRestr, p.category);
+      const privMode = p.privacy_mode || (isRestr ? 'restricted' : 'approximate');
+
+      return {
+        id: p.id,
+        latitude: finalLat,
+        longitude: finalLng,
+        label: isRestr 
+          ? 'Restricted Region' 
+          : (countryName ? `${countryName} • ${p.display_name || 'Community'}` : (p.display_name || 'Community Prayer')),
+        category: cat,
+        privacy_mode: privMode,
+        text: isRestr
+          ? 'A prayer request from a sensitive or restricted region. Pray for safety, strength, and church perseverance.'
+          : p.request,
+        urgency: 'normal',
+        isRestricted: isRestr,
+        source: 'public' as const,
+        country_code: countryCode,
+        country_name: countryName,
+      };
+    });
+
+    const seenIds = new Set<string>(submittedPins.map(p => p.id));
+    const nonDuplicatedSeeds = DEFAULT_MAP_PINS.filter(seed => !seenIds.has(seed.id));
+
+    return [...submittedPins, ...nonDuplicatedSeeds];
+  }, [prayers]);
+
+  // ── Actions: Check-in & Care Workflow ────────────────────────────────────
+
+  function handleCheckin(commitment: PrayerCommitment, outcome: CheckinOutcome) {
+    if (outcome === 'prayed') {
+      setPendingCheckinCommitment(commitment);
+      setCheckinNoteModalOpen(true);
+    } else {
+      executeCheckin(commitment.id, outcome);
+    }
+  }
+
+  function executeCheckin(commitmentId: string, outcome: CheckinOutcome, note?: string) {
+    const store = loadPrayerCareStore();
+    const result = performCheckin(store, commitmentId, outcome, note);
+    setCommitments(result.store.commitments);
+
+    const commitment = store.commitments.find(c => c.id === commitmentId);
+    const contact = contacts.find(c => c.id === commitment?.contact_id);
+
+    if (outcome === 'prayed' && contact) {
+      // Offer optional follow-up care
+      setSelectedFollowupContact(contact);
+      setSelectedFollowupCommitment(commitment || null);
+      setFollowupMessage(`I prayed for you today regarding "${commitment?.title}". How are you doing?`);
+      setFollowupModalOpen(true);
+    } else if (outcome === 'snoozed') {
+      setMessage({ text: 'Prayer snoozed for 24 hours. Grace over streaks.', type: 'success' });
+      setTimeout(() => setMessage(null), 3500);
+    } else if (outcome === 'answered') {
+      setMessage({ text: 'Praise God! Prayer recorded in your Answered Gratitude log.', type: 'success' });
+      setTimeout(() => setMessage(null), 4000);
+    }
+  }
+
+  function handleCreateCommitment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!commitmentTitle.trim() || !contactName.trim()) return;
+
+    const store = loadPrayerCareStore();
+    // 1. Add contact
+    const { store: storeWithContact, contact } = addContactToStore(store, {
+      display_name: contactName,
+      category: contactCategory,
+      email: contactEmail,
+      phone: contactPhone,
+      is_sensitive: contactSensitive
+    });
+
+    // 2. Add commitment
+    const { store: finalStore } = addCommitmentToStore(storeWithContact, {
+      contact_id: contact.id,
+      title: commitmentTitle,
+      private_details: commitmentDetails,
+      recurrence_rule: commitmentRule
+    });
+
+    setContacts(finalStore.contacts);
+    setCommitments(finalStore.commitments);
+    setIsAddCommitmentModalOpen(false);
+
+    // Reset fields
+    setContactName('');
+    setCommitmentTitle('');
+    setCommitmentDetails('');
+    setContactEmail('');
+    setContactPhone('');
+    setContactSensitive(false);
+
+    setMessage({ text: `Added ${contact.display_name} to your Prayer Circle.`, type: 'success' });
+    setTimeout(() => setMessage(null), 3500);
+  }
+
+  function handleSendFollowup() {
+    if (!followupMessage.trim() || !selectedFollowupContact) return;
+
+    // Record follow-up event in store
+    const store = loadPrayerCareStore();
+    recordFollowupInStore(store, {
+      contact_id: selectedFollowupContact.id,
+      channel: followupChannel,
+      recipient: followupChannel === 'email' 
+        ? selectedFollowupContact.email 
+        : (followupChannel === 'whatsapp' || followupChannel === 'sms')
+          ? selectedFollowupContact.phone 
+          : 'clipboard',
+      message: followupMessage,
+      status: 'sent',
+    });
+
+    if (followupChannel === 'clipboard') {
+      navigator.clipboard.writeText(followupMessage);
+      setCopiedSuccess(true);
+      setTimeout(() => {
+        setCopiedSuccess(false);
+        setFollowupModalOpen(false);
+      }, 1500);
+    } else if (followupChannel === 'whatsapp') {
+      const link = createWhatsAppShareLink(
+        followupMessage,
+        selectedFollowupContact.phone || undefined
+      );
+      window.open(link, '_blank');
+      setFollowupModalOpen(false);
+    } else if (followupChannel === 'sms') {
+      const cleanPhone = (selectedFollowupContact.phone || '').replace(/[^0-9+]/g, '');
+      const body = encodeURIComponent(followupMessage);
+      window.location.href = `sms:${cleanPhone}?body=${body}`;
+      setFollowupModalOpen(false);
+    } else if (followupChannel === 'email') {
+      const email = selectedFollowupContact.email || '';
+      const subject = encodeURIComponent('Thinking of you and praying today');
+      const body = encodeURIComponent(followupMessage);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      setFollowupModalOpen(false);
+    }
+  }
+
+  // ── Multi-Channel Reminder & Digest Handlers ──────────────────────────────
+  async function handleRequestNotificationPermission() {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      setMessage({ text: 'Web push notifications are not supported on this browser.', type: 'error' });
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission === 'granted') {
+        setMessage({ text: 'Prayer reminders enabled! Due commitments are listed in the Today tab \u2014 that is your daily reminder.', type: 'success' });
+        setTimeout(() => setMessage(null), 3500);
+      } else {
+        setMessage({ text: 'Notifications were denied. Please enable them in your browser settings.', type: 'error' });
+      }
+    } catch (e) {
+      console.error('Notification permission error:', e);
+    }
+  }
+
+  function handleSendTestNotification() {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') {
+      handleRequestNotificationPermission();
+      return;
+    }
+    const samplePerson = dueCommitments[0]?.contact_id 
+      ? contacts.find(c => c.id === dueCommitments[0].contact_id)?.display_name 
+      : 'Sarah (Family)';
+    const sampleTitle = dueCommitments[0]?.title || 'Health, peace, and spiritual strength';
+
+    new Notification(`Time to Pray for ${samplePerson}`, {
+      body: `${sampleTitle} — Open BibleDesk to pray and check in.`,
+      icon: '/icon-192.png',
+    });
+
+    setMessage({ text: 'Test reminder notification sent to your device!', type: 'success' });
+    setTimeout(() => setMessage(null), 3500);
+  }
+
+  async function handlePreviewDigest() {
+    setDigestSending(true);
+    try {
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch('/api/prayer/digest', { headers });
+      const data = await res.json();
+
+      if (data.success) {
+        setMessage({ 
+          text: `Digest preview ready (${data.dueCount} prayers scheduled). Preview only — no mail provider is configured.`, 
+          type: 'success' 
+        });
+      } else {
+        setMessage({ 
+          text: data.error || 'Please sign in to preview the daily prayer digest.', 
+          type: 'error' 
+        });
+      }
+    } catch (err) {
+      console.error('Digest preview error:', err);
+      setMessage({ text: 'Failed to generate the prayer digest preview.', type: 'error' });
+    } finally {
+      setDigestSending(false);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  }
+
+  // Public Board Handlers
+  async function handlePublicPray(id: string) {
     if (prayedSession[id]) return;
     setPrayers(prayers.map(p => p.id === id ? { ...p, likes_count: p.likes_count + 1 } : p));
     setPrayedSession({ ...prayedSession, [id]: true });
-    if (selectedPrayer && selectedPrayer.id === id) {
-      setSelectedPrayer({ ...selectedPrayer, likes_count: selectedPrayer.likes_count + 1 });
-    }
     try {
       await fetch('/api/prayer', {
         method: 'PUT',
@@ -163,95 +672,137 @@ export default function PrayerBoardPage() {
     }
   }
 
-  // Handle Prayer Submission
-  async function handleSubmit(e: React.FormEvent) {
+  async function handlePublicSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!newRequest.trim()) return;
 
-    setSubmitting(true);
+    // B14: posting requires sign-in. Anonymous visitors are read-only and see
+    // the sign-in prompt in the composer instead of this handler ever firing.
+    if (!userId) {
+      setMessage({ text: 'Please sign in to share a prayer request on the Community Wall.', type: 'error' });
+      setTimeout(() => setMessage(null), 4000);
+      return;
+    }
+
+    setSubmittingPublic(true);
     setMessage(null);
 
-    const selectedCountry = countryCode ? getCountryByCode(countryCode) : null;
+    let selectedCountry = countryCode ? getCountryByCode(countryCode) : null;
+    if (!selectedCountry) {
+      selectedCountry = findCountryInText(newRequest) || null;
+    }
+    if (!selectedCountry) {
+      selectedCountry = getApproximateCoordsForText(newRequest);
+    }
+
     const isRestrictedSetting = locationPrivacy === 'restricted' || Boolean(selectedCountry?.isRestricted);
+    const countryCodeToUse = selectedCountry?.code ?? 'US';
+    const countryNameToUse = isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? 'Global');
+    const latToUse = selectedCountry ? selectedCountry.lat : 38.8951;
+    const lngToUse = selectedCountry ? selectedCountry.lng : -77.0364;
+    const authorName = (anonymous || isRestrictedSetting) ? 'Anonymous Believer' : (displayName || 'Community Member');
+
+    const tempId = `local-prayer-${Date.now()}`;
+    const optimisticPrayer: PublicPrayerRequest = {
+      id: tempId,
+      user_id: userId,
+      display_name: authorName,
+      request: newRequest.trim(),
+      likes_count: 0,
+      created_at: new Date().toISOString(),
+      country_code: countryCodeToUse,
+      country_name: countryNameToUse,
+      latitude: latToUse,
+      longitude: lngToUse,
+      category: publicCategory,
+      privacy_mode: locationPrivacy,
+      is_restricted: isRestrictedSetting,
+      is_public: true,
+      consent_atlas: consentAtlas,
+      status: 'pending',
+    };
+
+    // 1. Optimistically add to state immediately
+    setPrayers(prev => [optimisticPrayer, ...prev]);
 
     try {
+      const { data: { session } } = await getBrowserClient().auth.getSession();
       const res = await fetch('/api/prayer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
         body: JSON.stringify({
-          request: newRequest,
-          display_name: (anonymous || isRestrictedSetting) ? 'Anonymous Believer' : (displayName || 'Community Member'),
+          request: newRequest.trim(),
+          display_name: authorName,
           anonymous: anonymous || isRestrictedSetting,
-          user_id: userId,
-          country_code: selectedCountry?.code ?? null,
-          country_name: isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? null),
-          latitude: selectedCountry ? selectedCountry.lat : null,
-          longitude: selectedCountry ? selectedCountry.lng : null,
+          country_code: countryCodeToUse,
+          country_name: countryNameToUse,
+          latitude: latToUse,
+          longitude: lngToUse,
+          category: publicCategory,
+          privacy_mode: locationPrivacy,
           is_restricted: isRestrictedSetting,
+          consent_atlas: consentAtlas,
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to submit request');
+      if (!res.ok) throw new Error('Submission was not saved remotely.');
+      let finalId = tempId;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.prayer) {
+          finalId = data.prayer.id;
+          setPrayers(prev =>
+            prev.map(p => (p.id === tempId ? { ...p, id: data.prayer.id } : p))
+          );
+        }
+      }
 
-      setMessage({ text: 'Prayer request pinned to the global map!', type: 'success' });
+      setMessage({ text: 'Prayer received for review. This pin is currently visible only on your device.', type: 'success' });
       setNewRequest('');
       setCountryCode('');
+      setConsentAtlas(false);
       setIsSubmitModalOpen(false);
-
-      setPrayers([data.prayer, ...prayers]);
-      if (data.prayer.latitude && data.prayer.longitude) {
-        setSelectedPinId(data.prayer.id);
-        setSelectedPrayer(data.prayer);
-      }
-      setTimeout(() => setMessage(null), 4000);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit prayer request.';
-      setMessage({ text: errorMessage, type: 'error' });
+      setActiveTab('world');
+    } catch (err: any) {
+      // Network failure: drop the optimistic row, keep the draft, say so.
+      setPrayers(prev => prev.filter(p => p.id !== tempId));
+      console.warn('Prayer submission failed:', err);
+      setMessage({
+        text: 'Could not reach the server. Your request was not shared — please check your connection and try again.',
+        type: 'error',
+      });
+      setSubmittingPublic(false);
+      setTimeout(() => setMessage(null), 5000);
+      return;
     } finally {
-      setSubmitting(false);
+      setSubmittingPublic(false);
     }
   }
-
-  // Filtered Prayers
-  const filteredPrayers = useMemo(() => {
-    return prayers.filter(p => {
-      if (filterRestricted && !p.is_restricted) return false;
-      if (filterCountry !== 'all' && p.country_code !== filterCountry) return false;
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesText = p.request.toLowerCase().includes(q);
-        const matchesAuthor = p.display_name.toLowerCase().includes(q);
-        const matchesCountry = (p.country_name || '').toLowerCase().includes(q);
-        if (!matchesText && !matchesAuthor && !matchesCountry) return false;
-      }
-      return true;
-    });
-  }, [prayers, filterCountry, filterRestricted, searchQuery]);
-
-  function formatDate(dStr: string) {
-    return new Date(dStr).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-    });
-  }
-
-  const selectedCountryEntry = countryCode ? getCountryByCode(countryCode) : null;
 
   return (
     <main className={styles.mainContainer}>
       <div className="container">
         <PageHeader
-          icon={Globe}
-          title="PrayerAtlas — 3D Global Prayer Map"
-          subtitle="Submit prayer requests to the 3D globe, discover requests from worldwide believers, and intercede for sensitive & restricted regions."
+          icon={Heart}
+          title="Pastoral Prayer Care &amp; Intercession"
+          subtitle="A quiet space to remember who you committed to pray for, follow up with genuine pastoral care, and stand with believers worldwide."
           actions={
-            <button
-              onClick={() => setIsSubmitModalOpen(true)}
-              className={styles.pinPrayerHeroBtn}
-            >
-              <Plus size={16} />
-              <span>Pin a Prayer to Map</span>
-            </button>
+            <div className={styles.headerActions}>
+              <button
+                onClick={() => setIsAddCommitmentModalOpen(true)}
+                className={styles.addCareBtn}
+              >
+                <Plus size={16} />
+                <span>Add to Prayer Circle</span>
+              </button>
+              <button
+                onClick={() => setIsSubmitModalOpen(true)}
+                className={styles.pinPrayerHeroBtn}
+              >
+                <Globe size={16} />
+                <span>Pin to Global Map</span>
+              </button>
+            </div>
           }
         />
 
@@ -263,345 +814,704 @@ export default function PrayerBoardPage() {
 
         <PrayerCare />
 
-        {/* View Controls & Filter Bar */}
-        <div className={styles.toolbar}>
-          <div className={styles.viewModeGroup}>
-            <button
-              className={`${styles.viewModeBtn} ${viewMode === 'split' ? styles.viewModeBtnActive : ''}`}
-              onClick={() => setViewMode('split')}
-              title="Split View: 3D Globe + Feed"
-            >
-              <Layers size={14} />
-              <span>Split View</span>
-            </button>
-            <button
-              className={`${styles.viewModeBtn} ${viewMode === 'globe' ? styles.viewModeBtnActive : ''}`}
-              onClick={() => setViewMode('globe')}
-              title="Full 3D Globe View"
-            >
-              <Globe size={14} />
-              <span>3D Globe</span>
-            </button>
-            <button
-              className={`${styles.viewModeBtn} ${viewMode === 'feed' ? styles.viewModeBtnActive : ''}`}
-              onClick={() => setViewMode('feed')}
-              title="Prayer Board Feed"
-            >
-              <Heart size={14} />
-              <span>Feed ({prayers.length})</span>
-            </button>
-          </div>
+        {/* ── Segmented Navigation (Jakob's Law Mobile-Friendly) ─────── */}
+        <nav className={styles.segmentedNav} aria-label="Prayer Workspace Sections">
+          <button
+            className={`${styles.segmentBtn} ${activeTab === 'today' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setActiveTab('today')}
+          >
+            <Clock size={16} />
+            <span>Today in Prayer</span>
+            {dueCommitments.length > 0 && (
+              <span className={styles.badgeCount}>{dueCommitments.length}</span>
+            )}
+          </button>
 
-          <div className={styles.filterGroup}>
-            <div className={styles.searchBox}>
-              <Search size={14} className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search requests, countries, topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
+          <button
+            className={`${styles.segmentBtn} ${activeTab === 'circle' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setActiveTab('circle')}
+          >
+            <UserCheck size={16} />
+            <span>My Circle ({contacts.length})</span>
+          </button>
+
+          <button
+            className={`${styles.segmentBtn} ${activeTab === 'community' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setActiveTab('community')}
+          >
+            <Heart size={16} />
+            <span>Community Wall ({prayers.length})</span>
+          </button>
+
+          <button
+            className={`${styles.segmentBtn} ${activeTab === 'world' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setActiveTab('world')}
+          >
+            <Globe size={16} />
+            <span>World PrayerAtlas</span>
+          </button>
+
+          <button
+            className={`${styles.segmentBtn} ${activeTab === 'answered' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setActiveTab('answered')}
+          >
+            <Sparkles size={16} />
+            <span>Answered ({answeredCommitments.length})</span>
+          </button>
+        </nav>
+
+        {/* ── 1. Tab: Today in Prayer (Due Queue) ────────────────────── */}
+        {activeTab === 'today' && (
+          <section className={styles.sectionContainer}>
+            <div className={styles.sectionIntro}>
+              <h2 className={styles.sectionTitle}>Today&apos;s Intercession Rhythm</h2>
+              <p className={styles.sectionDesc}>
+                Take a quiet moment before God. Mark when you have prayed, take an optional note, or follow up with pastoral care.
+              </p>
             </div>
 
-            <select
-              value={filterCountry}
-              onChange={(e) => setFilterCountry(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">🌍 All Nations ({prayers.length})</option>
-              {COUNTRIES_SORTED.map(c => (
-                <option key={c.code} value={c.code}>{c.name}</option>
-              ))}
-            </select>
-
-            <button
-              onClick={() => setFilterRestricted(!filterRestricted)}
-              className={`${styles.restrictedFilterBtn} ${filterRestricted ? styles.restrictedFilterActive : ''}`}
-              title="Filter to Restricted / Sensitive Regions"
-            >
-              <ShieldAlert size={14} />
-              <span>Sensitive Regions</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Main Workspace Layout */}
-        <div className={`${styles.workspaceGrid} ${styles[`view_${viewMode}`]}`}>
-
-          {/* ── Left / Main: 3D Globe Atlas ────────────────────────── */}
-          {(viewMode === 'split' || viewMode === 'globe') && (
-            <div className={styles.globeColumn}>
-              <div className={`${styles.atlasCard} glass-card`}>
-                <div className={styles.atlasCardHeader}>
-                  <div>
-                    <h2 className={styles.atlasCardTitle}>Interactive Prayer Globe</h2>
-                    <p className={styles.atlasCardSubtitle}>
-                      Drag to rotate • Click any glowing beacon to focus on a country and intercede.
-                    </p>
-                  </div>
-                  <span className={styles.globePinCount}>
-                    <MapPin size={13} /> {globePins.length} Global Beacons
-                  </span>
+            {/* Multi-channel Reminders & Daily Digest Control Bar */}
+            <div className={styles.remindersBanner}>
+              <div className={styles.remindersInfo}>
+                <div className={styles.remindersIcon}>
+                  <Bell size={20} />
                 </div>
-
-                <PrayerAtlas
-                  pins={globePins}
-                  selectedPinId={selectedPinId}
-                  onSelectPin={handleSelectPin}
-                />
-
-                {/* Selected Prayer Spotlight Drawer */}
-                {selectedPrayer && (
-                  <div className={styles.spotlightCard}>
-                    <div className={styles.spotlightHeader}>
-                      <div className={styles.spotlightMeta}>
-                        <span className={selectedPrayer.is_restricted ? styles.spotlightRestricted : styles.spotlightOpen}>
-                          {selectedPrayer.is_restricted ? (
-                            <><ShieldAlert size={13} /> Sensitive Region</>
-                          ) : (
-                            <><MapPin size={13} /> {selectedPrayer.country_name || 'Global Community'}</>
-                          )}
-                        </span>
-                        <strong className={styles.spotlightAuthor}>{selectedPrayer.display_name}</strong>
-                      </div>
-                      <button
-                        onClick={() => { setSelectedPrayer(null); setSelectedPinId(null); }}
-                        className={styles.spotlightClose}
-                      >
-                        <X size={15} />
-                      </button>
-                    </div>
-
-                    <p className={styles.spotlightText}>
-                      &ldquo;{selectedPrayer.is_restricted && selectedPrayer.user_id ? '[Request protected for safety. Pray for peace and perseverance]' : selectedPrayer.request}&rdquo;
-                    </p>
-
-                    <div className={styles.spotlightFooter}>
-                      <button
-                        onClick={() => handlePray(selectedPrayer.id)}
-                        className={`${styles.prayBtn} ${prayedSession[selectedPrayer.id] ? styles.prayBtnActive : ''}`}
-                      >
-                        <Heart size={14} fill={prayedSession[selectedPrayer.id] ? 'currentColor' : 'none'} />
-                        <span>{selectedPrayer.likes_count > 0 ? `${selectedPrayer.likes_count} Amen / Prayed` : 'Pray for This'}</span>
-                      </button>
-
-                      <a
-                        href={createWhatsAppShareLink(
-                          `*Prayer Request for ${selectedPrayer.country_name || 'the Global Church'}*\n\n"${selectedPrayer.request}"\n\n_Join in prayer on BibleDesk:_ https://bibledesk.org/prayer`
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.shareLinkBtn}
-                        title="Share on WhatsApp"
-                      >
-                        <Share2 size={13} />
-                        <span>Share</span>
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── Right / Feed Column: Community Prayer Requests ───────── */}
-          {(viewMode === 'split' || viewMode === 'feed') && (
-            <div className={styles.feedColumn}>
-              <div className={styles.feedHeader}>
-                <h3 className={styles.feedTitle}>Community Prayer Board</h3>
-                <span className={styles.feedCount}>{filteredPrayers.length} requests</span>
+                <div>
+                  <h4 className={styles.remindersTitle}>Daily Intercession Reminders</h4>
+                  <p className={styles.remindersSubtitle}>
+                    {notificationPermission === 'granted'
+                      ? 'Browser notifications are enabled on this device for manual alerts. Due commitments are listed here in the Today tab \u2014 that is your daily reminder.'
+                      : 'Enable browser notifications for manual reminder alerts. Due commitments are always listed here in the Today tab.'}
+                  </p>
+                </div>
               </div>
 
-              {loading ? (
-                <div className={styles.loadingFeed}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="skeleton" style={{ height: '140px', borderRadius: '16px', marginBottom: '1rem' }} />
-                  ))}
-                </div>
-              ) : filteredPrayers.length === 0 ? (
-                <div className={styles.emptyFeed}>
-                  <Globe size={32} className={styles.emptyIcon} />
-                  <p>No prayer requests match your filter.</p>
-                  <button onClick={() => { setFilterCountry('all'); setFilterRestricted(false); setSearchQuery(''); }} className={styles.clearFilterBtn}>
-                    Clear Filters
+              <div className={styles.remindersActions}>
+                {notificationPermission === 'granted' ? (
+                  <button
+                    type="button"
+                    onClick={handleSendTestNotification}
+                    className={styles.reminderActionBtn}
+                    title="Send a sample reminder alert to verify device notifications"
+                  >
+                    <Bell size={14} />
+                    <span>Test Device Alert</span>
                   </button>
-                </div>
-              ) : (
-                <div className={styles.prayerList}>
-                  {filteredPrayers.map((p) => {
-                    const hasPrayed = prayedSession[p.id];
-                    const isSelected = selectedPinId === p.id;
-                    const hasLocation = p.latitude != null && p.longitude != null;
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRequestNotificationPermission}
+                    className={styles.reminderActionBtn}
+                    title="Enable browser notifications"
+                  >
+                    <Bell size={14} />
+                    <span>Enable Reminders</span>
+                  </button>
+                )}
 
-                    return (
-                      <div
-                        key={p.id}
-                        className={`${styles.prayerCard} glass-card ${isSelected ? styles.prayerCardSelected : ''}`}
-                        onClick={() => {
-                          setSelectedPinId(p.id);
-                          setSelectedPrayer(p);
-                        }}
-                      >
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardAuthorRow}>
-                            <span className={styles.cardAuthor}>{p.display_name}</span>
-                            {p.country_name && (
-                              <span className={p.is_restricted ? styles.countryBadgeRestricted : styles.countryBadge}>
-                                {p.is_restricted ? <ShieldAlert size={11} /> : <MapPin size={11} />}
-                                {p.country_name}
-                              </span>
-                            )}
-                          </div>
-                          <span className={styles.cardDate}>{formatDate(p.created_at)}</span>
-                        </div>
+                <button
+                  type="button"
+                  disabled={digestSending}
+                  onClick={handlePreviewDigest}
+                  className={styles.reminderDigestBtn}
+                  title="Preview today's intercession digest — no mail provider is configured"
+                >
+                  <Mail size={14} />
+                  <span>{digestSending ? 'Loading Preview...' : "Preview Today's Digest"}</span>
+                </button>
+              </div>
+            </div>
 
-                        <p className={styles.cardText}>
-                          {p.is_restricted && p.user_id ? '[Request protected for safety. Pray for boldness and peace]' : p.request}
-                        </p>
-
-                        <div className={styles.cardActions}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePray(p.id);
-                            }}
-                            className={`${styles.prayBtnSmall} ${hasPrayed ? styles.prayBtnActive : ''}`}
-                          >
-                            <Heart size={13} fill={hasPrayed ? 'currentColor' : 'none'} />
-                            <span>{p.likes_count > 0 ? `${p.likes_count} Amen` : 'Pray'}</span>
-                          </button>
-
-                          {hasLocation && (
-                            <span className={styles.globeFocusHint}>
-                              <Globe size={12} /> Pin on Map
+            {dueCommitments.length === 0 ? (
+              <div className={`${styles.emptyStateCard} glass-card`}>
+                <div className={styles.emptyStateIcon}><Check size={28} /></div>
+                <h3>You are all caught up for today</h3>
+                <p>
+                  No pending prayer commitments are due right now. Rest in God&apos;s peace or add a new friend or family member to your circle.
+                </p>
+                <button
+                  className={styles.addCommitmentBtn}
+                  onClick={() => setIsAddCommitmentModalOpen(true)}
+                >
+                  <Plus size={16} />
+                  <span>Add Person to Circle</span>
+                </button>
+              </div>
+            ) : (
+              <div className={styles.dueGrid}>
+                {dueCommitments.map(c => {
+                  const contact = contacts.find(cnt => cnt.id === c.contact_id);
+                  return (
+                    <article key={c.id} className={`${styles.careCard} glass-card`}>
+                      <div className={styles.careCardHeader}>
+                        <div className={styles.careCardPerson}>
+                          <span className={styles.careCardName}>
+                            {contact?.display_name || 'Personal Intention'}
+                          </span>
+                          {contact?.category && (
+                            <span className={styles.categoryBadge}>{contact.category}</span>
+                          )}
+                          {contact?.is_sensitive && (
+                            <span className={styles.sensitiveBadge} title="Sensitive entry">
+                              <Lock size={12} /> Sensitive
                             </span>
                           )}
                         </div>
+                        <span className={styles.recurrencePill}>{c.recurrence_rule}</span>
+                      </div>
+
+                      <h4 className={styles.careCardTitle}>{c.title}</h4>
+                      {c.private_details && !contact?.is_sensitive && (
+                        <p className={styles.careCardDetails}>{c.private_details}</p>
+                      )}
+
+                      {/* Auto-detected Scripture & Strong's references */}
+                      {(() => {
+                        const detectedRefs = extractScriptureReferences(`${c.title} ${c.private_details || ''}`);
+                        const detectedStrongs = extractStrongsNumbers(`${c.title} ${c.private_details || ''}`);
+                        if (detectedRefs.length === 0 && detectedStrongs.length === 0) return null;
+                        return (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', margin: '4px 0 8px' }}>
+                            {detectedRefs.map(r => (
+                              <button
+                                key={r}
+                                type="button"
+                                onClick={() => {
+                                  setActiveDrawerTarget({ type: 'verse', id: r });
+                                  setIsKnowledgeDrawerOpen(true);
+                                }}
+                                style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              >
+                                <BookOpen size={10} /> {r}
+                              </button>
+                            ))}
+                            {detectedStrongs.map(s => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => {
+                                  setActiveDrawerTarget({ type: 'strongs', id: s });
+                                  setIsKnowledgeDrawerOpen(true);
+                                }}
+                                style={{ background: 'rgba(79, 156, 249, 0.1)', border: '1px solid rgba(79, 156, 249, 0.3)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              >
+                                <Languages size={10} /> {s}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Action Bar — Thumb-friendly 48px Jakob's Law */}
+                      <div className={styles.careCardActions}>
+                        <button
+                          className={styles.actionPrayedBtn}
+                          onClick={() => handleCheckin(c, 'prayed')}
+                        >
+                          <Check size={16} />
+                          <span>Prayed</span>
+                        </button>
+                        <button
+                          className={styles.actionSnoozeBtn}
+                          onClick={() => handleCheckin(c, 'snoozed')}
+                          title="Snooze for 24 hours without breaking rhythm"
+                        >
+                          <Clock size={15} />
+                          <span>Snooze</span>
+                        </button>
+                        <button
+                          className={styles.actionAnsweredBtn}
+                          onClick={() => handleCheckin(c, 'answered')}
+                          title="Mark answered with praise"
+                        >
+                          <Sparkles size={15} />
+                          <span>Answered</span>
+                        </button>
+                        {contact && (
+                          <button
+                            className={styles.actionFollowupBtn}
+                            onClick={() => {
+                              setSelectedFollowupContact(contact);
+                              setSelectedFollowupCommitment(c);
+                              setFollowupMessage(`I prayed for you today regarding "${c.title}". How are you doing?`);
+                              setFollowupModalOpen(true);
+                            }}
+                            title="Send follow-up care note"
+                          >
+                            <MessageCircle size={15} />
+                            <span>Follow Up</span>
+                          </button>
+                        )}
+                        <button
+                          className={styles.actionSnoozeBtn}
+                          onClick={() => {
+                            setSelectedEscalationPrayer({
+                              id: c.id,
+                              title: c.title,
+                              text: c.private_details || c.title,
+                              escalation_level: c.escalation_level,
+                              urgency_level: c.urgency_level,
+                            });
+                            setEscalationModalOpen(true);
+                          }}
+                          title="Escalate prayer to Circle, Church, or Global Atlas"
+                        >
+                          <TrendingUp size={15} />
+                          <span>Escalate</span>
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── 2. Tab: My Circle ──────────────────────────────────────── */}
+        {/* C05 (owner decision (b)): the circle tab is local-only — it reads/writes
+            localStorage via prayerCareLocal.ts only. No server sync exists. */}
+        {activeTab === 'circle' && (
+          <section className={styles.sectionContainer}>
+            <div className={styles.filterRow}>
+              <div className={styles.categoryChips}>
+                {['all', 'Family', 'Friend', 'Church', 'Missions', 'Healing', 'Work'].map(cat => (
+                  <button
+                    key={cat}
+                    className={`${styles.chipBtn} ${categoryFilter === cat ? styles.chipBtnActive : ''}`}
+                    onClick={() => setCategoryFilter(cat)}
+                  >
+                    {cat === 'all' ? 'All Contacts' : cat}
+                  </button>
+                ))}
+              </div>
+              <button
+                className={styles.addContactInlineBtn}
+                onClick={() => setIsAddCommitmentModalOpen(true)}
+              >
+                <Plus size={15} />
+                <span>Add Person</span>
+              </button>
+            </div>
+
+            <div className={styles.circleGrid}>
+              {filteredContacts.map(contact => {
+                const personCommitments = commitments.filter(c => c.contact_id === contact.id);
+                return (
+                  <div key={contact.id} className={`${styles.circleCard} glass-card`}>
+                    <div className={styles.circleCardHeader}>
+                      <div>
+                        <h4 className={styles.circleName}>{contact.display_name}</h4>
+                        <span className={styles.circleCategory}>{contact.category}</span>
+                      </div>
+                      {contact.is_sensitive && (
+                        <span className={styles.sensitiveTag}><Lock size={12} /> Confidential</span>
+                      )}
+                    </div>
+
+                    <div className={styles.circleCommitmentsList}>
+                      {personCommitments.length === 0 ? (
+                        <p className={styles.noCommitmentsNote}>No active prayer rhythms.</p>
+                      ) : (
+                        personCommitments.map(cm => (
+                          <div key={cm.id} className={styles.circleCommitmentItem}>
+                            <span className={styles.circleCommitmentDot} />
+                            <div className={styles.circleCommitmentContent}>
+                              <span className={styles.circleCommitmentTitle}>{cm.title}</span>
+                              <span className={styles.circleCommitmentSchedule}>{cm.recurrence_rule} • Status: {cm.status}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className={styles.circleCardFooter}>
+                      <button
+                        className={styles.circleQuickPrayBtn}
+                        onClick={() => {
+                          const firstActive = personCommitments.find(c => c.status === 'active');
+                          if (firstActive) handleCheckin(firstActive, 'prayed');
+                        }}
+                      >
+                        <Heart size={14} />
+                        <span>Pray Today</span>
+                      </button>
+                      <button
+                        className={styles.circleFollowupBtn}
+                        onClick={() => {
+                          setSelectedFollowupContact(contact);
+                          setSelectedFollowupCommitment(personCommitments[0] || null);
+                          setFollowupMessage(`You were on my heart today. How can I keep praying for you?`);
+                          setFollowupModalOpen(true);
+                        }}
+                      >
+                        <MessageCircle size={14} />
+                        <span>Care</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── 3. Tab: Community Wall ─────────────────────────────────── */}
+        {activeTab === 'community' && (
+          <section className={styles.sectionContainer}>
+            <div className={styles.toolbar}>
+              <div className={styles.searchBox}>
+                <Search size={14} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search community prayers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+
+              <select
+                value={filterCountry}
+                onChange={(e) => setFilterCountry(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="all">🌍 All Nations ({prayers.length})</option>
+                {COUNTRIES_SORTED.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+
+              <select
+                value={communityCategoryFilter}
+                onChange={(e) => setCommunityCategoryFilter(e.target.value)}
+                className={styles.filterSelect}
+                title="Filter community prayers by category"
+              >
+                <option value="all">All Categories</option>
+                <option value="healing">🕊️ Healing &amp; Health</option>
+                <option value="family">👨‍👩‍👧 Family &amp; Home</option>
+                <option value="missions">🌐 Missions &amp; Outreach</option>
+                <option value="church">⛪ Church &amp; Pastors</option>
+                <option value="work">💼 Career &amp; Work</option>
+                <option value="community">🤝 Community &amp; Friends</option>
+              </select>
+
+              <button
+                onClick={() => setFilterRestricted(!filterRestricted)}
+                className={`${styles.restrictedFilterBtn} ${filterRestricted ? styles.restrictedFilterActive : ''}`}
+              >
+                <ShieldAlert size={14} />
+                <span>Sensitive Regions</span>
+              </button>
+            </div>
+
+            <div className={styles.communityGrid}>
+              {filteredPrayers.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>No community prayers match the selected filters.</p>
+                  <p style={{ fontSize: '0.85rem' }}>Try clearing your category, nation, or search filters.</p>
+                </div>
+              ) : (
+                filteredPrayers.map(p => (
+                <article key={p.id} className={`${styles.communityCard} glass-card`}>
+                  <div className={styles.communityHeader}>
+                    <span className={styles.communityAuthor}>{p.display_name}</span>
+                    {p.country_name && (
+                      <span className={styles.countryTag}>
+                        <MapPin size={12} /> {p.country_name}
+                      </span>
+                    )}
+                  </div>
+                  <p className={styles.communityText}>{p.request}</p>
+
+                  {/* Auto-detected Scripture & Strong's references */}
+                  {(() => {
+                    const detectedRefs = extractScriptureReferences(p.request);
+                    const detectedStrongs = extractStrongsNumbers(p.request);
+                    if (detectedRefs.length === 0 && detectedStrongs.length === 0) return null;
+                    return (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', margin: '4px 0 8px' }}>
+                        {detectedRefs.map(r => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => {
+                              setActiveDrawerTarget({ type: 'verse', id: r });
+                              setIsKnowledgeDrawerOpen(true);
+                            }}
+                            style={{ background: 'rgba(181, 132, 20, 0.1)', border: '1px solid rgba(181, 132, 20, 0.25)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <BookOpen size={10} /> {r}
+                          </button>
+                        ))}
+                        {detectedStrongs.map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => {
+                              setActiveDrawerTarget({ type: 'strongs', id: s });
+                              setIsKnowledgeDrawerOpen(true);
+                            }}
+                            style={{ background: 'rgba(79, 156, 249, 0.1)', border: '1px solid rgba(79, 156, 249, 0.3)', borderRadius: '4px', fontSize: '0.74rem', padding: '2px 6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <Languages size={10} /> {s}
+                          </button>
+                        ))}
                       </div>
                     );
-                  })}
-                </div>
-              )}
+                  })()}
+                  <div className={styles.communityFooter}>
+                    <button
+                      className={`${styles.prayBtn} ${prayedSession[p.id] ? styles.prayBtnActive : ''}`}
+                      onClick={() => handlePublicPray(p.id)}
+                    >
+                      <Heart size={14} />
+                      <span>{p.likes_count} {prayedSession[p.id] ? 'Prayed' : 'Pray'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.viewOnMapBtn}
+                      onClick={() => {
+                        setSelectedPinId(p.id);
+                        setActiveTab('world');
+                      }}
+                      title="View prayer beacon on World PrayerAtlas"
+                    >
+                      <Globe size={13} />
+                      <span>View on Map</span>
+                    </button>
+                  </div>
+                </article>
+              )))}
             </div>
-          )}
+          </section>
+        )}
 
-        </div>
-
-        {/* ── Submit Prayer Modal / Drawer ────────────────────────── */}
-        {isSubmitModalOpen && (
-          <div className={styles.modalOverlay} onClick={() => setIsSubmitModalOpen(false)}>
-            <div className={`${styles.modalCard} glass-card`} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
+        {/* ── 4. Tab: World PrayerAtlas ──────────────────────────────── */}
+        {activeTab === 'world' && (
+          <section className={styles.sectionContainer}>
+            <div className={`${styles.atlasCard} glass-card`}>
+              <div className={styles.atlasCardHeader}>
                 <div>
-                  <h3 className={styles.modalTitle}>Pin a Prayer Request</h3>
-                  <p className={styles.modalSubtitle}>Share with the global body of Christ on the PrayerAtlas map.</p>
+                  <h2 className={styles.atlasCardTitle}>Global Intercession Map</h2>
+                  <p className={styles.atlasCardSubtitle}>
+                    Explore interactive 2D prayer beacons color-coded by category across nations. Pray for missionaries, churches, healing, and restricted regions.
+                  </p>
                 </div>
-                <button onClick={() => setIsSubmitModalOpen(false)} className={styles.modalCloseBtn}>
+                <span className={styles.globePinCount}>
+                  <MapPin size={13} /> {globePins.length} Global Beacons
+                </span>
+              </div>
+              <PrayerAtlas
+                pins={globePins}
+                selectedPinId={selectedPinId}
+                onSelectPin={(pin) => {
+                  setSelectedPinId(pin.id);
+                  const matched = prayers.find(p => p.id === pin.id);
+                  if (matched) setSelectedPrayer(matched);
+                }}
+                onPray={(pin) => {
+                  handlePublicPray(pin.id);
+                  setMessage({ text: `Prayed in spirit for ${pin.label}.`, type: 'success' });
+                  setTimeout(() => setMessage(null), 3000);
+                }}
+                onFollowup={(pin) => {
+                  const matchedContact = contacts.find(c => c.id === pin.contact_id || c.display_name === pin.label);
+                  if (matchedContact) {
+                    setSelectedFollowupContact(matchedContact);
+                    const matchingCommitment = commitments.find(c => c.contact_id === matchedContact.id);
+                    setSelectedFollowupCommitment(matchingCommitment || null);
+                    setFollowupMessage(`I prayed for you today regarding "${pin.text || pin.label}". How are you doing?`);
+                    setFollowupModalOpen(true);
+                  } else {
+                    setSelectedFollowupContact({
+                      id: pin.id,
+                      display_name: pin.label,
+                      category: (pin.category as any) || 'Friend',
+                      is_sensitive: pin.isRestricted,
+                      is_archived: false,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    });
+                    setSelectedFollowupCommitment(null);
+                    setFollowupMessage(`Praying for ${pin.label} today: "${pin.text}"`);
+                    setFollowupModalOpen(true);
+                  }
+                }}
+              />
+            </div>
+          </section>
+        )}
+
+        {/* ── 5. Tab: Answered Prayers & Gratitude ───────────────────── */}
+        {activeTab === 'answered' && (
+          <section className={styles.sectionContainer}>
+            <div className={styles.sectionIntro}>
+              <h2 className={styles.sectionTitle}>Answered Prayers &amp; Gratitude Log</h2>
+              <p className={styles.sectionDesc}>
+                &ldquo;Return to your home, and declare how much God has done for you.&rdquo; (Luke 8:39)
+              </p>
+            </div>
+
+            {answeredCommitments.length === 0 ? (
+              <div className={`${styles.emptyStateCard} glass-card`}>
+                <div className={styles.emptyStateIcon}><Sparkles size={28} /></div>
+                <h3>No prayers marked answered yet</h3>
+                <p>When God moves in response to your intercession, mark the item answered to preserve it in your praise journal.</p>
+              </div>
+            ) : (
+              <div className={styles.answeredGrid}>
+                {answeredCommitments.map(c => {
+                  const contact = contacts.find(cnt => cnt.id === c.contact_id);
+                  return (
+                    <div key={c.id} className={`${styles.answeredCard} glass-card`}>
+                      <div className={styles.answeredHeader}>
+                        <span className={styles.answeredBadge}><Check size={14} /> Answered</span>
+                        <span className={styles.answeredDate}>Updated: {new Date(c.updated_at).toLocaleDateString()}</span>
+                      </div>
+                      <h4 className={styles.answeredTitle}>{c.title}</h4>
+                      <p className={styles.answeredFor}>Prayed for: {contact?.display_name || 'Personal'}</p>
+                      {c.private_details && (
+                        <p className={styles.answeredDetails}>{c.private_details}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── Modal: Add Contact & Prayer Commitment ─────────────────── */}
+        {isAddCommitmentModalOpen && (
+          <div className={styles.modalOverlay} onClick={() => setIsAddCommitmentModalOpen(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h3>Add to Private Prayer Circle</h3>
+                <button 
+                  className={styles.modalCloseBtn}
+                  onClick={() => setIsAddCommitmentModalOpen(false)}
+                >
                   <X size={18} />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className={styles.modalForm}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="modal-name" className={styles.label}>Your Name (Optional)</label>
+              <form onSubmit={handleCreateCommitment} className={styles.modalForm}>
+                <label className={styles.formLabel}>
+                  Person or Group Name *
                   <input
-                    id="modal-name"
                     type="text"
-                    disabled={anonymous || submitting}
-                    value={anonymous ? 'Anonymous Believer' : displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="e.g. Sister Maria, Pastor David, or Guest"
-                    className={styles.input}
+                    required
+                    placeholder="e.g. Sarah, Pastor David, Youth Group"
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                    className={styles.formInput}
                   />
+                </label>
+
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>
+                    Category
+                    <select
+                      value={contactCategory}
+                      onChange={(e) => setContactCategory(e.target.value as PrayerCategory)}
+                      className={styles.formSelect}
+                    >
+                      <option value="Family">Family</option>
+                      <option value="Friend">Friend</option>
+                      <option value="Church">Church</option>
+                      <option value="Missions">Missions</option>
+                      <option value="Healing">Healing</option>
+                      <option value="Work">Work</option>
+                      <option value="Custom">Custom</option>
+                    </select>
+                  </label>
+
+                  <label className={styles.formLabel}>
+                    Prayer Rhythm
+                    <select
+                      value={commitmentRule}
+                      onChange={(e) => setCommitmentRule(e.target.value as RecurrenceRule)}
+                      className={styles.formSelect}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekdays">Weekdays</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="once">One-Time</option>
+                    </select>
+                  </label>
                 </div>
 
-                <div className={styles.checkboxGroup}>
+                <label className={styles.formLabel}>
+                  Prayer Intention / Title *
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Peace during medical treatment, new job interview"
+                    value={commitmentTitle}
+                    onChange={(e) => setCommitmentTitle(e.target.value)}
+                    className={styles.formInput}
+                  />
+                </label>
+
+                <label className={styles.formLabel}>
+                  Private Details (Only visible to you)
+                  <textarea
+                    rows={3}
+                    placeholder="Add specific verses or prayer notes..."
+                    value={commitmentDetails}
+                    onChange={(e) => setCommitmentDetails(e.target.value)}
+                    className={styles.formTextarea}
+                  />
+                </label>
+
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>
+                    Phone (WhatsApp Follow-up)
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      className={styles.formInput}
+                    />
+                  </label>
+                  <label className={styles.formLabel}>
+                    Email (Optional)
+                    <input
+                      type="email"
+                      placeholder="name@example.com"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      className={styles.formInput}
+                    />
+                  </label>
+                </div>
+
+                <div className={styles.checkboxRow}>
                   <input
                     type="checkbox"
-                    id="modal-anon"
-                    checked={anonymous}
-                    onChange={(e) => setAnonymous(e.target.checked)}
-                    className={styles.checkbox}
+                    id="sensitive_check"
+                    checked={contactSensitive}
+                    onChange={(e) => setContactSensitive(e.target.checked)}
                   />
-                  <label htmlFor="modal-anon" className={styles.checkboxLabel}>Submit Anonymously</label>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="modal-request" className={styles.label}>Prayer Request</label>
-                  <textarea
-                    id="modal-request"
-                    required
-                    rows={4}
-                    value={newRequest}
-                    onChange={(e) => setNewRequest(e.target.value)}
-                    placeholder="What would you like the global church community to pray for?"
-                    className={styles.textarea}
-                  />
-                </div>
-
-                {/* Privacy & Location Choice */}
-                <div className={styles.privacySection}>
-                  <label className={styles.label}>Location &amp; Privacy Level</label>
-                  <div className={styles.privacyGrid}>
-                    <button
-                      type="button"
-                      className={`${styles.privacyOption} ${locationPrivacy === 'country_only' ? styles.privacyOptionActive : ''}`}
-                      onClick={() => setLocationPrivacy('country_only')}
-                    >
-                      <Globe size={16} />
-                      <div>
-                        <strong>Country-Level Pin</strong>
-                        <span>Marks the nation on the 3D globe; hides city &amp; exact coordinates.</span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`${styles.privacyOption} ${locationPrivacy === 'restricted' ? styles.privacyOptionActive : ''}`}
-                      onClick={() => setLocationPrivacy('restricted')}
-                    >
-                      <ShieldAlert size={16} />
-                      <div>
-                        <strong>Sensitive / Restricted Region</strong>
-                        <span>Protects identity &amp; exact location with a shield marker for persecuted church prayer.</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="modal-country" className={styles.label}>Select Nation</label>
-                  <select
-                    id="modal-country"
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className={styles.select}
-                  >
-                    <option value="">— Select Country / Region —</option>
-                    {COUNTRIES_SORTED.map(c => (
-                      <option key={c.code} value={c.code}>
-                        {c.name} {c.isRestricted ? '🛡️ (Restricted Region)' : ''}
-                      </option>
-                    ))}
-                  </select>
+                  <label htmlFor="sensitive_check">
+                    Mark as Sensitive (hides details in notification previews)
+                  </label>
                 </div>
 
                 <div className={styles.modalActions}>
                   <button
                     type="button"
-                    onClick={() => setIsSubmitModalOpen(false)}
-                    className={styles.cancelBtn}
+                    className={styles.modalCancelBtn}
+                    onClick={() => setIsAddCommitmentModalOpen(false)}
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    disabled={submitting || !newRequest.trim()}
-                    className={styles.submitBtn}
-                  >
-                    <Send size={15} />
-                    <span>{submitting ? 'Pinning to Globe...' : 'Pin Prayer to Map'}</span>
+                  <button type="submit" className={styles.modalSubmitBtn}>
+                    Save to Prayer Circle
                   </button>
                 </div>
               </form>
@@ -609,6 +1519,330 @@ export default function PrayerBoardPage() {
           </div>
         )}
 
+        {/* ── Modal: Care Follow-up Composer ─────────────────────────── */}
+        {followupModalOpen && (
+          <div className={styles.modalOverlay} onClick={() => setFollowupModalOpen(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <div>
+                  <h3>Send Pastoral Care Follow-up</h3>
+                  <p className={styles.modalSub}>
+                    To: {selectedFollowupContact?.display_name} • Never automated; reviewed by you.
+                  </p>
+                </div>
+                <button 
+                  className={styles.modalCloseBtn}
+                  onClick={() => setFollowupModalOpen(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Channel Selector */}
+              <div className={styles.channelRow}>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'whatsapp' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('whatsapp')}
+                >
+                  <MessageCircle size={16} />
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'email' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('email')}
+                >
+                  <Mail size={16} />
+                  <span>Email</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'sms' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('sms')}
+                >
+                  <Phone size={16} />
+                  <span>SMS</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.channelBtn} ${followupChannel === 'clipboard' ? styles.channelBtnActive : ''}`}
+                  onClick={() => setFollowupChannel('clipboard')}
+                >
+                  <Copy size={16} />
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              {/* Template Picker */}
+              <div className={styles.templateList}>
+                <span className={styles.templateLabel}>Choose a Template:</span>
+                {FOLLOWUP_TEMPLATES.map(tmpl => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    className={styles.templatePill}
+                    onClick={() => setFollowupMessage(tmpl.text)}
+                  >
+                    {tmpl.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Editable Message Box */}
+              <textarea
+                rows={4}
+                value={followupMessage}
+                onChange={(e) => setFollowupMessage(e.target.value)}
+                className={styles.followupTextarea}
+                placeholder="Write your personal encouragement..."
+              />
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.modalCancelBtn}
+                  onClick={() => setFollowupModalOpen(false)}
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="button"
+                  className={styles.modalSubmitBtn}
+                  onClick={handleSendFollowup}
+                >
+                  {copiedSuccess ? (
+                    <>
+                      <Check size={16} />
+                      <span>Copied to Clipboard!</span>
+                    </>
+                  ) : followupChannel === 'whatsapp' ? (
+                    <>
+                      <MessageCircle size={16} />
+                      <span>Open in WhatsApp</span>
+                    </>
+                  ) : followupChannel === 'email' ? (
+                    <>
+                      <Mail size={16} />
+                      <span>Open Email Draft</span>
+                    </>
+                  ) : followupChannel === 'sms' ? (
+                    <>
+                      <Phone size={16} />
+                      <span>Open SMS App</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} />
+                      <span>Copy Message</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Modal: Optional Check-in Note ──────────────────────────── */}
+        {checkinNoteModalOpen && pendingCheckinCommitment && (
+          <div className={styles.modalOverlay} onClick={() => setCheckinNoteModalOpen(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h3>Mark as Prayed</h3>
+                <button 
+                  className={styles.modalCloseBtn}
+                  onClick={() => setCheckinNoteModalOpen(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p className={styles.notePrompt}>
+                Add an optional private reflection or prayer scripture for &ldquo;{pendingCheckinCommitment.title}&rdquo;:
+              </p>
+              <textarea
+                rows={3}
+                placeholder="e.g. Sensed peace from Philippians 4:6-7..."
+                value={privateNote}
+                onChange={(e) => setPrivateNote(e.target.value)}
+                className={styles.formTextarea}
+              />
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.modalCancelBtn}
+                  onClick={() => {
+                    executeCheckin(pendingCheckinCommitment.id, 'prayed');
+                    setCheckinNoteModalOpen(false);
+                    setPrivateNote('');
+                  }}
+                >
+                  Skip Note
+                </button>
+                <button
+                  type="button"
+                  className={styles.modalSubmitBtn}
+                  onClick={() => {
+                    executeCheckin(pendingCheckinCommitment.id, 'prayed', privateNote);
+                    setCheckinNoteModalOpen(false);
+                    setPrivateNote('');
+                  }}
+                >
+                  Save &amp; Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Modal: Public Prayer Submission ────────────────────────── */}
+        {isSubmitModalOpen && (
+          <div className={styles.modalOverlay} onClick={() => setIsSubmitModalOpen(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h3>Pin Prayer Request to Global Map</h3>
+                <button 
+                  className={styles.modalCloseBtn}
+                  onClick={() => setIsSubmitModalOpen(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* B14: posting requires sign-in. Anonymous visitors get a
+                  read-only wall and a sign-in prompt here. */}
+              {!userId ? (
+                <div className={styles.modalForm}>
+                  <p className={styles.sectionDesc}>
+                    The Community Wall and PrayerAtlas are public. Please sign in to share
+                    a prayer request — anonymous posting is not supported.
+                  </p>
+                  <div className={styles.modalActions}>
+                    <button
+                      type="button"
+                      className={styles.modalCancelBtn}
+                      onClick={() => setIsSubmitModalOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <a href="/login" className={styles.modalSubmitBtn} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      Sign In to Share
+                    </a>
+                  </div>
+                </div>
+              ) : (
+              <form onSubmit={handlePublicSubmit} className={styles.modalForm}>
+                <label className={styles.formLabel}>
+                  Your Prayer Request *
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Share what you are believing God for..."
+                    value={newRequest}
+                    onChange={(e) => setNewRequest(e.target.value)}
+                    className={styles.formTextarea}
+                  />
+                </label>
+
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>
+                    Prayer Category
+                    <select
+                      value={publicCategory}
+                      onChange={(e) => setPublicCategory(e.target.value)}
+                      className={styles.formSelect}
+                    >
+                      <option value="community">Community &amp; Civic</option>
+                      <option value="healing">Healing &amp; Recovery</option>
+                      <option value="church">Church &amp; Leadership</option>
+                      <option value="missions">Missions &amp; Outreach</option>
+                      <option value="family">Family &amp; Marriage</option>
+                      <option value="work">Work &amp; Calling</option>
+                    </select>
+                  </label>
+
+                  <label className={styles.formLabel}>
+                    Nation / Country
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className={styles.formSelect}
+                    >
+                      <option value="">Select country...</option>
+                      {COUNTRIES_SORTED.map(c => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>
+                    Map Highlight &amp; Privacy Level
+                    <select
+                      value={locationPrivacy}
+                      onChange={(e) => setLocationPrivacy(e.target.value as any)}
+                      className={styles.formSelect}
+                    >
+                      <option value="approximate">Approximate Region (Country Capital Centroid)</option>
+                      <option value="precise">Precise Pinpoint Beacon</option>
+                      <option value="restricted">Restricted Region Shield (Protected Location)</option>
+                    </select>
+                  </label>
+                </div>
+
+                {/* B14: explicit opt-in — the atlas shows ONLY consented prayers.
+                    Without this, the request appears on the Community Wall only. */}
+                <div className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    id="atlas_consent_check"
+                    checked={consentAtlas}
+                    onChange={(e) => setConsentAtlas(e.target.checked)}
+                  />
+                  <label htmlFor="atlas_consent_check">
+                    Show on the World PrayerAtlas map (approximate region only). I understand this prayer becomes public.
+                  </label>
+                </div>
+
+                <div className={styles.modalActions}>
+                  <button
+                    type="button"
+                    className={styles.modalCancelBtn}
+                    onClick={() => setIsSubmitModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={submittingPublic}
+                    className={styles.modalSubmitBtn}
+                  >
+                    {submittingPublic ? 'Submitting...' : 'Submit to Prayer Wall'}
+                  </button>
+                </div>
+              </form>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── 4-Tier Prayer Escalation Modal ── */}
+        <PrayerEscalationModal
+          isOpen={escalationModalOpen}
+          onClose={() => {
+            setEscalationModalOpen(false);
+            setSelectedEscalationPrayer(null);
+          }}
+          prayer={selectedEscalationPrayer}
+          onEscalate={handleEscalateSubmit}
+        />
+
+        <ConnectedKnowledgeDrawer
+          isOpen={isKnowledgeDrawerOpen}
+          onClose={() => setIsKnowledgeDrawerOpen(false)}
+          entityType={activeDrawerTarget.type}
+          entityId={activeDrawerTarget.id}
+        />
       </div>
     </main>
   );

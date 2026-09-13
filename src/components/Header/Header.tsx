@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Search, BookOpen, LogIn, LogOut } from 'lucide-react';
-import { getBrowserClient } from '@/lib/supabase';
+import { Search, BookOpen, LogIn, LogOut, Radio } from 'lucide-react';
+import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
@@ -31,26 +31,66 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    function checkUser() {
+      const supabase = getBrowserClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+          const local = localStorage.getItem('bibledesk_local_user');
+          if (local) {
+            try {
+              setUser(JSON.parse(local));
+            } catch {
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      });
+    }
+
+    checkUser();
     const supabase = getBrowserClient();
-    
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+        const local = localStorage.getItem('bibledesk_local_user');
+        if (local) {
+          try {
+            setUser(JSON.parse(local));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
     });
 
-    // Listen to changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const handleStorage = () => checkUser();
+    window.addEventListener('storage', handleStorage);
 
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
 
   async function handleSignOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('bibledesk_local_user');
+      window.dispatchEvent(new Event('storage'));
+    }
     const supabase = getBrowserClient();
     await supabase.auth.signOut();
+    setUser(null);
     router.push('/');
     router.refresh();
   }
@@ -76,6 +116,30 @@ export default function Header() {
             <kbd className={styles.quickJumpKbd}>Ctrl K</kbd>
           </button>
 
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('bibledesk:open-radio'))}
+            title="Open Christian Worship Radio & Ambient Praise"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(181, 132, 20, 0.12)',
+              border: '1px solid rgba(181, 132, 20, 0.3)',
+              color: '#d4af37',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              marginLeft: '6px',
+              height: '36px',
+            }}
+          >
+            <Radio size={14} />
+            <span>Radio</span>
+          </button>
+
           <nav className={styles.nav} aria-label="Main navigation">
           {NAV_LINKS.map(({ href, label }) => {
             const pathOnly = href.split('#')[0] || '/';
@@ -97,7 +161,7 @@ export default function Header() {
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>
-                {user.user_metadata?.name || user.email?.split('@')[0]}
+                {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
               </span>
               <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
                 <LogOut size={14} />

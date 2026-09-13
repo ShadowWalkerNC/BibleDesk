@@ -1,8 +1,9 @@
-/* ── App Shell ──────────────────────────────────────────────── */
+/* ── App Shell — Tinted Sage Devotional ─────────────────────── */
 
 .shell {
   display: flex;
-  height: 100vh;
+  height: 100vh; /* fallback */
+  height: 100dvh;
   overflow: hidden;
   background: var(--navy-950);
 }
@@ -15,11 +16,11 @@
   margin-left: 220px;
   transition: margin-left 0.25s var(--ease-out);
   background: var(--navy-950);
-  /* Subtle inner vellum gradient */
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 230, 200, 0.5), transparent 75%),
-    radial-gradient(ellipse 60% 60% at 15% 75%, rgba(255, 252, 245, 0.4), transparent);
-  min-height: 100vh;
+    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
+    linear-gradient(125deg, rgba(107, 142, 123, 0.16), transparent 42%);
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
 }
 
 .mainCollapsed {
@@ -30,13 +31,32 @@
 .main::-webkit-scrollbar { width: 6px; }
 .main::-webkit-scrollbar-track { background: transparent; }
 .main::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 3px; }
-.main::-webkit-scrollbar-thumb:hover { background: var(--gold-600); }
+.main::-webkit-scrollbar-thumb:hover { background: var(--sage); }
+
+/* ── Skip link (first tab stop; visible on focus) ──────────── */
+.skipLink {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 10000;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: top 0.2s var(--ease-out);
+}
+.skipLink:focus-visible {
+  top: 0.75rem;
+}
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
-    padding-bottom: 72px; /* Space for bottom nav rail on mobile */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
   .mainCollapsed {
     margin-left: 0;

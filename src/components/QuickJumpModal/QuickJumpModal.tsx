@@ -98,7 +98,7 @@ export default function QuickJumpModal({ isOpen, onClose, onSelect }: QuickJumpM
 
   return (
     <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true" aria-label="Quick Jump to Scripture">
-      <div className={`${styles.modal} glass-card`} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Header Search Input */}
         <div className={styles.modalHeader}>
           <div className={styles.searchBar}>

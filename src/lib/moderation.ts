@@ -19,6 +19,7 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import type { BibleAnswer } from '@/types';
+import { getAppUrl } from '@/lib/appUrl';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -433,7 +434,7 @@ export async function inviteModerator(data: InviteData): Promise<boolean> {
     const { error: authErr } = await supabase.auth.admin.inviteUserByEmail(
       data.email,
       {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/mod`,
+        redirectTo: `${getAppUrl()}/mod`,
         data: { name: data.name, role: data.role ?? 'moderator' },
       }
     );

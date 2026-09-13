@@ -1,6 +1,12 @@
 -- BibleDesk — Supabase RPC Functions
 -- Run this in: Supabase Dashboard → SQL Editor
 -- Required by rag.ts for pgvector similarity search
+--
+-- Order: 10 — apply after supabase/schema-v9.sql (needs canonical_answers
+-- from schema.sql/schema-v2.sql and the pgvector extension)
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 
 -- ── match_canonical_answers ───────────────────────────────────────────
 -- Called by rag.ts → searchCanonicalAnswers()

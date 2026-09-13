@@ -1,0 +1,46 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.dictionary {
+  color: #1d7a4f;
+  border-color: rgba(29, 122, 79, 0.45);
+  background: rgba(29, 122, 79, 0.08);
+}
+
+.curated {
+  color: #9a6b0f;
+  border-color: rgba(181, 132, 20, 0.45);
+  background: rgba(181, 132, 20, 0.08);
+}
+
+.ai {
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.45);
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.sample {
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.45);
+  background: rgba(107, 114, 128, 0.08);
+}

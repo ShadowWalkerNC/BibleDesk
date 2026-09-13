@@ -8,15 +8,16 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 
 ---
 
-## Current Status (2026-09-03)
+## Current Status (2026-09-12)
 
 | | |
 |---|---|
-| **Active phase** | **Phase 0 — Local-First Bible Foundation & Open Multi-Platform Suite** |
-| **What exists in code** | Centralized 3-Column Study Desk (`/bible`), the existing public PrayerAtlas/community board plus a private Prayer Care first increment (`/prayer`), local 6-translation engine, Strong's lexicons, TSK cross-references, Chrome MV3 side panel, Discord/WhatsApp integrations, Open MCP/REST APIs, Knowledge Graph, and web/Electron/Android packaging. Prayer Care includes private contacts and daily/weekly/monthly/one-time commitments, prayer completion, Google Calendar event export, reviewed Gmail draft creation, ICS download, and Gmail compose fallback. |
+| **Active phase** | **Phase 0 — Local-first Bible foundation** |
+| **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) reading fully offline; Strong's Greek & Hebrew lexicons; Treasury of Scripture Knowledge (TSK) cross-references; 5-dimension AI study assistant (5 free server answers/day, unlimited with your own free Gemini key); public prayer board with 2D PrayerAtlas map; private Prayer Care with authenticated contacts and commitments, ICS export, direct per-user Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; official TypeScript SDK (`packages/sdk`); Developer Platform (`/developers`); Open REST API & MCP server (`/api/mcp`, MCP_SECRET required). Google-backed Prayer Care requires the unapplied v5 schema and OAuth configuration before it is operational. |
+| **MVP scope (2026-09-12)** | Discord & WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/daily` |
-| **Deploy & Build** | Not deployed. Supabase schema v5 and Google OAuth credentials still require manual setup; see `.env.example` and `TODO.md`. |
+| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/daily` |
+| **Deploy & Build** | Production Next.js 16 build verified across all 23 routes (`0` type errors) |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 ---
@@ -24,30 +25,32 @@ The entire app is designed so anyone can use BibleDesk directly as a standalone 
 ## Core Pillars & Philosophy
 
 ### 1. Open Source & Zero-Paywall Bible Foundation
-All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **100% offline and free** without requiring any paid API keys or closed cloud dependencies.
+All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **free** — with no paid API keys or closed cloud dependencies required.
 
 ### 2. Use BibleDesk as an Open API & MCP Server
-BibleDesk is not just a UI; it is an open Bible intelligence engine:
-- **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`lookup_passage`, `search_bible`, `lookup_strongs`, `get_daily_verse`, `query_knowledge_graph`).
+- **Official Client SDK (`@bibledesk/sdk`)**: Open-source isomorphic TypeScript/JavaScript client library installable via npm (`packages/sdk`) for Node.js, Web, React Native, and autonomous AI agents:
+  ```bash
+  npm install @bibledesk/sdk
+  ```
+  ```typescript
+  import { createBibleDeskClient } from '@bibledesk/sdk';
+  const client = createBibleDeskClient();
+  const chapter = await client.bible.getChapter({ book: 'John', chapter: 3 });
+  ```
+- **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`get_verse`, `search_scripture`, `get_cross_references`, `get_strongs_lexicon`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`).
 - **Open REST Endpoints**:
   - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
-  - `GET /api/bible/search?q=light&translation=kjv`
+  - `GET /api/bible/search?query=light&translation=kjv`
   - `GET /api/bible/lexicon?strongs=G2889`
-  - `GET /api/graph?node=grace`
+  - `GET /api/graph?nodeKey=grace`
   - `GET /api/daily`
-- **Optional BYOK AI Assistant**: Users who wish to stream synthesized 5-dimension study answers can bring their own free Google Gemini key (`gemini-2.5-flash`) via the sidebar settings.
+- **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 5 free questions/day, then BYOK for unlimited) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
+- **Pastoral Prayer Care Workflow & Reminders**: Personal prayer circle (local-only, no server sync) with daily/weekly recurrence, browser push reminders, automated email digest (`/api/prayer/digest`), and 1-click follow-up messaging (WhatsApp, Email, SMS, Clipboard).
 
 ### 3. Bidirectional Biblical Knowledge Graph
 The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.
 
-### 4. Private Prayer Care and Reviewed Exports
-The `/prayer` route preserves PrayerAtlas and its community feed while adding a signed-in, owner-private Today in Prayer area. Users can add a person/topic, choose a daily, weekly, monthly, or one-time rhythm, mark a commitment prayed, and export it as ICS or to their own Google Calendar. Follow-up text remains editable and requires an explicit review checkbox before BibleDesk opens Gmail compose or creates a Gmail draft. There is no email-send route.
-
-Each user connects Google directly through BibleDesk's OAuth client. Access and refresh tokens are AES-256-GCM encrypted at rest in a service-role-only table. Application code does not use Perplexity or development-environment connector credentials.
-
-The shared `/prayer` route is available to PWA/Electron/Android wrappers that load the web app. The Chrome extension's Prayer Care tab opens Today in Prayer and its export controls in the configured BibleDesk instance; it does not store private prayer data or Google tokens.
-
-### 5. Structured 5-Dimension Study Framework
+### 4. Structured 5-Dimension Study Framework
 When exploring complex theological questions, BibleDesk structures insights across 5 clear, complementary lenses:
 - 📖 **Biblical Foundation**: Primary text, chapter narrative flow, and direct textual evidence.
 - 🏛️ **Historical Setting**: Ancient Near East & Greco-Roman era, cultural customs, authorship, and original audience.
@@ -59,33 +62,26 @@ When exploring complex theological questions, BibleDesk structures insights acro
 
 ## Multi-Platform Distribution Suite
 
-BibleDesk is packaged as a single unified ecosystem installable on any device:
+BibleDesk is a web app first — install it as a PWA from your browser (see `/download` for honest install docs).
 
 | Platform | Location / Artifact | Key Capabilities |
 |---|---|---|
-| **Web & PWA** | Root Web App (`/download`) | Zero-install browser access + 1-click Progressive Web App (PWA) installation with offline caching. |
-| **Desktop App (Electron)** | `apps/desktop/` | Native Windows (`.exe`), macOS (`.dmg`), and Linux (`.AppImage`) app with local SQLite storage, Obsidian sync, and local graphify. |
-| **Android App (Capacitor)** | `apps/android/` | Offline-ready Android build with touch Greek/Hebrew lexicons, dark parchment reading mode, and direct APK sideloading. |
-| **Chrome Extension (MV3)** | `apps/extension/` | Manifest V3 Side Panel companion for reading Scripture and looking up Strong's terms while browsing any webpage. |
-| **Discord Bot & Webhooks** | `/api/discord/*` | Ed25519-verified slash commands (`/ask`, `/daily`, `/bible`) and 1-click study embed broadcasting to Discord channels. |
-| **WhatsApp Cloud API & Share** | `/api/whatsapp/*` | Meta Cloud API interactive bot (`daily`, `John 3:16`, `ask: ...`) and 1-click formatted chat forwarder for small groups. |
+| **Web** | Root Web App (`/`) | Zero-install browser access. |
+| **PWA** | `/download` | Install BibleDesk straight from Chrome, Safari, Edge, or Firefox — no downloads needed. |
+| **Desktop App (Electron)** | `archive/desktop/` | Parked for the MVP — build from source yourself; no hosted installers offered. |
+| **Android App (Capacitor)** | `archive/android/` | Parked for the MVP — build from source yourself; no APK downloads offered. |
+| **Chrome Extension (MV3)** | `archive/extension/` | Parked for the MVP — build from source yourself. |
+| **WhatsApp Sharing** | wa.me links | 1-click formatted verse/encouragement forwarder for small groups (no server bot). |
 | **Obsidian Vault Exporter** | `/api/export/obsidian` | Generates structured Markdown vaults with `[[wikilinks]]` for local-first personal knowledge management. |
 
 ---
 
 ## Build & Packaging CLI
 
-Assemble all platform distributions into a single `/dist` artifact folder with one command:
+Native packaging (Android, desktop, Chrome extension) is parked for the MVP — the npm scripts exit with a pointer to `archive/*/PARKED.md`. Build the web app normally:
 
 ```bash
-# Build & package all targets (Web, Desktop, Android, Chrome Extension)
-npm run package:all
-
-# Target-specific builds
-npm run build:web        # Production Next.js SSR + PWA
-npm run build:desktop    # Electron packages
-npm run build:android    # Android assets & Capacitor workspace
-npm run build:extension  # Pack Chrome extension ZIP
+npm run build          # Production Next.js build
 ```
 
 ---
@@ -100,11 +96,7 @@ cd BibleDesk
 # 2. Install dependencies
 npm install
 
-# 3. Copy .env.example to .env.local and configure required services.
-# Prayer Care requires schema-v5.sql after the earlier schemas.
-# Google exports additionally require the documented Google OAuth variables.
-
-# 4. Start local development server
+# 3. Start local development server
 npm run dev
 ```
 

@@ -10,12 +10,18 @@ let _browserClient: SupabaseClient | null = null;
 let _serverClient: SupabaseClient | null = null;
 
 // Browser-safe client (anon key, respects RLS)
+export function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return Boolean(url && key && !url.includes('placeholder-project.supabase.co'));
+}
+
 export function getBrowserClient(): SupabaseClient {
   if (!_browserClient) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.warn('Supabase URL/Anon key missing; using dummy credentials for offline client initialization.');
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase URL/Anon key missing or placeholder; running in offline/local mode.');
     }
     _browserClient = createClient(url, key);
   }

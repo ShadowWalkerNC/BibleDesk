@@ -2,6 +2,11 @@
 -- Run in the Supabase SQL editor AFTER schema.sql and schema-v2.sql
 -- Safe to re-run: uses IF NOT EXISTS / DO $$ blocks throughout
 --
+-- Order: 3 — apply after supabase/schema-v2.sql
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
+--
 -- New tables:
 --   graph_nodes   — concepts extracted from questions/answers
 --   graph_edges   — typed, confidence-weighted relationships between nodes
@@ -125,27 +130,14 @@ CREATE POLICY "graph_edges_public_read"
 
 -- Writes are service_role only (no INSERT/UPDATE/DELETE policy = deny for anon)
 
--- ─── 6. Phase 2: PrayerAtlas Schema ─────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS prayer_requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  schema_version INT NOT NULL DEFAULT 1,
-  key_version INT,
-  text_ciphertext TEXT,
-  wrapped_dek TEXT,
-  nonce TEXT,
-  text_plain TEXT,
-  location_tier TEXT NOT NULL DEFAULT 'country_only',
-  location_label TEXT,
-  is_restricted_region BOOLEAN NOT NULL DEFAULT false,
-  urgency TEXT DEFAULT 'normal',
-  category TEXT DEFAULT 'general',
-  status TEXT NOT NULL DEFAULT 'pending',
-  submitter_hash TEXT,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  deleted_at TIMESTAMPTZ
-);
+-- ─── 6. Phase 2: PrayerAtlas companion tables ────────────────────────────────
+-- NOTE (B04): this file previously defined public.prayer_requests with an
+-- encrypted-atlas shape. That conflicted with the canonical definition in
+-- schema-v4.sql (public board + geo columns), and the v4 CREATE TABLE IF NOT
+-- EXISTS silently lost on fresh deploys. The canonical prayer_requests
+-- definition now lives ONLY in schema-v4.sql; v4 shape + v7 geo columns wins.
+-- prayer_engagements / prayer_updates reference it via FKs added in
+-- schema-v4.sql (the table does not exist yet at this point in the chain).
 
 CREATE TABLE IF NOT EXISTS missionary_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -161,7 +153,9 @@ CREATE TABLE IF NOT EXISTS missionary_profiles (
 
 CREATE TABLE IF NOT EXISTS prayer_engagements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  request_id UUID REFERENCES prayer_requests(id),
+  -- FK to public.prayer_requests is added in schema-v4.sql, where the
+  -- canonical prayer_requests table is defined (it does not exist yet here).
+  request_id UUID,
   action TEXT NOT NULL,
   user_hash TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
@@ -169,36 +163,15 @@ CREATE TABLE IF NOT EXISTS prayer_engagements (
 
 CREATE TABLE IF NOT EXISTS prayer_updates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  request_id UUID REFERENCES prayer_requests(id),
+  -- FK to public.prayer_requests is added in schema-v4.sql (see above).
+  request_id UUID,
   update_text TEXT,
   is_answered BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Enable RLS
-ALTER TABLE prayer_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE missionary_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prayer_engagements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prayer_updates ENABLE ROW LEVEL SECURITY;
-
--- Policies for prayer_requests
-DROP POLICY IF EXISTS "public can read published requests" ON prayer_requests;
-CREATE POLICY "public can read published requests"
-  ON prayer_requests FOR SELECT
-  USING (status = 'published' AND deleted_at IS NULL);
-
-DROP POLICY IF EXISTS "moderators can read all" ON prayer_requests;
-CREATE POLICY "moderators can read all"
-  ON prayer_requests FOR SELECT
-  USING (auth.role() = 'moderator');
-
-DROP POLICY IF EXISTS "anyone can insert pending" ON prayer_requests;
-CREATE POLICY "anyone can insert pending"
-  ON prayer_requests FOR INSERT
-  WITH CHECK (status = 'pending');
-
-DROP POLICY IF EXISTS "only moderators can update status" ON prayer_requests;
-CREATE POLICY "only moderators can update status"
-  ON prayer_requests FOR UPDATE
-  USING (auth.role() = 'moderator');
 

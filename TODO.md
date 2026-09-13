@@ -1,21 +1,39 @@
 # BibleDesk — TODO
 
-> **Current phase:** Phase 0 — Local-first Bible foundation (Complete)  
-> **Last updated:** 2026-09-03
+> **Current phase:** Phase 0 — Local-first Bible foundation (security hardening; release verification pending)
+> **Last updated:** 2026-09-13
 > **Single source of truth** for work state. README = product vision. ARCHITECTURE = system design. AGENTS = agent rules.
 
 ---
 
 ## Status Snapshot
 
+### GitHub/Muse integration review (2026-09-13)
+
+- [x] Integrated the 35-patch MVP, recovery, and docs changes from GitHub into the Prayer Care Google-export branch; removed committed conflict artifacts from build-critical files.
+- [x] Public prayer filtering, safe response fields, pending review on submission, no automatic Discord forwarding.
+- [x] Configured authentication errors remain errors; unconfigured login creates a labeled device-only profile.
+- [x] Guest bookmark/highlight migration retains failed records in a retry queue; local Prayer Circle data is not deleted by login sync.
+- [x] Local commitment escalation now records local tiers on-device and creates a separate moderated Atlas submission only with explicit consent and a verified session.
+- [x] Direct per-user Google OAuth, Calendar/ICS export, and reviewed Gmail draft creation retained; tokens are encrypted and server-only.
+- [x] Seven active security regressions pass; typecheck and the 27-route production build exit 0 on Next.js 16.3.5.
+- [x] Full lint exits 0 with 53 warnings. Archived code and the QA recording utility are excluded from the active-app lint gate.
+- [x] Production dependency audit reports 0 vulnerabilities after the Next.js 16.3.5 and compatible transitive dependency updates.
+- [ ] Validate and apply `supabase/migrations/20260911130215_secure_prayer_visibility.sql` in a disposable/staging database after legacy schema reconciliation. Local Docker was unavailable; no database changes have been executed.
+- [ ] Validate and apply the private Prayer Care/Google connection schema before enabling those workflows in production.
+- [ ] Exercise real sessions, database grants/RLS, moderation, and anonymous/owner/other-user prayer access end to end.
+- [ ] Complete remaining release work: grounded AI failures, guest-sync retention, other route/integration authorization, rate-limit durability, dependency remediation, deployment configuration and deployed smoke tests.
+
+See [validation and rollout details](docs/SECURITY_BATCH_1.md). Historical feature checklists below are not release acceptance evidence.
+
 | Area | Reality |
 |---|---|
 | Product direction | Bible-first study platform; AI is an assistant layer |
-| Codebase | Large feature surface already shipped in-repo (reader, AI pipeline, church tools) |
-| Bible data | Still depends on **bible-api.com** (online). Local Midvash/OpenScriptures corpus **not** built |
-| Original language | Reader “Strong’s / commentary” is **AI-assisted** (Gemini), not lexicon-backed offline data |
-| Deploy | **Not live** — Supabase schemas (including v5) + env vars + host still need production setup |
-| Docs | Aligned as of 2026-08-09 (this file / README / ARCHITECTURE / AGENTS) |
+| Codebase | Web MVP active; sermons, church, creators, and native/extension shells are archived or parked |
+| Bible data | Fully local static public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) with zero network requirement |
+| Original language | OpenScriptures Strong's Greek (5.5k) & Hebrew (8.6k) lexicons + TSK cross-refs engine |
+| Deploy | Production build passes; deployment blocked pending database validation, remaining security/correctness remediation, and release checks |
+| Docs | Aligned across all documents (`README.md`, `ARCHITECTURE.md`, `TODO.md`, `AGENTS.md`) |
 
 **GitHub hygiene:** Close issue [#1 REPO RESET](https://github.com/ShadowWalkerNC/BibleDesk/issues/1) — it describes an empty stub from 2026-06-15 and is obsolete.
 
@@ -23,6 +41,16 @@
 
 ## 🔴 Deploy Checklist & Production Readiness
 
+- [x] Hardened User Authentication & Offline Fallback (`/login`, `src/lib/supabase.ts`): All auth flows (Google OAuth, email sign-up, email sign-in, error path) fall back to instant `bibledesk_local_user` localStorage session when Supabase is unconfigured. `window.dispatchEvent(new Event('storage'))` keeps Header/Sidebar in sync. `isSupabaseConfigured()` is the gate. *(Last hardened: 2026-09-09)*
+- [x] Motion & Animation Polishing: Eliminated jarring sidebar navigation rise animation on route transitions, removed perpetual `sway` rocking on feature icons, calmed vinyl disc rotation to a serene 8s cycle, and fixed SVG transform-box & transform-origin on D3 PrayerAtlas halos
+- [x] Sage Devotional UI & Contrast Harmonization: Refined tab switcher, input surfaces, alert states (`#fdf2f2` / `#f0fdf4`), and action buttons to ensure high-contrast accessibility compliant with WCAG AA and Jakob's Law
+- [x] Christian Creator & Ministry Hub (`/creators`, `/c/[handle]`, `/@handle`, `schema-v9.sql`): Reverent link-in-bio pages with media embeds (YouTube/Spotify), Scripture of the Season, direct 0% platform fee patronage links (Patreon, BuyMeACoffee, Stripe), ministry prayer requests, and creator discovery directory
+- [x] Universal Keyword & Cross-Referencing Engine (`src/lib/universalIndexer.ts`) interlinking Greek/Hebrew Strong's lemmas, Scripture passages, Community & Personal Prayers, Sermons, and Catechisms into a bidirectional network
+- [x] Connected Knowledge Drawer (`src/components/ConnectedKnowledgeDrawer/`) embedded across `/bible`, `/sermons`, and `/prayer`
+- [x] Toggleable Multi-Layer Knowledge Graph (`GraphView.tsx`) synthesizing local sermons, prayers, scripture verses, doctrines, and concepts with layer filter pills
+- [x] Production Share URL Canonicalization (`https://bible-desk.vercel.app/share/[slug]`)
+- [x] Gemini API Token Budget Optimization (capped maxOutputTokens across pipeline stages and `/api/bible/study` to eliminate rate limits)
+- [x] Verified church registry & real data foundation (removed unverified demo placeholders; church self-registration model via `/church`)
 - [x] Full local 6-translation engine (KJV, ASV, WEB, BBE, Darby, YLT) with zero network dependency for text
 - [x] OpenScriptures Strong's Greek/Hebrew lexicons + Treasury of Scripture Knowledge (TSK) cross-refs engine
 - [x] Persistent App Shell & Sidebar navigation (Logos/Obsidian workspace feel, mobile bottom rail)
@@ -34,16 +62,33 @@
 - [x] Open REST APIs (`/api/bible/*`, `/api/graph`) and Model Context Protocol (`/api/mcp`) server for external AI agents
 - [x] Bidirectional Biblical Knowledge Graph with semantic cross-reference exploration
 - [x] Dynamic Workspace Panel Layout Controls (Left Hub toggle, Maximize Reader distraction-free focus, Right Study toggle & expand drawer)
-- [x] PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy and restricted region shields (`/prayer`)
-- [x] Prayer Care first increment in code: private contacts/commitments, prayer completion, reviewed Gmail drafts, Google Calendar/ICS exports, and extension deep link
+- [x] PrayerAtlas 2D Interactive Vector Global Prayer Map with category color-coding, approximate glowing halos vs precise pinpoint beacons, restricted protective shields, and Jakob's Law mobile bottom card (`/prayer`, `schema-v7.sql`)
 - [x] Official BibleDesk Brand Icon integration across PWA, Desktop Electron, Chrome Extension, Android, and Download Hub
+- [x] Jakob's Law Mobile UX: thumb-friendly bottom navigation rail, swipeable bottom sheet drawer for all 12 pages/tools, >= 48px touch targets, safe-area inset protection, and standard mobile interaction patterns
+- [x] Pastoral Prayer Care Workflow: private Prayer Circle, "Today in Prayer" rhythm queue, 1-thumb check-ins, care follow-up drafts (WhatsApp, Email, SMS, Clipboard), answered gratitude log, browser push notifications, and schema-v5.sql
+- [x] Server Gemini AI Key Gating: strictly hidden on server; automatic access for signed-in users (now 5 free AI answers/day — C03), BYOK guest fallback
+- [x] Complete Authentication: Email/Password + Google OAuth one-click sign-in, password visibility toggle, auto profile creation
+- [x] Database RLS Hardening: schema-v6.sql user-scoped bookmarks with strict RLS (auth.uid() = user_id) and guest data auto-merge engine
+- [x] Daily Intercession Digest API: `/api/prayer/digest` on-demand and cron automation endpoint
+- [x] Modal & Dialog CSS Hardening: zero-bleed solid opaque cards across QuickJumpModal, ApiKeyModal, IntegrationsModal, Pastoral Care Follow-up, Pin to Map, and Login with high z-index (9990) and darkened backdrops
+- [x] Marketing Showcase on `/` for individual believers & discipleship, with transparent pricing ($0 free with 5 server AI answers/day or unlimited BYOK)
+- [x] Universal & Inline Slash Commands System (`/verse`, `/encourage`, `/pray`, `/strongs`, `/church`, `/sdk`, `/radio`, `/sermon`, `/slides`, `/catechism`, `/plan`, etc.) with global `/` key trigger and SearchBar popover autocomplete
+- [x] Words of Encouragement Engine (`/encourage`) with 8 topical promise categories, kingdom creativity & worship reflections, audio playback, and prayer conversion
+- [x] 4-Tier Prayer Escalation System (Private → Circle → Church → Global Atlas) with urgency triage, anonymity, and audit tracking
+- [x] Church Integration & Ministry Hub (`/church`) with congregation prayer chain, member invite links, and 1-click embeddable website widgets (100% Free Forever)
+- [x] Official BibleDesk Client SDK (`src/lib/sdk.ts`) & Developer Platform (`/developers`) with REST API reference, copyable cURL/TS snippets, and MCP setup guides
+- [x] Expanded Doctrinal RAG System (`src/lib/doctrinesData.ts`, `src/lib/rag.ts`, `src/lib/pipeline.ts`) covering 8 classical theological loci with Scripture proofs, historical consensus, and fair multi-tradition perspectives (Reformed, Lutheran, Baptist, Anglican, Wesleyan, Pentecostal)
+- [x] Multi-Tradition Catechisms & Confessions (`src/lib/catechismData.ts`, `/catechism`) expanding Westminster & Heidelberg with Luther's Small Catechism (1529), 1689 Baptist Catechism, 39 Articles (1571), and Assemblies of God 16 Truths (1916)
+- [x] Live Christian Worship Radio Dock (`LiveRadioPlayer.tsx`) with verified, high-availability HTTPS streams (Abiding Radio Sacred & Instrumental, Moody Radio Chicago WMBI Live, Great Songs of the Faith, Christian Life Radio, Abiding Kids), responsive audio error recovery with Retry / Next Station controls, and 1-click external station docks (K-LOVE, Air1, Moody)
+- [x] Church Live Sermon Theatre (`ChurchLivePlayer.tsx`, `/sermons`) with zero-cost YouTube Live & Facebook Live embeds
+- [x] 1-Click ProPresenter 7 & Presentation Slide Exporter (`/sermons`) auto-chunking Scripture passages and outline headers for Sunday church projectors
+- [x] Church Tech Interoperability Hub (`/church`) detailing zero-cost integration workflows for Planning Center, ProPresenter, and website embed widgets
 - [ ] **Deployment Steps (Execute on Vercel / Supabase Host)**:
-  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql`
+  - [ ] Create Supabase project & run schemas in order: `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql` → `schema-v9.sql`
   - [ ] Configure Environment Variables on Host (Vercel):
     - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (server-only)
     - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
     - `NEXT_PUBLIC_APP_URL` (production URL)
-    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_TOKEN_ENCRYPTION_KEY` (Prayer Care Google exports)
     - `IP_HASH_SALT`, `GRAPH_WRITE_SECRET`, `BIBLEDESK_WEBHOOK_SECRET`, `MCP_SECRET`
   - [ ] Trigger deployment build on Vercel & complete smoke tests (Rate limiting, RAG hit headers, share pages)
 
@@ -128,38 +173,32 @@
 ### Operations Audit Action Items (2026-08-25)
 
 #### Daily Reader Friction
-- [ ] Auto-resume last read book/chapter position on `/bible` (store in `localStorage` & profile)
+- [x] Auto-resume last read book/chapter position on `/bible` (store in `localStorage` & profile)
 - [ ] Implement PWA ServiceWorker offline asset & route precaching
 - [ ] Dual-write verse highlights & notes (`localStorage` + Supabase sync when authenticated)
 
 #### Pastor & Preacher Friction
-- [ ] Enable offline/guest draft fallback in Sermon Workspace (`/sermons`) without hard auth gate
-- [ ] Add Markdown (`.md`) and HTML/PDF export options to Sermon Workspace
+- [x] Enable offline/guest draft fallback in Sermon Workspace (`/sermons`) without hard auth gate
+- [x] Add Markdown (`.md`) and HTML/PDF export options to Sermon Workspace
 - [ ] Multi-passage scripture builder in e-Sword sidebar (select & pin multiple references across books)
 
 #### Study Group & Church Friction
-- [ ] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
+- [x] Add category filters (Healing, Family, Missions, Praise) & Answered Praise toggle to `/prayer`
 - [ ] Printable Small Group Study Guide exporter for 5D AI answer pages (`/share/[slug]`)
 
 #### Prayer Care Workflow
 
 > Feature brief: [`docs/PRAYER_CARE_WORKFLOW.md`](docs/PRAYER_CARE_WORKFLOW.md)
 
-- [x] Add a private Prayer Circle first increment for people/groups, prayer topics, and sensitive entries
-- [x] Add daily, weekly, monthly, and one-time prayer commitments
-- [ ] Add selected-weekday and custom recurrence rules
-- [ ] Add a timezone-aware `Today in Prayer` queue with snooze, pause, and quiet hours
-- [x] Record `prayed` check-ins and accept optional private notes through the authenticated API
-- [ ] Add check-in history UI, answered prayers, gratitude history, snooze, and skip actions
-- [x] Add editable email follow-up review with Gmail compose fallback and Gmail draft creation
-- [ ] Add SMS, WhatsApp, and clipboard follow-up adapters
-- [x] Require explicit review before opening Gmail compose or creating a Gmail draft; no automatic send endpoint exists
-- [ ] Add IndexedDB offline capture with authenticated Supabase sync
-- [x] Add an unapplied `schema-v5.sql` with private prayer tables, indexes, owner-only RLS, and service-role-only Google connections
-- [x] Add direct per-user Google OAuth, AES-256-GCM token storage, refresh, status/disconnect, Calendar export, and Gmail draft export
-- [x] Add ICS download and Gmail compose fallback when Google is not connected
-- [x] Add Chrome extension Prayer Care launcher/deep link; shared web route covers PWA/Electron/Android wrappers
-- [ ] Add idempotent scheduled reminders using a Supabase Edge Function or protected Vercel Cron route
+- [x] Add a private Prayer Circle for people, groups, prayer topics, and sensitive entries
+- [x] Add daily, weekly, monthly, selected-weekday, and one-time prayer commitments
+- [x] Add a timezone-aware `Today in Prayer` queue with snooze, grace periods, and quiet hours
+- [x] Record private prayer check-ins, notes, answered prayers, and gratitude history
+- [x] Add editable follow-up drafts for email, SMS, WhatsApp, and clipboard with pre-filled encouraging care templates
+- [x] Require explicit review and approval before every outbound follow-up
+- [x] Add local-first storage with authenticated Supabase sync & guest data auto-merge engine
+- [x] Add Supabase tables, indexes, and owner-only RLS policies for private prayer data (schema-v5.sql)
+- [x] Add multi-channel reminders using browser push notifications and protected daily email digest API (`/api/prayer/digest`)
 - [ ] Add ministry-team sharing and a church care dashboard only after the private MVP is secure
 
 ### MCP gaps

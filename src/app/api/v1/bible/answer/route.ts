@@ -10,6 +10,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { generateBibleAnswer } from '@/lib/claude';
 import type { TranslationId } from '@/types';
+import { getAppUrl } from '@/lib/appUrl';
+import { checkRateLimit, RateLimitNamespace } from '@/lib/rate-limit';
 
 function verifySignature(body: string, signature: string): boolean {
   const secret = process.env.BIBLEDESK_WEBHOOK_SECRET;
@@ -28,7 +30,26 @@ export async function POST(req: NextRequest) {
 
   // SECURITY: Verify HMAC signature from Sigil
   if (!verifySignature(rawBody, signature)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized', code: 'unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  // Generous per-secret budget — this is a partner contract, not anonymous
+  // traffic. verifySignature fails closed when BIBLEDESK_WEBHOOK_SECRET is
+  // unset, so the secret is set here. The limiter hashes the secret; the
+  // raw value is never stored.
+  const rate = await checkRateLimit(process.env.BIBLEDESK_WEBHOOK_SECRET as string, {
+    namespace: RateLimitNamespace.v1,
+    limit: 200,
+  });
+  if (!rate.allowed) {
+    const retryAfter = Math.max(1, Math.ceil((rate.resetAt.getTime() - Date.now()) / 1000));
+    return NextResponse.json(
+      { success: false, error: 'Too many requests', code: 'rate_limited' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+    );
   }
 
   let body: { question?: string; translation?: string; guild_id?: string };
@@ -58,7 +79,7 @@ export async function POST(req: NextRequest) {
           { title: dim.title, content: dim.content.slice(0, 400), citations: dim.citations },
         ])
       ),
-      share_url: `${process.env.NEXT_PUBLIC_APP_URL}/share/${answer.id.slice(0, 8)}`,
+      share_url: `${getAppUrl()}/share/${answer.id.slice(0, 8)}`,
       confidence: answer.confidence,
     });
   } catch (err) {

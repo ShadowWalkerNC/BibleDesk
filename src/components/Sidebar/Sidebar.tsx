@@ -5,15 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
   BookOpen,
-  Calendar,
-  Sun,
-  Brain,
   Church,
-  Scroll,
-  Bookmark,
-  History,
-  Network,
-  MessageSquare,
   Heart,
   Search,
   ChevronLeft,
@@ -29,32 +21,35 @@ import {
   X,
   Layers,
   Globe,
+  Code,
+  ShieldCheck,
 } from 'lucide-react';
-import { getBrowserClient } from '@/lib/supabase';
+import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
 import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal';
 import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
-  { href: '/bible',     label: 'Study Desk',    icon: BookOpen },
-  { href: '/daily',     label: 'Daily Verse',   icon: Sun },
-  { href: '/plans',     label: 'Reading Plans', icon: Calendar },
-  { href: '/memory',    label: 'Verse Memory',  icon: Brain },
+  { href: '/bible',            label: 'Study Desk',     icon: BookOpen },
+  { href: '/study-resources',  label: 'Study Resources', icon: Layers },
 ];
 
 const CHURCH_LINKS = [
   { href: '/prayer',    label: 'Prayer Atlas',  icon: Globe },
-  { href: '/sermons',   label: 'Sermons',       icon: Church },
-  { href: '/catechism', label: 'Catechism',     icon: MessageSquare },
-  { href: '/creeds',    label: 'Creeds',        icon: Scroll },
 ];
 
 const TOOL_LINKS = [
-  { href: '/bookmarks', label: 'Bookmarks',     icon: Bookmark },
-  { href: '/history',   label: 'History',       icon: History },
-  { href: '/graph',     label: 'Concept Graph', icon: Network },
+  { href: '/developers',label: 'Developers & SDK', icon: Code },
   { href: '/download',  label: 'Install App',   icon: Download },
+];
+
+// C01: /mod has no usable client-side role check (src/lib/mod-auth.ts is
+// server-only), so the link is rendered for everyone and the /mod page itself
+// gates: non-moderators see "Access Denied". Do not rely on this link for
+// authorization — the /api/mod/* routes enforce it server-side.
+const MOD_LINKS = [
+  { href: '/mod', label: 'Moderation', icon: ShieldCheck },
 ];
 
 interface SidebarProps {
@@ -80,14 +75,56 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   // Auth state
   useEffect(() => {
+    function checkUser() {
+      const supabase = getBrowserClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+          const local = localStorage.getItem('bibledesk_local_user');
+          if (local) {
+            try {
+              setUser(JSON.parse(local));
+            } catch {
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      });
+    }
+
+    checkUser();
     const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+      } else if (!isSupabaseConfigured() && typeof window !== 'undefined') {
+        const local = localStorage.getItem('bibledesk_local_user');
+        if (local) {
+          try {
+            setUser(JSON.parse(local));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
     });
-    return () => subscription.unsubscribe();
+
+    const handleStorage = () => checkUser();
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // Ctrl+K shortcut
@@ -108,8 +145,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }, [pathname]);
 
   async function handleSignOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('bibledesk_local_user');
+      window.dispatchEvent(new Event('storage'));
+    }
     const supabase = getBrowserClient();
     await supabase.auth.signOut();
+    setUser(null);
     router.push('/');
     router.refresh();
   }
@@ -124,6 +166,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <Link
         href={href}
         className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+        aria-current={active ? 'page' : undefined}
         title={collapsed ? label : undefined}
       >
         <Icon size={18} className={styles.navIcon} />
@@ -160,6 +203,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <button
           className={styles.quickJump}
           onClick={() => setIsJumpOpen(true)}
+          aria-label="Jump to book or chapter (Ctrl+K)"
           title="Jump to book or chapter (Ctrl+K)"
         >
           <Search size={15} className={styles.navIcon} />
@@ -181,29 +225,32 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {!collapsed && <p className={styles.sectionLabel}>Tools</p>}
           {TOOL_LINKS.map(link => <NavItem key={link.href} {...link} />)}
+
+          {!collapsed && <p className={styles.sectionLabel}>Moderation</p>}
+          {MOD_LINKS.map(link => <NavItem key={link.href} {...link} />)}
           
           <button
             className={styles.navItem}
             onClick={() => setIsIntegrationsOpen(true)}
-            title={collapsed ? 'Discord & WhatsApp' : undefined}
+            title={collapsed ? 'WhatsApp' : undefined}
             style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
           >
             <Share2 size={18} className={styles.navIcon} />
-            {!collapsed && <span className={styles.navLabel}>Integrations</span>}
+            {!collapsed && <span className={styles.navLabel}>WhatsApp Sharing</span>}
           </button>
         </nav>
 
         {/* Footer: Gemini API Key & Auth */}
         <div className={styles.sidebarFooter}>
           <button
-            className={`${styles.apiKeyBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+            className={`${styles.apiKeyBtn} ${(user || hasApiKey) ? styles.apiKeyConfigured : ''}`}
             onClick={() => setIsKeyModalOpen(true)}
-            title={hasApiKey ? 'Gemini API Key: Configured' : 'Configure Gemini API Key'}
+            title={user ? 'Gemini AI: Active (Included with your account)' : hasApiKey ? 'Gemini API Key: Configured' : 'Configure Gemini API Key / Sign In'}
           >
             <Sparkles size={14} className={styles.keyIcon} />
             {!collapsed && (
               <span className={styles.apiKeyLabel}>
-                {hasApiKey ? 'AI Key: Active' : 'Add Gemini Key'}
+                {user ? 'Gemini AI: Included' : hasApiKey ? 'AI Key: Active' : 'Sign in for AI'}
               </span>
             )}
           </button>
@@ -215,12 +262,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </div>
               {!collapsed && (
                 <span className={styles.userName}>
-                  {user.user_metadata?.name || user.email?.split('@')[0]}
+                  {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
                 </span>
               )}
               <button
                 onClick={handleSignOut}
                 className={styles.signOutBtn}
+                aria-label="Sign Out"
                 title="Sign Out"
               >
                 <LogOut size={14} />
@@ -240,30 +288,26 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <Link
           href="/bible"
           className={`${styles.mobileNavItem} ${isActive('/bible') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/bible') ? 'page' : undefined}
         >
           <BookOpen size={20} />
           <span>Bible</span>
         </Link>
         <Link
-          href="/daily"
-          className={`${styles.mobileNavItem} ${isActive('/daily') ? styles.mobileNavItemActive : ''}`}
+          href="/study-resources"
+          className={`${styles.mobileNavItem} ${isActive('/study-resources') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/study-resources') ? 'page' : undefined}
         >
-          <Sun size={20} />
-          <span>Daily</span>
+          <Layers size={20} />
+          <span>Resources</span>
         </Link>
         <Link
           href="/prayer"
           className={`${styles.mobileNavItem} ${isActive('/prayer') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/prayer') ? 'page' : undefined}
         >
           <Globe size={20} />
           <span>Prayer</span>
-        </Link>
-        <Link
-          href="/plans"
-          className={`${styles.mobileNavItem} ${isActive('/plans') ? styles.mobileNavItemActive : ''}`}
-        >
-          <Calendar size={20} />
-          <span>Plans</span>
         </Link>
         <button
           className={`${styles.mobileNavItem} ${isMobileMenuOpen ? styles.mobileNavItemActive : ''}`}
@@ -279,6 +323,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {isMobileMenuOpen && (
         <div className={styles.mobileDrawerOverlay} onClick={() => setIsMobileMenuOpen(false)}>
           <div className={styles.mobileDrawerContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.mobileDrawerHandleBar}>
+              <div className={styles.mobileDrawerHandle} />
+            </div>
             <div className={styles.mobileDrawerHeader}>
               <div className={styles.mobileDrawerBrand}>
                 <div className={styles.logoIcon}>✦</div>
@@ -315,6 +362,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -332,6 +380,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -349,6 +398,25 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       key={href}
                       href={href}
                       className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} className={styles.mobileCategoryIcon} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.mobileCategory}>
+                <span className={styles.mobileCategoryTitle}>Moderation</span>
+                <div className={styles.mobileCategoryGrid}>
+                  {MOD_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`${styles.mobileCategoryCard} ${isActive(href) ? styles.mobileCategoryCardActive : ''}`}
+                      aria-current={isActive(href) ? 'page' : undefined}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon size={18} className={styles.mobileCategoryIcon} />
@@ -362,14 +430,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             {/* Mobile Footer Actions (API Key, Integrations, Auth) */}
             <div className={styles.mobileDrawerFooter}>
               <button
-                className={`${styles.mobileActionBtn} ${hasApiKey ? styles.apiKeyConfigured : ''}`}
+                className={`${styles.mobileActionBtn} ${(user || hasApiKey) ? styles.apiKeyConfigured : ''}`}
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsKeyModalOpen(true);
                 }}
               >
                 <Sparkles size={16} />
-                <span>{hasApiKey ? 'Gemini AI Key: Active' : 'Add Gemini AI Key'}</span>
+                <span>{user ? 'Gemini AI: Included' : hasApiKey ? 'AI Key: Active' : 'Sign in for AI Assistant'}</span>
               </button>
 
               <button
@@ -380,13 +448,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 }}
               >
                 <Share2 size={16} />
-                <span>Discord &amp; WhatsApp Connect</span>
+                <span>WhatsApp Connect</span>
               </button>
 
               {user ? (
                 <div className={styles.mobileUserRow}>
                   <div className={styles.userAvatar}><User size={14} /></div>
-                  <span className={styles.userName}>{user.user_metadata?.name || user.email?.split('@')[0]}</span>
+                  <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
                   <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
                     <LogOut size={14} />
                   </button>

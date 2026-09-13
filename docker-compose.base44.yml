@@ -1,0 +1,33 @@
+# Base44 dev environment for BibleDesk
+# Runs the Next.js 16 web app from the cloned source with live reload.
+# Bible data is local/public-domain; Supabase + AI keys are optional and
+# degrade gracefully when absent, so no external credentials are required to boot.
+services:
+  web:
+    image: node:22
+    working_dir: /app
+    init: true
+    volumes:
+      - ./:/app
+      - node_modules:/app/node_modules
+    # Install only the root web-app deps (skip Electron/Capacitor workspace builds),
+    # then start the Next.js dev server bound to all interfaces.
+    command: sh -c "npm install --workspaces=false && npm run dev -- -H 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    environment:
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+volumes:
+  node_modules:

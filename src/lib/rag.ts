@@ -2,26 +2,20 @@
  * rag.ts — Retrieval-Augmented Generation for BibleDesk
  *
  * Responsibilities:
- *   1. Generate a 1536-dim embedding for any text (OpenAI text-embedding-3-small)
- *   2. Search canonical_answers by vector cosine similarity (pgvector in Supabase)
- *   3. Return an exact cached answer OR a context string for pipeline Stage 1
+ *   1. Retrieve grounded historical Christian doctrines & catechisms (offline/instant)
+ *   2. Generate a 1536-dim embedding for any text (OpenAI text-embedding-3-small)
+ *   3. Search canonical_answers by vector cosine similarity (pgvector in Supabase)
+ *   4. Return an exact cached answer OR a unified context string for pipeline Stage 1 & Stage 4
  *
- * Embedding model: openai/text-embedding-3-small
- *   - 1536 dimensions, matches pgvector column size in schema
- *   - Cost: $0.02 / 1M tokens (~$0.000002 per question)
- *   - Requires OPENAI_API_KEY in env (server-only)
- *
- * NOTE: Anthropic does NOT provide an embeddings API — Voyage AI is a
- * separate company. OpenAI text-embedding-3-small is the standard choice
- * for 1536-dim pgvector RAG pipelines.
- *
- * SERVER ONLY — never import this from client components.
+ * Server-only — never import from client components.
  */
 
 import OpenAI from 'openai';
 import crypto from 'crypto';
 import { getServerClient } from '@/lib/supabase';
 import type { BibleAnswer } from '@/types';
+import { searchDoctrines } from '@/lib/doctrinesData';
+import { searchCatechisms } from '@/lib/catechismData';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -55,6 +49,8 @@ export interface RAGResult {
   contextMatches: CanonicalMatch[];
   /** Formatted context string ready to inject into pipeline Stage 1 prompt */
   contextPrompt: string;
+  /** Grounded doctrinal summaries and catechism questions */
+  doctrinalContext?: string;
 }
 
 /** Shape of a row returned by the match_canonical_answers() Supabase RPC */
@@ -77,14 +73,59 @@ function getOpenAIClient(): OpenAI {
   return _openai;
 }
 
+// ─── Doctrinal Retrieval (Offline / Zero-Cost) ─────────────────────────────────
+
+/**
+ * Searches local core doctrines, confessions, and catechisms to build a
+ * high-authority theological grounding prompt for the pipeline.
+ * Runs instantly in 0ms without requiring network or external API keys.
+ */
+export function findRelevantDoctrinalContext(question: string): string {
+  const matchedDoctrines = searchDoctrines(question);
+  const matchedCatechisms = searchCatechisms(question);
+
+  if (matchedDoctrines.length === 0 && matchedCatechisms.length === 0) {
+    return '';
+  }
+
+  const sections: string[] = [];
+
+  if (matchedDoctrines.length > 0) {
+    sections.push('── HISTORIC DOCTRINAL LOCI & CONFESSIONS ──');
+    for (const doc of matchedDoctrines.slice(0, 2)) {
+      const traditionBullets = doc.traditions
+        .map(t => `  • ${t.tradition}: ${t.summary} (${t.confessionalBasis})`)
+        .join('\n');
+
+      sections.push(
+        `[Locus: ${doc.locus}] ${doc.title}\n` +
+        `Summary: ${doc.summary}\n` +
+        `Historical Consensus: ${doc.historicalConsensus}\n` +
+        `Scripture Proofs: ${doc.scriptureProofs.join(', ')}\n` +
+        `Confessional Perspectives across Traditions:\n${traditionBullets}`
+      );
+    }
+  }
+
+  if (matchedCatechisms.length > 0) {
+    sections.push('── HISTORIC CATECHISM Q&A ──');
+    for (const item of matchedCatechisms.slice(0, 3)) {
+      sections.push(
+        `[${item.catechism} — ${item.tradition}] Q${item.question.number}: "${item.question.question}"\n` +
+        `Answer: "${item.question.answer}"\n` +
+        (item.question.proofTexts.length > 0 ? `Proof Texts: ${item.question.proofTexts.join(', ')}` : '')
+      );
+    }
+  }
+
+  return sections.join('\n\n');
+}
+
 // ─── Embedding ────────────────────────────────────────────────────────────────
 
 /**
  * Generate a 1536-dimension embedding for the given text.
  * Uses OpenAI text-embedding-3-small.
- *
- * Normalizes input: lowercase, collapse whitespace.
- * Cost: ~$0.000002 per call.
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
   const client = getOpenAIClient();
@@ -106,10 +147,6 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
 // ─── Question normalization & hashing ────────────────────────────────────────
 
-/**
- * Normalize a question for consistent hashing and embedding.
- * Strips punctuation, lowercases, collapses whitespace.
- */
 export function normalizeQuestion(question: string): string {
   return question
     .trim()
@@ -118,10 +155,6 @@ export function normalizeQuestion(question: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/**
- * SHA-256 hash of a normalized question string.
- * Used as canonical_answers.question_hash for exact deduplication on upsert.
- */
 export function hashQuestion(question: string): string {
   return crypto
     .createHash('sha256')
@@ -131,43 +164,13 @@ export function hashQuestion(question: string): string {
 
 // ─── Vector Search ────────────────────────────────────────────────────────────
 
-/**
- * Search canonical_answers via pgvector cosine similarity.
- * Calls the match_canonical_answers() SQL function in Supabase.
- *
- * Required SQL (add to your Supabase schema or migration):
- *
- *   create or replace function match_canonical_answers(
- *     query_embedding vector(1536),
- *     match_threshold float,
- *     match_count int
- *   )
- *   returns table (
- *     id uuid,
- *     question text,
- *     answer_json jsonb,
- *     similarity float
- *   )
- *   language sql stable
- *   as $$
- *     select
- *       id,
- *       question,
- *       answer_json,
- *       1 - (embedding <=> query_embedding) as similarity
- *     from canonical_answers
- *     where 1 - (embedding <=> query_embedding) > match_threshold
- *     order by embedding <=> query_embedding
- *     limit match_count;
- *   $$;
- */
 async function searchCanonicalAnswers(embedding: number[]): Promise<CanonicalMatch[]> {
   const supabase = getServerClient();
 
   const { data, error } = await supabase.rpc('match_canonical_answers', {
     query_embedding: embedding,
     match_threshold: CONTEXT_MATCH_THRESHOLD,
-    match_count: MAX_CONTEXT_MATCHES + 1, // +1 to detect exact match at top
+    match_count: MAX_CONTEXT_MATCHES + 1,
   });
 
   if (error) {
@@ -189,29 +192,37 @@ async function searchCanonicalAnswers(embedding: number[]): Promise<CanonicalMat
  * Main RAG function. Called by /api/ask before the pipeline runs.
  *
  * Flow:
- *   1. Generate embedding for the question
- *   2. Search canonical_answers by cosine similarity
- *   3. similarity >= EXACT_MATCH_THRESHOLD (0.97) → return cached answer
- *   4. similarity >= CONTEXT_MATCH_THRESHOLD (0.75) → build Stage 1 context
- *   5. No matches → return empty (pipeline runs cold)
- *
- * RAG failures NEVER crash the pipeline — they degrade to empty context.
+ *   1. Retrieve local doctrinal/catechism grounding (instant, offline-ready)
+ *   2. If OpenAI key available, generate question embedding and query Supabase
+ *   3. If exact canonical match (>= 0.97), return cached answer immediately
+ *   4. Merge canonical answers with doctrinal context for Stage 1 and Stage 4
  */
 export async function runRAG(question: string): Promise<RAGResult> {
-  const empty: RAGResult = {
+  const doctrinalContext = findRelevantDoctrinalContext(question);
+
+  const fallbackResult: RAGResult = {
     exactMatch: false,
     exactAnswer: null,
     contextMatches: [],
-    contextPrompt: '',
+    contextPrompt: doctrinalContext ? formatDoctrinalPrompt(doctrinalContext) : '',
+    doctrinalContext,
   };
+
+  // If OpenAI key is missing, return grounded doctrinal context immediately
+  if (!process.env.OPENAI_API_KEY) {
+    if (doctrinalContext) {
+      console.log('[RAG] Offline/Local doctrinal grounding injected into pipeline');
+    }
+    return fallbackResult;
+  }
 
   try {
     const embedding = await generateEmbedding(question);
     const matches = await searchCanonicalAnswers(embedding);
 
-    if (matches.length === 0) return empty;
+    if (matches.length === 0) return fallbackResult;
 
-    // Exact match — return the cached answer, skip the pipeline entirely
+    // Exact match — return cached approved answer
     const top = matches[0];
     if (top.similarity >= EXACT_MATCH_THRESHOLD) {
       console.log(`[RAG] Exact match (${(top.similarity * 100).toFixed(1)}%) — serving cached answer`);
@@ -220,73 +231,85 @@ export async function runRAG(question: string): Promise<RAGResult> {
         exactAnswer: top.answer_json,
         contextMatches: [],
         contextPrompt: '',
+        doctrinalContext,
       };
     }
 
-    // Context matches — inject into pipeline Stage 1
+    // Context matches — combine with doctrinal context
     const contextMatches = matches
       .filter((m) => m.similarity >= CONTEXT_MATCH_THRESHOLD)
       .slice(0, MAX_CONTEXT_MATCHES);
 
-    if (contextMatches.length === 0) return empty;
-
-    const contextPrompt = buildContextPrompt(contextMatches);
-    console.log(`[RAG] ${contextMatches.length} context match(es) injected into Stage 1`);
+    const contextPrompt = buildCombinedPrompt(contextMatches, doctrinalContext);
+    console.log(`[RAG] ${contextMatches.length} canonical match(es) + doctrinal grounding injected into Stage 1`);
 
     return {
       exactMatch: false,
       exactAnswer: null,
       contextMatches,
       contextPrompt,
+      doctrinalContext,
     };
   } catch (err) {
-    // RAG failure must never break the pipeline
-    console.error('[RAG] runRAG failed, proceeding without context:', err);
-    return empty;
+    console.warn('[RAG] Vector RAG error, proceeding with local doctrinal grounding:', err);
+    return fallbackResult;
   }
 }
 
-// ─── Context Prompt Builder ───────────────────────────────────────────────────
+// ─── Context Prompt Builders ──────────────────────────────────────────────────
 
-/**
- * Builds the moderator-approved context string injected at the top of
- * pipeline Stage 1. Claude treats these as grounding reference — it must
- * not contradict them without strong scriptural justification.
- */
-function buildContextPrompt(matches: CanonicalMatch[]): string {
-  const sections = matches.map((match, i) => {
-    const citations = extractCitations(match.answer_json);
-    return [
-      `[Approved Reference ${i + 1}] (similarity: ${(match.similarity * 100).toFixed(0)}%)`,
-      `Question: ${match.question}`,
-      `Summary: ${match.answer_json?.summary ?? '(no summary)'}`,
-      citations.length > 0 ? `Scripture used: ${citations.join(', ')}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-  });
-
+function formatDoctrinalPrompt(doctrinalContext: string): string {
   return [
     '══════════════════════════════════════════════════',
-    'VERIFIED MODERATOR-APPROVED REFERENCE ANSWERS',
-    'These answers were reviewed by human moderators',
-    '(pastors and theologians). Use them as grounding.',
-    'Do not contradict them without strong scriptural',
-    'justification. Present evidence; let the reader conclude.',
+    'HISTORIC CHRISTIAN DOCTRINAL & CONFESSIONAL GROUNDING',
+    'Use these verified historic confessions, catechisms,',
+    'and scriptural proofs to ground the theological and',
+    'historical dimensions of your answer. Fairly cite',
+    'the traditions represented (e.g. Reformed, Lutheran,',
+    'Baptist, Anglican, Wesleyan, Pentecostal).',
     '══════════════════════════════════════════════════',
     '',
-    sections.join('\n\n'),
+    doctrinalContext,
     '',
-    '══════════════════════════════════════════════════',
-    'Now answer the current question to the same standard.',
     '══════════════════════════════════════════════════',
   ].join('\n');
 }
 
-/**
- * Extract all citation strings from a BibleAnswer's dimensions.
- * Returns a deduplicated flat array of reference strings.
- */
+function buildCombinedPrompt(matches: CanonicalMatch[], doctrinalContext?: string): string {
+  const parts: string[] = [];
+
+  if (matches.length > 0) {
+    const canonicalSections = matches.map((match, i) => {
+      const citations = extractCitations(match.answer_json);
+      return [
+        `[Approved Reference ${i + 1}] (similarity: ${(match.similarity * 100).toFixed(0)}%)`,
+        `Question: ${match.question}`,
+        `Summary: ${match.answer_json?.summary ?? '(no summary)'}`,
+        citations.length > 0 ? `Scripture used: ${citations.join(', ')}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    });
+
+    parts.push(
+      '══════════════════════════════════════════════════',
+      'VERIFIED MODERATOR-APPROVED REFERENCE ANSWERS',
+      'These answers were reviewed by human moderators',
+      '(pastors and theologians). Use them as grounding.',
+      '══════════════════════════════════════════════════',
+      '',
+      canonicalSections.join('\n\n'),
+      ''
+    );
+  }
+
+  if (doctrinalContext) {
+    parts.push(formatDoctrinalPrompt(doctrinalContext));
+  }
+
+  return parts.join('\n');
+}
+
 function extractCitations(answer: BibleAnswer): string[] {
   const citations: string[] = [];
   const dims = answer?.dimensions;
@@ -303,17 +326,6 @@ function extractCitations(answer: BibleAnswer): string[] {
 
 // ─── Canonical Answer Storage ─────────────────────────────────────────────────
 
-/**
- * Upsert an approved answer into canonical_answers with its embedding.
- * Called by the moderation system when a flagged answer is approved.
- *
- * Uses question_hash as the conflict key so re-approving a question
- * updates the stored answer rather than duplicating it.
- *
- * @param question    Original question text
- * @param answer      The approved BibleAnswer object
- * @param approvedBy  UUID of the moderator
- */
 export async function storeCanonicalAnswer(
   question: string,
   answer: BibleAnswer,

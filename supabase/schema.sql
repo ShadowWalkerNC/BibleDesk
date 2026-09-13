@@ -1,6 +1,11 @@
 -- BibleDesk — Supabase Schema
 -- Run this in: Supabase Dashboard → SQL Editor
 -- Updated: Phase 2 — Pipeline + RAG + Moderation
+--
+-- Order: 1 — apply first
+-- (canonical chain: schema.sql → schema-v2.sql → schema-v3.sql → schema-v4.sql
+--  → schema-v5.sql → schema-v6.sql → schema-v7.sql → schema-v8.sql
+--  → schema-v9.sql → rpc.sql; see supabase/README.md)
 
 -- ─────────────────────────────────────────────────────────────────────
 -- EXTENSIONS
@@ -33,16 +38,23 @@ CREATE INDEX IF NOT EXISTS answers_share_slug_idx  ON answers (share_slug);
 CREATE INDEX IF NOT EXISTS answers_created_at_idx  ON answers (created_at DESC);
 CREATE INDEX IF NOT EXISTS answers_status_idx      ON answers (status);
 
--- RLS: Public read, service-role-only write
+-- RLS: Service-role-only read/write. The app touches this table only via the
+-- server client (src/lib/supabase.ts saveAnswer/getAnswerBySlug), so no
+-- anon-key access is needed. Public share reads go through the /share/[slug]
+-- server page (service role, bypasses RLS).
 ALTER TABLE answers ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public can read answers"
+DROP POLICY IF EXISTS "Public can read answers" ON answers;
+DROP POLICY IF EXISTS "Service role can insert answers" ON answers;
+DROP POLICY IF EXISTS "Service role can read answers" ON answers;
+
+CREATE POLICY "Service role can read answers"
   ON answers FOR SELECT
-  USING (true);
+  USING (auth.role() = 'service_role');
 
 CREATE POLICY "Service role can insert answers"
   ON answers FOR INSERT
-  WITH CHECK (true); -- Enforced via service role key — never anon key
+  WITH CHECK (auth.role() = 'service_role'); -- Enforced via service role key — never anon key
 
 
 -- ── Rate limits ───────────────────────────────────────────────────────
@@ -55,12 +67,17 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 
 -- RLS: Service role only
+-- B05: USING (true)/WITH CHECK (true) on FOR ALL was an open write/read for
+-- any anon caller. All app access goes through getServerClient()
+-- (src/lib/rate-limit.ts), so scope the policy to the service role.
 ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role manages rate limits" ON rate_limits;
 
 CREATE POLICY "Service role manages rate limits"
   ON rate_limits
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- Auto-cleanup: delete stale rows older than 2 hours
 -- (Schedule as a Supabase Edge Function or pg_cron job)
@@ -87,12 +104,16 @@ CREATE TABLE IF NOT EXISTS moderators (
 );
 
 -- RLS: Service role only (moderator auth handled by Supabase Auth sessions)
+-- B05: narrowed from USING (true) — the moderators table stores contact
+-- emails, so anonymous callers must not be able to read it.
 ALTER TABLE moderators ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role manages moderators" ON moderators;
 
 CREATE POLICY "Service role manages moderators"
   ON moderators
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 
 -- ── Canonical answers (with vector embeddings) ───────────────────────
@@ -140,13 +161,17 @@ CREATE TRIGGER canonical_answers_updated_at
 --      Service role write only
 ALTER TABLE canonical_answers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read canonical answers" ON canonical_answers;
+DROP POLICY IF EXISTS "Service role can write canonical answers" ON canonical_answers;
+
 CREATE POLICY "Public can read canonical answers"
   ON canonical_answers FOR SELECT
   USING (true);
 
 CREATE POLICY "Service role can write canonical answers"
   ON canonical_answers FOR ALL
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 
 -- ── Flagged topics (admin-editable keyword list) ─────────────────────
@@ -188,13 +213,17 @@ ON CONFLICT (keyword) DO NOTHING;
 --      Service role write
 ALTER TABLE flagged_topics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read flagged topics" ON flagged_topics;
+DROP POLICY IF EXISTS "Service role manages flagged topics" ON flagged_topics;
+
 CREATE POLICY "Public can read flagged topics"
   ON flagged_topics FOR SELECT
   USING (active = true);
 
 CREATE POLICY "Service role manages flagged topics"
   ON flagged_topics FOR ALL
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 
 -- ── Flags ────────────────────────────────────────────────────────────
@@ -215,12 +244,15 @@ CREATE INDEX IF NOT EXISTS flags_answer_id_idx ON flags (answer_id);
 CREATE INDEX IF NOT EXISTS flags_status_idx    ON flags (status);
 
 -- RLS: Service role only
+-- B05: narrowed from USING (true) — flag rows carry user-submitted notes.
 ALTER TABLE flags ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role manages flags" ON flags;
 
 CREATE POLICY "Service role manages flags"
   ON flags
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 
 -- ── Moderation votes ─────────────────────────────────────────────────
@@ -242,12 +274,15 @@ CREATE TABLE IF NOT EXISTS moderation_votes (
 CREATE INDEX IF NOT EXISTS moderation_votes_flag_id_idx ON moderation_votes (flag_id);
 
 -- RLS: Service role only
+-- B05: narrowed from USING (true) — votes are internal moderation data.
 ALTER TABLE moderation_votes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role manages moderation votes" ON moderation_votes;
 
 CREATE POLICY "Service role manages moderation votes"
   ON moderation_votes
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 
 -- ─────────────────────────────────────────────────────────────────────
