@@ -228,8 +228,8 @@ export default function ConnectedKnowledgeDrawer({
                     )}
                   </div>
                   {sermon.excerpt && <p className={styles.cardBody}>{sermon.excerpt}</p>}
-                  <a className={styles.cardLink} href="/sermons">
-                    Open Sermon Workspace <ExternalLink size={11} />
+                  <a className={styles.cardLink} href="/study-resources">
+                    Open Study Resources <ExternalLink size={11} />
                   </a>
                 </div>
               ))}

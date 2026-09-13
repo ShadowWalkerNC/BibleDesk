@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-03
+> **Updated:** 2026-09-13
 
 ---
 
@@ -28,10 +28,9 @@ Database:     Supabase (PostgreSQL + pgvector + RLS)
 AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
-Integrations: Discord · WhatsApp · MCP · Sigil · direct per-user Google OAuth for Prayer Care
+Integrations: MCP · Sigil · direct per-user Google OAuth for Prayer Care · wa.me sharing
 Hosting:      Vercel preferred (Render also viable)
-Desktop:      Electron wrapper in apps/desktop/
-Extension:    Chrome Manifest V3 Side Panel in apps/extension/
+Parked:       Android · Electron · Chrome extension · church/sermon/creator suites
 ```
 
 ---
@@ -79,12 +78,11 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 Phase goal:     Local-first Bible foundation
                 Read + search + compare installed public-domain text without bible-api.com
 
-Already shipped (keep; do not rip out):
+Active web MVP:
   ✓ AI 5-dimension pipeline + streaming
-  ✓ Rate limiting, RAG, share pages, history
+  ✓ Rate limiting, RAG, share pages
   ✓ /bible UI with 3-Column Study Desk workspace
-  ✓ Graph, MCP, prayer, sermons, catechism/creeds/memory/plans
-  ✓ Moderation UI, login wiring, Electron shell
+  ✓ Study Resources hub, MCP, prayer, moderation and login
 
 Active work (Phase 0 Complete):
   ✓ Module format + 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT)
@@ -93,17 +91,15 @@ Active work (Phase 0 Complete):
   ✓ Quick Jump modal (Ctrl+K) & Chrome Extension MV3 side panel
   ✓ Modernized Bible-themed UI with clean Lucide icons across desktop & mobile
   ✓ Bring-Your-Own-Key (BYOK) Gemini API key setup with shared/free Bible guarantee
-  ✓ Discord bot slash commands & webhook channel dispatcher
-  ✓ Meta WhatsApp Business Cloud API webhook & Click-to-Chat sharing
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
-  ✓ PrayerAtlas 3D Interactive Global Prayer Map with country-level privacy & restricted region shields
+  ✓ PrayerAtlas 2D map with consent-gated public records
   ✓ Private Prayer Care first increment with Calendar/ICS and reviewed Gmail draft/compose exports
-  ✓ Chrome extension Prayer Care launcher; shared web flow is used by PWA/Electron/Android
-  ✓ Single-command packaging CLI (`npm run package:all`) & official multi-resolution brand icon suite
 
-Deploy (parallel):
-  □ Apply supabase schemas v1→v5
+Release gates:
+  □ Apply and validate all Supabase schemas through v10 plus rpc.sql
+  □ Verify RLS with cross-user denial tests
   □ Configure Google OAuth consent/client, APIs, callback, encryption key, host, and smoke tests
+  □ Deploy to Vercel and complete authenticated/public production smoke tests
 ```
 
 ---
@@ -115,11 +111,11 @@ src/
   app/
     page.tsx                     ← Homepage (Bible-first hero + assistant)
     bible/                       ← Reader UI
-    daily|plans|catechism|creeds|memory|prayer|sermons|bookmarks|history|graph|mod|login|share/
+    bible|study-resources|prayer|developers|download|mod|login|share/
     api/
       ask/                       ← AI answer (+ stream/)
       bible/                     ← chapter, search, study
-      graph|history|bookmarks|daily|mcp|mod|prayer|prayer-care|google|sermons|export/
+      ask|bible|graph|history|bookmarks|daily|mcp|mod|prayer|prayer-care|google|export/
       v1/bible/answer/           ← Sigil webhook
   components/                    ← Header, SearchBar, DimensionPanel, GraphView, …
   lib/
@@ -127,9 +123,9 @@ src/
     claude.ts|pipeline.ts|rag.ts|gemini.ts|graph.ts|moderation.ts|…
   hooks/                         ← useStreamingAsk, useBookmark
   types/
-apps/desktop/                    ← Electron wrapper
+archive/                         ← preserved non-MVP features and native shells
 supabase/
-  schema.sql → schema-v5.sql     ← Apply in order
+  schema.sql → schema-v10-public-prayer.sql + rpc.sql  ← Apply and validate in order
 public/
   manifest.json, icon-*.png
 TODO.md · README.md · ARCHITECTURE.md · .env.example
@@ -137,4 +133,4 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
-*Updated: 2026-09-03 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-13 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

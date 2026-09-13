@@ -3,19 +3,17 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Search, BookOpen, LogIn, LogOut, Radio } from 'lucide-react';
+import { Search, LogIn, LogOut } from 'lucide-react';
 import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
   { href: '/bible',       label: 'Study Desk' },
-  { href: '/plans',       label: 'Plans' },
-  { href: '/daily',       label: 'Daily' },
+  { href: '/study-resources', label: 'Resources' },
   { href: '/#assistant',  label: '5D Assistant' },
-  { href: '/sermons',     label: 'Notes & Outlines' },
   { href: '/prayer',      label: 'Prayer' },
-  { href: '/history',     label: 'History' },
+  { href: '/developers',  label: 'Developers' },
 ];
 
 export default function Header() {
@@ -114,30 +112,6 @@ export default function Header() {
             <Search size={15} className={styles.quickJumpIcon} />
             <span className={styles.quickJumpText}>Jump to Book / Chapter...</span>
             <kbd className={styles.quickJumpKbd}>Ctrl K</kbd>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('bibledesk:open-radio'))}
-            title="Open Christian Worship Radio & Ambient Praise"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(181, 132, 20, 0.12)',
-              border: '1px solid rgba(181, 132, 20, 0.3)',
-              color: '#d4af37',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              marginLeft: '6px',
-              height: '36px',
-            }}
-          >
-            <Radio size={14} />
-            <span>Radio</span>
           </button>
 
           <nav className={styles.nav} aria-label="Main navigation">

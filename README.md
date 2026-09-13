@@ -4,20 +4,20 @@
 
 BibleDesk provides a completely free, open-source foundation for Scripture study with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek & Hebrew lexicons, Treasury of Scripture Knowledge (TSK) cross-references, and a bidirectional Biblical Knowledge Graph.
 
-The entire app is designed so anyone can use BibleDesk directly as a standalone web/desktop/mobile app or consume it as an **Open REST API & MCP Server** for external AI agents (Claude Code, Cursor, Windsurf, LangChain, custom agents) — **no closed AI subscriptions or mandatory API keys required**.
+Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MCP Server** from external tools. Native desktop, Android, and Chrome extension shells are preserved under `archive/` and are not current releases. Scripture reading and local study data need no paid subscription; AI features require host configuration or a user-provided Gemini key.
 
 ---
 
-## Current Status (2026-09-12)
+## Current Status (2026-09-13)
 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation** |
-| **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) reading fully offline; Strong's Greek & Hebrew lexicons; Treasury of Scripture Knowledge (TSK) cross-references; 5-dimension AI study assistant (5 free server answers/day, unlimited with your own free Gemini key); public prayer board with 2D PrayerAtlas map; private Prayer Care with authenticated contacts and commitments, ICS export, direct per-user Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; official TypeScript SDK (`packages/sdk`); Developer Platform (`/developers`); Open REST API & MCP server (`/api/mcp`, MCP_SECRET required). Google-backed Prayer Care requires the unapplied v5 schema and OAuth configuration before it is operational. |
+| **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) for offline reading/search; Strong's Greek & Hebrew lexicons; TSK cross-references; optional 5-dimension AI study assistant; consent-based public Prayer Atlas; local private prayer commitments; authenticated Prayer Care with ICS, Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; TypeScript SDK; REST API and MCP server. Google-backed Prayer Care requires the production schemas and OAuth configuration before it is operational. |
 | **MVP scope (2026-09-12)** | Discord & WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
 | **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/daily` |
-| **Deploy & Build** | Production Next.js 16 build verified across all 23 routes (`0` type errors) |
+| **Deploy & Build** | Next.js 16.3.5 production build, typecheck, 7 security tests, and production dependency audit pass locally. Live Supabase, OAuth, RLS, Vercel and post-deploy checks remain open. |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 ---
@@ -45,7 +45,7 @@ All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew
   - `GET /api/graph?nodeKey=grace`
   - `GET /api/daily`
 - **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 5 free questions/day, then BYOK for unlimited) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
-- **Pastoral Prayer Care Workflow & Reminders**: Personal prayer circle (local-only, no server sync) with daily/weekly recurrence, browser push reminders, automated email digest (`/api/prayer/digest`), and 1-click follow-up messaging (WhatsApp, Email, SMS, Clipboard).
+- **Prayer Care**: Local private commitments support recurring rhythms and gratitude tracking. With Supabase and direct BibleDesk Google OAuth configured, signed-in users can export ICS/Calendar events and create an editable Gmail draft after explicit review. BibleDesk does not send Gmail messages automatically.
 
 ### 3. Bidirectional Biblical Knowledge Graph
 The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.

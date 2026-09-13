@@ -25,7 +25,7 @@ export default function MarketingShowcase() {
         <div className={styles.heroCopy}>
         <div className={styles.heroBadge}>
           <Sparkles size={15} />
-          <span>The Open, Local-First Bible Study Platform &amp; Global Prayer Network</span>
+          <span>Open-source, local-first Scripture study and prayer</span>
         </div>
 
         <h1 className={styles.heroTitle}>
@@ -33,8 +33,8 @@ export default function MarketingShowcase() {
         </h1>
 
         <p className={styles.heroSubtitle}>
-          BibleDesk unites 6 public-domain translations (100% offline), Strong’s Greek &amp; Hebrew lexicons,
-          Treasury of Scripture Knowledge cross-references, a global prayer atlas, and an open developer SDK.
+          Read and search six bundled public-domain translations without a network connection. Explore
+          Strong’s lexicons and TSK cross-references, keep a prayer rhythm, or build with the open SDK.
         </p>
 
         <div className={styles.heroActions}>
@@ -87,7 +87,7 @@ export default function MarketingShowcase() {
         <article className={styles.glassCard}>
           <div className={styles.featureIcon}><Globe size={18} /></div>
           <h3>Prayer Atlas</h3>
-          <p>Connect prayer with the people and places that need it.</p>
+          <p>View prayers shared with explicit Atlas consent and keep private commitments separate.</p>
         </article>
         <article className={styles.glassCard}>
           <div className={styles.featureIcon}><Brain size={18} /></div>
@@ -146,7 +146,7 @@ export default function MarketingShowcase() {
                 </div>
                 <div className={styles.personaBullet}>
                   <Check size={16} className={styles.bulletCheck} />
-                  <span><strong>Personal Prayer Circle &amp; Follow-up:</strong> Track commitments, set recurring rhythms, and log answered prayers with gratitude.</span>
+                  <span><strong>Personal Prayer Circle &amp; Follow-up:</strong> Keep local commitments, recurrence, and gratitude history. Signed-in Prayer Care can add Calendar export and reviewed Gmail drafts after the host configures Supabase and Google OAuth; BibleDesk never sends the message.</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -196,7 +196,7 @@ export default function MarketingShowcase() {
               <span className={styles.tierPeriod}>Free Forever</span>
             </div>
             <p className={styles.tierDesc}>
-              Full offline Bible foundation with 5 free server AI answers/day, or unlimited answers using your own free Gemini API key.
+              The bundled Bible reader and search work offline. AI availability depends on the host configuration or your own Gemini API key.
             </p>
 
             <div className={styles.tierFeatureList}>
@@ -268,7 +268,7 @@ export default function MarketingShowcase() {
       <section className={styles.integrationsSection} aria-label="Integrations">
         <div className={styles.sectionHeading}>
           <span className={styles.sectionBadge}>Universal Accessibility</span>
-          <h2 className={styles.sectionTitle}>Connected Across Every Platform</h2>
+          <h2 className={styles.sectionTitle}>Use it on the web or connect your tools</h2>
           <p className={styles.sectionSubtitle}>
             Access BibleDesk in your browser and as an installable PWA, share verses over WhatsApp,
             and export to your personal Obsidian notes.
@@ -323,8 +323,7 @@ export default function MarketingShowcase() {
         <div className={styles.bannerCard}>
           <h2 className={styles.bannerTitle}>Rooted in Scripture. Connected in Prayer.</h2>
           <p className={styles.bannerSubtitle}>
-            Join thousands of believers, pastors, missionaries, and worship artists studying the Word of God with
-            depth, reverence, and global intercession.
+            Study public-domain Scripture, build a private prayer rhythm, and use the optional assistant when you want a structured place to begin deeper study.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <Link href="/login" className={styles.primaryCta}>

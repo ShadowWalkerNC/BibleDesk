@@ -11,8 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title:       'BibleDesk — Bible-first study',
-  description: 'Read Scripture, follow plans, and study with notes. Optional AI assistant for five-dimension, citation-grounded answers.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  title:       'BibleDesk — Local-first Bible study',
+  description: 'Read and search six public-domain Bible translations offline. Explore Strong’s lexicons, TSK cross-references, prayer tools, and an optional study assistant.',
   keywords:    ['Bible study', 'Bible reader', 'theology', 'scripture', 'Christian', 'reading plans'],
   authors:     [{ name: 'BibleDesk' }],
   manifest:    '/manifest.json',
@@ -22,8 +23,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
   },
   openGraph: {
-    title:       'BibleDesk — Bible-first study',
-    description: 'Read Scripture first. AI assists when you want it.',
+    title:       'BibleDesk — Local-first Bible study',
+    description: 'Read and search public-domain Scripture offline. Explore study resources, prayer tools, and an optional five-dimension assistant.',
     type:        'website',
   },
 };
