@@ -15,12 +15,12 @@ Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MC
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation** |
-| **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) for offline reading/search; Strong's Greek & Hebrew lexicons; TSK cross-references; optional 5-dimension AI study assistant; consent-based public Prayer Atlas; local private prayer commitments; authenticated Prayer Care with ICS, Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; TypeScript SDK; REST API and MCP server. Google-backed Prayer Care requires the production schemas and OAuth configuration before it is operational. |
+| **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) for offline reading/search; Strong's Greek & Hebrew lexicons; TSK cross-references; optional 5-dimension AI study assistant; consent-based public Prayer Atlas; local private prayer commitments; authenticated Prayer Care with ICS, Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; TypeScript SDK; REST API, MCP server, Stripe Customer Portal, and Obsidian vault exporter. |
 | **MVP scope (2026-09-12)** | Discord & WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/daily` |
-| **Deploy & Build** | Next.js 16.3.5 production build, typecheck, 7 security tests, and production dependency audit pass locally. Live Supabase, OAuth, RLS, Vercel and post-deploy checks remain open. |
-| **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
+| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/daily`, `/api/export/obsidian`, `/api/billing/portal` |
+| **Deploy & Build** | Next.js 16.3.5 production build, TypeScript typecheck, 10 automated tests (7 security boundary + 3 SDK tests), environment doctor, and production dependency audit pass. |
+| **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [DEPLOYMENT.md](DEPLOYMENT.md) for deployment · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 ---
 
@@ -74,7 +74,8 @@ BibleDesk is a web app first — install it as a PWA from your browser (see `/do
 | **Android App (Capacitor)** | `archive/android/` | Parked for the MVP — build from source yourself; no APK downloads offered. |
 | **Chrome Extension (MV3)** | `archive/extension/` | Parked for the MVP — build from source yourself. |
 | **WhatsApp Sharing** | wa.me links | 1-click formatted verse/encouragement forwarder for small groups (no server bot). |
-| **Obsidian Vault Exporter** | `/api/export/obsidian` | Generates structured Markdown vaults with `[[wikilinks]]` for local-first personal knowledge management. |
+| **Obsidian Vault Exporter** | `/api/export/obsidian` | Generates structured Markdown vaults with `[[wikilinks]]` combining theological knowledge graph and personal verse notes into a downloadable `.zip`. |
+| **Printable Study Sheets** | `/bible` (Study Sheet) | Formatted chapter study guides with cross-references, Strong's lexical notes, and print-ready CSS layout. |
 
 ---
 
@@ -116,6 +117,21 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions:
 - **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.
 - **Docker**: Production-ready multi-stage container (`Dockerfile` & `docker-compose.yml`).
 
+---
+
+## SaaS Membership & Open-Source Self-Hosting
+
+BibleDesk balances open-source Kingdom stewardship with sustainable SaaS operations:
+
+1. **100% Free & Open-Source Core**:
+   - Bundled public-domain Bibles (KJV, ASV, WEB, BBE, Darby, YLT), Strong's lexicons, TSK cross-references, and local notes are **never paywalled**.
+   - Unlimited AI queries with your own free Google Gemini API key (BYOK).
+2. **Pro & Ministry SaaS Tiers** (`/pricing`):
+   - For users who prefer a turnkey cloud experience without managing API keys or infrastructure.
+   - Includes hosted AI quotas (250–1,000 answers/day), real-time cloud sync for verse notes, 1-click Obsidian Markdown vault (.zip) downloads, and printable PDF study guides.
+   - Self-service billing via Stripe Customer Portal (`POST /api/billing/portal`).
+3. **Open Self-Hosting Guarantee**:
+   - Churches, ministries, and self-hosters running their own instances can set `NEXT_PUBLIC_SELF_HOSTED=true` (enabled by default in `docker-compose.yml`) to unlock all Pro capabilities for their community without any subscription or Stripe account.
 
 ---
 

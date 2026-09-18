@@ -55,6 +55,9 @@ export declare class BibleDeskClient {
         list: (code?: string) => Promise<any>;
         register: (churchData: any) => Promise<any>;
     };
+    readonly export: {
+        getObsidianVault: (authToken?: string) => Promise<ArrayBuffer>;
+    };
     readonly mcp: {
         getSetupConfig: (client?: "claude" | "cursor" | "windsurf") => {
             mcpServers: {

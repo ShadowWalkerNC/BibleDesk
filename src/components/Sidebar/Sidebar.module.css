@@ -319,14 +319,65 @@
   color: var(--sage);
 }
 
-.userName {
+.userMeta {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.userName {
   font-size: 0.8rem;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.tierBadgePro {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(181, 132, 20, 0.15);
+  color: #b58414;
+  border: 1px solid rgba(181, 132, 20, 0.3);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.tierBadgePro:hover {
+  opacity: 0.85;
+}
+
+.tierBadgeFree {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(107, 142, 123, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.tierBadgeFree:hover {
+  background: rgba(107, 142, 123, 0.2);
+  color: var(--sage-dark);
+}
+
 
 .signOutBtn {
   display: flex;

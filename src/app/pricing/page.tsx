@@ -93,6 +93,42 @@ export default function PricingPage() {
     }
   }
 
+  async function handleManageBilling() {
+    if (!user) {
+      router.push('/login?redirect=/pricing');
+      return;
+    }
+
+    setLoadingTier('pro');
+    setNotification(null);
+
+    try {
+      const res = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${(await getBrowserClient().auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to open customer portal');
+      }
+
+      if (data.mode === 'mock') {
+        setNotification('✓ Local/Self-Hosted Mode: Your Pro membership is active and managed locally.');
+      } else if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      setNotification(`Error: ${err.message}`);
+    } finally {
+      setLoadingTier(null);
+    }
+  }
+
+
   return (
     <main className={styles.container}>
       {/* ── Hero Section ── */}
@@ -195,10 +231,10 @@ export default function PricingPage() {
           <button
             type="button"
             disabled={loadingTier === 'pro'}
-            onClick={() => handleSubscribe('pro')}
+            onClick={() => currentTier === 'pro' ? handleManageBilling() : handleSubscribe('pro')}
             className={styles.tierBtnPrimary}
           >
-            {loadingTier === 'pro' ? 'Activating...' : currentTier === 'pro' ? 'Active Membership' : 'Upgrade to Pro'}
+            {loadingTier === 'pro' ? 'Opening...' : currentTier === 'pro' ? 'Manage Subscription' : 'Upgrade to Pro'}
           </button>
         </div>
 
@@ -228,10 +264,10 @@ export default function PricingPage() {
           <button
             type="button"
             disabled={loadingTier === 'ministry'}
-            onClick={() => handleSubscribe('ministry')}
+            onClick={() => currentTier === 'ministry' ? handleManageBilling() : handleSubscribe('ministry')}
             className={styles.tierBtnSecondary}
           >
-            {loadingTier === 'ministry' ? 'Activating...' : currentTier === 'ministry' ? 'Active Membership' : 'Select Ministry Tier'}
+            {loadingTier === 'ministry' ? 'Opening...' : currentTier === 'ministry' ? 'Manage Subscription' : 'Select Ministry Tier'}
           </button>
         </div>
       </section>

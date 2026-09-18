@@ -146,3 +146,58 @@ export async function handleStripeWebhookEvent(event: any): Promise<void> {
       console.log(`[billing] Unhandled Stripe event: ${event.type}`);
   }
 }
+
+export interface BillingPortalOptions {
+  userId: string;
+  returnUrl: string;
+}
+
+/**
+ * Creates a Stripe Billing Customer Portal session allowing subscribers to manage payment methods,
+ * view invoices, or change/cancel their subscription.
+ */
+export async function createBillingPortalSession(options: BillingPortalOptions): Promise<{ url: string; mode: 'stripe' | 'mock' }> {
+  const { userId, returnUrl } = options;
+
+  // 1. If Stripe is not configured or in self-hosted mode, return mock portal URL
+  if (!isStripeConfigured()) {
+    console.log(`[billing] STRIPE_SECRET_KEY is unset; returning mock billing portal for user ${userId}`);
+    return {
+      url: `${returnUrl}?session=mock_portal`,
+      mode: 'mock',
+    };
+  }
+
+  // 2. Lookup user's stripe_customer_id from Supabase
+  const client = getServerClient();
+  const { data: profile, error } = await client
+    .from('profiles')
+    .select('stripe_customer_id')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error || !profile?.stripe_customer_id) {
+    throw new Error('No active billing customer found for this account. Please subscribe first.');
+  }
+
+  try {
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-02-24.acacia' as any,
+    });
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: returnUrl,
+    });
+
+    return {
+      url: portalSession.url,
+      mode: 'stripe',
+    };
+  } catch (err: any) {
+    console.error('[billing] Stripe portal session creation error:', err);
+    throw new Error(err.message || 'Failed to create billing portal session');
+  }
+}
+

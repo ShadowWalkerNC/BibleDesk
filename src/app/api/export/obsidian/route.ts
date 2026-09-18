@@ -21,6 +21,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFullGraph } from '@/lib/graph';
 import type { GraphNode, GraphEdge } from '@/lib/graph';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { getServerClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getUserTier } from '@/lib/tiers';
 
 const GRAPH_WRITE_SECRET = process.env.GRAPH_WRITE_SECRET;
 
@@ -209,11 +212,44 @@ function buildZip(files: { name: string; content: string }[]): Buffer {
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('x-graph-write-secret');
-  if (!GRAPH_WRITE_SECRET || authHeader !== GRAPH_WRITE_SECRET) {
-    return NextResponse.json(
-      { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
-      { status: 401 }
-    );
+  const isServerSecret = Boolean(GRAPH_WRITE_SECRET && authHeader === GRAPH_WRITE_SECRET);
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_COMMUNITY_MODE === 'true';
+
+  let user = null;
+  let userTier = 'free';
+
+  if (!isServerSecret) {
+    user = await getAuthenticatedUser(req);
+    if (!user && !isSelfHosted) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required to export study vault', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    if (user && isSupabaseConfigured()) {
+      const client = getServerClient();
+      const { data: profile } = await client
+        .from('profiles')
+        .select('subscription_tier, subscription_status')
+        .eq('id', user.id)
+        .maybeSingle();
+      userTier = getUserTier(profile);
+    } else {
+      userTier = getUserTier(null);
+    }
+
+    const hasAccess = userTier === 'pro' || userTier === 'ministry' || userTier === 'lifetime' || isSelfHosted;
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Obsidian Vault Export is a BibleDesk Pro feature. Upgrade at /pricing to download your study vault.',
+          code: 'PRO_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
   }
 
   try {
@@ -234,6 +270,7 @@ export async function GET(req: NextRequest) {
           '',
           '## Structure',
           '- Each `.md` file is a concept, verse, doctrine, question, or theme.',
+          '- `Personal Notes/` contains your personal verse reflections and study notes.',
           '- `[[wikilinks]]` connect related nodes.',
           '- Use Obsidian Graph View to visualise the full network.',
         ].join('\n'),
@@ -247,6 +284,38 @@ export async function GET(req: NextRequest) {
       const body     = buildNoteBody(node, edges, nodeById);
       files.push({ name: filename, content: `${fm}\n\n${body}` });
     }
+
+    // Attach personal verse notes if exporting for an authenticated user
+    if (user && isSupabaseConfigured()) {
+      try {
+        const client = getServerClient();
+        const { data: notesList } = await client
+          .from('verse_notes')
+          .select('reference, content, created_at')
+          .eq('user_id', user.id);
+
+        if (notesList && notesList.length > 0) {
+          for (const note of notesList) {
+            const safeRef = note.reference.replace(/[:\/\\?%*|"<>]/g, '-');
+            const noteFm = [
+              '---',
+              `reference: "${note.reference}"`,
+              `created_at: "${note.created_at}"`,
+              'tags: [bibledesk, personal-note]',
+              '---',
+            ].join('\n');
+            const noteBody = `# ${note.reference} — Study Note\n\n${note.content}\n\n---\n*Personal study note from BibleDesk*`;
+            files.push({
+              name: `Personal Notes/${safeRef}.md`,
+              content: `${noteFm}\n\n${noteBody}`,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[export/obsidian] Could not attach personal notes:', err);
+      }
+    }
+
 
     const zip = buildZip(files);
     const timestamp = new Date().toISOString().slice(0, 10);

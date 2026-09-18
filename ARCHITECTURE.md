@@ -31,7 +31,8 @@ Browser / installed PWA
   └─ authenticated requests with a Supabase access token
 
 Next.js server routes
-  ├─ Bible, daily, graph, export and MCP APIs
+  ├─ Bible, daily, graph, export (Obsidian with personal notes), and MCP APIs
+  ├─ Stripe checkout, portal, and webhook billing lifecycle
   ├─ rate-limited Gemini/AI answer pipeline
   ├─ owner-scoped Prayer Care APIs
   ├─ consent-gated public prayer submission
@@ -40,6 +41,7 @@ Next.js server routes
 External services when configured
   ├─ Supabase Postgres/Auth/pgvector
   ├─ Google Gemini and OpenAI embeddings
+  ├─ Stripe for subscription billing & Customer Portal
   └─ Google OAuth for Calendar events and Gmail draft creation
 ```
 
@@ -51,6 +53,8 @@ External services when configured
 - Public Atlas submission requires explicit consent and creates a pending moderation record. Private local commitments are not published by escalation alone.
 - Google tokens are encrypted at rest in `google_connections`, which is accessed only with the service role.
 - Gmail export requires a reviewed request and creates an editable draft. There is no automatic send path.
+- Billing portal (`/api/billing/portal`) derives customer identity solely from verified Supabase sessions.
+- Obsidian export with personal notes verifies Pro/Ministry tier or `NEXT_PUBLIC_SELF_HOSTED=true` before inclusion.
 - `/api/v1/bible/answer` retains the Sigil-compatible HMAC contract.
 
 ## Data and migrations
@@ -68,7 +72,7 @@ The repository build and mocked boundary tests do not prove these migrations aga
 ## Deployment model
 
 BibleDesk supports both Vercel cloud hosting and turnkey Docker containerization (`Dockerfile` and `docker-compose.yml`):
-- Run `docker compose up -d` for an instant self-hosted production container.
+- Run `docker compose up -d` for an instant self-hosted production container (`NEXT_PUBLIC_SELF_HOSTED=true` by default, unlocking all Pro features for self-hosted instances).
 - Run `npm run check:env` to validate environment variables, keys, and database connectivity.
 - Vercel is the primary hosted web target. `NEXT_PUBLIC_APP_URL` must be the canonical HTTPS origin so metadata, OAuth callbacks, sitemap URLs and share links agree.
 

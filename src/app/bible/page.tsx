@@ -29,9 +29,11 @@ import {
   Columns2,
   Columns3,
   Download,
+  Printer,
 } from 'lucide-react';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import OnboardingModal from '@/components/OnboardingModal/OnboardingModal';
+import StudyGuideModal from '@/components/StudyGuideModal/StudyGuideModal';
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import ProvenanceBadge from '@/components/ProvenanceBadge/ProvenanceBadge';
@@ -40,6 +42,7 @@ import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseRefe
 import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse, type BibleAnswer } from '@/types';
 import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getUserTier, type SubscriptionTier } from '@/lib/tiers';
 import styles from './page.module.css';
 
 function BibleReaderContent() {
@@ -208,6 +211,11 @@ function BibleReaderContent() {
       setActiveTab('connected');
       void openStrongsDefinition(strongsParam.trim());
     }
+
+    // ?tour=1 — re-open onboarding setup wizard
+    if (searchParams.get('tour') === '1') {
+      setIsOnboardingOpen(true);
+    }
   }, [searchParams]);
 
   // Persist last read position to localStorage on book/chapter/translation change
@@ -257,6 +265,14 @@ function BibleReaderContent() {
   // Export menu state (A12: Obsidian vault export)
   const [exportOpen, setExportOpen] = useState(false);
   const [exportingObsidian, setExportingObsidian] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isStudyGuideOpen, setIsStudyGuideOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenOnboarding = () => setIsOnboardingOpen(true);
+    window.addEventListener('bibledesk:open-onboarding', handleOpenOnboarding);
+    return () => window.removeEventListener('bibledesk:open-onboarding', handleOpenOnboarding);
+  }, []);
 
   useEffect(() => {
     // Fetch daily devotional snippet
@@ -565,20 +581,52 @@ function BibleReaderContent() {
     };
   }, [selectedVerse, activeTab]);
 
-  // User authentication state for cloud sync
+  // User authentication and subscription tier state
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userTier, setUserTier] = useState<SubscriptionTier>('free');
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured()) {
+      setUserTier(getUserTier(null));
+      return;
+    }
     const supabase = getBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setCurrentUser(u);
+      if (u) {
+        supabase
+          .from('profiles')
+          .select('subscription_tier, subscription_status')
+          .eq('id', u.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setUserTier(getUserTier(data));
+          });
+      } else {
+        setUserTier(getUserTier(null));
+      }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setCurrentUser(u);
+      if (u) {
+        supabase
+          .from('profiles')
+          .select('subscription_tier, subscription_status')
+          .eq('id', u.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setUserTier(getUserTier(data));
+          });
+      } else {
+        setUserTier(getUserTier(null));
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const hasCloudSync = userTier === 'pro' || userTier === 'ministry' || userTier === 'lifetime' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
 
   // 4. Load Personal Notes (Local + Cloud Sync)
   useEffect(() => {
@@ -587,8 +635,8 @@ function BibleReaderContent() {
     const savedNote = localStorage.getItem(key) || '';
     setNotes(savedNote);
 
-    // If authenticated, fetch from Supabase to ensure cross-device sync
-    if (currentUser && isSupabaseConfigured()) {
+    // If authenticated & on cloud sync tier, fetch from Supabase to ensure cross-device sync
+    if (currentUser && isSupabaseConfigured() && hasCloudSync) {
       const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
       const supabase = getBrowserClient();
       supabase
@@ -603,7 +651,7 @@ function BibleReaderContent() {
           }
         });
     }
-  }, [selectedVerse, currentUser]);
+  }, [selectedVerse, currentUser, hasCloudSync]);
 
   // 5. Save Note Helper (Local + Cloud Sync)
   const handleSaveNote = (val: string) => {
@@ -612,15 +660,15 @@ function BibleReaderContent() {
     const key = `biblenote:${selectedVerse.book_name}:${selectedVerse.chapter}:${selectedVerse.verse}`;
     const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
 
-    // Always update local cache for instant offline responsiveness
+    // Always update local cache for instant offline responsiveness (Rule 8: Local-first)
     if (val.trim()) {
       localStorage.setItem(key, val);
     } else {
       localStorage.removeItem(key);
     }
 
-    // If authenticated, sync to Supabase verse_notes table
-    if (currentUser && isSupabaseConfigured()) {
+    // If authenticated and on cloud sync tier, sync to Supabase verse_notes table
+    if (currentUser && isSupabaseConfigured() && hasCloudSync) {
       const supabase = getBrowserClient();
       if (val.trim()) {
         supabase
@@ -659,20 +707,27 @@ function BibleReaderContent() {
       .catch(() => showToast('Failed to copy text.', 'error'));
   };
 
-  // A12: Export the knowledge graph as an Obsidian-ready zip.
-  // The route requires the graph write secret, so a 401 is surfaced honestly.
+  // Export personal study notes and knowledge graph as an Obsidian-ready zip.
   const handleExportObsidian = async () => {
     setExportingObsidian(true);
     try {
-      const res = await fetch('/api/export/obsidian');
+      const supabase = getBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch('/api/export/obsidian', { headers });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        showToast(
-          data?.error === 'Unauthorized'
-            ? 'Obsidian export needs the graph write secret (admin setup).'
-            : 'Obsidian export failed.',
-          'error'
-        );
+        if (res.status === 403 || data?.code === 'PRO_REQUIRED') {
+          showToast('Obsidian Vault export is a Pro feature. Upgrade at /pricing.', 'error');
+        } else if (res.status === 401) {
+          showToast('Please sign in or configure Pro membership to export.', 'error');
+        } else {
+          showToast(data?.error || 'Obsidian export failed.', 'error');
+        }
         return;
       }
       const blob = await res.blob();
@@ -684,7 +739,7 @@ function BibleReaderContent() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      showToast('Obsidian vault downloaded.');
+      showToast('Obsidian study vault downloaded successfully!');
     } catch {
       showToast('Obsidian export failed.', 'error');
     } finally {
@@ -1205,13 +1260,30 @@ function BibleReaderContent() {
                   <h1 className={`${styles.chapterHeader} text-serif`}>
                     {selectedBook} {selectedChapter}
                   </h1>
-                  <button
-                    onClick={handlePlayChapterAudio}
-                    className={`${styles.audioBtn} ${isSpeaking ? styles.audioBtnActive : ''}`}
-                    title="Listen to full chapter using Text-to-Speech"
-                  >
-                    {isSpeaking ? '⏹ Stop Audio' : '🔊 Listen Chapter'}
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => setIsStudyGuideOpen(true)}
+                      className={styles.audioBtn}
+                      title="Print or export chapter study worksheet"
+                    >
+                      <Printer size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Study Sheet
+                    </button>
+                    <button
+                      onClick={handleExportObsidian}
+                      disabled={exportingObsidian}
+                      className={styles.audioBtn}
+                      title="Export knowledge vault and notes to Obsidian (.zip)"
+                    >
+                      <Download size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> {exportingObsidian ? 'Exporting…' : 'Obsidian'}
+                    </button>
+                    <button
+                      onClick={handlePlayChapterAudio}
+                      className={`${styles.audioBtn} ${isSpeaking ? styles.audioBtnActive : ''}`}
+                      title="Listen to full chapter using Text-to-Speech"
+                    >
+                      {isSpeaking ? '⏹ Stop Audio' : '🔊 Listen Chapter'}
+                    </button>
+                  </div>
                 </div>
                 <div className={styles.versesWrapper}>
                   {parallelMode && (
@@ -1603,9 +1675,14 @@ function BibleReaderContent() {
                   {activeTab === 'notes' && (
                     <div id="notes-tab" role="tabpanel" className={styles.tabPanel}>
                       <div className={styles.notesContainer}>
-                        <label htmlFor="notes-textarea" className={styles.notesLabel}>
-                          Personal Study Notes (Saved locally)
-                        </label>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <label htmlFor="notes-textarea" className={styles.notesLabel} style={{ margin: 0 }}>
+                            Personal Study Notes
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: hasCloudSync && currentUser ? 'var(--dim-theological)' : 'var(--text-muted)' }}>
+                            {hasCloudSync && currentUser ? '☁️ Cloud Synced' : '💾 Local Storage'}
+                          </span>
+                        </div>
                         <textarea
                           id="notes-textarea"
                           value={notes}
@@ -1614,7 +1691,19 @@ function BibleReaderContent() {
                           className={styles.notesTextarea}
                         />
                         <div className={styles.notesFooter}>
-                          <span>Saved to Local Storage</span>
+                          {hasCloudSync && currentUser ? (
+                            <span style={{ color: 'var(--dim-theological)' }}>☁️ Synced to cloud (Pro)</span>
+                          ) : (
+                            <span>💾 Saved locally (Free) · <a href="/pricing" style={{ color: 'var(--sage)', textDecoration: 'underline' }}>Upgrade for Cloud Sync</a></span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={handleExportObsidian}
+                            disabled={exportingObsidian}
+                            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--sage)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline' }}
+                          >
+                            {exportingObsidian ? 'Exporting…' : 'Export Obsidian (.zip)'}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1806,8 +1895,23 @@ function BibleReaderContent() {
         }}
       />
 
+      <StudyGuideModal
+        isOpen={isStudyGuideOpen}
+        onClose={() => setIsStudyGuideOpen(false)}
+        book={selectedBook}
+        chapter={selectedChapter}
+        translation={selectedTranslation}
+        verses={verses}
+        notes={notes}
+        crossRefs={crossRefs.map(r => ({ to: r.reference }))}
+        strongsData={[]}
+      />
+
       <OnboardingModal
+        forceOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
         onComplete={(prefs) => {
+          setIsOnboardingOpen(false);
           if (prefs.translation) {
             setSelectedTranslation(prefs.translation);
           }

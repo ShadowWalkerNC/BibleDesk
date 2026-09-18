@@ -13,8 +13,13 @@
 - [x] Consolidated single-file database migration (`supabase/schema-init.sql`) bundles all 12 schemas into a 1-click execution.
 - [x] First-run Onboarding Modal (`OnboardingModal.tsx`) personalizes translation, study persona, and AI mode.
 - [x] Dual-tier Open Core & SaaS architecture established: 100% Free Core Scripture + Pro/Ministry Cloud Tiers (`src/lib/tiers.ts`, `/pricing`, `/api/billing/*`).
+- [x] Stripe Customer Portal endpoint (`/api/billing/portal`) enables self-service subscription and billing management.
+- [x] Pro & Ministry membership badges displayed dynamically in Header, Sidebar, and Mobile navigation.
+- [x] Personal Obsidian Vault (.zip) export bundles user study notes and theological knowledge graph with Pro gating.
+- [x] Printable passage study worksheet (`StudyGuideModal.tsx`) with `@media print` layout.
+- [x] Turnkey self-hosted mode default (`NEXT_PUBLIC_SELF_HOSTED=true`) in Docker Compose grants all Pro capabilities out-of-the-box.
 - [x] Personal verse notes cloud sync: real-time dual-write to Supabase `verse_notes` table with `localStorage` offline cache and auto-merge on login.
-- [x] Isomorphic TypeScript client SDK (`@bibledesk/sdk`) builds cleanly to ESM and CJS.
+- [x] Isomorphic TypeScript client SDK (`@bibledesk/sdk`) builds cleanly to ESM and CJS with automated unit tests.
 - [x] Private local prayer commitments remain separate from consent-based public Atlas records.
 - [x] Prayer Care API ownership is derived from verified Supabase sessions.
 - [x] Google Calendar export and reviewed Gmail draft creation use direct per-user BibleDesk OAuth; Gmail has no send path.

@@ -159,13 +159,18 @@ if (process.env.MCP_SECRET) {
   warn('MCP_SECRET is unset', 'POST /api/mcp endpoint will refuse external requests with 401.');
 }
 
-// 8. SaaS / Billing check
+// 8. SaaS / Billing & Self-Hosted Check
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-if (stripeKey) {
-  pass('Stripe Billing: Secret key configured (Pro SaaS enabled)');
+const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_COMMUNITY_MODE === 'true';
+
+if (isSelfHosted) {
+  pass('Self-Hosted Mode: Active (NEXT_PUBLIC_SELF_HOSTED=true grants full Pro capabilities to all local users)');
+} else if (stripeKey) {
+  pass('Stripe Billing: Secret key configured (Pro SaaS hosted tier active)');
 } else {
-  warn('STRIPE_SECRET_KEY is unset', 'Running in Community/Open-Source mode. Set NEXT_PUBLIC_COMMUNITY_MODE=true or add Stripe keys for paid tiers.');
+  warn('Stripe Billing is unset', 'Running in Community Cloud mode. Set NEXT_PUBLIC_SELF_HOSTED=true to unlock full Pro features for self-hosting.');
 }
+
 
 // ── Summary Report ──────────────────────────────────────────────────────────
 console.log(`\n${c.bold}══════════════════════════════════════════════════════════════${c.reset}`);

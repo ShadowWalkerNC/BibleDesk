@@ -63,6 +63,20 @@ export class BibleDeskClient {
                 });
             },
         };
+        // ── SaaS & Export API ──
+        this.export = {
+            getObsidianVault: async (authToken) => {
+                const headers = {
+                    Accept: 'application/zip',
+                    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+                };
+                const res = await fetch(`${this.baseUrl}/api/export/obsidian`, { headers });
+                if (!res.ok) {
+                    throw new Error(`BibleDesk Export Error ${res.status}`);
+                }
+                return res.arrayBuffer();
+            },
+        };
         // ── Model Context Protocol (MCP) Integration Helper ──
         this.mcp = {
             getSetupConfig: (client = 'claude') => {

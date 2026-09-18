@@ -5,15 +5,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
   BookOpen,
-  Church,
-  Heart,
   Search,
   ChevronLeft,
   ChevronRight,
   LogIn,
   LogOut,
   User,
-  Key,
   Sparkles,
   Share2,
   Download,
@@ -24,8 +21,10 @@ import {
   Code,
   ShieldCheck,
   Crown,
+  Compass,
 } from 'lucide-react';
 import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
+import { getUserTier, type SubscriptionTier } from '@/lib/tiers';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
 import IntegrationsModal from '@/components/IntegrationsModal/IntegrationsModal';
@@ -68,6 +67,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [isIntegrationsOpen, setIsIntegrationsOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userTier, setUserTier] = useState<SubscriptionTier>('free');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -82,19 +82,35 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setUser(session.user);
+          if (isSupabaseConfigured()) {
+            supabase
+              .from('profiles')
+              .select('subscription_tier, subscription_status')
+              .eq('id', session.user.id)
+              .maybeSingle()
+              .then(({ data }) => {
+                setUserTier(getUserTier(data));
+              });
+          } else {
+            setUserTier(getUserTier(null));
+          }
         } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
           const local = localStorage.getItem('bibledesk_local_user');
           if (local) {
             try {
               setUser(JSON.parse(local));
+              setUserTier(getUserTier(null));
             } catch {
               setUser(null);
+              setUserTier('free');
             }
           } else {
             setUser(null);
+            setUserTier('free');
           }
         } else {
           setUser(null);
+          setUserTier('free');
         }
       });
     }
@@ -104,19 +120,35 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         setUser(session.user);
+        if (isSupabaseConfigured()) {
+          supabase
+            .from('profiles')
+            .select('subscription_tier, subscription_status')
+            .eq('id', session.user.id)
+            .maybeSingle()
+            .then(({ data }) => {
+              setUserTier(getUserTier(data));
+            });
+        } else {
+          setUserTier(getUserTier(null));
+        }
       } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {
             setUser(JSON.parse(local));
+            setUserTier(getUserTier(null));
           } catch {
             setUser(null);
+            setUserTier('free');
           }
         } else {
           setUser(null);
+          setUserTier('free');
         }
       } else {
         setUser(null);
+        setUserTier('free');
       }
     });
 
@@ -240,6 +272,22 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <Share2 size={18} className={styles.navIcon} />
             {!collapsed && <span className={styles.navLabel}>WhatsApp Sharing</span>}
           </button>
+
+          <button
+            className={styles.navItem}
+            onClick={() => {
+              if (pathname !== '/bible') {
+                router.push('/bible?tour=1');
+              } else {
+                window.dispatchEvent(new CustomEvent('bibledesk:open-onboarding'));
+              }
+            }}
+            title={collapsed ? 'Study Tour' : undefined}
+            style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <Compass size={18} className={styles.navIcon} />
+            {!collapsed && <span className={styles.navLabel}>Study Tour</span>}
+          </button>
         </nav>
 
         {/* Footer: Gemini API Key & Auth */}
@@ -263,9 +311,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <User size={14} />
               </div>
               {!collapsed && (
-                <span className={styles.userName}>
-                  {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
-                </span>
+                <div className={styles.userMeta}>
+                  <span className={styles.userName}>
+                    {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
+                  </span>
+                  <Link
+                    href="/pricing"
+                    className={userTier === 'pro' || userTier === 'ministry' ? styles.tierBadgePro : styles.tierBadgeFree}
+                    title={userTier === 'free' ? 'Upgrade to Pro' : `${userTier.toUpperCase()} Membership Active`}
+                  >
+                    {userTier === 'pro' || userTier === 'ministry' ? '★ ' + userTier.toUpperCase() : 'Free · Upgrade'}
+                  </Link>
+                </div>
               )}
               <button
                 onClick={handleSignOut}
@@ -456,7 +513,17 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {user ? (
                 <div className={styles.mobileUserRow}>
                   <div className={styles.userAvatar}><User size={14} /></div>
-                  <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
+                  <div className={styles.userMeta}>
+                    <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
+                    <Link
+                      href="/pricing"
+                      className={userTier === 'pro' || userTier === 'ministry' ? styles.tierBadgePro : styles.tierBadgeFree}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      title={userTier === 'free' ? 'Upgrade to Pro' : `${userTier.toUpperCase()} Membership Active`}
+                    >
+                      {userTier === 'pro' || userTier === 'ministry' ? '★ ' + userTier.toUpperCase() : 'Free · Upgrade'}
+                    </Link>
+                  </div>
                   <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
                     <LogOut size={14} />
                   </button>

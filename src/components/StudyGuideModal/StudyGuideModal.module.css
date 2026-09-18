@@ -1,0 +1,304 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 26, 21, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1.5rem;
+}
+
+.modal {
+  background: #fdfbf7;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 48px rgba(18, 26, 21, 0.25);
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+}
+
+.modalTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleIcon {
+  color: var(--sage);
+}
+
+.modalTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.printBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sage);
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.printBtn:hover {
+  background: var(--sage-dark);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: rgba(107, 142, 123, 0.1);
+  color: var(--text-primary);
+}
+
+.optionsBar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  background: rgba(218, 221, 207, 0.35);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+  font-size: 0.82rem;
+}
+
+.optionsLabel {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.optionCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.worksheetContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2.5rem;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+.sheetHeader {
+  border-bottom: 2px solid #222;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sheetMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.sheetPassageTitle {
+  font-size: 2.2rem;
+  margin: 0 0 0.4rem;
+  color: #111;
+}
+
+.sheetBadge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #444;
+  background: #eee;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.sheetSection {
+  margin-bottom: 1.75rem;
+}
+
+.sectionHeading {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+
+.scriptureBody {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #222;
+}
+
+.verseSpan {
+  margin-right: 0.25rem;
+}
+
+.verseNumber {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #777;
+  vertical-align: super;
+  margin-right: 3px;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.crossRefGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.crossRefPill {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.78rem;
+  background: #f4f4f0;
+  border: 1px solid #ddd;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #444;
+}
+
+.lexiconList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.lexiconItem {
+  font-family: var(--font-inter), sans-serif;
+}
+
+.notesText {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  background: #fafaf8;
+  border: 1px solid #e5e5e0;
+  border-radius: 6px;
+  padding: 1rem;
+  white-space: pre-wrap;
+}
+
+.blankNotesLines {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+
+.blankLine {
+  border-bottom: 1px dashed #ccc;
+  height: 1px;
+}
+
+.sheetFooter {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* ── Print Stylesheet ── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .modalHeader,
+  .optionsBar {
+    display: none !important;
+  }
+
+  .overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    inset: auto !important;
+  }
+
+  .modal {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .worksheetContent,
+  .worksheetContent * {
+    visibility: visible !important;
+  }
+
+  .worksheetContent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    overflow: visible;
+  }
+}
