@@ -20,6 +20,7 @@ import { getBrowserClient } from '@/lib/supabase';
 export interface SyncSummary {
   bookmarksCount: number;
   highlightsCount: number;
+  notesCount: number;
 }
 
 // ── Persistent retry queue ────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ export interface SyncSummary {
 // next sync run instead of being dropped into the void.
 const RETRY_QUEUE_KEY = 'bibledesk_sync_retry_queue_v1';
 
-type SyncableKind = 'bookmark' | 'highlight';
+type SyncableKind = 'bookmark' | 'highlight' | 'note';
 
 interface RetryItem {
   kind: SyncableKind;
@@ -70,6 +71,7 @@ interface MigrateResult {
 const KIND_ORDER: Record<SyncableKind, number> = {
   bookmark: 0,
   highlight: 1,
+  note: 2,
 };
 
 interface BookmarkResponse {
@@ -82,6 +84,7 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
   const summary: SyncSummary = {
     bookmarksCount: 0,
     highlightsCount: 0,
+    notesCount: 0,
   };
 
   if (typeof window === 'undefined') return summary;
@@ -146,6 +149,15 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
       return error ? { ok: false, error: error.message } : { ok: true };
     }
 
+    async function migrateNote(n: { ref: string; content: string }): Promise<MigrateResult> {
+      const { error } = await supabase.from('verse_notes').upsert({
+        user_id: userId,
+        reference: n.ref,
+        content: n.content,
+      }, { onConflict: 'user_id,reference' });
+      return error ? { ok: false, error: error.message } : { ok: true };
+    }
+
     // ── Dispatcher: per-record attempt ──────────────────────────────────────────
     // Never throws: transport/parse failures become { ok:false }.
 
@@ -159,6 +171,12 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
               return { ok: false, error: 'malformed highlight payload' };
             }
             return await migrateHighlight({ ref: payload.ref, color: payload.color });
+          }
+          case 'note': {
+            if (typeof payload.ref !== 'string' || typeof payload.content !== 'string') {
+              return { ok: false, error: 'malformed note payload' };
+            }
+            return await migrateNote({ ref: payload.ref, content: payload.content });
           }
           default:
             return { ok: false, error: `unknown sync kind: ${kind}` };
@@ -240,6 +258,32 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
         consumeHighlightsKey = true;
       } catch (e) {
         console.warn('Failed to sync guest highlights:', e);
+      }
+    }
+
+    // ── 4. Sync Guest Verse Notes ─────────────────────────────────────────────
+    if (typeof localStorage !== 'undefined') {
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('biblenote:')) {
+            const content = localStorage.getItem(key);
+            if (content && content.trim()) {
+              const parts = key.split(':');
+              if (parts.length >= 4) {
+                const ref = `${parts[1]} ${parts[2]}:${parts[3]}`;
+                const result = await attemptMigration('note', { ref, content: content.trim() });
+                if (result.ok) {
+                  summary.notesCount++;
+                } else {
+                  queueFailure('note', { ref, content: content.trim() }, result.error ?? null);
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to sync guest verse notes:', e);
       }
     }
 

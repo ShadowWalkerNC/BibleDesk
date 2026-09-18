@@ -1,0 +1,423 @@
+/* Onboarding Modal Styling */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.25rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modalCard {
+  background: var(--surface, #ffffff);
+  color: var(--foreground, #1e293b);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 0.5rem;
+  border-bottom: 1px solid transparent;
+}
+
+.stepIndicators {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.stepDot {
+  width: 2rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  background: var(--border, #e2e8f0);
+  transition: all 0.3s ease;
+}
+
+.stepDotActive {
+  background: #b58414;
+  width: 2.75rem;
+}
+
+.stepDotDone {
+  background: #059669;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground, #64748b);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.closeBtn:hover {
+  background: var(--muted, #f1f5f9);
+  color: var(--foreground, #1e293b);
+}
+
+.stepContent {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b58414;
+  background: rgba(181, 132, 20, 0.1);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  width: fit-content;
+  margin-bottom: 0.75rem;
+}
+
+.stepTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+  color: var(--foreground, #0f172a);
+}
+
+.stepDescription {
+  font-size: 0.925rem;
+  color: var(--muted-foreground, #64748b);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+/* Pillar List in Step 1 */
+.pillarList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.pillarItem {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  background: var(--muted, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+}
+
+.pillarIcon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgba(181, 132, 20, 0.12);
+  color: #b58414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pillarItem strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--foreground, #0f172a);
+  margin-bottom: 0.15rem;
+}
+
+.pillarItem p {
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #64748b);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Grids in Step 2 */
+.translationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.subHeading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground, #1e293b);
+  margin-bottom: 0.65rem;
+}
+
+.personaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.selectCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  text-align: left;
+  background: var(--muted, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.selectCard:hover {
+  border-color: #b58414;
+  background: rgba(181, 132, 20, 0.04);
+}
+
+.selectCardActive {
+  border-color: #b58414;
+  background: rgba(181, 132, 20, 0.08);
+  box-shadow: 0 0 0 1px #b58414;
+}
+
+.selectCardCheck {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #b58414;
+  color: #b58414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.personaIconBox {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.4rem;
+  background: rgba(181, 132, 20, 0.1);
+  color: #b58414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.selectCardBody strong {
+  display: block;
+  font-size: 0.825rem;
+  color: var(--foreground, #0f172a);
+}
+
+.selectCardBody span {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--muted-foreground, #64748b);
+  line-height: 1.25;
+  margin-top: 0.15rem;
+}
+
+/* Step 3: BYOK */
+.byokBox {
+  background: var(--muted, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.byokHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--foreground, #0f172a);
+  margin-bottom: 0.4rem;
+}
+
+.byokDesc {
+  font-size: 0.825rem;
+  color: var(--muted-foreground, #64748b);
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+
+.keyInput {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--foreground, #0f172a);
+  font-size: 0.85rem;
+  font-family: monospace;
+  margin-bottom: 0.35rem;
+}
+
+.keyHelp {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--muted-foreground, #64748b);
+}
+
+.guaranteePill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  color: #065f46;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.6rem;
+  font-size: 0.785rem;
+  line-height: 1.35;
+  margin-bottom: 1.5rem;
+}
+
+/* Step 4: Tips */
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: var(--muted, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+}
+
+.kbdBox {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.kbdBox kbd {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 600;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.tipItem strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--foreground, #0f172a);
+  margin-bottom: 0.15rem;
+}
+
+.tipItem p {
+  font-size: 0.775rem;
+  color: var(--muted-foreground, #64748b);
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Action Rows */
+.actionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border, #f1f5f9);
+}
+
+.primaryBtn, .finishBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #b58414;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-left: auto;
+}
+
+.primaryBtn:hover, .finishBtn:hover {
+  background: #966d0e;
+}
+
+.finishBtn {
+  background: #059669;
+}
+
+.finishBtn:hover {
+  background: #047857;
+}
+
+.secondaryBtn, .skipBtn {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: var(--muted-foreground, #64748b);
+  border: 1px solid var(--border, #e2e8f0);
+  font-size: 0.85rem;
+  padding: 0.65rem 1rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.secondaryBtn:hover, .skipBtn:hover {
+  background: var(--muted, #f8fafc);
+  color: var(--foreground, #0f172a);
+}
+
+@media (max-width: 640px) {
+  .translationGrid, .personaGrid {
+    grid-template-columns: 1fr;
+  }
+  .modalCard {
+    max-height: 95vh;
+  }
+}

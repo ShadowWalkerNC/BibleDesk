@@ -31,6 +31,7 @@ import {
   Download,
 } from 'lucide-react';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
+import OnboardingModal from '@/components/OnboardingModal/OnboardingModal';
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import ProvenanceBadge from '@/components/ProvenanceBadge/ProvenanceBadge';
@@ -38,7 +39,7 @@ import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse, type BibleAnswer } from '@/types';
-import { getBrowserClient } from '@/lib/supabase';
+import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
 import styles from './page.module.css';
 
 function BibleReaderContent() {
@@ -564,23 +565,83 @@ function BibleReaderContent() {
     };
   }, [selectedVerse, activeTab]);
 
-  // 4. Load Personal Notes from LocalStorage
+  // User authentication state for cloud sync
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const supabase = getBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 4. Load Personal Notes (Local + Cloud Sync)
   useEffect(() => {
     if (!selectedVerse) return;
     const key = `biblenote:${selectedVerse.book_name}:${selectedVerse.chapter}:${selectedVerse.verse}`;
     const savedNote = localStorage.getItem(key) || '';
     setNotes(savedNote);
-  }, [selectedVerse]);
 
-  // 5. Save Note Helper
+    // If authenticated, fetch from Supabase to ensure cross-device sync
+    if (currentUser && isSupabaseConfigured()) {
+      const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
+      const supabase = getBrowserClient();
+      supabase
+        .from('verse_notes')
+        .select('content')
+        .eq('reference', ref)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (!error && data && data.content) {
+            setNotes(data.content);
+            localStorage.setItem(key, data.content);
+          }
+        });
+    }
+  }, [selectedVerse, currentUser]);
+
+  // 5. Save Note Helper (Local + Cloud Sync)
   const handleSaveNote = (val: string) => {
     if (!selectedVerse) return;
     setNotes(val);
     const key = `biblenote:${selectedVerse.book_name}:${selectedVerse.chapter}:${selectedVerse.verse}`;
+    const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
+
+    // Always update local cache for instant offline responsiveness
     if (val.trim()) {
       localStorage.setItem(key, val);
     } else {
       localStorage.removeItem(key);
+    }
+
+    // If authenticated, sync to Supabase verse_notes table
+    if (currentUser && isSupabaseConfigured()) {
+      const supabase = getBrowserClient();
+      if (val.trim()) {
+        supabase
+          .from('verse_notes')
+          .upsert(
+            { user_id: currentUser.id, reference: ref, content: val.trim() },
+            { onConflict: 'user_id,reference' }
+          )
+          .then(({ error }) => {
+            if (error) console.warn('[verse_notes] Cloud sync failed:', error.message);
+          });
+      } else {
+        supabase
+          .from('verse_notes')
+          .delete()
+          .eq('user_id', currentUser.id)
+          .eq('reference', ref)
+          .then(({ error }) => {
+            if (error) console.warn('[verse_notes] Cloud delete failed:', error.message);
+          });
+      }
     }
   };
 
@@ -1741,6 +1802,14 @@ function BibleReaderContent() {
           setSelectedChapter(chapter);
           if (verse) {
             setPendingVerseTarget(verse);
+          }
+        }}
+      />
+
+      <OnboardingModal
+        onComplete={(prefs) => {
+          if (prefs.translation) {
+            setSelectedTranslation(prefs.translation);
           }
         }}
       />

@@ -15,16 +15,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateBibleAnswer } from '@/lib/claude';
-import { saveAnswer } from '@/lib/supabase';
+import { saveAnswer, getServerClient } from '@/lib/supabase';
 import { checkAutoFlag, saveFlag } from '@/lib/moderation';
 import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { runRAG } from '@/lib/rag';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getUserTier, getTierAiDailyQuota, type SubscriptionTier } from '@/lib/tiers';
 import type { AskRequest, ApiResponse, BibleAnswer } from '@/types';
 import { MIN_QUESTION_LENGTH } from '@/lib/ask-validation';
 
 const MAX_QUESTION_LENGTH = 500;
-const ASK_LIMIT_PER_DAY = 5;
 
 function sanitizeQuestion(q: string): string {
   return q.trim().replace(/\s+/g, ' ').slice(0, MAX_QUESTION_LENGTH);
@@ -104,21 +104,42 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       );
     }
 
+    // Resolve user subscription tier & daily quota
+    let userTier: SubscriptionTier = 'free';
+    if (user) {
+      try {
+        const client = getServerClient();
+        const { data: profile } = await client
+          .from('profiles')
+          .select('subscription_tier, subscription_status')
+          .eq('id', user.id)
+          .maybeSingle();
+        userTier = getUserTier(profile);
+      } catch {
+        userTier = 'free';
+      }
+    }
+
+    const dailyLimit = userApiKey ? 10000 : getTierAiDailyQuota(userTier);
+
     // Rate limit check: keyed by user ID if authenticated, else IP
     const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
-    const rateLimit = await checkRateLimit(rateLimitKey, { namespace: RateLimitNamespace.ask });
+    const rateLimit = await checkRateLimit(rateLimitKey, {
+      namespace: RateLimitNamespace.ask,
+      limit: dailyLimit,
+    });
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
           success: false,
-          error: `You've reached the limit of ${ASK_LIMIT_PER_DAY} free AI answers per day. Add your own free Gemini API key (BYOK) for unlimited answers, or try again tomorrow. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
+          error: `You've reached your daily limit of ${dailyLimit} AI answers (${userTier === 'free' ? 'Free Community Tier' : userTier.toUpperCase() + ' Tier'}). Add your own free Gemini API key (BYOK) for unlimited answers, or upgrade at /pricing. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
           code: 'RATE_LIMITED',
         },
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit':     String(ASK_LIMIT_PER_DAY),
+            'X-RateLimit-Limit':     String(dailyLimit),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset':     rateLimit.resetAt.toISOString(),
           },

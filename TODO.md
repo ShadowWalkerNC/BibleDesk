@@ -7,25 +7,31 @@
 
 - [x] Six bundled public-domain translations read and search without a network connection.
 - [x] Strong's Greek/Hebrew lexicons and TSK cross-references are bundled.
-- [x] Study Desk, Study Resources, Prayer, Developers, Download, Login, Moderation and share surfaces compile.
+- [x] Study Desk, Study Resources, Prayer, Developers, Download, Login, Moderation, Pricing and share surfaces compile.
 - [x] Five-dimension assistant, streaming, rate limiting, SDK, REST API, MCP and Sigil HMAC endpoint remain in scope.
+- [x] Turnkey deployment suite ready: multi-stage Dockerfile, docker-compose.yml, and environment doctor (`npm run check:env`).
+- [x] Consolidated single-file database migration (`supabase/schema-init.sql`) bundles all 12 schemas into a 1-click execution.
+- [x] First-run Onboarding Modal (`OnboardingModal.tsx`) personalizes translation, study persona, and AI mode.
+- [x] Dual-tier Open Core & SaaS architecture established: 100% Free Core Scripture + Pro/Ministry Cloud Tiers (`src/lib/tiers.ts`, `/pricing`, `/api/billing/*`).
+- [x] Personal verse notes cloud sync: real-time dual-write to Supabase `verse_notes` table with `localStorage` offline cache and auto-merge on login.
+- [x] Isomorphic TypeScript client SDK (`@bibledesk/sdk`) builds cleanly to ESM and CJS.
 - [x] Private local prayer commitments remain separate from consent-based public Atlas records.
 - [x] Prayer Care API ownership is derived from verified Supabase sessions.
 - [x] Google Calendar export and reviewed Gmail draft creation use direct per-user BibleDesk OAuth; Gmail has no send path.
 - [x] Next.js production build, TypeScript check and security boundary tests pass.
 - [x] Production dependency audit reports zero known vulnerabilities.
-- [x] Active navigation, sitemap and homepage marketing reflect the web MVP.
+- [x] Active navigation, sitemap, and pricing marketing reflect the web MVP and SaaS tiers.
 
 ## Required before a public production launch
 
 - [ ] Create or select the production Supabase project.
-- [ ] Apply `schema.sql` through `schema-v10-public-prayer.sql`, then `rpc.sql`, in order.
+- [ ] Apply `supabase/schema-init.sql` in the Supabase SQL editor (consolidates all 12 schemas in 1 run).
 - [ ] Test both a fresh install and an upgrade of an existing schema.
 - [ ] Verify owner-only RLS and service-role isolation, including cross-user denial cases for Prayer Care and `google_connections`.
-- [ ] Configure the Vercel environment from `.env.example`; use a canonical HTTPS `NEXT_PUBLIC_APP_URL`.
+- [ ] Configure the Vercel or Docker environment from `.env.example`; use a canonical HTTPS `NEXT_PUBLIC_APP_URL`.
 - [ ] Configure the Google OAuth consent screen, client, callback URL, Calendar/Gmail APIs and token encryption key.
 - [ ] Verify the production bundle does not expose server-only secrets.
-- [ ] Run authenticated production smoke tests for login, Prayer Care CRUD, ICS, Calendar export, reviewed Gmail draft creation and Google disconnect.
+- [ ] Run authenticated production smoke tests for login, notes cloud sync, Prayer Care CRUD, ICS, Calendar export, reviewed Gmail draft creation and Google disconnect.
 - [ ] Run public smoke tests for Bible read/search, study resources, Atlas privacy, AI rate limiting, share pages, SDK/API docs, sitemap and robots.
 - [ ] Confirm monitoring and rollback ownership before announcing availability.
 

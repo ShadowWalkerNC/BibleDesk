@@ -23,6 +23,7 @@ import {
   Globe,
   Code,
   ShieldCheck,
+  Crown,
 } from 'lucide-react';
 import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
@@ -40,6 +41,7 @@ const CHURCH_LINKS = [
 ];
 
 const TOOL_LINKS = [
+  { href: '/pricing',   label: 'Membership & Pro', icon: Crown },
   { href: '/developers',label: 'Developers & SDK', icon: Code },
   { href: '/download',  label: 'Install App',   icon: Download },
 ];

@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: '/study-resources', label: 'Resources' },
   { href: '/#assistant',  label: '5D Assistant' },
   { href: '/prayer',      label: 'Prayer' },
+  { href: '/pricing',     label: 'Membership' },
   { href: '/developers',  label: 'Developers' },
 ];
 

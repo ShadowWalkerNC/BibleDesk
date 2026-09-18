@@ -17,17 +17,17 @@ import { TRANSLATIONS, type TranslationId, type BibleAnswer } from '@/types';
 import { MIN_QUESTION_LENGTH } from '@/lib/ask-validation';
 import { runPipeline, type PipelineOptions } from '@/lib/pipeline';
 import { runRAG } from '@/lib/rag';
-import { saveAnswer } from '@/lib/supabase';
+import { saveAnswer, getServerClient } from '@/lib/supabase';
 import { checkAutoFlag, saveFlag } from '@/lib/moderation';
 import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getUserTier, getTierAiDailyQuota, type SubscriptionTier } from '@/lib/tiers';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 const VALID_TRANSLATIONS: TranslationId[] = TRANSLATIONS.map((t) => t.id);
-const ASK_LIMIT_PER_DAY = 5;
 
 function sse(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -107,16 +107,37 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Resolve user subscription tier & daily quota
+  let userTier: SubscriptionTier = 'free';
+  if (user) {
+    try {
+      const client = getServerClient();
+      const { data: profile } = await client
+        .from('profiles')
+        .select('subscription_tier, subscription_status')
+        .eq('id', user.id)
+        .maybeSingle();
+      userTier = getUserTier(profile);
+    } catch {
+      userTier = 'free';
+    }
+  }
+
+  const dailyLimit = userApiKey ? 10000 : getTierAiDailyQuota(userTier);
+
   // Rate limit check before opening stream (keyed by user ID if authenticated, else IP)
   const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
-  const rateLimit = await checkRateLimit(rateLimitKey, { namespace: RateLimitNamespace.ask });
+  const rateLimit = await checkRateLimit(rateLimitKey, {
+    namespace: RateLimitNamespace.ask,
+    limit: dailyLimit,
+  });
 
   if (!rateLimit.allowed) {
     return new Response(
       sse('error', {
-        message: `You've reached the limit of ${ASK_LIMIT_PER_DAY} free AI answers per day. Add your own free Gemini API key (BYOK) for unlimited answers, or try again tomorrow. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
+        message: `You've reached your daily limit of ${dailyLimit} AI answers (${userTier === 'free' ? 'Free Community Tier' : userTier.toUpperCase() + ' Tier'}). Add your own free Gemini API key (BYOK) for unlimited answers, or upgrade at /pricing. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
         code: 'RATE_LIMITED',
-        rateLimit: { remaining: 0, limit: ASK_LIMIT_PER_DAY, resetAt: rateLimit.resetAt.toISOString() },
+        rateLimit: { remaining: 0, limit: dailyLimit, resetAt: rateLimit.resetAt.toISOString() },
       }),
       { status: 429, headers: { 'Content-Type': 'text/event-stream' } }
     );
@@ -163,7 +184,7 @@ export async function POST(req: NextRequest) {
           shareSlug,
           rateLimit: {
             remaining: rateLimit.remaining,
-            limit: ASK_LIMIT_PER_DAY,
+            limit: dailyLimit,
           },
         });
       } catch (err: unknown) {

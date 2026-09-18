@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-title BibleDesk — 1-Click Bible Study Desk
+title BibleDesk — Turnkey Bible Study Desk
 
 echo.
 echo ===============================================================
@@ -37,21 +37,23 @@ if not exist "node_modules\" (
 )
 
 echo.
-echo Please choose how you want to open BibleDesk:
+echo Select an option to launch BibleDesk:
 echo.
 echo  [1] Start BibleDesk (Opens directly in your web browser - Recommended)
-echo  [2] Start Desktop App (Native Electron window)
-echo  [3] Build All Installers (.exe, Android APK, Chrome Extension)
-echo  [4] Exit
+echo  [2] Run Environment & Health Doctor (Checks keys, database, and setup)
+echo  [3] Build Production Web App (Next.js standalone build)
+echo  [4] Launch with Docker (1-Click containerized spin-up)
+echo  [5] Exit
 echo.
 
-set /p choice="Enter your choice (1-4, default is 1): "
+set /p choice="Enter your choice (1-5, default is 1): "
 if "%choice%"=="" set choice=1
 
 if "%choice%"=="1" goto START_WEB
-if "%choice%"=="2" goto START_DESKTOP
-if "%choice%"=="3" goto BUILD_ALL
-if "%choice%"=="4" goto END
+if "%choice%"=="2" goto RUN_DOCTOR
+if "%choice%"=="3" goto BUILD_PROD
+if "%choice%"=="4" goto START_DOCKER
+if "%choice%"=="5" goto END
 
 :START_WEB
 echo.
@@ -61,23 +63,37 @@ start http://localhost:3000
 call npm run dev
 goto END
 
-:START_DESKTOP
+:RUN_DOCTOR
 echo.
-echo [*] Checking desktop components...
-if not exist "apps\desktop\node_modules\" (
-    echo [*] Setting up Desktop Electron shell...
-    call npm run desktop:install
-)
-echo [*] Launching BibleDesk Desktop App...
-call npm run desktop:dev
+echo [*] Running BibleDesk Health Doctor...
+call npm run check:env
+echo.
+pause
 goto END
 
-:BUILD_ALL
+:BUILD_PROD
 echo.
-echo [*] Assembling all platform packages into /dist folder...
-call npm run package:all
+echo [*] Building production Next.js application...
+call npm run build
 echo.
-echo [✓] Build complete! Check the /dist folder for your installers.
+echo [✓] Build complete! You can run 'npm start' to serve the production build.
+pause
+goto END
+
+:START_DOCKER
+echo.
+echo [*] Launching BibleDesk in Docker...
+where docker >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [!] Docker was not found on your PATH. Please install Docker Desktop: https://docker.com
+    pause
+    goto END
+)
+call docker compose up -d
+echo.
+echo [✓] BibleDesk is running in Docker at http://localhost:3000!
+echo     View logs with: docker compose logs -f
+echo     Stop with:      docker compose down
 pause
 goto END
 

@@ -78,17 +78,17 @@ BibleDesk is a web app first — install it as a PWA from your browser (see `/do
 
 ---
 
-## Build & Packaging CLI
+## Turnkey Quick Start (1-Click Launchers)
 
-Native packaging (Android, desktop, Chrome extension) is parked for the MVP — the npm scripts exit with a pointer to `archive/*/PARKED.md`. Build the web app normally:
+BibleDesk provides out-of-the-box 1-click launchers that verify dependencies and launch immediately:
 
-```bash
-npm run build          # Production Next.js build
-```
+- **Windows**: Double-click `Launch-BibleDesk.bat` (or run `.\Launch-BibleDesk.ps1` in PowerShell).
+- **macOS / Linux**: Run `./Launch-BibleDesk.sh`.
+- **Docker**: Run `docker compose up -d` for an instant self-hosted production container.
 
 ---
 
-## Quick Start (Development)
+## Developer Quick Start (CLI)
 
 ```bash
 # 1. Clone repository
@@ -98,11 +98,24 @@ cd BibleDesk
 # 2. Install dependencies
 npm install
 
-# 3. Start local development server
+# 3. Run Environment Doctor
+npm run check:env
+
+# 4. Start local development server
 npm run dev
 ```
 
 Visit `http://localhost:3000` to open the Study Desk.
+
+---
+
+## Production Deployment & Database Setup
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions:
+- **Consolidated Database Init**: Paste [`supabase/schema-init.sql`](supabase/schema-init.sql) into your Supabase SQL Editor for 1-click database initialization.
+- **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.
+- **Docker**: Production-ready multi-stage container (`Dockerfile` & `docker-compose.yml`).
+
 
 ---
 

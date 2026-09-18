@@ -223,7 +223,51 @@ export default function MarketingShowcase() {
             </Link>
           </div>
 
-          {/* Tier 2: Developers & Open Source */}
+          {/* Tier 2: BibleDesk Pro */}
+          <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
+            <div className={styles.pricingFeaturedBadge}>Most Popular</div>
+            <h3 className={styles.tierName}>BibleDesk Pro</h3>
+            <div className={styles.tierPriceRow}>
+              <span className={styles.tierPrice}>$7</span>
+              <span className={styles.tierPeriod}>/ month ($60/yr)</span>
+            </div>
+            <p className={styles.tierDesc}>
+              Hosted 5D AI answers without an API key, real-time cloud sync, and advanced export tools.
+            </p>
+
+            <div className={styles.tierFeatureList}>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>All Free Community Features</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>250 Hosted AI Answers / Day (Zero Config)</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>Real-Time Cloud Notes &amp; Highlights Sync</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>1-Click Obsidian Vault (.zip) Export</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>Formatted PDF Study Worksheets</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={16} color="#059669" />
+                <span>Google Calendar Prayer Care Sync</span>
+              </div>
+            </div>
+
+            <Link href="/pricing" className={styles.primaryCta} style={{ width: '100%', justifyContent: 'center' }}>
+              <span>View All Tiers &amp; Upgrade</span>
+            </Link>
+          </div>
+
+          {/* Tier 3: Developers & Open Source */}
           <div className={styles.pricingCard}>
             <h3 className={styles.tierName}>Developers &amp; AI Agents</h3>
             <div className={styles.tierPriceRow}>

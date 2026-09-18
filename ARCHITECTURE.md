@@ -15,6 +15,7 @@ BibleDesk is a Next.js 16 and React 19 web application. Its product center is th
 | `/prayer` | Local private commitments and the consent-based public Prayer Atlas |
 | `/developers` | REST API, SDK and MCP documentation |
 | `/download` | PWA installation guidance and accurate status of parked native shells |
+| `/pricing` | Transparent Kingdom-first pricing and Pro SaaS membership tiers |
 | `/login` | Supabase authentication, with a local profile only when Supabase is intentionally unconfigured |
 | `/mod` | Server-authorized moderation UI |
 | `/share/[slug]` | Public shared study answers |
@@ -54,15 +55,22 @@ External services when configured
 
 ## Data and migrations
 
-Apply the SQL files in order to a fresh Supabase project:
+For turnkey deployment on a fresh Supabase project, execute the consolidated initialization script in one step:
 
-`schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql` → `schema-v9.sql` → `schema-v10-public-prayer.sql` → `rpc.sql`
+`supabase/schema-init.sql`
+
+Alternatively, the sequential canonical migration chain can be run in order:
+
+`schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql` → `schema-v9.sql` → `schema-v10-public-prayer.sql` → `rpc.sql` → `migrations/20260918_saas_subscriptions.sql`
 
 The repository build and mocked boundary tests do not prove these migrations against a live database. A fresh-schema run, existing-schema upgrade run, RLS verification, and cross-user denial test are release gates.
 
 ## Deployment model
 
-Vercel is the intended web host. The build is deployable, but a production release remains conditional on environment configuration, database validation, Google OAuth setup, and post-deploy smoke tests. `NEXT_PUBLIC_APP_URL` must be the canonical HTTPS origin so metadata, OAuth callbacks, sitemap URLs and share links agree.
+BibleDesk supports both Vercel cloud hosting and turnkey Docker containerization (`Dockerfile` and `docker-compose.yml`):
+- Run `docker compose up -d` for an instant self-hosted production container.
+- Run `npm run check:env` to validate environment variables, keys, and database connectivity.
+- Vercel is the primary hosted web target. `NEXT_PUBLIC_APP_URL` must be the canonical HTTPS origin so metadata, OAuth callbacks, sitemap URLs and share links agree.
 
 Native Android, Electron and Chrome extension packages are parked under `archive/` and are not advertised as downloadable releases.
 
