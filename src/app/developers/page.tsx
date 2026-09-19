@@ -9,10 +9,6 @@ import {
   Copy,
   Check,
   ExternalLink,
-  BookOpen,
-  Network,
-  Heart,
-  Shield,
   Layers,
 } from 'lucide-react';
 import styles from './page.module.css';

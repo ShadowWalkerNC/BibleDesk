@@ -8,11 +8,8 @@ import {
   Sparkles,
   BookOpen,
   Crown,
-  Heart,
   Server,
   ArrowRight,
-  ShieldCheck,
-  HelpCircle,
 } from 'lucide-react';
 import { TIERS, getUserTier, type SubscriptionTier } from '@/lib/tiers';
 import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
@@ -157,7 +154,7 @@ export default function PricingPage() {
             <div className={`${styles.toggleThumb} ${isAnnual ? styles.toggleThumbRight : ''}`} />
           </button>
           <span className={isAnnual ? styles.toggleActive : ''}>
-            Annual <span className={styles.discountBadge}>Save 25%</span>
+            Annual <span className={styles.discountBadge}>Save 30%</span>
           </span>
         </div>
 
@@ -185,7 +182,7 @@ export default function PricingPage() {
           <div className={styles.featureList}>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>6 Offline Bible Translations</span></div>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Strong’s Greek &amp; Hebrew Lexicons</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>29,000+ TSK Cross-References</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>500,000+ TSK Cross-References</span></div>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>5 Free Server AI Answers / Day</span></div>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Unlimited AI with BYOK Gemini Key</span></div>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Local Notes, Bookmarks &amp; Highlights</span></div>
@@ -269,6 +266,95 @@ export default function PricingPage() {
           >
             {loadingTier === 'ministry' ? 'Opening...' : currentTier === 'ministry' ? 'Manage Subscription' : 'Select Ministry Tier'}
           </button>
+        </div>
+      </section>
+
+      {/* ── Feature Comparison Matrix Table ── */}
+      <section className={styles.tableSection}>
+        <div className={styles.tableHeading}>
+          <h2 className={`${styles.tableTitle} text-serif`}>Compare Plan Features</h2>
+          <p className={styles.tableSubtitle}>Transparent breakdown of capabilities across all tiers.</p>
+        </div>
+
+        <div className={styles.tableCard}>
+          <table className={styles.compareTable}>
+            <thead>
+              <tr>
+                <th className={styles.colFeature}>Feature</th>
+                <th className={styles.colTier}>Free Core</th>
+                <th className={`${styles.colTier} ${styles.colTierHighlight}`}>Pro</th>
+                <th className={styles.colTier}>Ministry</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>6 Public-Domain Bibles (Offline)</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Strong’s Greek &amp; Hebrew Lexicons</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>TSK Cross-References (500k+)</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Daily Hosted AI Answers Quota</td>
+                <td>5 / day</td>
+                <td><strong>250 / day</strong></td>
+                <td><strong>1,000 / day</strong></td>
+              </tr>
+              <tr>
+                <td>Bring-Your-Own-Key (BYOK Gemini)</td>
+                <td>✓ Unlimited</td>
+                <td>✓ Unlimited</td>
+                <td>✓ Unlimited</td>
+              </tr>
+              <tr>
+                <td>Cloud Notes &amp; Highlights Sync</td>
+                <td>Local only</td>
+                <td>✓ Real-Time</td>
+                <td>✓ Real-Time</td>
+              </tr>
+              <tr>
+                <td>1-Click Obsidian Vault (.zip) Export</td>
+                <td>—</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Formatted Printable PDF Worksheets</td>
+                <td>—</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Google Calendar Prayer Care Sync</td>
+                <td>—</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Pastoral Reviewed Gmail Follow-ups</td>
+                <td>—</td>
+                <td>—</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Group Workspaces &amp; Shared Notes</td>
+                <td>—</td>
+                <td>—</td>
+                <td>✓ Included</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

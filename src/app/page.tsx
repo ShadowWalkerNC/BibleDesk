@@ -82,8 +82,8 @@ export default function HomePage() {
   const isLoading  = status === 'loading';
   const hasContent = isLoading || answer !== null || error !== null;
 
-  // Render Marketing Showcase for unauthenticated visitors
-  if (user === null) {
+  // Render Marketing Showcase for unauthenticated visitors (and initial SSR/hydration)
+  if (!user) {
     return <MarketingShowcase />;
   }
 

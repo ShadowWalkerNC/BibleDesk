@@ -1,7 +1,7 @@
 # BibleDesk release plan
 
 > **Phase:** Phase 0 — local-first Bible foundation
-> **Updated:** 2026-09-13
+> **Updated:** 2026-09-19
 
 ## Verified in the current branch
 
@@ -23,8 +23,22 @@
 - [x] Private local prayer commitments remain separate from consent-based public Atlas records.
 - [x] Prayer Care API ownership is derived from verified Supabase sessions.
 - [x] Google Calendar export and reviewed Gmail draft creation use direct per-user BibleDesk OAuth; Gmail has no send path.
-- [x] Next.js production build, TypeScript check and security boundary tests pass.
-- [x] Production dependency audit reports zero known vulnerabilities.
+- [x] Relational PostgreSQL database tables and Drizzle ORM schema (`scripture_verses`, `cross_references`, `commentaries`, `study_notes`, `study_collections`, `collection_items`, `research_findings`).
+- [x] Zero-config dual database runtime: embedded WASM PostgreSQL (`@electric-sql/pglite`) or external PostgreSQL (`DATABASE_URL`).
+- [x] Seeding pipeline loads 910 scripture verses, 647 cross-references, 5-dimension commentaries, notes, and collections (`npm run db:seed`).
+- [x] Multi-factor 5-dimension evidence and confidence scoring algorithm ($w_1=0.30, w_2=0.20, w_3=0.20, w_4=0.15, w_5=0.15$) with transparent factor breakdown and rating tiers (High/Moderate/Low).
+- [x] Anthropic Claude 3.5 Sonnet research assistant endpoint (`POST /api/research`) with web search and verifiable, traceable citations.
+- [x] Dedicated Research Assistant workbench (`/research`) and integrated Study Desk tab (`/bible` Research Tab).
+- [x] Unified full-text search (`GET /api/search`) across scripture verses, 5-dimension commentary, and personal notes.
+- [x] Personal study notes CRUD (`/api/notes`) and thematic study collections (`/api/collections`) persisted per user in PostgreSQL.
+- [x] 32 automated tests passing with zero failures across unit, database, API, and end-to-end critical path suites (`npm test`).
+- [x] Responsive Desktop, Tablet, and Mobile multi-device architecture with device-tailored UI/UX: Desktop admin workspace (dashboards, bulk actions, audit logs, 3-column desk), Tablet touch oversight (56px compact rail, 2-pane reader, 48px targets), and Mobile operational engine (bottom nav rail, distraction-free reading canvas, Rapid Triage moderation deck, Today's Prayers checklist).
+- [x] Turnkey Guided Onboarding Flow (`OnboardingModal.tsx`): 4-step progressive wizard with sensible defaults, optional starter workspace auto-load, and real-time Gemini API key validation with plain-language status feedback.
+- [x] System Health, Diagnostics & Recovery Hub (`/system` & `GET /api/system/diagnostics`): real-time diagnostic checks for 6 scripture modules, PostgreSQL/PGlite relational database, Strong's lexicons, TSK cross-references, AI service readiness, and cloud sync.
+- [x] 1-Click Safe Maintenance & Repair Operations (`POST /api/system/repair`): single-click starter study data seeding, database index and table verification, and live AI connectivity diagnostics.
+- [x] Complete Data Portability & Disaster Recovery: export full workspace JSON backup (notes, collections, prayer commitments, highlights, reading plans) and safe restore with preview confirmation dialog.
+- [x] Commercial-Grade Plain Language & Purposeful Empty States: replaced vague labels and raw errors with action-oriented buttons ("Record Verification Vote", "Promote Answer to Canonical", "Investigate Question", "Save to Study Notes") and informative empty states with clear next actions across `/bible`, `/research`, `/prayer`, and `/mod`.
+- [x] Next.js 16.3.5 production build and TypeScript check exit 0 with clean page generation across 32 routes.
 - [x] Active navigation, sitemap, and pricing marketing reflect the web MVP and SaaS tiers.
 
 ## Required before a public production launch
@@ -42,7 +56,7 @@
 
 ## High-priority follow-up
 
-- [ ] Reduce the remaining ESLint warnings in active code, especially hook dependency and unused-value warnings.
+- [x] Reduce the remaining ESLint warnings in active code: achieved 0 errors, 0 warnings across all project code and scripts.
 - [ ] Add live migration/RLS tests; mocked route tests are insufficient for the database boundary.
 - [ ] Import and attribute a complete verse-level Greek and Hebrew tagging corpus before enabling clickable original-language words. Candidate sources are OSHB for the Hebrew Bible and an openly licensed tagged Greek New Testament; validate versification and Strong's alignment during ingestion.
 - [ ] Add behavior tests for Google token refresh, revoked consent and duplicate Calendar/draft requests.

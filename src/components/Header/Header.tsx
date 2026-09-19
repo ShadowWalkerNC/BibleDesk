@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Search, LogIn, LogOut } from 'lucide-react';
+import { Search, LogIn, LogOut, Menu, X } from 'lucide-react';
 import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { href: '/bible',       label: 'Study Desk' },
-  { href: '/study-resources', label: 'Resources' },
-  { href: '/#assistant',  label: '5D Assistant' },
-  { href: '/prayer',      label: 'Prayer' },
-  { href: '/pricing',     label: 'Membership' },
-  { href: '/developers',  label: 'Developers' },
+  { href: '/bible',            label: 'Study Desk' },
+  { href: '/research',         label: '5D Research' },
+  { href: '/study-resources',  label: 'Resources' },
+  { href: '/prayer',           label: 'Prayer Atlas' },
+  { href: '/pricing',          label: 'Membership' },
+  { href: '/developers',       label: 'Developers' },
 ];
 
 export default function Header() {
@@ -22,6 +22,12 @@ export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [isJumpOpen, setIsJumpOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleOpen = () => setIsJumpOpen(true);
@@ -152,7 +158,60 @@ export default function Header() {
 
           <span className={styles.badge}>Free</span>
         </nav>
+
+        {/* Mobile Hamburger Toggle */}
+        <button
+          type="button"
+          className={styles.mobileToggleBtn}
+          onClick={() => setIsMobileMenuOpen(prev => !prev)}
+          aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
+
+      {/* Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div className={styles.mobileDrawer}>
+          {NAV_LINKS.map(({ href, label }) => {
+            const pathOnly = href.split('#')[0] || '/';
+            const isActive = pathOnly === '/'
+              ? pathname === '/' && href.includes('#')
+              : pathname.startsWith(pathOnly);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`${styles.mobileNavLink} ${isActive ? styles.mobileNavLinkActive : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {label}
+              </Link>
+            );
+          })}
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderTop: '1px solid rgba(107, 142, 123, 0.2)', marginTop: '6px' }}>
+              <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>
+                {user.user_metadata?.name || user.email?.split('@')[0]}
+              </span>
+              <button onClick={handleSignOut} className={styles.signOutBtn}>
+                <LogOut size={14} />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className={styles.authBtn}
+              style={{ justifyContent: 'center', margin: '8px 0 0' }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <LogIn size={15} />
+              <span>Sign In to BibleDesk</span>
+            </Link>
+          )}
+        </div>
+      )}
     </header>
     <QuickJumpModal isOpen={isJumpOpen} onClose={() => setIsJumpOpen(false)} />
   </>

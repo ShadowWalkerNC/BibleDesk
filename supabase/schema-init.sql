@@ -12,7 +12,7 @@
 -- - SaaS subscriptions & membership tier columns
 --
 -- Safe to execute on fresh projects or re-run on existing databases.
--- Generated: 2026-09-18T21:57:42.197Z
+-- Generated: 2026-09-19T15:31:38.061Z
 -- =====================================================================
 
 

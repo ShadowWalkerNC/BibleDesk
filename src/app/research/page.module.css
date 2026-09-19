@@ -1,0 +1,192 @@
+/* ── Research Workbench Page Styles ────────────────────────── */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.header {
+  border-bottom: 1px solid rgba(107, 142, 123, 0.25);
+  padding-bottom: 1.5rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-400);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  background: rgba(181, 132, 20, 0.1);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.sideCard {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(71, 92, 76, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+  color: var(--gold-400);
+}
+
+.cardHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyCardState {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+}
+
+.emptyText {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.emptyActionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--forest);
+  text-decoration: none;
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: rgba(107, 142, 123, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  transition: all 0.15s ease;
+}
+
+.emptyActionLink:hover {
+  background: var(--forest);
+  color: #ffffff;
+  border-color: var(--forest);
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.noteItem {
+  padding: 0.85rem;
+  background: rgba(247, 248, 239, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  transition: all 0.15s var(--ease-out);
+}
+
+.noteItem:hover {
+  background: #ffffff;
+  border-color: var(--sage);
+  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.06);
+}
+
+.itemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.itemTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.itemRef {
+  font-size: 0.78rem;
+  color: var(--gold-400);
+  font-weight: 700;
+}
+
+.itemDesc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.itemBadge {
+  font-size: 0.76rem;
+  background: rgba(107, 142, 123, 0.14);
+  color: var(--sage-dark);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* ── Responsive Breakpoints (Desktop, Tablet, Mobile) ────────── */
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    padding: 2rem 1.5rem 4rem;
+  }
+  .cardsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile / Phone (< 768px) */
+@media (max-width: 767px) {
+  .container {
+    padding: 1.25rem 1rem 5.5rem;
+    gap: 1.5rem;
+  }
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

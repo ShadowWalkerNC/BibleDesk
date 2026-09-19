@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-13
+> **Updated:** 2026-09-19
 
 ---
 
@@ -94,6 +94,11 @@ Active work (Phase 0 Complete):
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
   ✓ PrayerAtlas 2D map with consent-gated public records
   ✓ Private Prayer Care first increment with Calendar/ICS and reviewed Gmail draft/compose exports
+  ✓ Relational PostgreSQL database layer with Drizzle ORM and dual-mode embedded PGlite
+  ✓ Five-dimension evidence model and transparent multi-factor confidence rating system
+  ✓ Anthropic Claude 3.5 Sonnet research assistant with web search and verifiable citations
+  ✓ Dedicated Research Assistant workbench (`/research`) and Study Desk tab (`/bible`)
+  ✓ 32 automated tests passing across unit, database, API, and E2E critical path suites
 
 Release gates:
   □ Apply and validate all Supabase schemas through v10 plus rpc.sql
@@ -133,4 +138,4 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
-*Updated: 2026-09-13 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-19 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*

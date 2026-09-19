@@ -13,6 +13,7 @@ import {
   X,
   Layers,
   Heart,
+  Wrench,
 } from 'lucide-react';
 import type { TranslationId } from '@/types';
 import styles from './OnboardingModal.module.css';
@@ -28,10 +29,11 @@ export interface UserOnboardingPreferences {
   studyPersona: 'devotional' | 'theological' | 'pastoral' | 'group';
   geminiKey?: string;
   themePreference: 'parchment' | 'light' | 'dark';
+  loadSampleWorkspace?: boolean;
 }
 
 const TRANSLATIONS: { id: TranslationId; name: string; desc: string }[] = [
-  { id: 'web', name: 'World English Bible (WEB)', desc: 'Modern, clear, completely public domain' },
+  { id: 'web', name: 'World English Bible (WEB)', desc: 'Modern, clear English · completely public domain' },
   { id: 'kjv', name: 'King James Version (KJV)', desc: 'Historic 1611 literary majesty' },
   { id: 'asv', name: 'American Standard Version (ASV)', desc: 'Literal, scholarly 1901 translation' },
   { id: 'darby', name: 'Darby Translation', desc: 'Direct literal rendering by J.N. Darby' },
@@ -72,6 +74,9 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
   const [translation, setTranslation] = useState<TranslationId>('web');
   const [studyPersona, setStudyPersona] = useState<'devotional' | 'theological' | 'pastoral' | 'group'>('devotional');
   const [geminiKey, setGeminiKey] = useState('');
+  const [loadSampleWorkspace, setLoadSampleWorkspace] = useState(true);
+  const [testingKey, setTestingKey] = useState(false);
+  const [keyFeedback, setKeyFeedback] = useState<{ status: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -85,7 +90,33 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
     }
   }, [forceOpen]);
 
-  function handleFinish() {
+  async function handleTestKey() {
+    if (!geminiKey.trim()) {
+      setKeyFeedback({ status: 'error', text: 'Please paste your Google Gemini API key first.' });
+      return;
+    }
+    setTestingKey(true);
+    setKeyFeedback(null);
+    try {
+      const res = await fetch('/api/system/repair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test_ai', geminiKey: geminiKey.trim() }),
+      });
+      const data = await res.json();
+      if (data.success && data.status === 'connected') {
+        setKeyFeedback({ status: 'success', text: '✓ Connected to Google Gemini successfully! 5D Study Assistant is ready.' });
+      } else {
+        setKeyFeedback({ status: 'error', text: data.message || 'Could not validate key. Please check for missing characters.' });
+      }
+    } catch {
+      setKeyFeedback({ status: 'error', text: 'Network timeout testing key. You can still save it for later.' });
+    } finally {
+      setTestingKey(false);
+    }
+  }
+
+  async function handleFinish() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('bibledesk_onboarding_completed', 'true');
       localStorage.setItem('bibledesk_default_translation', translation);
@@ -95,11 +126,25 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
       }
     }
 
+    // If user requested sample workspace, seed it
+    if (loadSampleWorkspace) {
+      try {
+        fetch('/api/system/repair', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'seed_sample_data' }),
+        }).catch(() => {});
+      } catch {
+        // Continue seamlessly
+      }
+    }
+
     const prefs: UserOnboardingPreferences = {
       translation,
       studyPersona,
       geminiKey: geminiKey.trim() || undefined,
       themePreference: 'parchment',
+      loadSampleWorkspace,
     };
 
     onComplete?.(prefs);
@@ -134,7 +179,7 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
             type="button"
             className={styles.closeBtn}
             onClick={handleSkip}
-            aria-label="Skip onboarding"
+            aria-label="Skip onboarding and enter reader"
           >
             <X size={18} />
           </button>
@@ -258,49 +303,108 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
                 Back
               </button>
               <button type="button" onClick={() => setStep(3)} className={styles.primaryBtn}>
-                <span>Next: AI Setup</span>
+                <span>Next: AI Setup &amp; Workspace</span>
                 <ArrowRight size={16} />
               </button>
             </div>
           </div>
         )}
 
-        {/* ── STEP 3: AI Assistant Mode ── */}
+        {/* ── STEP 3: AI Assistant Mode & Workspace Starter ── */}
         {step === 3 && (
           <div className={styles.stepContent}>
             <div className={styles.stepBadge}>
               <Sparkles size={14} />
-              <span>Step 3 of 4 · AI Companion</span>
+              <span>Step 3 of 4 · Assistant &amp; Workspace</span>
             </div>
             <h2 className={`${styles.stepTitle} text-serif`}>5-Dimension AI Study Assistant</h2>
             <p className={styles.stepDescription}>
-              BibleDesk includes 5 free server AI answers per day. You can also bring your own free Google Gemini key
-              for unlimited access with zero cost.
+              BibleDesk includes server AI answers, or you can supply your own free Google Gemini API key for unlimited personal study.
             </p>
 
             <div className={styles.byokBox}>
               <div className={styles.byokHeader}>
                 <Key size={16} color="#b58414" />
-                <strong>Optional: Bring Your Own Key (BYOK)</strong>
+                <strong>Optional: Connect Free Gemini Key (BYOK)</strong>
               </div>
               <p className={styles.byokDesc}>
-                Get a free API key from Google AI Studio (takes 30 seconds, no credit card required) for unlimited personal study:
+                Get a free key from Google AI Studio (takes 30 seconds, no credit card required) for unlimited personal study:
               </p>
-              <input
-                type="password"
-                placeholder="AIzaSy... (Paste Gemini API key)"
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                className={styles.keyInput}
-              />
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                <input
+                  type="password"
+                  placeholder="AIzaSy... (Paste Gemini API key)"
+                  value={geminiKey}
+                  onChange={(e) => {
+                    setGeminiKey(e.target.value);
+                    setKeyFeedback(null);
+                  }}
+                  className={styles.keyInput}
+                  style={{ marginBottom: 0 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleTestKey}
+                  disabled={testingKey || !geminiKey.trim()}
+                  className={styles.secondaryBtn}
+                  style={{ padding: '0.4rem 0.85rem', whiteSpace: 'nowrap' }}
+                >
+                  {testingKey ? 'Testing...' : 'Test Key'}
+                </button>
+              </div>
+
+              {keyFeedback && (
+                <div
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: keyFeedback.status === 'success' ? '#065f46' : '#b91c1c',
+                    marginTop: '4px',
+                  }}
+                >
+                  {keyFeedback.text}
+                </div>
+              )}
+
               <span className={styles.keyHelp}>
                 Your key stays strictly in your browser and is only sent with your direct questions.
               </span>
             </div>
 
+            {/* Starter Study Workspace Toggle */}
+            <div
+              style={{
+                background: 'rgba(107, 142, 123, 0.1)',
+                border: '1px solid rgba(107, 142, 123, 0.25)',
+                borderRadius: '0.65rem',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                marginBottom: '1rem',
+                cursor: 'pointer',
+              }}
+              onClick={() => setLoadSampleWorkspace(!loadSampleWorkspace)}
+            >
+              <input
+                type="checkbox"
+                checked={loadSampleWorkspace}
+                onChange={(e) => setLoadSampleWorkspace(e.target.checked)}
+                style={{ marginTop: '3px', cursor: 'pointer' }}
+              />
+              <div>
+                <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                  Load Starter Study Workspace
+                </strong>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+                  Pre-loads sample personal notes, thematic study collections, and a reading plan so you can immediately see a working workspace.
+                </p>
+              </div>
+            </div>
+
             <div className={styles.guaranteePill}>
               <Check size={15} color="#059669" />
-              <span>Bible reading, concordance search, Strong’s lexicons, and cross-references never require an API key.</span>
+              <span>Scripture reading, concordance search, Strong’s lexicons, and cross-references never require an API key.</span>
             </div>
 
             <div className={styles.actionRow}>
@@ -365,7 +469,7 @@ export default function OnboardingModal({ forceOpen = false, onClose, onComplete
               </button>
               <button type="button" onClick={handleFinish} className={styles.finishBtn}>
                 <BookOpen size={18} />
-                <span>Enter Study Desk</span>
+                <span>Launch Study Workspace</span>
               </button>
             </div>
           </div>

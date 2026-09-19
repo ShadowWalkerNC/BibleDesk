@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Crown,
   Compass,
+  Activity,
 } from 'lucide-react';
 import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
 import { getUserTier, type SubscriptionTier } from '@/lib/tiers';
@@ -32,6 +33,7 @@ import styles from './Sidebar.module.css';
 
 const STUDY_LINKS = [
   { href: '/bible',            label: 'Study Desk',     icon: BookOpen },
+  { href: '/research',         label: 'Research Assistant', icon: Sparkles },
   { href: '/study-resources',  label: 'Study Resources', icon: Layers },
 ];
 
@@ -40,6 +42,7 @@ const CHURCH_LINKS = [
 ];
 
 const TOOL_LINKS = [
+  { href: '/system',    label: 'System Health & Recovery', icon: Activity },
   { href: '/pricing',   label: 'Membership & Pro', icon: Crown },
   { href: '/developers',label: 'Developers & SDK', icon: Code },
   { href: '/download',  label: 'Install App',   icon: Download },
@@ -350,15 +353,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           aria-current={isActive('/bible') ? 'page' : undefined}
         >
           <BookOpen size={20} />
-          <span>Bible</span>
-        </Link>
-        <Link
-          href="/study-resources"
-          className={`${styles.mobileNavItem} ${isActive('/study-resources') ? styles.mobileNavItemActive : ''}`}
-          aria-current={isActive('/study-resources') ? 'page' : undefined}
-        >
-          <Layers size={20} />
-          <span>Resources</span>
+          <span>Study</span>
         </Link>
         <Link
           href="/prayer"
@@ -368,13 +363,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <Globe size={20} />
           <span>Prayer</span>
         </Link>
+        <Link
+          href="/research"
+          className={`${styles.mobileNavItem} ${isActive('/research') ? styles.mobileNavItemActive : ''}`}
+          aria-current={isActive('/research') ? 'page' : undefined}
+        >
+          <Sparkles size={20} />
+          <span>Research</span>
+        </Link>
         <button
           className={`${styles.mobileNavItem} ${isMobileMenuOpen ? styles.mobileNavItemActive : ''}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="All Tools and Pages"
+          aria-label="All Tools, Administration and Account"
         >
           <Menu size={20} />
-          <span>All Pages</span>
+          <span>More</span>
         </button>
       </nav>
 

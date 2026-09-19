@@ -9,24 +9,16 @@ import {
   ShieldAlert, 
   Sparkles, 
   Search, 
-  Filter, 
-  Share2, 
   Check, 
   X,
   Lock,
-  Layers,
-  Send,
-  Calendar,
   Clock,
   UserCheck,
   MessageCircle,
   Copy,
   Mail,
   Phone,
-  Smile,
-  RefreshCw,
   Bell,
-  ChevronRight,
   TrendingUp,
   BookOpen,
   Languages,
@@ -117,8 +109,6 @@ export default function PrayerBoardPage() {
   // B14: explicit opt-in for the World PrayerAtlas map (default off).
   const [consentAtlas, setConsentAtlas] = useState(false);
 
-  // View mode for Public Board: 'split' | 'globe' | 'feed'
-  const [viewMode, setViewMode] = useState<'split' | 'globe' | 'feed'>('split');
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterRestricted, setFilterRestricted] = useState(false);
   const [communityCategoryFilter, setCommunityCategoryFilter] = useState<string>('all');
@@ -126,13 +116,11 @@ export default function PrayerBoardPage() {
 
   // Selected Pin on Globe
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
-  const [selectedPrayer, setSelectedPrayer] = useState<PublicPrayerRequest | null>(null);
 
   // Modal for new Public prayer submission
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [newRequest, setNewRequest] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [anonymous, setAnonymous] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState('');
   const [publicCategory, setPublicCategory] = useState<string>('community');
@@ -700,7 +688,7 @@ export default function PrayerBoardPage() {
     const countryNameToUse = isRestrictedSetting ? 'Restricted Region' : (selectedCountry?.name ?? 'Global');
     const latToUse = selectedCountry ? selectedCountry.lat : 38.8951;
     const lngToUse = selectedCountry ? selectedCountry.lng : -77.0364;
-    const authorName = (anonymous || isRestrictedSetting) ? 'Anonymous Believer' : (displayName || 'Community Member');
+    const authorName = isRestrictedSetting ? 'Anonymous Believer' : (displayName || 'Community Member');
 
     const tempId = `local-prayer-${Date.now()}`;
     const optimisticPrayer: PublicPrayerRequest = {
@@ -733,7 +721,7 @@ export default function PrayerBoardPage() {
         body: JSON.stringify({
           request: newRequest.trim(),
           display_name: authorName,
-          anonymous: anonymous || isRestrictedSetting,
+          anonymous: isRestrictedSetting,
           country_code: countryCodeToUse,
           country_name: countryNameToUse,
           latitude: latToUse,
@@ -746,15 +734,11 @@ export default function PrayerBoardPage() {
       });
 
       if (!res.ok) throw new Error('Submission was not saved remotely.');
-      let finalId = tempId;
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.prayer) {
-          finalId = data.prayer.id;
-          setPrayers(prev =>
-            prev.map(p => (p.id === tempId ? { ...p, id: data.prayer.id } : p))
-          );
-        }
+      const data = await res.json();
+      if (data.success && data.prayer) {
+        setPrayers(prev =>
+          prev.map(p => (p.id === tempId ? { ...p, id: data.prayer.id } : p))
+        );
       }
 
       setMessage({ text: 'Prayer received for review. This pin is currently visible only on your device.', type: 'success' });
@@ -1207,7 +1191,11 @@ export default function PrayerBoardPage() {
             </div>
 
             <div className={styles.communityGrid}>
-              {filteredPrayers.length === 0 ? (
+              {loadingPublic ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Loading community prayers...</p>
+                </div>
+              ) : filteredPrayers.length === 0 ? (
                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
                   <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>No community prayers match the selected filters.</p>
                   <p style={{ fontSize: '0.85rem' }}>Try clearing your category, nation, or search filters.</p>
@@ -1308,8 +1296,6 @@ export default function PrayerBoardPage() {
                 selectedPinId={selectedPinId}
                 onSelectPin={(pin) => {
                   setSelectedPinId(pin.id);
-                  const matched = prayers.find(p => p.id === pin.id);
-                  if (matched) setSelectedPrayer(matched);
                 }}
                 onPray={(pin) => {
                   handlePublicPray(pin.id);
@@ -1359,6 +1345,14 @@ export default function PrayerBoardPage() {
                 <div className={styles.emptyStateIcon}><Sparkles size={28} /></div>
                 <h3>No prayers marked answered yet</h3>
                 <p>When God moves in response to your intercession, mark the item answered to preserve it in your praise journal.</p>
+                <button
+                  className={styles.addCommitmentBtn}
+                  onClick={() => setActiveTab('today')}
+                  style={{ marginTop: '0.85rem' }}
+                >
+                  <Clock size={16} />
+                  <span>View Today&apos;s Intercessions</span>
+                </button>
               </div>
             ) : (
               <div className={styles.answeredGrid}>
@@ -1527,7 +1521,7 @@ export default function PrayerBoardPage() {
                 <div>
                   <h3>Send Pastoral Care Follow-up</h3>
                   <p className={styles.modalSub}>
-                    To: {selectedFollowupContact?.display_name} • Never automated; reviewed by you.
+                    To: {selectedFollowupContact?.display_name}{selectedFollowupCommitment ? ` • Regarding: ${selectedFollowupCommitment.title}` : ''} • Never automated; reviewed by you.
                   </p>
                 </div>
                 <button 

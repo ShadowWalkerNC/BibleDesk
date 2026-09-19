@@ -80,7 +80,7 @@ try {
           formats: ['Windows (.exe)', 'macOS (.dmg)', 'Linux (.AppImage)'],
           distDir: 'dist/desktop',
         };
-      } catch (err) {
+      } catch {
         console.warn('  ⚠️ Desktop packaging completed with warnings (non-fatal on unsupported OS cross-compilation).');
         buildManifest.platforms.desktop = {
           status: 'configured',
@@ -98,9 +98,9 @@ try {
       status: 'ready',
       type: 'Capacitor Android Shell + PWA TWA',
       packageId: 'org.bibledesk.app',
-      outputDir: 'apps/android',
+      outputDir: androidDir,
     };
-    console.log('  ✓ Android workspace configured at apps/android/');
+    console.log(`  ✓ Android workspace configured at ${androidDir}`);
   }
 
   // ── D. CHROME EXTENSION BUILD ─────────────────────────────────
@@ -120,6 +120,7 @@ try {
         manifestVersion: 3,
         type: 'Chrome Side Panel Companion',
         sourceDir: 'apps/extension',
+        zipPath: extZipPath,
       };
       console.log('  ✓ Chrome Extension packaged successfully.');
     }

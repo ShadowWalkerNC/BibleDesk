@@ -10,7 +10,6 @@ import {
   Code,
   Brain,
   Globe,
-  X,
   Search,
   Scroll,
 } from 'lucide-react';

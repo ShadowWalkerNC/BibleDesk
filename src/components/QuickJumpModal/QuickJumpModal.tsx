@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft } from 'lucide-react';
 import { BIBLE_BOOKS, getBookChapters, parseReference } from '@/lib/books';
 import styles from './QuickJumpModal.module.css';
 

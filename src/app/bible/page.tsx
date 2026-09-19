@@ -8,16 +8,12 @@ import {
   Sparkles, 
   Scale, 
   Copy, 
-  Search, 
   ChevronLeft, 
   ChevronRight, 
   ExternalLink,
-  BookMarked,
-  RotateCcw,
   Calendar,
   Sun,
   Bookmark,
-  Brain,
   History,
   CheckCircle2,
   PanelLeftClose,
@@ -27,7 +23,6 @@ import {
   Maximize2,
   Minimize2,
   Columns2,
-  Columns3,
   Download,
   Printer,
 } from 'lucide-react';
@@ -37,6 +32,7 @@ import StudyGuideModal from '@/components/StudyGuideModal/StudyGuideModal';
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
 import DimensionPanel from '@/components/DimensionPanel/DimensionPanel';
 import ProvenanceBadge from '@/components/ProvenanceBadge/ProvenanceBadge';
+import ResearchAssistant from '@/components/ResearchAssistant/ResearchAssistant';
 import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
@@ -65,7 +61,7 @@ function BibleReaderContent() {
 
   // AI Study states
   const [selectedVerse, setSelectedVerse] = useState<BibleVerse | null>(null);
-  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search' | 'connected'>('search');
+  const [activeTab, setActiveTab] = useState<'study' | 'compare' | 'references' | 'notes' | 'search' | 'connected' | 'research'>('search');
   const [isKnowledgeDrawerOpen, setIsKnowledgeDrawerOpen] = useState(false);
   // AI Study states (B02: served by the gated /api/ask pipeline; rendered as a real BibleAnswer)
   const [studyAnswer, setStudyAnswer] = useState<BibleAnswer | null>(null);
@@ -134,6 +130,27 @@ function BibleReaderContent() {
     }
     return styles.deskGrid;
   };
+
+  // Initialize responsive panel visibility:
+  // Desktop (>= 1024px): 3-column workspace (both panels visible)
+  // Tablet (768px-1023px): 2-pane reader & study drawer (left hub collapsed by default)
+  // Mobile (< 768px): 1-column distraction-free reader (both panels collapsed to drawers)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      const isTablet = window.matchMedia('(min-width: 768px) and (max-width: 1023px)').matches;
+      if (isMobile) {
+        setShowLeftHub(false);
+        setShowRightStudy(false);
+      } else if (isTablet) {
+        setShowLeftHub(false);
+        setShowRightStudy(true);
+      } else {
+        setShowLeftHub(true);
+        setShowRightStudy(true);
+      }
+    }
+  }, []);
 
   // Sync URL query params — deep links (C02):
   //   ?book=John&chapter=3   -> navigate the reader (validated; invalid -> honest "not found")
@@ -216,6 +233,7 @@ function BibleReaderContent() {
     if (searchParams.get('tour') === '1') {
       setIsOnboardingOpen(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Persist last read position to localStorage on book/chapter/translation change
@@ -298,7 +316,7 @@ function BibleReaderContent() {
       .then(data => { setHubHistory(data.answers ?? []); })
       .catch(() => setHubHistoryError('Could not load history.'))
       .finally(() => setHubHistoryLoading(false));
-  }, [hubTab]);
+  }, [hubTab, hubHistory.length, hubHistoryLoading]);
 
   const handleSetHighlight = (vKey: string, color: string | null) => {
     setHighlights((prev) => {
@@ -511,6 +529,22 @@ function BibleReaderContent() {
       setCrossRefs([]);
       try {
         const reference = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
+        // 1. Query stored PostgreSQL database cross-references first
+        const dbRes = await fetch(`/api/cross-references?reference=${encodeURIComponent(reference)}`);
+        if (dbRes.ok) {
+          const dbData = await dbRes.json();
+          if (dbData.success && Array.isArray(dbData.crossReferences) && dbData.crossReferences.length > 0) {
+            if (!active) return;
+            setCrossRefs(dbData.crossReferences.map((r: any) => ({
+              reference: r.target_reference,
+              text: r.target_text || '',
+              connectionReason: r.connection_type || 'Thematic Cross-Reference',
+            })));
+            return;
+          }
+        }
+
+        // 2. Fallback to TSK cross-reference engine if DB has no stored entries
         const res = await fetch(`/api/bible/lexicon?reference=${encodeURIComponent(reference)}`);
         const data = await res.json();
 
@@ -549,7 +583,6 @@ function BibleReaderContent() {
     async function fetchComparison() {
       setLoadingCompare(true);
       try {
-        const ref = `${verse.book_name} ${verse.chapter}:${verse.verse}`;
         const promises = TRANSLATIONS.map(async (t) => {
           const res = await fetch(`/api/bible/chapter?book=${encodeURIComponent(verse.book_name)}&chapter=${verse.chapter}&translation=${t.id}`);
           if (!res.ok) return { translation: t.name, text: 'Unavailable' };
@@ -635,9 +668,22 @@ function BibleReaderContent() {
     const savedNote = localStorage.getItem(key) || '';
     setNotes(savedNote);
 
+    const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
+
+    // Load from local PostgreSQL database if available
+    fetch(`/api/notes?reference=${encodeURIComponent(ref)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.notes) && data.notes.length > 0) {
+          const dbNote = data.notes[0].content;
+          setNotes(dbNote);
+          localStorage.setItem(key, dbNote);
+        }
+      })
+      .catch((err) => console.warn('[notes] Database load failed:', err));
+
     // If authenticated & on cloud sync tier, fetch from Supabase to ensure cross-device sync
     if (currentUser && isSupabaseConfigured() && hasCloudSync) {
-      const ref = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
       const supabase = getBrowserClient();
       supabase
         .from('verse_notes')
@@ -653,7 +699,7 @@ function BibleReaderContent() {
     }
   }, [selectedVerse, currentUser, hasCloudSync]);
 
-  // 5. Save Note Helper (Local + Cloud Sync)
+  // 5. Save Note Helper (Local + Database + Cloud Sync)
   const handleSaveNote = (val: string) => {
     if (!selectedVerse) return;
     setNotes(val);
@@ -663,6 +709,16 @@ function BibleReaderContent() {
     // Always update local cache for instant offline responsiveness (Rule 8: Local-first)
     if (val.trim()) {
       localStorage.setItem(key, val);
+      // Persist to local PostgreSQL database
+      fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reference: ref,
+          title: `Notes on ${ref}`,
+          content: val.trim(),
+        }),
+      }).catch((err) => console.warn('[notes] Database sync failed:', err));
     } else {
       localStorage.removeItem(key);
     }
@@ -1442,6 +1498,15 @@ function BibleReaderContent() {
                 </button>
                 <button
                   role="tab"
+                  aria-selected={activeTab === 'research'}
+                  aria-controls="research-tab"
+                  className={`${styles.tabLink} ${activeTab === 'research' ? styles.activeTabLink : ''}`}
+                  onClick={() => setActiveTab('research')}
+                >
+                  Research
+                </button>
+                <button
+                  role="tab"
                   aria-selected={activeTab === 'compare'}
                   aria-controls="compare-tab"
                   className={`${styles.tabLink} ${activeTab === 'compare' ? styles.activeTabLink : ''}`}
@@ -1548,10 +1613,25 @@ function BibleReaderContent() {
                 )}
 
                 {/* Other study tabs require a selected verse */}
-                {activeTab !== 'search' && !selectedVerse && (
+                {activeTab !== 'search' && activeTab !== 'research' && !selectedVerse && (
                   <div className={styles.noSelection}>
                     <BookOpen size={24} style={{ color: 'var(--gold-400)', marginBottom: '8px' }} />
                     <p>Select a verse in the reader to view original language study, comparisons, cross-references, and write notes.</p>
+                  </div>
+                )}
+
+                {/* Research Assistant without verse selection */}
+                {activeTab === 'research' && !selectedVerse && (
+                  <div id="research-tab" role="tabpanel" className={styles.tabPanel}>
+                    <ResearchAssistant
+                      initialVerseRef={`${selectedBook} ${selectedChapter}`}
+                      onSaveToNotes={(finding) => {
+                        const newContent = notes ? `${notes}\n\n${finding.summary}` : finding.summary;
+                        handleSaveNote(newContent);
+                        setActiveTab('notes');
+                        showToast('Saved research findings to notes!');
+                      }}
+                    />
                   </div>
                 )}
 
@@ -1561,6 +1641,21 @@ function BibleReaderContent() {
                     <div className={styles.verseInfoBanner}>
                       <strong>Study Target:</strong> {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
                     </div>
+
+                    {/* TAB: Research Assistant (targeted verse) */}
+                    {activeTab === 'research' && (
+                      <div id="research-tab" role="tabpanel" className={styles.tabPanel}>
+                        <ResearchAssistant
+                          initialVerseRef={`${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`}
+                          onSaveToNotes={(finding) => {
+                            const newContent = notes ? `${notes}\n\n${finding.summary}` : finding.summary;
+                            handleSaveNote(newContent);
+                            setActiveTab('notes');
+                            showToast('Saved research findings to notes!');
+                          }}
+                        />
+                      </div>
+                    )}
 
                     {/* TAB 1: AI Study */}
                     {activeTab === 'study' && (
@@ -1581,7 +1676,7 @@ function BibleReaderContent() {
                             }}
                             className={styles.retryBtn}
                           >
-                            Retry
+                            Retry Study Analysis
                           </button>
                         </div>
                       ) : studyAnswer ? (
@@ -1595,7 +1690,7 @@ function BibleReaderContent() {
                           <DimensionPanel answer={studyAnswer} shareSlug={studyShareSlug ?? undefined} />
                         </div>
                       ) : (
-                        <p className={styles.emptyState}>No study guide loaded.</p>
+                        <p className={styles.emptyState}>No study guide generated for this verse yet. Select a verse in the reader to explore 5-dimension insights.</p>
                       )}
                     </div>
                   )}
@@ -1648,7 +1743,7 @@ function BibleReaderContent() {
                             }}
                             className={styles.retryBtn}
                           >
-                            Retry
+                            Retry Cross-References
                           </button>
                         </div>
                       ) : crossRefs.length > 0 ? (

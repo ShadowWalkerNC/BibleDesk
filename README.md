@@ -10,7 +10,7 @@ Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MC
 
 ---
 
-## Current Status (2026-09-13)
+## Current Status (2026-09-19)
 
 | | |
 |---|---|
@@ -18,8 +18,9 @@ Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MC
 | **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) for offline reading/search; Strong's Greek & Hebrew lexicons; TSK cross-references; optional 5-dimension AI study assistant; consent-based public Prayer Atlas; local private prayer commitments; authenticated Prayer Care with ICS, Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; TypeScript SDK; REST API, MCP server, Stripe Customer Portal, and Obsidian vault exporter. |
 | **MVP scope (2026-09-12)** | Discord & WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
-| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/graph`, `/api/prayer`, `/api/daily`, `/api/export/obsidian`, `/api/billing/portal` |
-| **Deploy & Build** | Next.js 16.3.5 production build, TypeScript typecheck, 10 automated tests (7 security boundary + 3 SDK tests), environment doctor, and production dependency audit pass. |
+| **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/cross-references`, `/api/commentary`, `/api/research`, `/api/notes`, `/api/collections`, `/api/search`, `/api/graph`, `/api/prayer`, `/api/daily`, `/api/export/obsidian`, `/api/billing/portal` |
+| **Deploy & Build** | Next.js 16.3.5 production build, TypeScript typecheck, 32 automated tests (unit, database, API, and E2E critical path), environment doctor, and production dependency audit pass. |
+| **Database & ORM** | PostgreSQL with Drizzle ORM. Dual-mode support: zero-config embedded PostgreSQL via WASM PGlite or external PostgreSQL connection string (`DATABASE_URL`). |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [DEPLOYMENT.md](DEPLOYMENT.md) for deployment · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
 ---
@@ -27,9 +28,15 @@ Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MC
 ## Core Pillars & Philosophy
 
 ### 1. Open Source & Zero-Paywall Bible Foundation
-All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **free** — with no paid API keys or closed cloud dependencies required.
+All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew lexical definitions, Treasury of Scripture Knowledge (TSK) cross-references, and concept navigation run **free** — with no paid API keys or closed cloud dependencies required. Stored and queryable directly in PostgreSQL via Drizzle ORM.
 
-### 2. Use BibleDesk as an Open API & MCP Server
+### 2. Evidence-Based 5-Dimension Research Assistant
+When investigating difficult passages, claims, or interpretations, BibleDesk applies a rigorous, multi-factor confidence rating ($w_1=0.30$ Scripture, $w_2=0.20$ Original Language, $w_3=0.20$ Historical Setting, $w_4=0.15$ Theology, $w_5=0.15$ Traceability):
+- 🔍 **Research Assistant (`/research` & `/bible` Tab)**: Backed by Anthropic Claude 3.5 Sonnet with web search tool capabilities. Formats findings across all 5 dimensions with real, clickable citations and transparent confidence derivation.
+- 💾 **Personal Notes & Collections**: Organize insights with tagged personal study notes (`/api/notes`) and thematic study collections (`/api/collections`).
+- 🔎 **Unified Full-Text Search (`/api/search`)**: Query scripture verses, 5-dimension commentary records, and personal study notes in one request.
+
+### 3. Use BibleDesk as an Open API & MCP Server
 - **Official Client SDK (`@bibledesk/sdk`)**: Open-source isomorphic TypeScript/JavaScript client library installable via npm (`packages/sdk`) for Node.js, Web, React Native, and autonomous AI agents:
   ```bash
   npm install @bibledesk/sdk
@@ -42,6 +49,12 @@ All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew
 - **Model Context Protocol (MCP)** (`POST /api/mcp`): External agents (Claude Code, Cursor, Windsurf, Sigil) can query BibleDesk tools (`get_verse`, `search_scripture`, `get_cross_references`, `get_strongs_lexicon`, `get_concept_subgraph`, `get_answer_history`, `get_dimension`, `ask_bible_question`).
 - **Open REST Endpoints**:
   - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
+  - `GET /api/cross-references?reference=John 1:1`
+  - `GET /api/commentary?reference=John 1:1`
+  - `POST /api/research` (Anthropic web-search grounded research)
+  - `GET|POST|DELETE /api/notes` (Personal study notes)
+  - `GET|POST /api/collections` (Thematic study collections)
+  - `GET /api/search?q=beginning&type=all` (Unified search)
   - `GET /api/bible/search?query=light&translation=kjv`
   - `GET /api/bible/lexicon?strongs=G2889`
   - `GET /api/graph?nodeKey=grace`
@@ -66,6 +79,11 @@ When exploring complex theological questions, BibleDesk structures insights acro
 
 BibleDesk is a web app first — install it as a PWA from your browser (see `/download` for honest install docs).
 
+### Multi-Device Responsive Architecture
+- **Desktop ($\ge 1024\text{px}$)**: Primary administrative workspace and scholarly research hub. Full-featured dashboards, bulk actions, system configuration, 3-column Study Desk workspace, and comprehensive prayer CRM.
+- **Tablet ($768\text{px} - 1023\text{px}$)**: Adaptive touch oversight. 56px compact sidebar rail with slide-over drawer, 2-pane reader layout with 65–75ch reading line length, touch targets $\ge 48\text{px}$, and segmented controls.
+- **Mobile Phone ($< 768\text{px}$)**: Fast operational day-to-day engine. Ergonomic thumb-zone bottom navigation rail, distraction-free reading canvas, Rapid Triage card deck in Moderation, and "Today's Prayers" checklist with 1-tap WhatsApp care sharing. Safe-area insets (`env(safe-area-inset-bottom)`) prevent UI clipping.
+
 | Platform | Location / Artifact | Key Capabilities |
 |---|---|---|
 | **Web** | Root Web App (`/`) | Zero-install browser access. |
@@ -76,8 +94,18 @@ BibleDesk is a web app first — install it as a PWA from your browser (see `/do
 | **WhatsApp Sharing** | wa.me links | 1-click formatted verse/encouragement forwarder for small groups (no server bot). |
 | **Obsidian Vault Exporter** | `/api/export/obsidian` | Generates structured Markdown vaults with `[[wikilinks]]` combining theological knowledge graph and personal verse notes into a downloadable `.zip`. |
 | **Printable Study Sheets** | `/bible` (Study Sheet) | Formatted chapter study guides with cross-references, Strong's lexical notes, and print-ready CSS layout. |
+| **System Diagnostics & Recovery** | `/system` | In-app health verification of 6 Bible translations, database, lexicons, AI engine, 1-click safe repairs, and complete JSON backup/restore. |
 
 ---
+
+### Turnkey Reliability & Disaster Recovery
+
+BibleDesk is engineered for non-technical users, pastors, and study leaders to operate with commercial confidence:
+- 🚀 **Guided First-Run Onboarding**: 4-step wizard with sensible defaults, optional starter workspace pre-loading, and real-time Gemini API key validation with plain-language feedback.
+- 🩺 **In-App Health & Diagnostics (`/system`)**: Real-time health cards verifying all 6 Scripture modules, PostgreSQL/PGlite connection and row counts, Strong's Greek/Hebrew lexicons, TSK cross-references, AI service readiness, and sync state.
+- 🛠️ **1-Click Safe Repairs**: Single-click maintenance actions (`POST /api/system/repair`) to seed starter study notes and collections, verify database tables and indices, and ping AI connectivity.
+- 💾 **Universal JSON Backup & Restore**: Export full workspace state (`bibledesk-complete-backup-[date].json`) bundling database notes and collections with browser storage (local prayer commitments, highlights, reading plan progress). Restores safely via a preview confirmation modal.
+- 💬 **Commercial-Grade Plain Language**: Clear, action-oriented button copy ("Record Verification Vote", "Promote Answer to Canonical", "Investigate Question", "Save to Study Notes") and purposeful empty states that guide users on next steps.
 
 ## Turnkey Quick Start (1-Click Launchers)
 

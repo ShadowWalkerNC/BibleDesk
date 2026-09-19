@@ -1,0 +1,298 @@
+/* ── Header Component — Frosted Glass Navigation ────────────── */
+
+.header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(232, 230, 220, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.2);
+  transition: all 0.25s var(--ease-out);
+}
+
+.inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  gap: 1rem;
+}
+
+/* ── Logo ─────────────────────────────────────────────────── */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--sage);
+  background: rgba(107, 142, 123, 0.1);
+  color: var(--gold-400);
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(181, 132, 20, 0.12);
+}
+
+.logoText {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.logoText span {
+  color: var(--sage-dark);
+}
+
+/* ── Quick Jump Button ────────────────────────────────────── */
+
+.quickJumpBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(107, 142, 123, 0.28);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  max-width: 260px;
+  flex: 1;
+}
+
+.quickJumpBtn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--sage);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.08);
+}
+
+.quickJumpIcon {
+  color: var(--sage);
+  flex-shrink: 0;
+}
+
+.quickJumpText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
+}
+
+.quickJumpKbd {
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background: rgba(107, 142, 123, 0.14);
+  border: 1px solid rgba(107, 142, 123, 0.3);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ── Navigation Links ─────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navLink {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.18s var(--ease-out);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+  background: rgba(107, 142, 123, 0.12);
+  text-decoration: none;
+}
+
+.navLinkActive {
+  color: var(--gold-400);
+  background: rgba(181, 132, 20, 0.1);
+  font-weight: 600;
+}
+
+/* ── User & Auth Info ─────────────────────────────────────── */
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgba(107, 142, 123, 0.25);
+}
+
+.userName {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signOutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.signOutBtn:hover {
+  background: rgba(184, 29, 88, 0.1);
+  color: var(--dim-practical);
+  border-color: rgba(184, 29, 88, 0.3);
+}
+
+.authBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  margin-left: 0.5rem;
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  border-radius: var(--radius-sm);
+  background: rgba(181, 132, 20, 0.08);
+  color: var(--gold-400);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.authBtn:hover {
+  background: var(--gold-400);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(181, 132, 20, 0.2);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(10, 107, 72, 0.1);
+  border: 1px solid rgba(10, 107, 72, 0.3);
+  border-radius: 12px;
+  color: var(--dim-theological);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 0.25rem;
+}
+
+/* ── Mobile Menu Toggle ───────────────────────────────────── */
+
+.mobileToggleBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mobileToggleBtn:hover {
+  background: rgba(107, 142, 123, 0.1);
+}
+
+/* ── Mobile Navigation Drawer ─────────────────────────────── */
+
+.mobileDrawer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 1.5rem;
+  background: rgba(232, 230, 220, 0.98);
+  border-bottom: 1px solid rgba(107, 142, 123, 0.25);
+  box-shadow: 0 10px 25px rgba(71, 92, 76, 0.1);
+  animation: fadeIn 0.2s var(--ease-out);
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.mobileNavLink:hover {
+  background: rgba(107, 142, 123, 0.12);
+  text-decoration: none;
+}
+
+.mobileNavLinkActive {
+  background: rgba(181, 132, 20, 0.12);
+  color: var(--gold-400);
+  font-weight: 600;
+}
+
+/* ── Responsive Queries ───────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .quickJumpBtn {
+    max-width: 180px;
+  }
+  .quickJumpKbd {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+  .mobileToggleBtn {
+    display: flex;
+  }
+  .quickJumpBtn {
+    display: none;
+  }
+}

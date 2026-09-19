@@ -1,0 +1,518 @@
+/* ── System Health & Recovery Hub Styles ───────────────────────── */
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  border-bottom: 1px solid rgba(107, 142, 123, 0.25);
+  padding-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.headerMain {
+  max-width: 720px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-400);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  background: rgba(181, 132, 20, 0.1);
+  border: 1px solid rgba(181, 132, 20, 0.25);
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.refreshBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  min-height: var(--touch-target-min, 48px);
+  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.05);
+  transition: all 0.2s;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Overall Status Banner ────────────────────────────────────── */
+
+.statusBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusBannerHealthy {
+  background: rgba(10, 107, 72, 0.1);
+  border: 1px solid rgba(10, 107, 72, 0.3);
+  color: #065f46;
+}
+
+.statusBannerWarning {
+  background: rgba(181, 132, 20, 0.12);
+  border: 1px solid rgba(181, 132, 20, 0.35);
+  color: #785304;
+}
+
+.statusBannerError {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #991b1b;
+}
+
+.statusBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusBannerIcon {
+  font-size: 1.75rem;
+}
+
+.statusBannerText h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.statusBannerText p {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ── Subsystem Cards Grid ─────────────────────────────────────── */
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.statusCard {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statusCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(71, 92, 76, 0.07);
+}
+
+.statusCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.statusCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.statusPillGreen {
+  background: rgba(10, 107, 72, 0.12);
+  color: #065f46;
+  border: 1px solid rgba(10, 107, 72, 0.3);
+}
+
+.statusPillYellow {
+  background: rgba(181, 132, 20, 0.15);
+  color: #785304;
+  border: 1px solid rgba(181, 132, 20, 0.35);
+}
+
+.statusPillRed {
+  background: rgba(220, 38, 38, 0.12);
+  color: #991b1b;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.statusCardDesc {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.statusCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(107, 142, 123, 0.15);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── 1-Click Safe Repair & Maintenance Section ────────────────── */
+
+.repairSection {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.repairGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.repairCard {
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  background: rgba(247, 248, 239, 0.6);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.repairCardInfo h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.repairCardInfo p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.repairActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  min-height: var(--touch-target-min, 48px);
+  transition: all 0.2s;
+}
+
+.repairActionBtn:hover:not(:disabled) {
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+  background: rgba(255, 252, 245, 0.9);
+}
+
+.repairActionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Backup & Restore Section ─────────────────────────────────── */
+
+.backupSection {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.backupRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.backupCard {
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  background: rgba(247, 248, 239, 0.6);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.backupCard h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.backupCard p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.backupPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: var(--touch-target-min, 48px);
+  transition: opacity 0.2s;
+}
+
+.backupPrimaryBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.restoreInputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px dashed rgba(107, 142, 123, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  min-height: var(--touch-target-min, 48px);
+  transition: all 0.2s;
+}
+
+.fileInputLabel:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+}
+
+.previewAlert {
+  background: rgba(10, 107, 72, 0.08);
+  border: 1px solid rgba(10, 107, 72, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  color: #065f46;
+  line-height: 1.45;
+}
+
+/* ── Advanced Administrator Diagnostic Panel ──────────────────── */
+
+.advancedPanel {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: rgba(218, 221, 207, 0.4);
+  overflow: hidden;
+}
+
+.advancedToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+
+.advancedToggle:hover {
+  color: var(--text-primary);
+}
+
+.advancedContent {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid rgba(107, 142, 123, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.techGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.techItem {
+  background: #ffffff;
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  border-radius: var(--radius-xs);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.techLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.techVal {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+
+/* ── Responsive Breakpoints ───────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .container {
+    padding: 1.25rem 1rem 5.5rem;
+    gap: 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .refreshBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .statusBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .repairGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .backupRow {
+    grid-template-columns: 1fr;
+  }
+}

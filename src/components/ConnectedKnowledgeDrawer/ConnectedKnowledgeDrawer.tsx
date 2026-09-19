@@ -15,7 +15,6 @@ import {
 import {
   resolveConnectionsForVerse,
   resolveConnectionsForStrongs,
-  resolveConnectionsForSermon,
 } from '@/lib/universalIndexer';
 import type { ConnectedKnowledge } from '@/types';
 import styles from './ConnectedKnowledgeDrawer.module.css';

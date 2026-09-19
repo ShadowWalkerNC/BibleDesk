@@ -142,7 +142,7 @@ a:hover {
   background-clip: text;
 }
 
-/* ── Frosted Glass Card ───────────────────────────────────── */
+/* ── Frosted Glass Card & Double-Bezel Hardware Aesthetics ──── */
 
 .glass-card {
   background: var(--glass-bg);
@@ -156,6 +156,60 @@ a:hover {
     inset 0 1px 0 rgba(255, 252, 245, 0.7),
     inset 0 -1px 0 rgba(107, 142, 123, 0.08);
   transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+}
+
+.glass-card-elevated {
+  background: rgba(255, 254, 250, 0.88);
+  border: 1px solid rgba(181, 132, 20, 0.28);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  box-shadow:
+    0 20px 48px rgba(71, 92, 76, 0.09),
+    0 4px 12px rgba(181, 132, 20, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+}
+
+.glass-card-elevated:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 26px 56px rgba(71, 92, 76, 0.12),
+    0 6px 16px rgba(181, 132, 20, 0.1);
+  border-color: rgba(181, 132, 20, 0.45);
+}
+
+/* Double-Bezel Hardware Container */
+.double-bezel {
+  padding: 6px;
+  background: rgba(107, 142, 123, 0.08);
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  border-radius: calc(var(--radius-xl) + 6px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.double-bezel-inner {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+/* Kinetic Interactive Buttons */
+.button-kinetic {
+  transition: transform var(--touch-spring-duration, 75ms) ease-out, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.button-kinetic:active {
+  transform: var(--touch-spring-active, scale(0.97));
+}
+
+.button-kinetic:hover .kinetic-icon {
+  transform: translateX(3px);
+}
+
+.kinetic-icon {
+  transition: transform 0.25s var(--ease-out);
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */

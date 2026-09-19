@@ -52,11 +52,19 @@
   top: 0.75rem;
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
+/* ── Responsive Breakpoints ──────────────────────────────── */
+/* Tablet (768px to 1023px) — compact rail margin */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .main {
+    margin-left: 56px;
+  }
+}
+
+/* Mobile (< 768px) — full-width canvas with bottom nav clearance */
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   }
   .mainCollapsed {
     margin-left: 0;

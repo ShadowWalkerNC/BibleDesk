@@ -5,20 +5,14 @@ import { useRouter } from 'next/navigation';
 import {
   Sparkles,
   Search,
-  Share2,
   Heart,
   Copy,
   Check,
   Volume2,
-  ArrowRight,
-  Bookmark,
-  Shield,
-  Church,
 } from 'lucide-react';
 import {
   ENCOURAGEMENT_CATEGORIES,
   ENCOURAGEMENT_PROMISES,
-  EncouragementCategory,
   EncouragementItem,
 } from '@/lib/encouragementData';
 import styles from './encourage.module.css';

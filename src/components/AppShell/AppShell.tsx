@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import SlashCommandPalette from '@/components/SlashCommandPalette/SlashCommandPalette';
 import styles from './AppShell.module.css';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   
-  // On mobile, start collapsed
+  // Desktop (>= 1024px): expanded; Tablet (768px-1023px): compact rail; Mobile (< 768px): bottom rail
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)');
+    const mq = window.matchMedia('(max-width: 1023px)');
     setCollapsed(mq.matches);
     const handler = (e: MediaQueryListEvent) => setCollapsed(e.matches);
     mq.addEventListener('change', handler);

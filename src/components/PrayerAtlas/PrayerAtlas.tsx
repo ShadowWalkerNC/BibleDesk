@@ -45,7 +45,6 @@ export default function PrayerAtlas({
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
   const [worldData, setWorldData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [hoveredPin, setHoveredPin] = useState<MissionMapPin | null>(null);
   const [activePin, setActivePin] = useState<MissionMapPin | null>(null);
@@ -61,7 +60,6 @@ export default function PrayerAtlas({
       .then((data) => {
         const countriesGeo = topojson.feature(data, data.objects.countries);
         setWorldData(countriesGeo);
-        setLoading(false);
       })
       .catch((err) => {
         console.warn('Could not load local world-110m.json, attempting fallback:', err);
@@ -70,11 +68,9 @@ export default function PrayerAtlas({
           .then((data) => {
             const countriesGeo = topojson.feature(data, data.objects.countries);
             setWorldData(countriesGeo);
-            setLoading(false);
           })
           .catch((cdnErr) => {
             console.error('Failed to load world map data from both local and CDN:', cdnErr);
-            setLoading(false);
           });
       });
   }, []);
@@ -259,7 +255,7 @@ export default function PrayerAtlas({
         >
           {/* Radial Gradient Defs for Category Halos */}
           <defs>
-            {Object.entries(CATEGORY_COLORS).map(([key, meta]) => {
+            {Object.entries(CATEGORY_COLORS).map(([, meta]) => {
               const id = `halo-grad-${meta.color.replace('#', '')}`;
               return (
                 <radialGradient id={id} key={id} cx="50%" cy="50%" r="50%">

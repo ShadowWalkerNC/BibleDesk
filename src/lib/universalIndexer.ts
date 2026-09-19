@@ -4,7 +4,6 @@
 
 import { BIBLE_BOOKS } from '@/lib/books';
 import { searchCatechisms } from '@/lib/catechismData';
-import { searchDoctrines } from '@/lib/doctrinesData';
 import type {
   ConnectedKnowledge,
   ConnectedVerse,

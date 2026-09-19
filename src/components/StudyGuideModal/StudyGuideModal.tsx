@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Printer, Download, X, BookOpen, Sparkles, FileText, Check } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Printer, X, FileText } from 'lucide-react';
 import styles from './StudyGuideModal.module.css';
 
 interface StudyGuideModalProps {

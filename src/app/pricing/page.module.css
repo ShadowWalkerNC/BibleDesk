@@ -309,6 +309,79 @@
   background: rgba(181, 132, 20, 0.2);
 }
 
+/* ── Feature Comparison Table ── */
+.tableSection {
+  max-width: 1050px;
+  margin: 0 auto 5rem;
+}
+
+.tableHeading {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.tableTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground, #0f172a);
+  margin-bottom: 0.5rem;
+}
+
+.tableSubtitle {
+  font-size: 1rem;
+  color: var(--muted-foreground, #64748b);
+}
+
+.tableCard {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(107, 142, 123, 0.25);
+  border-radius: 20px;
+  overflow-x: auto;
+  box-shadow: 0 10px 30px rgba(71, 92, 76, 0.06);
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.compareTable th,
+.compareTable td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+}
+
+.compareTable th {
+  background: rgba(247, 248, 239, 0.7);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.colFeature {
+  width: 45%;
+}
+
+.colTier {
+  width: 18%;
+  text-align: center;
+}
+
+.colTierHighlight {
+  background: rgba(181, 132, 20, 0.1) !important;
+  color: #7c5804 !important;
+}
+
+.compareTable tbody tr:hover {
+  background: rgba(107, 142, 123, 0.05);
+}
+
+.compareTable tbody td:not(:first-child) {
+  text-align: center;
+}
+
 /* ── FAQ ── */
 .faqSection {
   max-width: 900px;
@@ -350,9 +423,60 @@
   margin: 0;
 }
 
-@media (max-width: 900px) {
+/* ── Responsive Breakpoints (Desktop, Tablet, Mobile) ────────── */
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    padding: 2rem 1.5rem 4rem;
+  }
+  .cardsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .card {
+    padding: 1.5rem 1.25rem;
+  }
+  .compareContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile / Phone (< 768px) */
+@media (max-width: 767px) {
+  .container {
+    padding: 1.25rem 1rem 5.5rem;
+  }
+  .title {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
   .cardsGrid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .card {
+    padding: 1.5rem 1.25rem;
+  }
+  .actionBtn {
+    min-height: var(--touch-target-min, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .compareContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.5rem 2.5rem;
+    padding: 0 0.5rem;
+  }
+  .compareTable {
+    min-width: 580px;
   }
   .faqGrid {
     grid-template-columns: 1fr;
@@ -363,5 +487,9 @@
   }
   .selfHostLink {
     margin: 1rem auto 0;
+    min-height: var(--touch-target-min, 48px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }

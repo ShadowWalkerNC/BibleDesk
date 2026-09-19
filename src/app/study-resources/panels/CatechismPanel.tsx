@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import {
   ALL_CATECHISMS,
   CATEGORIES,

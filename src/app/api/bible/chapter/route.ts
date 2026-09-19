@@ -79,7 +79,46 @@ export const GET = defineRoute({
     }
 
     try {
-      // 1. Try instant local chapter lookup
+      // 1. Try PostgreSQL Database lookup
+      try {
+        const { getDb, scriptureVerses } = await import('@/db');
+        const { eq, and } = await import('drizzle-orm');
+        const db = await getDb();
+        const dbVerses = await db
+          .select()
+          .from(scriptureVerses)
+          .where(
+            and(
+              eq(scriptureVerses.book, book),
+              eq(scriptureVerses.chapter, chapter),
+              eq(scriptureVerses.translation, translation)
+            )
+          )
+          .orderBy(scriptureVerses.verse);
+
+        if (dbVerses && dbVerses.length > 0) {
+          const passageText = dbVerses.map((v: any) => `${v.verse} ${v.text}`).join(' ');
+          return NextResponse.json({
+            success: true,
+            passage: {
+              reference: `${book} ${chapter}`,
+              verses: dbVerses.map((v: any) => ({
+                verse: v.verse,
+                text: v.text,
+              })),
+              text: passageText,
+              translation_id: translation,
+              translation_name: TRANSLATIONS.find(t => t.id === translation)?.name || translation,
+            },
+            maxChapters,
+            source: 'database',
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[bible/chapter] DB lookup note, checking local modules:', dbErr);
+      }
+
+      // 2. Try instant local bundled file lookup
       const localPassage = getLocalChapter(book, chapter, translation as TranslationId);
       if (localPassage) {
         return NextResponse.json({
@@ -90,7 +129,7 @@ export const GET = defineRoute({
         });
       }
 
-      // 2. Fallback to fetchPassage (remote if needed)
+      // 3. Fallback to fetchPassage (remote if needed)
       const reference = `${book} ${chapter}`;
       const result = await fetchPassage(reference, translation as TranslationId);
 

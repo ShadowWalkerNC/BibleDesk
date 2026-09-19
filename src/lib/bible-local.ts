@@ -8,8 +8,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { BiblePassage, BibleVerse, TranslationId } from '@/types';
-import { TRANSLATIONS } from '@/types';
-import { BIBLE_BOOKS } from './books';
 
 export interface LocalVerse {
   book_id: string;

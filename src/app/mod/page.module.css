@@ -1,11 +1,11 @@
-/* BibleDesk — Moderator Dashboard Styles
+/* BibleDesk — Moderator Administrative & Operations Dashboard Styles
    Inherits design tokens from globals.css (navy/gold/glass palette).
-   All layout is CSS Grid + Flexbox; no external UI lib dependencies. */
+   Tailored across Desktop (Admin Workspace), Tablet (Oversight), and Mobile (Rapid Triage). */
 
 /* ─── Layout ──────────────────────────────────────────────────────────── */
 
 .dashboard {
-  min-height: 100vh; /* fallback */
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -42,16 +42,41 @@
   flex: 1;
 }
 
+.topBarBadges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(10, 107, 72, 0.12);
+  color: var(--dim-theological);
+  border: 1px solid rgba(10, 107, 72, 0.3);
+}
+
 .refreshBtn {
   background: transparent;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.8rem;
+  min-height: var(--touch-target-min, 48px);
+  min-width: var(--touch-target-min, 48px);
   font-size: 1.1rem;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .refreshBtn:hover:not(:disabled) {
   color: var(--gold-400);
@@ -67,6 +92,8 @@
   padding: 0.75rem 2rem 0;
   border-bottom: 1px solid var(--glass-border);
   background: var(--navy-900);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tabBtn {
@@ -80,14 +107,16 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
   transition: color 0.2s, border-color 0.2s;
-  margin-bottom: -1px; /* align border-bottom with nav border */
+  margin-bottom: -1px;
 }
 .tabBtn:hover { color: var(--text-primary); }
 
 .tabBtnActive {
   color: var(--gold-400);
   border-bottom-color: var(--gold-400);
+  font-weight: 600;
 }
 
 /* ─── Content ────────────────────────────────────────────────────────── */
@@ -95,9 +124,298 @@
 .content {
   flex: 1;
   padding: 2rem;
-  max-width: 860px;
+  max-width: 1080px;
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ─── Administrative KPI Dashboard ───────────────────────────────────── */
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.kpiCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.04);
+}
+
+.kpiValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-display), Georgia, serif;
+  line-height: 1.2;
+}
+
+.kpiLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Filter & Search Toolbar ─────────────────────────────────────────── */
+
+.filterToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.filterTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 240px;
+  background: #ffffff;
+  border: 1px solid rgba(107, 142, 123, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.85rem;
+}
+
+.searchBox input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.dimPillGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dimPill {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  min-height: 36px;
+  transition: all 0.15s ease;
+}
+
+.dimPill:hover {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
+}
+
+.dimPillActive {
+  background: var(--gold-500) !important;
+  color: var(--navy-950) !important;
+  border-color: var(--gold-400) !important;
+}
+
+/* ─── Bulk Operations Toolbar (Desktop / Admin) ──────────────────────── */
+
+.bulkToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: rgba(107, 142, 123, 0.08);
+  border: 1px solid rgba(107, 142, 123, 0.2);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.bulkSelectAll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.bulkActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bulkBtn {
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  min-height: 38px;
+  transition: all 0.15s ease;
+}
+
+.bulkBtn:hover:not(:disabled) {
+  border-color: var(--gold-400);
+  color: var(--gold-600);
+}
+
+.bulkBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ─── View Mode Switcher (List vs Rapid Triage) ───────────────────────── */
+
+.modeToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.modeToggleGroup {
+  display: inline-flex;
+  background: rgba(235, 226, 210, 0.55);
+  border: 1px solid rgba(107, 142, 123, 0.28);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 3px;
+}
+
+.modeToggleBtn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  min-height: 38px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.modeToggleBtnActive {
+  background: #ffffff;
+  color: var(--gold-600);
+  border-color: rgba(107, 142, 123, 0.2);
+  box-shadow: 0 1px 3px rgba(71, 92, 76, 0.06);
+}
+
+/* ─── Rapid Triage Mode (Mobile / Phone Optimized) ───────────────────── */
+
+.rapidDeck {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rapidDeckHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.rapidCard {
+  background: var(--glass-bg);
+  border: 2px solid rgba(181, 132, 20, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 10px 30px rgba(71, 92, 76, 0.08);
+}
+
+.rapidActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.rapidVerifyBtn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #0a6b48;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s;
+}
+
+.rapidVerifyBtn:active {
+  transform: scale(0.97);
+}
+
+.rapidRejectBtn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #b81d58;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s;
+}
+
+.rapidRejectBtn:active {
+  transform: scale(0.97);
+}
+
+.rapidSkipBtn {
+  min-height: 52px;
+  padding: 0 1rem;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ─── Flag queue list ────────────────────────────────────────────────── */
@@ -122,6 +440,26 @@
 }
 .flagCard:hover {
   border-color: rgba(245, 200, 66, 0.2);
+}
+
+.flagCardSelectable {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.flagCheckbox {
+  margin-top: 4px;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.flagCardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
 }
 
 .flagCardHeader {
@@ -262,18 +600,18 @@
 .feedbackOk  { font-size: 0.8rem; color: var(--dim-theological); }
 .feedbackErr { font-size: 0.8rem; color: var(--dim-practical); }
 
-/* ─── Generic panel (Approve / Invite) ────────────────────────────── */
+/* ─── Generic panel (Approve / Invite / System) ───────────────────── */
 
 .panel {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 2rem;
-  max-width: 520px;
+  max-width: 680px;
 }
 
 .panelTitle {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
@@ -310,6 +648,7 @@
   font-family: var(--font-sans);
   font-size: 0.9rem;
   padding: 0.6rem 0.8rem;
+  min-height: var(--touch-target-min, 48px);
   transition: border-color 0.2s;
 }
 .textInput:focus,
@@ -337,6 +676,50 @@
 }
 .primaryBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 .primaryBtn:hover:not(:disabled) { opacity: 0.88; }
+
+/* ─── System Configuration & Audit Section ───────────────────────────── */
+
+.systemSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.systemCard {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.systemCardTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.systemCardDesc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.systemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+  font-size: 0.86rem;
+}
+
+.systemStatusGreen {
+  color: var(--dim-theological);
+  font-weight: 600;
+}
 
 /* ─── States ───────────────────────────────────────────────────────────── */
 
@@ -376,7 +759,7 @@
 /* ─── Access denied ─────────────────────────────────────────────────── */
 
 .accessDenied {
-  min-height: 100vh; /* fallback */
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -412,14 +795,33 @@
   color: var(--text-secondary);
 }
 
-/* ─── Responsive ──────────────────────────────────────────────────────── */
+/* ─── Responsive Breakpoints: Desktop, Tablet, Mobile ────────────────── */
 
-@media (max-width: 640px) {
-  .topBar    { padding: 0.75rem 1rem; }
-  .tabs      { padding: 0.5rem 1rem 0; }
-  .content   { padding: 1.25rem 1rem; }
-  .panel     { padding: 1.25rem 1rem; }
-  .flagCard  { padding: 1rem 1.125rem; }
-  .tabBtn    { padding: 0.4rem 0.75rem 0.5rem; font-size: 0.8rem; }
+/* Tablet Portrait & Landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .topBar   { padding: 0.85rem 1.5rem; }
+  .tabs     { padding: 0.65rem 1.5rem 0; }
+  .content  { padding: 1.5rem; max-width: 100%; }
+  .kpiGrid  { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+  .filterTopRow { flex-direction: column; align-items: stretch; }
+  .bulkToolbar  { justify-content: space-between; }
+}
+
+/* Mobile / Phone (< 768px) */
+@media (max-width: 767px) {
+  .topBar      { padding: 0.75rem 1rem; }
+  .topBarTitle { font-size: 0.92rem; }
+  .tabs        { padding: 0.5rem 1rem 0; gap: 0; }
+  .tabBtn      { padding: 0.4rem 0.8rem 0.5rem; font-size: 0.8rem; }
+  .content     { padding: 1rem; }
+  .kpiGrid     { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .kpiValue    { font-size: 1.3rem; }
+  .filterToolbar { padding: 0.85rem; }
+  .dimPillGroup { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .panel       { padding: 1.25rem 1rem; }
+  .flagCard    { padding: 1rem; }
   .voteButtons { flex-direction: column; }
+  .bulkToolbar { flex-direction: column; align-items: stretch; }
+  .bulkActions { flex-wrap: wrap; }
+  .rapidActions { flex-direction: column; }
 }

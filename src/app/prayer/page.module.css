@@ -1660,4 +1660,129 @@
   cursor: not-allowed;
 }
 
+/* ─── Responsive Breakpoints (Desktop, Tablet, Mobile) ────────── */
+
+/* Tablet Portrait & Landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .mainContainer {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .searchBar {
+    width: 100%;
+  }
+
+  .categoryTabs {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .remindersBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Mobile / Phone (< 768px) */
+@media (max-width: 767px) {
+  .mainContainer {
+    padding: 0.75rem 0.75rem 5.5rem;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .pinPrayerHeroBtn,
+  .addCareBtn {
+    width: 100%;
+    justify-content: center;
+    min-height: var(--touch-target-min, 48px);
+    font-size: 0.9rem;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .searchBar {
+    width: 100%;
+  }
+
+  .viewModeGroup {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .viewModeBtn {
+    justify-content: center;
+    min-height: var(--touch-target-min, 48px);
+  }
+
+  .categoryTabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 0.4rem;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .categoryTab {
+    min-height: 40px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  .remindersBanner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .remindersActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .reminderActionBtn,
+  .reminderDigestBtn {
+    width: 100%;
+    justify-content: center;
+    min-height: var(--touch-target-min, 48px);
+  }
+
+  /* Modal on Mobile: Bottom Sheet appearance */
+  .modalOverlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modalContent {
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
 
