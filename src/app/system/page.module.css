@@ -218,6 +218,22 @@
   border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
+.statusPillNeutral {
+  background: rgba(107, 142, 123, 0.12);
+  color: var(--sage-dark, #34483d);
+  border: 1px solid rgba(107, 142, 123, 0.28);
+  animation: pulseVerifying 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseVerifying {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
 .statusCardDesc {
   font-size: 0.86rem;
   color: var(--text-secondary);

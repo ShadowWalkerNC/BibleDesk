@@ -1698,7 +1698,7 @@
 /* Mobile / Phone (< 768px) */
 @media (max-width: 767px) {
   .mainContainer {
-    padding: 0.75rem 0.75rem 5.5rem;
+    padding: 0.75rem 0.75rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .headerActions {

@@ -446,7 +446,7 @@
 /* Mobile / Phone (< 768px) */
 @media (max-width: 767px) {
   .container {
-    padding: 1.25rem 1rem 5.5rem;
+    padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
   .title {
     font-size: clamp(1.8rem, 6vw, 2.4rem);

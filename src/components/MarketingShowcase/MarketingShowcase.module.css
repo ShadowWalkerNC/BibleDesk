@@ -207,6 +207,7 @@
 .teaserTabs {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .teaserTabBtn {
@@ -270,6 +271,7 @@
 .dimensionPills {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
   overflow-x: auto;
   padding-bottom: 6px;
   margin-bottom: 1.25rem;

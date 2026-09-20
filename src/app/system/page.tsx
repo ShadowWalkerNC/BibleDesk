@@ -352,12 +352,18 @@ export default function SystemHealthPage() {
               </div>
               <span
                 className={`${styles.statusPill} ${
-                  report?.checks.scriptures?.status === 'healthy'
+                  !report
+                    ? styles.statusPillNeutral
+                    : report.checks.scriptures?.status === 'healthy'
                     ? styles.statusPillGreen
                     : styles.statusPillRed
                 }`}
               >
-                {report?.checks.scriptures?.status === 'healthy' ? 'Active' : 'Attention'}
+                {!report
+                  ? 'Verifying...'
+                  : report.checks.scriptures?.status === 'healthy'
+                  ? 'Active'
+                  : 'Attention'}
               </span>
             </div>
             <p className={styles.statusCardDesc}>
@@ -377,12 +383,18 @@ export default function SystemHealthPage() {
               </div>
               <span
                 className={`${styles.statusPill} ${
-                  report?.checks.database?.status === 'healthy'
+                  !report
+                    ? styles.statusPillNeutral
+                    : report.checks.database?.status === 'healthy'
                     ? styles.statusPillGreen
                     : styles.statusPillRed
                 }`}
               >
-                {report?.checks.database?.status === 'healthy' ? 'Connected' : 'Error'}
+                {!report
+                  ? 'Verifying...'
+                  : report.checks.database?.status === 'healthy'
+                  ? 'Connected'
+                  : 'Error'}
               </span>
             </div>
             <p className={styles.statusCardDesc}>
@@ -402,8 +414,8 @@ export default function SystemHealthPage() {
                 <Layers size={18} color="var(--dim-language)" />
                 <span>Lexicons &amp; Cross-Refs</span>
               </div>
-              <span className={`${styles.statusPill} ${styles.statusPillGreen}`}>
-                Indexed
+              <span className={`${styles.statusPill} ${!report ? styles.statusPillNeutral : styles.statusPillGreen}`}>
+                {!report ? 'Verifying...' : 'Indexed'}
               </span>
             </div>
             <p className={styles.statusCardDesc}>
@@ -421,8 +433,8 @@ export default function SystemHealthPage() {
                 <Sparkles size={18} color="var(--gold-500)" />
                 <span>AI Study Assistant</span>
               </div>
-              <span className={`${styles.statusPill} ${styles.statusPillGreen}`}>
-                Ready
+              <span className={`${styles.statusPill} ${!report ? styles.statusPillNeutral : styles.statusPillGreen}`}>
+                {!report ? 'Verifying...' : 'Ready'}
               </span>
             </div>
             <p className={styles.statusCardDesc}>
@@ -440,8 +452,8 @@ export default function SystemHealthPage() {
                 <Shield size={18} color="var(--dim-theological)" />
                 <span>Privacy &amp; Cloud Sync</span>
               </div>
-              <span className={`${styles.statusPill} ${styles.statusPillGreen}`}>
-                Private
+              <span className={`${styles.statusPill} ${!report ? styles.statusPillNeutral : styles.statusPillGreen}`}>
+                {!report ? 'Verifying...' : 'Private'}
               </span>
             </div>
             <p className={styles.statusCardDesc}>

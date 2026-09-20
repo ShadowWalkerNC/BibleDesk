@@ -371,3 +371,13 @@
   color: var(--gold-500);
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .main {
+    padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .authCard {
+    padding: 1.5rem 1.25rem;
+  }
+}

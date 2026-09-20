@@ -38,6 +38,8 @@
 - [x] 1-Click Safe Maintenance & Repair Operations (`POST /api/system/repair`): single-click starter study data seeding, database index and table verification, and live AI connectivity diagnostics.
 - [x] Complete Data Portability & Disaster Recovery: export full workspace JSON backup (notes, collections, prayer commitments, highlights, reading plans) and safe restore with preview confirmation dialog.
 - [x] Commercial-Grade Plain Language & Purposeful Empty States: replaced vague labels and raw errors with action-oriented buttons ("Record Verification Vote", "Promote Answer to Canonical", "Investigate Question", "Save to Study Notes") and informative empty states with clear next actions across `/bible`, `/research`, `/prayer`, and `/mod`.
+- [x] Real-world UAT inspection via Chrome DevTools Protocol across Desktop (1440×900), Tablet (820×1180), and Mobile (390×844) with 26 clean screenshots, 0 console errors, and comprehensive 31-step user testing checklist.
+- [x] Responsive layout refinements: stacked mobile header actions on `/prayer`, neutral pulsing `Verifying...` status pills on `/system` to eliminate initial status flash, tablet flex-wrap for 5D preview tabs, and safe-area inset protection (`env(safe-area-inset-bottom)`) with Next.js dev indicator disabled (`devIndicators: false`) to safeguard mobile navigation.
 - [x] Next.js 16.3.5 production build and TypeScript check exit 0 with clean page generation across 32 routes.
 - [x] Active navigation, sitemap, and pricing marketing reflect the web MVP and SaaS tiers.
 
