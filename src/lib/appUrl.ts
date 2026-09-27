@@ -18,7 +18,17 @@ export function getAppUrl(): string {
     return window.location.origin.replace(/\/+$/, '');
   }
 
-  // 3. Vercel system environment variables (injected during Vercel builds & serverless functions)
+  // 3. Railway system environment variables (injected during Railway deployments)
+  const railwayDomain =
+    process.env.RAILWAY_PUBLIC_DOMAIN ||
+    process.env.NEXT_PUBLIC_RAILWAY_PUBLIC_DOMAIN ||
+    process.env.RAILWAY_STATIC_URL;
+  if (railwayDomain) {
+    const domain = railwayDomain.trim().replace(/\/+$/, '');
+    return domain.startsWith('http://') || domain.startsWith('https://') ? domain : `https://${domain}`;
+  }
+
+  // 4. Vercel system environment variables (injected during Vercel builds & serverless functions)
   const vercelProductionUrl =
     process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ||
     process.env.VERCEL_PROJECT_PRODUCTION_URL;

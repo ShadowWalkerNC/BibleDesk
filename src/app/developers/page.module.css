@@ -16,7 +16,7 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.4rem 1rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   background: rgba(37, 99, 235, 0.1);
   border: 1px solid rgba(37, 99, 235, 0.3);
   color: #1d4ed8;
@@ -60,7 +60,7 @@
   padding: 0.65rem 1.25rem;
   border-radius: 12px;
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.25);
+  border: 1px solid var(--border-subtle);
   color: #405548;
   font-size: 0.92rem;
   font-weight: 600;
@@ -78,13 +78,13 @@
   background: #b58414 !important;
   color: #ffffff !important;
   border-color: #94690a !important;
-  box-shadow: 0 4px 14px rgba(107, 142, 123, 0.25);
+  box-shadow: 0 4px 14px var(--border-subtle);
 }
 
 /* Content Sections */
 .section {
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.28);
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
   padding: 2.2rem;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.04);
@@ -99,7 +99,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .sectionTitle {

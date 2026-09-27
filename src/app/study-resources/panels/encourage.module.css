@@ -17,7 +17,7 @@
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
   background: rgba(107, 142, 123, 0.1);
-  border: 1px solid rgba(107, 142, 123, 0.28);
+  border: 1px solid var(--border-subtle);
   color: #94690a;
   font-size: 0.82rem;
   font-weight: 600;
@@ -53,7 +53,7 @@
   width: 100%;
   padding: 0.85rem 1.1rem 0.85rem 2.85rem;
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.35);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   font-size: 0.96rem;
   color: #34483d;
@@ -64,7 +64,7 @@
 .searchInput:focus {
   outline: none;
   border-color: #b58414;
-  box-shadow: 0 0 0 3px rgba(107, 142, 123, 0.15);
+  box-shadow: 0 0 0 3px var(--border-subtle);
 }
 
 .searchIcon {
@@ -97,7 +97,7 @@
   padding: 0.55rem 1rem;
   border-radius: 9999px;
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.22);
+  border: 1px solid var(--border-subtle);
   color: #405548;
   font-size: 0.88rem;
   font-weight: 500;
@@ -117,13 +117,13 @@
   background: #b58414 !important;
   color: #ffffff !important;
   border-color: #94690a !important;
-  box-shadow: 0 4px 12px rgba(107, 142, 123, 0.25);
+  box-shadow: 0 4px 12px var(--border-subtle);
 }
 
 /* Spotlight Featured Card */
 .spotlightCard {
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.38);
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
   padding: 2.2rem;
   margin-bottom: 2.5rem;
@@ -259,7 +259,7 @@
 .secondaryActionBtn {
   background: #ffffff;
   color: #405548;
-  border: 1px solid rgba(107, 142, 123, 0.32);
+  border: 1px solid var(--border-subtle);
 }
 
 .secondaryActionBtn:hover {
@@ -276,7 +276,7 @@
 
 .card {
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.25);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 1.6rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
@@ -287,7 +287,7 @@
 
 .card:hover {
   border-color: #b58414;
-  box-shadow: 0 8px 24px rgba(107, 142, 123, 0.12);
+  box-shadow: 0 8px 24px var(--border-subtle);
   transform: translateY(-2px);
 }
 
@@ -339,7 +339,7 @@
 .cardActions {
   display: flex;
   gap: 0.5rem;
-  border-top: 1px solid rgba(107, 142, 123, 0.12);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 1rem;
 }
 
@@ -354,7 +354,7 @@
   font-size: 0.84rem;
   font-weight: 600;
   background: rgba(247, 248, 239, 0.72);
-  border: 1px solid rgba(107, 142, 123, 0.22);
+  border: 1px solid var(--border-subtle);
   color: #3e3526;
   cursor: pointer;
   transition: all 0.15s ease;

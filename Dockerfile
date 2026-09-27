@@ -42,18 +42,23 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 
 # Set correct permissions
-RUN mkdir .next && chown nextjs:nodejs .next
+RUN mkdir -p .next data && chown -R nextjs:nodejs .next data
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Guarantee static data and migrations are present in runner
+COPY --from=builder --chown=nextjs:nodejs /app/src/data ./src/data
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+
 USER nextjs
 
 EXPOSE 3000
 
+# Dynamic port health check supporting Railway ($PORT) and local Docker ($PORT:-3000)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-3000}/api/health || exit 1
 
 CMD ["node", "server.js"]

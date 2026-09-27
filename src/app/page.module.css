@@ -1,11 +1,12 @@
-/* ── Start Screen (Homepage) — Tinted Sage Devotional ──────── */
+/* ── Start Screen (Homepage) — 2026 Architectural Codex ───────── */
 
 .startScreen {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  min-height: 100vh; /* fallback */
+  grid-template-columns: 1fr 1.35fr;
+  min-height: 100vh;
   min-height: 100dvh;
   gap: 0;
+  background: var(--canvas-base);
 }
 
 /* ── Left Column ─────────────────────────────────────────── */
@@ -14,9 +15,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 2rem 1.75rem 2rem 2rem;
-  border-right: 1px solid rgba(107, 142, 123, 0.14);
-  background: rgba(218, 221, 207, 0.4);
+  padding: 2.25rem 2rem;
+  border-right: 1px solid var(--border-subtle);
+  background: var(--surface-ground);
 }
 
 /* Wordmark */
@@ -27,46 +28,49 @@
 }
 
 .wordmarkIcon {
-  width: 29px;
-  height: 29px;
-  border: 1px solid var(--sage);
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-xs);
+  background: var(--gold-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 15px;
   color: var(--gold-400);
   flex-shrink: 0;
 }
 
 .wordmark {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: #34483d;
-  letter-spacing: -0.5px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
-.wordmark span { color: var(--sage); }
+.wordmark span {
+  color: var(--gold-400);
+}
 
 /* Daily Verse */
 .dailyVerse {
-  background: rgba(255, 251, 235, 0.7);
-  border: 1px solid rgba(107, 142, 123, 0.22);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
   border-left: 3px solid var(--gold-400);
-  border-radius: 18px;
-  padding: 1rem 1.1rem;
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.35rem;
   margin: 0;
-  box-shadow: 0 13px 30px rgba(93, 86, 55, 0.07);
+  box-shadow: var(--shadow-subtle);
 }
 
 .dailyVerseText {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.02rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
   line-height: 1.7;
-  color: #526053;
-  margin: 0 0 0.5rem;
+  color: var(--ink-primary);
+  margin: 0 0 0.65rem;
   font-style: italic;
 }
 
@@ -74,24 +78,25 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 0.80rem;
+  color: var(--ink-secondary);
 }
 
 .dailyVerseRef cite {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-display), Georgia, serif;
   font-style: normal;
   font-weight: 700;
-  color: #92752c;
+  color: var(--gold-500);
 }
 
 .dailyVerseTrans {
-  font-size: 0.72rem;
-  background: rgba(107, 142, 123, 0.1);
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  border-radius: 4px;
-  padding: 1px 5px;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  background: var(--surface-ground);
+  border: 1px solid var(--gold-border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--gold-500);
 }
 
 /* Primary CTA */
@@ -99,36 +104,33 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--gold-400);
-  color: #fff;
-  padding: 0.95rem 1.4rem;
-  min-height: var(--touch-target-min, 48px);
-  border-radius: 9px;
-  font-size: 0.98rem;
-  font-weight: 700;
+  background: var(--ink-primary);
+  color: #ffffff !important;
+  padding: 0.85rem 1.25rem;
+  min-height: 44px;
+  border-radius: var(--radius-xs);
+  font-size: 0.92rem;
+  font-weight: 600;
   text-decoration: none;
-  border: none;
-  box-shadow: 0 6px 20px rgba(107, 142, 123, 0.25);
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #000000;
+  box-shadow: var(--shadow-subtle);
+  transition: transform var(--touch-spring-duration, 90ms) ease-out, background 0.15s, box-shadow 0.15s;
   letter-spacing: 0.01em;
 }
 
 .primaryCta:hover {
-  background: #c8940e;
-  box-shadow: 0 8px 18px rgba(24, 43, 31, 0.25);
+  background: #2b332c;
   transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
   text-decoration: none;
-  color: #fff;
 }
 
 .primaryCta:active {
-  transform: translateY(0);
-  box-shadow: 0 3px 8px rgba(107, 142, 123, 0.25);
+  transform: var(--touch-spring-active);
 }
 
 .ctaArrow {
   margin-left: auto;
-  opacity: 0.9;
   transition: transform 0.2s ease;
 }
 
@@ -144,11 +146,12 @@
 }
 
 .quickNavLabel {
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
   margin: 0;
 }
 
@@ -162,32 +165,30 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 0.7rem 0.95rem;
-  min-height: var(--touch-target-min, 48px);
-  background: rgba(247, 248, 239, 0.57);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 12px;
-  color: var(--text-primary);
+  padding: 0.75rem 0.95rem;
+  min-height: 42px;
+  background: var(--canvas-subdued);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--ink-secondary);
   font-size: 0.84rem;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
-  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.05);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.15s ease;
 }
 
 .quickItem:hover {
-  background: rgba(255, 252, 245, 0.72);
-  border-color: var(--sage);
-  color: var(--sage-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(71, 92, 76, 0.12);
+  background: var(--surface-ground);
+  border-color: var(--border-medium);
+  color: var(--ink-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
   text-decoration: none;
 }
 
 .quickItem:active {
-  transform: translateY(0);
+  transform: var(--touch-spring-active);
 }
 
 /* ── Right Column ─────────────────────────────────────────── */
@@ -196,8 +197,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  padding: 2rem;
+  padding: 2.25rem;
   overflow-y: auto;
+  background: var(--canvas-base);
 }
 
 /* Assistant header */
@@ -205,8 +207,8 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(107, 142, 123, 0.12);
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .assistantIcon {
@@ -216,19 +218,18 @@
 }
 
 .assistantTitle {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: #394d40;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink-primary);
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.01em;
 }
 
 .assistantSubtitle {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-size: 0.80rem;
+  color: var(--ink-muted);
   margin: 2px 0 0;
-  letter-spacing: 0.02em;
 }
 
 /* Search */
@@ -256,14 +257,15 @@
   align-items: center;
   justify-content: center;
   padding: 3rem 1.5rem;
-  border: 1px dashed rgba(107, 142, 123, 0.2);
-  border-radius: var(--radius-md);
-  background: rgba(247, 248, 239, 0.3);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-sm);
+  background: var(--surface-ground);
 }
 
 .answerPlaceholder p {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: 0.90rem;
+  color: var(--ink-muted);
   text-align: center;
   font-style: italic;
   margin: 0;
@@ -277,7 +279,7 @@
   }
   .leftCol {
     border-right: none;
-    border-bottom: 1px solid rgba(107, 142, 123, 0.14);
+    border-bottom: 1px solid var(--border-subtle);
     padding: 1.5rem;
   }
   .rightCol {

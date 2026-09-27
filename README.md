@@ -142,8 +142,9 @@ Visit `http://localhost:3000` to open the Study Desk.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions:
 - **Consolidated Database Init**: Paste [`supabase/schema-init.sql`](supabase/schema-init.sql) into your Supabase SQL Editor for 1-click database initialization.
-- **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.
+- **Railway**: 1-click deployment via `railway.json` and production `Dockerfile` (healthcheck `/api/health`, dynamic `$PORT` handling, unified Next.js API & web server).
 - **Docker**: Production-ready multi-stage container (`Dockerfile` & `docker-compose.yml`).
+- **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.
 
 ---
 

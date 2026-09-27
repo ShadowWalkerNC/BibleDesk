@@ -103,7 +103,11 @@ if (greekExists && hebrewExists && tskExists) {
 }
 
 // 4. App URL & Canonical Origin
-const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null) ||
+  (process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : null);
+
 if (appUrl) {
   if (appUrl.startsWith('http://localhost') || appUrl.startsWith('https://')) {
     pass(`Canonical App Origin: ${appUrl}`);
@@ -111,7 +115,7 @@ if (appUrl) {
     warn(`Canonical App Origin: ${appUrl}`, 'Must start with http:// or https://');
   }
 } else {
-  warn('NEXT_PUBLIC_APP_URL is not defined in .env.local', 'Defaulting to http://localhost:3000');
+  warn('NEXT_PUBLIC_APP_URL is not defined in .env.local', 'Defaulting to http://localhost:3000 (detected Railway/local fallback)');
 }
 
 // 5. Supabase Configuration check

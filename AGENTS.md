@@ -29,7 +29,7 @@ AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or serv
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
 Integrations: MCP · Sigil · direct per-user Google OAuth for Prayer Care · wa.me sharing
-Hosting:      Vercel preferred (Render also viable)
+Hosting:      Railway · Docker · Vercel
 Parked:       Android · Electron · Chrome extension · church/sermon/creator suites
 ```
 
@@ -104,7 +104,7 @@ Release gates:
   □ Apply and validate all Supabase schemas through v10 plus rpc.sql
   □ Verify RLS with cross-user denial tests
   □ Configure Google OAuth consent/client, APIs, callback, encryption key, host, and smoke tests
-  □ Deploy to Vercel and complete authenticated/public production smoke tests
+  □ Deploy to Railway or Vercel and complete authenticated/public production smoke tests
 ```
 
 ---

@@ -1,12 +1,19 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BibleDesk · Kingdom Stewardship Pricing
+   Architectural Codex 2026 — matches globals.css design tokens
+   ═══════════════════════════════════════════════════════════════════ */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1.5rem 5rem;
 }
 
+/* ── Section Hero ──────────────────────────────────────────────── */
+
 .hero {
   text-align: center;
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto 3.5rem;
 }
 
@@ -14,55 +21,61 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #b58414;
-  background: rgba(181, 132, 20, 0.1);
-  padding: 0.35rem 0.85rem;
-  border-radius: 9999px;
-  margin-bottom: 1rem;
+  letter-spacing: 0.09em;
+  color: var(--gold-600);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-xs);
+  margin-bottom: 1.25rem;
 }
 
 .title {
-  font-size: 2.75rem;
+  font-family: var(--font-cinzel);
+  font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 700;
-  color: var(--foreground, #0f172a);
-  line-height: 1.2;
+  color: var(--ink-900);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   margin-bottom: 1rem;
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  color: var(--muted-foreground, #64748b);
-  line-height: 1.6;
+  font-size: 1.05rem;
+  color: var(--ink-500);
+  line-height: 1.65;
   margin-bottom: 2rem;
 }
+
+/* ── Billing Toggle ────────────────────────────────────────────── */
 
 .toggleContainer {
   display: inline-flex;
   align-items: center;
   gap: 0.85rem;
-  background: var(--muted, #f8fafc);
-  border: 1px solid var(--border, #e2e8f0);
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.9rem;
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
   font-weight: 500;
-  color: var(--muted-foreground, #64748b);
+  color: var(--ink-500);
 }
 
 .toggleActive {
-  color: var(--foreground, #0f172a);
-  font-weight: 600;
+  color: var(--ink-900);
+  font-weight: 700;
 }
 
 .toggleTrack {
   width: 2.75rem;
   height: 1.5rem;
-  background: #cbd5e1;
-  border-radius: 9999px;
+  background: var(--ink-200);
+  border-radius: 9999px; /* intentional — UI toggle thumb */
   position: relative;
   border: none;
   cursor: pointer;
@@ -78,85 +91,97 @@
   position: absolute;
   top: 0.15rem;
   left: 0.2rem;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 .toggleThumbRight {
   transform: translateX(1.15rem);
-  background: #b58414;
+  background: var(--gold-500);
 }
 
 .discountBadge {
-  background: rgba(5, 150, 105, 0.12);
-  color: #059669;
-  font-size: 0.75rem;
+  background: rgba(5, 120, 85, 0.1);
+  color: #056b4c;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(5, 120, 85, 0.2);
   margin-left: 0.25rem;
 }
 
 .notificationBanner {
   margin-top: 1.5rem;
-  background: rgba(5, 150, 105, 0.1);
-  color: #065f46;
-  border: 1px solid rgba(5, 150, 105, 0.3);
+  background: rgba(5, 120, 85, 0.08);
+  color: #045c40;
+  border: 1px solid rgba(5, 120, 85, 0.25);
   padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
   font-weight: 500;
 }
 
-/* ── Cards Grid ── */
+/* ── Tier Cards Grid ───────────────────────────────────────────── */
+
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: stretch;
   margin-bottom: 4rem;
 }
 
 .card {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 1.25rem;
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 2rem 1.75rem;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(36, 32, 25, 0.04);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 28px rgba(36, 32, 25, 0.08);
 }
 
 .cardFeatured {
-  border-color: #b58414;
-  box-shadow: 0 10px 30px -5px rgba(181, 132, 20, 0.15);
+  border-color: var(--gold-400);
+  box-shadow: 0 6px 24px rgba(136, 94, 19, 0.12);
+}
+
+.cardFeatured:hover {
+  box-shadow: 0 12px 36px rgba(136, 94, 19, 0.18);
 }
 
 .cardCurrent {
-  border-color: #059669;
+  border-color: rgba(5, 120, 85, 0.55);
 }
 
+/* ── Popular Label (architectural tag, not pill) */
 .popularPill {
   position: absolute;
-  top: -0.75rem;
+  top: -0.6rem;
   left: 50%;
   transform: translateX(-50%);
-  background: #b58414;
+  background: var(--gold-600);
   color: #ffffff;
-  font-size: 0.725rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.85rem;
-  border-radius: 9999px;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.85rem;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
 }
+
+/* ── Card Interior ─────────────────────────────────────────────── */
 
 .cardHeader {
   margin-bottom: 1.5rem;
@@ -165,9 +190,10 @@
 .cardIconBox {
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 0.75rem;
-  background: var(--muted, #f1f5f9);
-  color: var(--foreground, #0f172a);
+  border-radius: var(--radius-sm);
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-700);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,16 +201,18 @@
 }
 
 .cardTitle {
-  font-size: 1.35rem;
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
   font-weight: 700;
-  color: var(--foreground, #0f172a);
+  color: var(--ink-900);
+  letter-spacing: 0.01em;
   margin-bottom: 0.35rem;
 }
 
 .cardDesc {
-  font-size: 0.875rem;
-  color: var(--muted-foreground, #64748b);
-  line-height: 1.45;
+  font-size: 0.855rem;
+  color: var(--ink-500);
+  line-height: 1.5;
   min-height: 2.5rem;
 }
 
@@ -196,71 +224,81 @@
 }
 
 .priceAmount {
+  font-family: var(--font-cinzel);
   font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--foreground, #0f172a);
+  font-weight: 700;
+  color: var(--ink-900);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .pricePeriod {
-  font-size: 0.85rem;
-  color: var(--muted-foreground, #64748b);
+  font-size: 0.83rem;
+  color: var(--ink-400);
 }
 
 .featureList {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
+  margin: 1.5rem 0 2rem;
   flex-grow: 1;
 }
 
 .featureItem {
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  font-size: 0.875rem;
-  color: var(--foreground, #1e293b);
-  line-height: 1.4;
+  gap: 0.6rem;
+  font-size: 0.855rem;
+  color: var(--ink-700);
+  line-height: 1.45;
 }
 
-.tierBtnPrimary, .tierBtnSecondary {
+/* ── Tier Buttons ──────────────────────────────────────────────── */
+
+.tierBtnPrimary,
+.tierBtnSecondary {
   width: 100%;
   padding: 0.85rem 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.15s ease;
   border: none;
   text-align: center;
+  letter-spacing: 0.01em;
 }
 
 .tierBtnPrimary {
-  background: #b58414;
+  background: var(--gold-600);
   color: #ffffff;
+  border: 1px solid var(--gold-700);
 }
 
 .tierBtnPrimary:hover {
-  background: #966d0e;
+  background: var(--gold-700);
+  box-shadow: 0 4px 14px rgba(136, 94, 19, 0.28);
 }
 
 .tierBtnSecondary {
-  background: var(--muted, #f1f5f9);
-  color: var(--foreground, #0f172a);
-  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--ink-700);
+  border: 1px solid var(--border-subtle);
 }
 
 .tierBtnSecondary:hover {
-  background: #e2e8f0;
+  background: var(--canvas-50);
+  border-color: var(--ink-200);
 }
 
-/* ── Self-Host Callout ── */
+/* ── Self-Host Callout ─────────────────────────────────────────── */
+
 .selfHostCallout {
-  background: var(--muted, #f8fafc);
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 1.25rem;
-  padding: 2rem 2.5rem;
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
   margin-bottom: 4rem;
 }
 
@@ -271,21 +309,23 @@
 }
 
 .selfHostIcon {
-  color: #b58414;
+  color: var(--gold-600);
   flex-shrink: 0;
 }
 
 .selfHostContent h3 {
-  font-size: 1.2rem;
+  font-family: var(--font-cinzel);
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--foreground, #0f172a);
-  margin-bottom: 0.25rem;
+  color: var(--ink-900);
+  margin: 0 0 0.3rem;
+  letter-spacing: 0.01em;
 }
 
 .selfHostContent p {
-  font-size: 0.9rem;
-  color: var(--muted-foreground, #64748b);
-  line-height: 1.5;
+  font-size: 0.875rem;
+  color: var(--ink-500);
+  line-height: 1.55;
   margin: 0;
 }
 
@@ -295,21 +335,24 @@
   gap: 0.4rem;
   margin-left: auto;
   flex-shrink: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #b58414;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--gold-600);
   text-decoration: none;
-  padding: 0.65rem 1.2rem;
-  background: rgba(181, 132, 20, 0.1);
-  border-radius: 0.65rem;
-  transition: background 0.15s;
+  padding: 0.6rem 1.15rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .selfHostLink:hover {
-  background: rgba(181, 132, 20, 0.2);
+  background: rgba(136, 94, 19, 0.14);
+  border-color: var(--gold-400);
 }
 
-/* ── Feature Comparison Table ── */
+/* ── Feature Comparison Table ──────────────────────────────────── */
+
 .tableSection {
   max-width: 1050px;
   margin: 0 auto 5rem;
@@ -321,43 +364,52 @@
 }
 
 .tableTitle {
-  font-size: 2rem;
+  font-family: var(--font-cinzel);
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--foreground, #0f172a);
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
   margin-bottom: 0.5rem;
 }
 
 .tableSubtitle {
-  font-size: 1rem;
-  color: var(--muted-foreground, #64748b);
+  font-size: 0.975rem;
+  color: var(--ink-500);
 }
 
 .tableCard {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 20px;
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow-x: auto;
-  box-shadow: 0 10px 30px rgba(71, 92, 76, 0.06);
+  box-shadow: 0 4px 16px rgba(36, 32, 25, 0.05);
 }
 
 .compareTable {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
 .compareTable th,
 .compareTable td {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+  padding: 0.95rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.compareTable tr:last-child td {
+  border-bottom: none;
 }
 
 .compareTable th {
-  background: rgba(247, 248, 239, 0.7);
+  background: var(--canvas-50);
+  font-family: var(--font-mono);
   font-weight: 700;
-  color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-600);
 }
 
 .colFeature {
@@ -370,69 +422,76 @@
 }
 
 .colTierHighlight {
-  background: rgba(181, 132, 20, 0.1) !important;
-  color: #7c5804 !important;
+  background: var(--gold-soft) !important;
+  color: var(--gold-700) !important;
 }
 
 .compareTable tbody tr:hover {
-  background: rgba(107, 142, 123, 0.05);
+  background: var(--canvas-50);
 }
 
 .compareTable tbody td:not(:first-child) {
   text-align: center;
 }
 
-/* ── FAQ ── */
+/* ── FAQ ───────────────────────────────────────────────────────── */
+
 .faqSection {
   max-width: 900px;
   margin: 0 auto;
 }
 
 .faqTitle {
-  font-size: 2rem;
+  font-family: var(--font-cinzel);
+  font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
+  letter-spacing: -0.01em;
   margin-bottom: 2.5rem;
-  color: var(--foreground, #0f172a);
+  color: var(--ink-900);
 }
 
 .faqGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .faqCard {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 1rem;
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.faqCard:hover {
+  border-color: var(--gold-300);
 }
 
 .faqCard h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--foreground, #0f172a);
-  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 0.5rem;
 }
 
 .faqCard p {
-  font-size: 0.875rem;
-  color: var(--muted-foreground, #64748b);
-  line-height: 1.5;
+  font-size: 0.855rem;
+  color: var(--ink-500);
+  line-height: 1.55;
   margin: 0;
 }
 
-/* ── Responsive Breakpoints (Desktop, Tablet, Mobile) ────────── */
+/* ── Responsive ────────────────────────────────────────────────── */
 
-/* Tablet (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .container {
     padding: 2rem 1.5rem 4rem;
   }
   .cardsGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.875rem;
   }
   .card {
     padding: 1.5rem 1.25rem;
@@ -443,13 +502,12 @@
   }
 }
 
-/* Mobile / Phone (< 768px) */
 @media (max-width: 767px) {
   .container {
     padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
   .title {
-    font-size: clamp(1.8rem, 6vw, 2.4rem);
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
   }
   .subtitle {
     font-size: 0.95rem;
@@ -463,11 +521,9 @@
   .card {
     padding: 1.5rem 1.25rem;
   }
-  .actionBtn {
+  .tierBtnPrimary,
+  .tierBtnSecondary {
     min-height: var(--touch-target-min, 48px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .compareContainer {
     overflow-x: auto;
@@ -491,5 +547,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .tierBtnPrimary,
+  .tierBtnSecondary,
+  .selfHostLink,
+  .faqCard,
+  .toggleThumb {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
   }
 }

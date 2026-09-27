@@ -1,88 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=SF+Pro+Display:wght@400;500;600&family=SF+Pro+Text:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════
-   BIBLEDESK DESIGN SYSTEM — Tinted Sage Devotional
-   Muted sage-green canvas, frosted glass surfaces, illuminated gold,
-   contemplative serif headings, gentle devotional motion.
+   BIBLEDESK 2026 DESIGN SYSTEM — Architectural Scripture Codex
+   Precision Research Workbench · Archival Stone & Vellum ·
+   Illuminated Gold Leaf · Editorial Typographic Restraint
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Sage-Tinted Canvas Palette */
-  --navy-950: #e8e6dc; /* Sage-tinted canvas */
-  --navy-900: rgba(218, 221, 207, 0.76); /* Translucent sage vellum */
-  --navy-800: rgba(200, 205, 188, 0.6); /* Sage sub-element surface */
-  --navy-700: rgba(180, 190, 170, 0.5); /* Sage border tone */
-  --navy-600: #879087; /* Sage gray */
-  --navy-500: #687169; /* Sage text */
+  /* ── 1. Archival Stone & Canvas Palette ────────────────────── */
+  --canvas-base: #f7f5f0;        /* Archival alabaster stone canvas */
+  --canvas-subdued: #efebe4;     /* Secondary structural section ground */
+  --canvas-surface: #ffffff;     /* Crisp white active study surface */
+  --canvas-inset: #e8e3d8;       /* Subtle recessed command tray */
+  
+  /* Backwards-compatible aliases for existing components */
+  --navy-950: var(--canvas-base);
+  --navy-900: rgba(239, 235, 228, 0.94);
+  --navy-800: rgba(232, 227, 216, 0.85);
+  --navy-700: rgba(206, 198, 184, 0.7);
+  --navy-600: #8c8273;
+  --navy-500: #675e52;
 
-  /* Sage Accent Palette */
-  --sage: #6b8e7b;
-  --sage-dark: #527361;
-  --sage-light: #d5e0d2;
-  --sage-tint: rgba(107, 142, 123, 0.16);
+  /* ── 2. Structural Hairline Borders ────────────────────────── */
+  --border-subtle: rgba(36, 32, 25, 0.08);
+  --border-medium: rgba(36, 32, 25, 0.16);
+  --border-strong: rgba(36, 32, 25, 0.28);
+  --border-contrast: #dcd4c6;
 
-  /* Illuminated Manuscript Gold Leaf */
-  --gold-400: #7c5804; /* Deep illuminated manuscript gold — darkened for WCAG AA (5.16:1 on canvas) */
-  --gold-500: #7a5608; /* CTA gold — darkened so light CTA text passes WCAG AA (5.31:1) */
-  --gold-600: #6e4e04;
-  --gold-glow: rgba(181, 132, 20, 0.14);
+  /* ── 3. Archival Ink Typography (WCAG AAA / AA compliant) ───── */
+  --ink-primary: #191c19;        /* Deep archival carbon ink (14.2:1 contrast) */
+  --ink-secondary: #3d4740;      /* Scholarly dark charcoal (8.5:1 contrast) */
+  --ink-muted: #5e6b62;          /* Monographic muted gray (5.2:1 contrast) */
+  --ink-faint: #88958c;          /* Marginal annotations & verse indices */
 
-  /* Sage-Tinted Typography */
-  --parchment-100: #34483d; /* Deep sage ink */
-  --parchment-200: #405548; /* Soft sage text */
-  --parchment-300: #526053; /* Secondary sage text */
-
-  --text-primary: #34483d; /* Deep sage ink */
-  --text-secondary: #405548; /* Sage secondary */
-  --text-muted: #57625a; /* Sage muted gray — darkened for WCAG AA (5.09:1 on canvas) */
-  --text-tertiary: #5f685f; /* WCAG AA (4.62:1 on canvas) */
-  --surface-2: var(--navy-900);
+  /* Backwards-compatible aliases */
+  --text-primary: var(--ink-primary);
+  --text-secondary: var(--ink-secondary);
+  --text-muted: var(--ink-muted);
+  --text-tertiary: var(--ink-faint);
+  --parchment-100: var(--ink-primary);
+  --parchment-200: var(--ink-secondary);
+  --parchment-300: var(--ink-muted);
+  --surface-2: var(--canvas-surface);
   --text-inverse: #fdfbf7;
 
-  /* 5 Dimensions Sourced Color Palette */
-  --dim-scripture:    #185ea5; /* Deep Royal Sanctuary Blue */
-  --dim-historical:   #a04113; /* Antique Clay / Terra Cotta — darkened for WCAG AA (5.15:1 on canvas) */
-  --dim-language:     #6b35b8; /* Royal Codex Purple */
-  --dim-theological:  #0a6b48; /* Olive Branch Green — darkened for WCAG AA (5.23:1 on canvas) */
-  --dim-practical:    #b81d58; /* Crimson Rubric Pink */
+  /* ── 4. Illuminated Gold Leaf Accent ───────────────────────── */
+  --gold-300: #b58414;
+  --gold-400: #885e13;          /* Refined illuminated gold (5.3:1 contrast on canvas) */
+  --gold-500: #744f0e;          /* Interactive CTA gold */
+  --gold-600: #5f400a;
+  --gold-soft: #faf4e8;         /* Vellum gold highlight surface */
+  --gold-glow: rgba(136, 94, 19, 0.12);
+  --gold-border: rgba(136, 94, 19, 0.28);
 
-  /* Sage Frosted Glass Surface */
-  --glass-bg: rgba(247, 248, 239, 0.57);
-  --glass-border: rgba(107, 142, 123, 0.25);
-  --glass-border-outer: rgba(107, 142, 123, 0.08);
-  --glass-hover: rgba(255, 252, 245, 0.72);
+  /* Sage & Cedar Accents */
+  --sage: #4d705c;
+  --sage-dark: #375343;
+  --sage-light: #e6ede8;
+  --sage-tint: rgba(77, 112, 92, 0.10);
 
-  /* Apple Squircle Radius Tokens */
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  /* ── 5. Five-Dimension Evidence Sourced Jewels ─────────────── */
+  --dim-scripture:    #165a9e;  /* Lapislazuli Blue (Scripture Anchor) */
+  --dim-historical:   #963e16;  /* Terra Cotta (Ancient Near Eastern Setting) */
+  --dim-language:     #6330a8;  /* Codex Violet (Hebrew/Greek Philology) */
+  --dim-theological:  #0d6845;  /* Olive Branch Green (Systematic Dogmatics) */
+  --dim-practical:    #a12046;  /* Crimson Rubric (Pastoral & Personal Praxis) */
 
-  /* Apple Fluid Motion */
-  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
-  --ease-in-out: cubic-bezier(0.32, 0.72, 0, 1);
+  /* ── 6. Architectural Surfaces & Structured Depth ───────────── */
+  --surface-ground: #ffffff;
+  --surface-raised: #fbfaf7;
+  --surface-overlay: rgba(255, 255, 255, 0.94);
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: var(--border-medium);
+  --glass-border-outer: var(--border-subtle);
+  --glass-hover: #ffffff;
 
-  /* Bible-First Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  /* ── 7. Architectural Geometry (Eliminating Bloated Bubbles) ── */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 9999px;
+
+  /* ── 8. Typographic Scale & Hierarchy ───────────────────────── */
+  --font-sans: 'Plus Jakarta Sans', var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
   --font-display: 'Cinzel', 'Lora', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
-  /* Elevation & Sage Shadows */
-  --apple-shadow-sm: 0 2px 8px rgba(71, 92, 76, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --apple-shadow-md: 0 10px 30px rgba(71, 92, 76, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
-  --apple-shadow-lg: 0 20px 40px rgba(71, 92, 76, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  /* ── 9. Tactile Editorial Elevation ────────────────────────── */
+  --shadow-subtle: 0 1px 2px rgba(25, 28, 25, 0.04), 0 1px 3px rgba(25, 28, 25, 0.02);
+  --shadow-card: 0 2px 8px rgba(25, 28, 25, 0.04), 0 8px 24px rgba(25, 28, 25, 0.04);
+  --shadow-raised: 0 4px 16px rgba(25, 28, 25, 0.06), 0 16px 36px rgba(25, 28, 25, 0.06);
+  --shadow-overlay: 0 12px 32px rgba(25, 28, 25, 0.10), 0 24px 64px rgba(25, 28, 25, 0.08);
 
-  /* OKLCH Perceptually Uniform Tokens */
-  --oklch-surface-bg: oklch(0.92 0.02 130);
-  --oklch-surface-card: oklch(0.96 0.012 130);
-  --oklch-text-primary: oklch(0.35 0.03 140);
-  --oklch-text-secondary: oklch(0.45 0.025 140);
-  --oklch-gold-accent: oklch(0.60 0.145 80);
+  /* Backwards-compatible aliases */
+  --apple-shadow-sm: var(--shadow-subtle);
+  --apple-shadow-md: var(--shadow-card);
+  --apple-shadow-lg: var(--shadow-raised);
 
-  /* Ergonomic Touch Target & Spring Dynamics */
-  --touch-target-min: 48px;
-  --touch-spring-active: scale(0.97);
-  --touch-spring-duration: 75ms;
+  /* ── 10. Motion & Touch Tokens ──────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --touch-target-min: 44px;
+  --touch-spring-active: scale(0.98);
+  --touch-spring-duration: 90ms;
 }
 
 /* ── Reset & Base ─────────────────────────────────────────── */
@@ -102,26 +125,25 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--navy-950);
-  color: var(--text-primary);
-  min-height: 100vh; /* fallback */
+  background-color: var(--canvas-base);
+  color: var(--ink-primary);
+  min-height: 100vh;
   min-height: 100dvh;
   line-height: 1.6;
   background-image:
-    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
-    linear-gradient(125deg, rgba(107, 142, 123, 0.16), transparent 42%);
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.85) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(239, 235, 228, 0.4) 0%, transparent 100%);
   background-attachment: fixed;
 }
 
 a {
   color: var(--gold-400);
   text-decoration: none;
-  transition: color 0.2s var(--ease-out);
+  transition: color 0.15s var(--ease-out);
 }
 
 a:hover {
   color: var(--gold-500);
-  text-decoration: underline;
 }
 
 /* ── Typography ───────────────────────────────────────────── */
@@ -132,67 +154,76 @@ a:hover {
 
 .text-display {
   font-family: var(--font-display);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.015em;
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "zero" 1, "tnum" 1;
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #7c5804 0%, #b58414 50%, #5e4302 100%);
+  background: linear-gradient(135deg, #191c19 0%, #4a544d 60%, #885e13 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Frosted Glass Card & Double-Bezel Hardware Aesthetics ──── */
+/* ── Architectural Codex Panels & Surfaces ────────────────── */
 
 .glass-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  box-shadow:
-    0 12px 32px rgba(71, 92, 76, 0.06),
-    0 2px 6px rgba(71, 92, 76, 0.03),
-    inset 0 1px 0 rgba(255, 252, 245, 0.7),
-    inset 0 -1px 0 rgba(107, 142, 123, 0.08);
-  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 
 .glass-card-elevated {
-  background: rgba(255, 254, 250, 0.88);
-  border: 1px solid rgba(181, 132, 20, 0.28);
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-xl);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  box-shadow:
-    0 20px 48px rgba(71, 92, 76, 0.09),
-    0 4px 12px rgba(181, 132, 20, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9);
-  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+  box-shadow: var(--shadow-raised);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 
 .glass-card-elevated:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 26px 56px rgba(71, 92, 76, 0.12),
-    0 6px 16px rgba(181, 132, 20, 0.1);
-  border-color: rgba(181, 132, 20, 0.45);
+  box-shadow: var(--shadow-overlay);
+  border-color: var(--border-strong);
 }
 
 /* Double-Bezel Hardware Container */
 .double-bezel {
-  padding: 6px;
-  background: rgba(107, 142, 123, 0.08);
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  border-radius: calc(var(--radius-xl) + 6px);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 4px;
+  background: var(--canvas-subdued);
+  border: 1px solid var(--border-medium);
+  border-radius: calc(var(--radius-lg) + 4px);
+  box-shadow: inset 0 1px 2px rgba(25, 28, 25, 0.04);
 }
 
 .double-bezel-inner {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+/* Precision Scholarly Monospace Badge */
+.codex-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--canvas-subdued);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
 }
 
 /* Kinetic Interactive Buttons */

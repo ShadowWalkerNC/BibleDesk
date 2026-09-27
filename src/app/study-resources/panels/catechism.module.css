@@ -43,7 +43,7 @@
   align-items: center;
   gap: 0.15rem;
   padding: 0.75rem 1.5rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--navy-950);
   cursor: pointer;
@@ -151,7 +151,7 @@
 .modeBtns {
   display: flex;
   background: var(--navy-900);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 3px;
   gap: 3px;
@@ -190,7 +190,7 @@
 .searchInput {
   flex: 1;
   background: var(--navy-950);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.875rem;
@@ -221,7 +221,7 @@
 .catBtn {
   padding: 0.3rem 0.85rem;
   border-radius: 99px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   background: var(--navy-950);
   font-size: 0.78rem;
   font-weight: 500;
@@ -319,7 +319,7 @@
 
 .answerBody {
   padding: 0 1.1rem 1.1rem;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid var(--border-subtle);
   animation: slideDown 0.2s ease;
 }
 

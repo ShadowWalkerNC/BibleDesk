@@ -44,19 +44,19 @@
 }
 
 .select {
-  background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.32);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 0.9rem;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  color: var(--ink-primary);
+  font-size: 0.88rem;
   font-weight: 600;
   padding: 0.55rem 2rem 0.55rem 0.85rem;
   cursor: pointer;
   outline: none;
-  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.06);
+  box-shadow: var(--shadow-subtle);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b58414'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23885e13'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.65rem center;
   background-size: 0.95rem;
@@ -64,12 +64,12 @@
 
 .select:hover {
   border-color: var(--gold-400);
-  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .select:focus {
   border-color: var(--gold-400);
-  box-shadow: 0 0 0 3px var(--gold-glow);
+  box-shadow: 0 0 0 2px var(--gold-glow);
 }
 
 .navButtons {
@@ -78,28 +78,28 @@
 }
 
 .navBtn {
-  background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.3);
-  color: var(--text-primary);
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  color: var(--ink-primary);
   font-size: 0.85rem;
   font-weight: 600;
-  min-height: 44px;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-sm);
+  min-height: 38px;
+  padding: 0.50rem 1rem;
+  border-radius: var(--radius-xs);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(71, 92, 76, 0.05);
-  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  box-shadow: var(--shadow-subtle);
+  transition: transform var(--touch-spring-duration, 90ms) ease-out, background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .navBtn:hover {
-  background: rgba(255, 252, 245, 0.72);
-  border-color: var(--gold-400);
-  color: var(--gold-600);
-  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.1);
+  background: var(--canvas-subdued);
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+  box-shadow: var(--shadow-card);
 }
 
 .navBtn:active {
-  transform: var(--touch-spring-active, scale(0.97));
+  transform: var(--touch-spring-active);
 }
 
 .navBtn:focus-visible {
@@ -108,31 +108,29 @@
 }
 
 .readerJumpBtn {
-  background: linear-gradient(135deg, #b58414, #805703);
-  border: 1px solid #805703;
+  background: var(--ink-primary);
+  border: 1px solid #000000;
   color: #ffffff;
   font-size: 0.86rem;
-  font-weight: 700;
-  min-height: 44px;
-  padding: 0.55rem 1.15rem;
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  min-height: 38px;
+  padding: 0.50rem 1.15rem;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow:
-    0 3px 10px rgba(107, 142, 123, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: transform var(--touch-spring-duration, 75ms) ease-out, background 0.18s, box-shadow 0.18s;
+  box-shadow: var(--shadow-subtle);
+  transition: transform var(--touch-spring-duration, 90ms) ease-out, background 0.15s, box-shadow 0.15s;
 }
 
 .readerJumpBtn:hover {
-  background: linear-gradient(135deg, #c8940e, #916307);
-  box-shadow: 0 6px 18px rgba(107, 142, 123, 0.45);
+  background: #2b332c;
+  box-shadow: var(--shadow-card);
 }
 
 .readerJumpBtn:active {
-  transform: var(--touch-spring-active, scale(0.97));
+  transform: var(--touch-spring-active);
 }
 
 .readerJumpBtn:focus-visible {
@@ -191,10 +189,10 @@
 .panelControlGroup {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(235, 226, 210, 0.55);
-  border: 1px solid rgba(107, 142, 123, 0.28);
-  border-radius: var(--radius-sm);
+  gap: 3px;
+  background: var(--canvas-subdued);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
   padding: 3px;
 }
 
@@ -205,35 +203,35 @@
   gap: 4px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
+  border-radius: 4px;
+  color: var(--ink-secondary);
+  font-size: 0.76rem;
   font-weight: 600;
   padding: 0.35rem 0.55rem;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .panelToggleBtn:hover {
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--gold-600);
-  border-color: rgba(107, 142, 123, 0.2);
+  background: var(--surface-ground);
+  color: var(--gold-500);
+  border-color: var(--border-subtle);
 }
 
 .panelToggleBtnActive {
-  background: #ffffff !important;
-  color: var(--gold-600) !important;
-  border-color: rgba(107, 142, 123, 0.35) !important;
-  box-shadow: 0 1px 4px rgba(71, 92, 76, 0.1) !important;
+  background: var(--surface-ground) !important;
+  color: var(--gold-500) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: var(--shadow-subtle) !important;
 }
 
 .panelCloseBtn {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--ink-muted);
   cursor: pointer;
   padding: 4px 6px;
-  border-radius: 6px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -241,31 +239,28 @@
 }
 
 .panelCloseBtn:hover {
-  background: rgba(107, 142, 123, 0.1);
-  color: var(--text-primary);
+  background: var(--canvas-subdued);
+  color: var(--ink-primary);
 }
 
 .leftHubPanel {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   min-height: 0;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  box-shadow: var(--apple-shadow-sm);
-  transition: all 0.25s ease;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  transition: all 0.22s ease;
 }
 
 .hubNavHeader {
   display: flex;
-  background: rgba(225, 225, 232, 0.45);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--canvas-subdued);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 4px;
   gap: 3px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .hubTabBtn {
@@ -423,8 +418,8 @@
 }
 
 .verseRow:hover {
-  background: rgba(107, 142, 123, 0.04);
-  border-left-color: rgba(107, 142, 123, 0.2);
+  background: var(--canvas-subdued);
+  border-left-color: var(--border-medium);
 }
 
 .verseRow:hover .rowActions {
@@ -433,8 +428,8 @@
 }
 
 .activeVerseRow {
-  background: rgba(181, 137, 19, 0.07);
-  border-left: 2.5px solid var(--gold-400);
+  background: var(--gold-soft);
+  border-left: 3px solid var(--gold-400);
 }
 
 /* ─── Verse Highlighting ─────────────────────────────────────────── */
@@ -466,11 +461,11 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  background: #ffffff !important;
-  border: 1px solid rgba(107, 142, 123, 0.35);
-  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.15);
+  background: var(--surface-ground) !important;
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-card);
   padding: 3px 6px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
 }
 
 .colorDot {
@@ -582,29 +577,30 @@
 }
 
 .actionBtn {
-  background: rgba(255, 253, 248, 0.95);
-  border: 1px solid rgba(107, 142, 123, 0.35);
-  color: var(--gold-600);
-  font-size: 0.74rem;
-  font-weight: 700;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  color: var(--gold-500);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.1);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
 .actionBtn:hover {
-  background: #ffffff;
+  background: var(--gold-soft);
   border-color: var(--gold-400);
-  color: var(--gold-500);
+  color: var(--gold-600);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(107, 142, 123, 0.22);
+  box-shadow: var(--shadow-card);
 }
 
 /* ─── Right Column: Toolbox & Study Tabs ───────────────────── */

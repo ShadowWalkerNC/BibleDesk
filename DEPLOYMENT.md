@@ -1,6 +1,6 @@
 # BibleDesk — Turnkey Deployment & Installation Guide
 
-A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on cloud platforms (Vercel, Supabase).
+A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on cloud platforms (Railway, Vercel, Supabase).
 
 ---
 
@@ -77,33 +77,47 @@ Run BibleDesk in a production container with standalone Next.js 16 runtime:
 
 ---
 
-## 3. Production Deployment (Vercel + Supabase)
+## 3. Production Deployment (Railway & Cloud Hosts)
 
-### Step 1: Initialize the Supabase Database
-1. Create a new project in [Supabase](https://supabase.com).
+### Architecture: Unified Web App & API Server
+BibleDesk is built on Next.js 16 with the App Router. The built application (`standalone` mode running `server.js`) **contains both the web client and all backend API routes** (`/api/bible`, `/api/ask`, `/api/research`, `/api/mcp`, `/api/health`, etc.). **You do not need a separate API server or secondary microservice.** The single container processes both UI page requests and backend JSON/streaming API requests.
+
+### Step 1: Initialize the Supabase Database (Optional for Cloud Sync)
+1. Create a project in [Supabase](https://supabase.com).
 2. Go to **Database** → **Extensions** and ensure `vector` (pgvector) is enabled.
 3. Open **SQL Editor** → **New query**.
 4. Copy the entire contents of [`supabase/schema-init.sql`](supabase/schema-init.sql) and click **Run**.
    - *This single file consolidates all base tables, RLS policies, RPC functions, and SaaS subscription columns.*
+   - *Note: If Supabase is omitted, BibleDesk automatically operates in self-contained local storage mode.*
 
 ### Step 2: Configure Environment Variables
-In your Vercel project settings (or Render environment), add the following variables from `.env.example`:
+In your Railway (or Vercel) project environment settings, add the following variables:
 
 | Variable | Required? | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_APP_URL` | **Yes** | Canonical HTTPS URL (e.g. `https://bibledesk.org`) |
-| `NEXT_PUBLIC_SUPABASE_URL` | **Yes** | Supabase project URL (`https://your-project.supabase.co`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Yes** | Supabase client anon public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Yes** | Server-only secret key (bypasses RLS for secure routes) |
+| `NEXT_PUBLIC_APP_URL` | Recommended | Canonical HTTPS URL (e.g. `https://bibledesk.up.railway.app`). If unset, Railway's assigned public domain is detected automatically. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional | Supabase project URL (`https://your-project.supabase.co`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional | Supabase client anon public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional | Server-only secret key (bypasses RLS for secure routes) |
 | `GEMINI_API_KEY` | Recommended | Google Gemini key for hosted AI study assistant |
 | `OPENAI_API_KEY` | Recommended | OpenAI key for text-embedding-3-small pgvector RAG |
 | `IP_HASH_SALT` | Recommended | Secret salt for SHA-256 rate limiting (`openssl rand -hex 16`) |
 | `MCP_SECRET` | Recommended | Bearer secret for external MCP agent connections |
 | `STRIPE_SECRET_KEY` | Optional | Stripe secret key for Pro SaaS subscriptions |
 | `STRIPE_WEBHOOK_SECRET` | Optional | Stripe webhook signing secret |
-| `NEXT_PUBLIC_SELF_HOSTED` | Optional | Set to `'true'` to grant Pro features to all users for free |
+| `NEXT_PUBLIC_SELF_HOSTED` | Optional | Set to `'true'` to grant Pro features to all community members for free |
 
-### Step 3: Deploy to Vercel
+### Step 3: Deploy to Railway
+BibleDesk is pre-configured for 1-click Railway deployments via `railway.json` and the multi-stage `Dockerfile`:
+
+1. In Railway, click **New Project** → **Deploy from GitHub repo**.
+2. Select your `BibleDesk` repository.
+3. Railway automatically detects `railway.json` and uses the production `Dockerfile`.
+4. Railway injects its assigned `PORT` dynamically, which is picked up by Next.js and the `/api/health` check probe.
+5. In **Settings** → **Networking**, click **Generate Domain** (or assign a custom domain).
+6. Verify deployment by visiting `/api/health` and your public URL.
+
+### Step 4: Deploy to Vercel (Alternative)
 Deploy directly via GitHub integration or CLI:
 ```bash
 vercel --prod

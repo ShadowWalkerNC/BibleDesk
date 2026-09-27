@@ -20,7 +20,7 @@
   gap: 1rem;
   padding: 1rem 2rem;
   background: var(--glass-bg);
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
@@ -57,7 +57,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 0.25rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   background: rgba(10, 107, 72, 0.12);
   color: var(--dim-theological);
   border: 1px solid rgba(10, 107, 72, 0.3);
@@ -65,7 +65,7 @@
 
 .refreshBtn {
   background: transparent;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   padding: 0.4rem 0.8rem;
@@ -90,7 +90,7 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.75rem 2rem 0;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--border-subtle);
   background: var(--navy-900);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -143,13 +143,13 @@
 
 .kpiCard {
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.04);
+  box-shadow: 0 4px 12px rgba(36, 32, 25, 0.04);
 }
 
 .kpiValue {
@@ -175,7 +175,7 @@
   flex-direction: column;
   gap: 0.85rem;
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
 }
@@ -195,7 +195,7 @@
   flex: 1;
   min-width: 240px;
   background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.3);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.85rem;
 }
@@ -218,8 +218,8 @@
 
 .dimPill {
   background: transparent;
-  border: 1px solid var(--glass-border);
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
   padding: 0.35rem 0.75rem;
   font-size: 0.78rem;
   font-weight: 600;
@@ -247,7 +247,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.25rem;
-  background: rgba(107, 142, 123, 0.08);
+  background: var(--border-subtle);
   border: 1px solid rgba(107, 142, 123, 0.2);
   border-radius: var(--radius-sm);
   flex-wrap: wrap;
@@ -272,7 +272,7 @@
 
 .bulkBtn {
   background: #ffffff;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.4rem 0.85rem;
   font-size: 0.8rem;
@@ -305,7 +305,7 @@
 .modeToggleGroup {
   display: inline-flex;
   background: rgba(235, 226, 210, 0.55);
-  border: 1px solid rgba(107, 142, 123, 0.28);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 3px;
   gap: 3px;
@@ -328,7 +328,7 @@
   background: #ffffff;
   color: var(--gold-600);
   border-color: rgba(107, 142, 123, 0.2);
-  box-shadow: 0 1px 3px rgba(71, 92, 76, 0.06);
+  box-shadow: 0 1px 3px rgba(36, 32, 25, 0.06);
 }
 
 /* ─── Rapid Triage Mode (Mobile / Phone Optimized) ───────────────────── */
@@ -356,7 +356,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 10px 30px rgba(71, 92, 76, 0.08);
+  box-shadow: 0 10px 30px rgba(36, 32, 25, 0.08);
 }
 
 .rapidActions {
@@ -411,7 +411,7 @@
   min-height: 52px;
   padding: 0 1rem;
   background: #ffffff;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -430,7 +430,7 @@
 
 .flagCard {
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -475,7 +475,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   background: rgba(255,255,255,0.05);
   border: 1px solid currentColor;
   opacity: 0.9;
@@ -543,7 +543,7 @@
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   background: transparent;
   color: var(--text-secondary);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -565,7 +565,7 @@
 .refsInput {
   width: 100%;
   background: rgba(255,255,255,0.04);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -604,7 +604,7 @@
 
 .panel {
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 2rem;
   max-width: 680px;
@@ -642,7 +642,7 @@
 .selectInput {
   width: 100%;
   background: rgba(255,255,255,0.04);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -687,7 +687,7 @@
 
 .systemCard {
   background: rgba(255, 255, 255, 0.7);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -712,7 +712,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(107, 142, 123, 0.15);
+  border-bottom: 1px solid var(--border-subtle);
   font-size: 0.86rem;
 }
 
@@ -769,7 +769,7 @@
 
 .accessDeniedCard {
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: 3rem 2.5rem;
   text-align: center;

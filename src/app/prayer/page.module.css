@@ -264,11 +264,11 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(107, 142, 123, 0.12);
+  background: var(--gold-soft);
   color: var(--gold-600);
-  border: 1px solid rgba(107, 142, 123, 0.25);
+  border: 1px solid var(--gold-200);
   padding: 0.3rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -324,13 +324,13 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(107, 142, 123, 0.12);
+  background: var(--gold-soft);
   color: var(--gold-600);
-  border: 1px solid rgba(107, 142, 123, 0.25);
+  border: 1px solid var(--gold-200);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   text-transform: uppercase;
 }
 
@@ -955,8 +955,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(235, 226, 210, 0.55);
-  border: 1px solid rgba(107, 142, 123, 0.28);
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 4px;
   margin-bottom: 2rem;
@@ -996,10 +996,10 @@
 }
 
 .segmentBtnActive {
-  background: #ffffff !important;
+  background: var(--surface-white) !important;
   color: var(--gold-600) !important;
-  border-color: rgba(107, 142, 123, 0.35) !important;
-  box-shadow: 0 1px 4px rgba(71, 92, 76, 0.1) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: 0 1px 4px rgba(36, 32, 25, 0.08) !important;
 }
 
 .badgeCount {
@@ -1013,7 +1013,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
 }
 
 /* ─── Section Layouts & Due Queue ────────────────────────────── */
@@ -1092,15 +1092,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.22);
-  box-shadow: 0 2px 8px rgba(71, 92, 76, 0.04);
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 8px rgba(36, 32, 25, 0.04);
   transition: all 0.2s ease;
 }
 
 .careCard:hover {
-  box-shadow: 0 4px 16px rgba(107, 142, 123, 0.12);
-  border-color: rgba(107, 142, 123, 0.4);
+  box-shadow: 0 4px 16px rgba(36, 32, 25, 0.08);
+  border-color: var(--gold-300);
 }
 
 .careCardHeader {
@@ -1124,11 +1124,13 @@
 }
 
 .categoryBadge {
-  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(107, 142, 123, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
   color: var(--gold-600);
 }
 
@@ -1173,7 +1175,7 @@
   gap: 8px;
   flex-wrap: wrap;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(107, 142, 123, 0.12);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .actionPrayedBtn,
@@ -1194,9 +1196,9 @@
 }
 
 .actionPrayedBtn {
-  background: linear-gradient(135deg, #b58414, #785304);
+  background: var(--gold-600);
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--gold-700);
   flex: 1;
 }
 
@@ -1205,9 +1207,9 @@
 }
 
 .actionSnoozeBtn {
-  background: rgba(107, 142, 123, 0.08);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  color: var(--text-secondary);
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-600);
 }
 
 .actionAnsweredBtn {
@@ -1242,10 +1244,10 @@
 .chipBtn {
   padding: 0.4rem 0.85rem;
   min-height: var(--touch-target-min, 48px);
-  border-radius: 999px;
-  background: rgba(235, 226, 210, 0.5);
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  color: var(--text-secondary);
+  border-radius: var(--radius-xs);
+  background: var(--canvas-50);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-600);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -1285,8 +1287,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  background: #ffffff;
-  border: 1px solid rgba(107, 142, 123, 0.2);
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
 }
 
 .circleCardHeader {
@@ -1365,7 +1367,7 @@
   align-items: center;
   gap: 8px;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(107, 142, 123, 0.12);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .circleQuickPrayBtn,
@@ -1385,15 +1387,15 @@
 }
 
 .circleQuickPrayBtn {
-  background: rgba(107, 142, 123, 0.08);
-  border: 1px solid rgba(107, 142, 123, 0.25);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
   color: var(--gold-600);
 }
 
 .circleFollowupBtn {
   background: transparent;
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-600);
 }
 
 /* ─── Answered Grid ──────────────────────────────────────────── */
@@ -1407,8 +1409,8 @@
 .answeredCard {
   padding: 1.25rem;
   border-radius: var(--radius-md);
-  background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: var(--surface-white);
+  border: 1px solid rgba(5, 120, 85, 0.28);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1424,12 +1426,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #047857;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  background: rgba(5, 120, 85, 0.1);
+  color: #045c40;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(5, 120, 85, 0.2);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .answeredDate {
@@ -1569,8 +1575,8 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid var(--glass-border);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
   border-radius: var(--radius-sm);
   margin-bottom: 1.5rem;
 }
@@ -1583,8 +1589,9 @@
 }
 
 .remindersIcon {
-  color: var(--gold-400);
-  background: rgba(212, 160, 23, 0.12);
+  color: var(--gold-600);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-200);
   padding: 0.5rem;
   border-radius: var(--radius-xs);
   flex-shrink: 0;
@@ -1596,13 +1603,13 @@
 .remindersTitle {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--ink-900);
   margin: 0 0 2px 0;
 }
 
 .remindersSubtitle {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: var(--ink-600);
   margin: 0;
   line-height: 1.4;
 }
@@ -1623,16 +1630,16 @@
   border-radius: var(--radius-xs);
   font-size: 0.82rem;
   font-weight: 600;
-  background: var(--navy-800);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  background: var(--surface-white);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-700);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .reminderActionBtn:hover {
   border-color: var(--gold-400);
-  color: var(--gold-400);
+  color: var(--gold-600);
 }
 
 .reminderDigestBtn {
@@ -1644,15 +1651,15 @@
   border-radius: var(--radius-xs);
   font-size: 0.82rem;
   font-weight: 600;
-  background: var(--gold-500);
-  border: 1px solid var(--gold-400);
-  color: var(--navy-950);
+  background: var(--gold-600);
+  border: 1px solid var(--gold-700);
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .reminderDigestBtn:hover {
-  background: var(--gold-400);
+  background: var(--gold-700);
 }
 
 .reminderDigestBtn:disabled {

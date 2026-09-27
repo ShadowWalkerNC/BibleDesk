@@ -1,732 +1,897 @@
 /* ═══════════════════════════════════════════════════════════════
-   BIBLEDESK MARKETING SHOWCASE — Vanguard UI Architecture
-   Tinted Sage Devotional · Double-Bezel Hardware Aesthetics
+   BIBLEDESK MARKETING SHOWCASE — 2026 Architectural Scripture Codex
+   Editorial Masthead · Precision Philology Terminal ·
+   Hairline Scriptorium Matrix · Illuminated Gold Leaf
    ═══════════════════════════════════════════════════════════════ */
 
 .container {
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--navy-950);
-  background-image:
-    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 28%),
-    linear-gradient(125deg, rgba(107, 142, 123, 0.16), transparent 42%);
-  color: var(--text-primary);
+  background-color: var(--canvas-base);
+  color: var(--ink-primary);
   overflow-x: hidden;
-  padding: 2rem 1.5rem 5rem;
+  padding: 1.5rem 1.5rem 6rem;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(239, 235, 228, 0.5) 0%, transparent 100%);
 }
 
-/* ── 1. Hero Section ────────────────────────────────────────── */
+/* ── 1. Editorial Split Hero Section ────────────────────────── */
 
 .heroSection {
-  position: relative;
-  max-width: 1200px;
-  margin: 0 auto 5rem;
-  padding: 3rem 1.5rem 2rem;
+  max-width: 1320px;
+  margin: 1.5rem auto 4.5rem;
+  padding: 1rem 0;
 }
 
-.ambientGlow {
-  position: absolute;
-  top: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(181, 132, 20, 0.12) 0%, rgba(107, 142, 123, 0.08) 50%, transparent 70%);
-  filter: blur(60px);
-  pointer-events: none;
-  z-index: 0;
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.12fr;
+  gap: 3.5rem;
+  align-items: center;
 }
 
-.heroInner {
-  position: relative;
-  z-index: 1;
+.heroEditorial {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
-.heroEyebrow {
+.heroLedgerTag {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  background: rgba(107, 142, 123, 0.14);
-  border: 1px solid rgba(107, 142, 123, 0.35);
-  color: var(--sage-dark);
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--gold-400);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  padding: 5px 12px;
+  border-radius: var(--radius-xs);
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 10px rgba(107, 142, 123, 0.08);
 }
 
-.sparkleIcon {
-  color: var(--gold-400);
+.tagDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-400);
+  box-shadow: 0 0 8px var(--gold-glow);
 }
 
 .heroTitle {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  font-size: clamp(2.4rem, 4.4vw, 3.8rem);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  max-width: 900px;
-  margin-bottom: 1.25rem;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--ink-primary);
+  margin-bottom: 1.35rem;
 }
 
-.heroTitle span {
-  background: linear-gradient(135deg, #7c5804 0%, #b58414 50%, #5e4302 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.heroTitle em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold-400);
+  border-bottom: 1px solid var(--gold-border);
+  padding-bottom: 2px;
 }
 
 .heroSubtitle {
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
-  line-height: 1.65;
-  color: var(--text-secondary);
-  max-width: 760px;
-  margin-bottom: 2rem;
+  font-size: clamp(1.02rem, 1.3vw, 1.15rem);
+  line-height: 1.68;
+  color: var(--ink-secondary);
+  margin-bottom: 2.2rem;
+  max-width: 580px;
 }
-
-/* ── CTA Buttons ───────────────────────────────────────────── */
 
 .heroActions {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
-.primaryCta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px 12px 24px;
-  background: linear-gradient(135deg, #7c5804 0%, #6e4e04 100%);
-  color: #fff !important;
-  border-radius: 9999px;
-  font-size: 0.98rem;
-  font-weight: 600;
-  text-decoration: none !important;
-  box-shadow:
-    0 10px 24px rgba(124, 88, 4, 0.28),
-    inset 0 1px 1px rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.primaryCta:hover {
-  background: linear-gradient(135deg, #8a6305 0%, #7c5804 100%);
-  box-shadow: 0 14px 30px rgba(124, 88, 4, 0.35);
-}
-
-.ctaIconCircle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.secondaryCta {
+.primaryAction {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--text-primary) !important;
-  border: 1px solid rgba(107, 142, 123, 0.35);
-  border-radius: 9999px;
-  font-size: 0.96rem;
+  padding: 12px 22px;
+  background: var(--ink-primary);
+  color: #ffffff !important;
+  border: 1px solid #000000;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none !important;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--touch-spring-duration, 90ms) ease-out, background 0.18s, box-shadow 0.18s;
+}
+
+.primaryAction:hover {
+  background: #2b332c;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-raised);
+}
+
+.primaryAction:active {
+  transform: var(--touch-spring-active);
+}
+
+.actionArrow {
+  transition: transform 0.2s var(--ease-out);
+}
+
+.primaryAction:hover .actionArrow {
+  transform: translateX(3px);
+}
+
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  background: var(--surface-ground);
+  color: var(--ink-primary) !important;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.90rem;
   font-weight: 600;
   text-decoration: none !important;
-  box-shadow: 0 4px 12px rgba(71, 92, 76, 0.05);
+  box-shadow: var(--shadow-subtle);
+  transition: background 0.15s, border-color 0.15s, transform var(--touch-spring-duration, 90ms) ease-out;
 }
 
-.secondaryCta:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: var(--sage);
+.secondaryAction:hover {
+  background: var(--canvas-subdued);
+  border-color: var(--border-strong);
 }
 
-.microAssurances {
+.secondaryAction:active {
+  transform: var(--touch-spring-active);
+}
+
+.kbdPill {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  background: var(--canvas-inset);
+  color: var(--ink-muted);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* Architectural Ledger Assurances */
+.assuranceLedger {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
   flex-wrap: wrap;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-bottom: 3.5rem;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-subtle);
+  width: 100%;
 }
 
 .assuranceItem {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
 }
 
-/* ── Interactive Hero Teaser Card ──────────────────────────── */
+.assuranceCheck {
+  color: var(--dim-theological);
+  font-weight: 700;
+}
 
-.heroTeaserCard {
-  width: 100%;
-  max-width: 950px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(181, 132, 20, 0.3);
-  border-radius: 24px;
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  box-shadow:
-    0 24px 60px rgba(71, 92, 76, 0.12),
-    0 4px 16px rgba(181, 132, 20, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+.assuranceDivider {
+  width: 1px;
+  height: 12px;
+  background: var(--border-subtle);
+}
+
+/* ── Right Column: Interactive Philology Workbench Terminal ── */
+
+.heroWorkbench {
+  position: relative;
+}
+
+.terminalBezel {
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay);
   overflow: hidden;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
 }
 
-.teaserHeader {
+.terminalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(107, 142, 123, 0.2);
-  background: rgba(247, 248, 239, 0.7);
-  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  background: var(--canvas-subdued);
+  border-bottom: 1px solid var(--border-subtle);
   gap: 0.75rem;
 }
 
-.teaserTabs {
+.passageTabs {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
-.teaserTabBtn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s var(--ease-out);
-}
-
-.teaserTabBtn:hover {
-  background: rgba(107, 142, 123, 0.12);
-  color: var(--text-primary);
-}
-
-.teaserTabActive {
-  background: var(--gold-400);
-  border-color: var(--gold-400);
-  color: #fff !important;
-  box-shadow: 0 2px 8px rgba(124, 88, 4, 0.25);
-}
-
-.confidenceBadge {
+.passageTabBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
-  background: rgba(10, 107, 72, 0.1);
-  border: 1px solid rgba(10, 107, 72, 0.28);
-  border-radius: 9999px;
+  padding: 5px 12px;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
   font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.passageTabBtn:hover {
+  border-color: var(--gold-400);
+  color: var(--ink-primary);
+}
+
+.passageTabActive {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--gold-500);
+  box-shadow: inset 0 0 0 1px var(--gold-400);
+}
+
+.tabMarker {
+  color: var(--gold-400);
   font-weight: 700;
+}
+
+.confidenceScoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--surface-ground);
+  border: 1px solid rgba(13, 104, 69, 0.25);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--dim-theological);
+  white-space: nowrap;
 }
 
-.teaserBody {
-  padding: 1.5rem 1.75rem;
-}
-
-.queryPrompt {
+.terminalSubjectBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: rgba(107, 142, 123, 0.08);
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  border-radius: 12px;
-  margin-bottom: 1.25rem;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-ground);
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 1rem;
 }
 
-.queryText {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-}
-
-.dimensionPills {
+.subjectPrompt {
   display: flex;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  margin-bottom: 1.25rem;
+  overflow: hidden;
 }
 
-.dimPill {
+.subjectIcon {
+  color: var(--gold-400);
+  flex-shrink: 0;
+}
+
+.subjectTitle {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subjectScope {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+/* 5-Dimension Precision Indicator Matrix */
+.dimensionRail {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--canvas-subdued);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dimTabBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  transition: all 0.15s ease;
+  gap: 2px;
+}
+
+.dimTabBtn:last-child {
+  border-right: none;
+}
+
+.dimNum {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  opacity: 0.75;
+}
+
+.dimTabBtn:hover {
+  background: var(--surface-ground);
+  color: var(--ink-primary);
+}
+
+.dimTabActiveScripture {
+  background: var(--surface-ground);
+  color: var(--dim-scripture);
+  box-shadow: inset 0 -2px 0 var(--dim-scripture);
+}
+
+.dimTabActiveHistorical {
+  background: var(--surface-ground);
+  color: var(--dim-historical);
+  box-shadow: inset 0 -2px 0 var(--dim-historical);
+}
+
+.dimTabActiveLanguage {
+  background: var(--surface-ground);
+  color: var(--dim-language);
+  box-shadow: inset 0 -2px 0 var(--dim-language);
+}
+
+.dimTabActiveTheology {
+  background: var(--surface-ground);
+  color: var(--dim-theological);
+  box-shadow: inset 0 -2px 0 var(--dim-theological);
+}
+
+.dimTabActivePraxis {
+  background: var(--surface-ground);
+  color: var(--dim-practical);
+  box-shadow: inset 0 -2px 0 var(--dim-practical);
+}
+
+/* Terminal Body Content */
+.terminalBody {
+  padding: 1.5rem 1.35rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--surface-ground);
+}
+
+.manuscriptView {
+  border-left: 2px solid var(--gold-400);
+  padding-left: 1rem;
+}
+
+.manuscriptText {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--ink-primary);
+}
+
+/* Citations Tray */
+.citationsTray {
+  background: var(--canvas-subdued);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.citationsHeading {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+
+.citationLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.citationChip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  background: rgba(255, 255, 255, 0.6);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s var(--ease-out);
+  padding: 3px 8px;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  font-size: 0.74rem;
+  color: var(--ink-secondary);
+  text-decoration: none !important;
+  transition: all 0.15s ease;
 }
 
-.dimPill:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--text-primary);
+.citationChip:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-500);
 }
 
-.dimPillActiveScripture {
-  background: rgba(24, 94, 165, 0.12);
-  border-color: var(--dim-scripture);
-  color: var(--dim-scripture);
-}
-
-.dimPillActiveHistorical {
-  background: rgba(160, 65, 19, 0.12);
-  border-color: var(--dim-historical);
-  color: var(--dim-historical);
-}
-
-.dimPillActiveLang {
-  background: rgba(107, 53, 184, 0.12);
-  border-color: var(--dim-language);
-  color: var(--dim-language);
-}
-
-.dimPillActiveTheological {
-  background: rgba(10, 107, 72, 0.12);
-  border-color: var(--dim-theological);
-  color: var(--dim-theological);
-}
-
-.dimPillActivePractical {
-  background: rgba(184, 29, 88, 0.12);
-  border-color: var(--dim-practical);
-  color: var(--dim-practical);
-}
-
-.dimensionContentBox {
-  padding: 1.25rem;
-  background: rgba(247, 248, 239, 0.65);
-  border: 1px solid rgba(107, 142, 123, 0.22);
-  border-radius: 14px;
-}
-
-.dimensionText {
-  font-size: 0.94rem;
-  line-height: 1.7;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.sourcesRow {
+/* Terminal Footer */
+.terminalFooter {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 0.75rem;
-  border-top: 1px dashed rgba(107, 142, 123, 0.25);
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--canvas-subdued);
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
 }
 
-.sourcesLabel {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-}
-
-.sourceTag {
-  display: inline-flex;
+.statusIndicator {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background: rgba(107, 142, 123, 0.12);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 6px;
-  color: var(--sage-dark);
-  font-size: 0.78rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s;
+  gap: 6px;
 }
 
-.sourceTag:hover {
-  background: rgba(181, 132, 20, 0.15);
-  border-color: var(--gold-400);
-  color: var(--gold-400);
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dim-theological);
 }
 
-/* ── 2. Authority & Stats Section ──────────────────────────── */
+.statusMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-.statsSection {
-  max-width: 1200px;
+/* ── 2. Architectural Metrics Ledger ────────────────────────── */
+
+.ledgerSection {
+  max-width: 1320px;
   margin: 0 auto 5rem;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+  background: var(--surface-ground);
 }
 
-.statsGrid {
+.ledgerGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(5, 1fr);
 }
 
-.statCard {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(107, 142, 123, 0.22);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 1.25rem;
-  text-align: center;
-  box-shadow: 0 4px 16px rgba(71, 92, 76, 0.05);
-  transition: transform 0.25s var(--ease-out);
+.ledgerCell {
+  padding: 1.75rem 1.25rem;
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.statCard:hover {
-  transform: translateY(-3px);
-  border-color: var(--sage);
+.ledgerCell:last-child {
+  border-right: none;
 }
 
-.statValue {
+.ledgerNumber {
   font-family: var(--font-display), Georgia, serif;
-  font-size: 2.2rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  color: var(--gold-400);
+  color: var(--ink-primary);
   line-height: 1.1;
-  margin-bottom: 0.25rem;
 }
 
-.statLabel {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.2rem;
+.ledgerLabel {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-.statSub {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.ledgerDetail {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
 }
 
-/* ── 3. Pain vs Gain Section ───────────────────────────────── */
+/* ── Common Section Headers ─────────────────────────────────── */
+
+.sectionHeader {
+  max-width: 780px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.headerTag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+  margin-bottom: 0.85rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink-secondary);
+}
+
+/* ── 3. Comparative Scriptorium Ledger ──────────────────────── */
 
 .comparisonSection {
   max-width: 1200px;
   margin: 0 auto 6rem;
 }
 
-.sectionHeading {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 3rem;
-}
-
-.sectionBadge {
-  display: inline-block;
-  padding: 5px 14px;
-  border-radius: 9999px;
-  background: rgba(181, 132, 20, 0.12);
-  border: 1px solid rgba(181, 132, 20, 0.35);
-  color: var(--gold-400);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 0.85rem;
-}
-
-.sectionTitle {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.85rem;
-  line-height: 1.2;
-}
-
-.sectionSubtitle {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.comparisonTableCard {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(107, 142, 123, 0.28);
-  border-radius: 24px;
-  box-shadow: 0 16px 40px rgba(71, 92, 76, 0.08);
+.comparisonMatrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: var(--surface-ground);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
-.comparisonGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.comparisonColOld {
-  padding: 2.5rem 2rem;
-  background: rgba(184, 29, 88, 0.03);
-  border-right: 1px solid rgba(107, 142, 123, 0.2);
-}
-
-.comparisonColNew {
-  padding: 2.5rem 2rem;
-  background: rgba(10, 107, 72, 0.03);
-}
-
-.colHeaderOld {
+.matrixColumnLegacy {
+  background: var(--canvas-subdued);
+  border-right: 1px solid var(--border-medium);
+  padding: 2.25rem 2rem;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+}
+
+.matrixColumnDesk {
+  background: var(--surface-ground);
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.columnHeader {
   margin-bottom: 1.75rem;
+}
+
+.columnBadgeLegacy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
   color: var(--dim-practical);
+  margin-bottom: 0.5rem;
 }
 
-.colHeaderOld h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.colHeaderNew {
-  display: flex;
+.columnBadgeDesk {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 1.75rem;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
   color: var(--dim-theological);
+  margin-bottom: 0.5rem;
 }
 
-.colHeaderNew h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
+.columnTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink-primary);
 }
 
-.comparisonList {
+.matrixList {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.35rem;
 }
 
-.comparisonList li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--text-secondary);
-}
-
-.iconRed {
-  color: var(--dim-practical);
-  flex-shrink: 0;
-  margin-top: 3px;
-}
-
-.iconGreen {
-  color: var(--dim-theological);
-  flex-shrink: 0;
-  margin-top: 3px;
-}
-
-/* ── 4. 5-Dimension Framework Section ──────────────────────── */
-
-.frameworkSection {
-  max-width: 1200px;
-  margin: 0 auto 6rem;
-}
-
-.dimensionsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 2.5rem;
-}
-
-.dimensionCard {
-  background: rgba(255, 255, 255, 0.78);
-  border-radius: 20px;
-  padding: 1.75rem 1.25rem;
+.matrixRow {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px rgba(71, 92, 76, 0.06);
-  border: 1px solid rgba(107, 142, 123, 0.2);
-  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+  gap: 4px;
 }
 
-.dimensionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(71, 92, 76, 0.1);
+.rowLead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: var(--ink-primary);
 }
 
-.dimCardScripture { border-top: 4px solid var(--dim-scripture); }
-.dimCardHistorical { border-top: 4px solid var(--dim-historical); }
-.dimCardLang { border-top: 4px solid var(--dim-language); }
-.dimCardTheol { border-top: 4px solid var(--dim-theological); }
-.dimCardPractical { border-top: 4px solid var(--dim-practical); }
-
-.dimIconBadge {
-  font-size: 1.6rem;
-  margin-bottom: 0.75rem;
+.legacyIcon {
+  color: var(--dim-practical);
+  flex-shrink: 0;
 }
 
-.dimensionCard h3 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
+.deskIcon {
+  color: var(--dim-theological);
+  flex-shrink: 0;
 }
 
-.dimensionCard p {
-  font-size: 0.86rem;
+.matrixRow p {
+  font-size: 0.85rem;
   line-height: 1.55;
-  color: var(--text-secondary);
-  flex: 1;
-  margin-bottom: 1rem;
+  color: var(--ink-secondary);
+  padding-left: 24px;
 }
 
-.dimWeightTag {
-  display: inline-block;
-  align-self: flex-start;
-  padding: 3px 8px;
-  background: rgba(107, 142, 123, 0.14);
-  border-radius: 6px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: var(--sage-dark);
-}
+/* ── 4. The 5-Dimension Evidence Compass ────────────────────── */
 
-.formulaBox {
-  background: rgba(247, 248, 239, 0.85);
-  border: 1px solid rgba(181, 132, 20, 0.35);
-  border-radius: 18px;
-  padding: 1.5rem 2rem;
-  text-align: center;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
-}
-
-.formulaTitle {
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--gold-400);
-  margin-bottom: 0.5rem;
-}
-
-.formulaMath {
-  font-family: monospace, serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.4rem;
-}
-
-.formulaDesc {
-  font-size: 0.86rem;
-  color: var(--text-secondary);
-}
-
-/* ── 5. Bento Superpowers Grid ─────────────────────────────── */
-
-.bentoSection {
-  max-width: 1200px;
+.compassSection {
+  max-width: 1280px;
   margin: 0 auto 6rem;
 }
 
-.bentoGrid {
+.compassGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.compassCard {
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.compassCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-400);
+}
+
+.cardScripture { border-top: 3px solid var(--dim-scripture); }
+.cardHistory   { border-top: 3px solid var(--dim-historical); }
+.cardPhilology { border-top: 3px solid var(--dim-language); }
+.cardTheology  { border-top: 3px solid var(--dim-theological); }
+.cardPraxis    { border-top: 3px solid var(--dim-practical); }
+
+.compassBadge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.compassTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.compassText {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  flex: 1;
+}
+
+.compassWeight {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: var(--gold-400);
+  background: var(--gold-soft);
+  padding: 3px 6px;
+  border-radius: 3px;
+  align-self: flex-start;
+}
+
+.derivationBox {
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.derivationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--gold-400);
+}
+
+.derivationIcon {
+  color: var(--gold-400);
+}
+
+.derivationFormula {
+  font-family: var(--font-mono);
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  background: var(--canvas-subdued);
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 4px auto;
+}
+
+.derivationNote {
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ── 5. Lifelong Study Suite ────────────────────────────────── */
+
+.suiteSection {
+  max-width: 1280px;
+  margin: 0 auto 6rem;
+}
+
+.suiteGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-.bentoCard {
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 24px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(71, 92, 76, 0.06);
+.suiteCellHero {
+  grid-column: span 2;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s var(--ease-out), box-shadow 0.3s;
+  gap: 12px;
 }
 
-.bentoCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 42px rgba(71, 92, 76, 0.1);
-  border-color: var(--sage);
+.suiteCell {
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.bentoLarge {
-  grid-column: span 2;
+.suiteCell:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-medium);
 }
 
-.bentoWide {
-  grid-column: span 1;
+.suiteCellHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.bentoIcon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: rgba(181, 132, 20, 0.12);
-  color: var(--gold-400);
+.cellIconWrap {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-xs);
+  background: var(--canvas-subdued);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.25rem;
+  color: var(--gold-400);
 }
 
-.bentoContent h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.6rem;
+.cellTag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
 }
 
-.bentoContent p {
-  font-size: 0.92rem;
+.cellTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.cellBody {
+  font-size: 0.88rem;
   line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: 1.25rem;
+  color: var(--ink-secondary);
+  flex: 1;
 }
 
-.pillList {
+.cellPills {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-.pillList span {
+.cellPills span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: var(--canvas-subdued);
+  color: var(--ink-secondary);
   padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(107, 142, 123, 0.12);
-  color: var(--sage-dark);
-  font-size: 0.78rem;
-  font-weight: 600;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
 }
 
-/* ── 6. Pricing Section ────────────────────────────────────── */
+/* ── 6. Kingdom Stewardship Pricing ─────────────────────────── */
 
 .pricingSection {
   max-width: 1200px;
@@ -738,365 +903,465 @@
   align-items: center;
   gap: 12px;
   margin-top: 1.5rem;
-  font-size: 0.94rem;
+  font-size: 0.90rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--ink-secondary);
 }
 
 .billingActive {
-  color: var(--text-primary);
-  font-weight: 700;
+  color: var(--ink-primary);
 }
 
 .toggleTrack {
-  width: 48px;
-  height: 26px;
-  background: rgba(107, 142, 123, 0.3);
+  width: 44px;
+  height: 24px;
   border-radius: 9999px;
-  padding: 2px;
-  cursor: pointer;
+  background: var(--border-medium);
   border: none;
-  display: flex;
-  align-items: center;
-  transition: background 0.2s;
+  cursor: pointer;
+  position: relative;
+  padding: 2px;
+  transition: background 0.2s ease;
 }
 
 .toggleThumb {
-  width: 22px;
-  height: 22px;
-  background: #fff;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s var(--ease-out);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s var(--ease-out);
 }
 
 .toggleThumbActive {
-  transform: translateX(22px);
+  transform: translateX(20px);
   background: var(--gold-400);
 }
 
 .saveBadge {
-  display: inline-block;
-  padding: 2px 6px;
-  background: rgba(10, 107, 72, 0.15);
-  border: 1px solid rgba(10, 107, 72, 0.3);
-  border-radius: 6px;
-  color: var(--dim-theological);
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
   font-weight: 700;
+  background: var(--gold-soft);
+  color: var(--gold-500);
+  border: 1px solid var(--gold-border);
+  padding: 2px 6px;
+  border-radius: 3px;
   margin-left: 4px;
 }
 
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-  gap: 1.75rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+  align-items: stretch;
 }
 
 .pricingCard {
-  position: relative;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 24px;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
   padding: 2.25rem 1.75rem;
+  box-shadow: var(--shadow-subtle);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 32px rgba(71, 92, 76, 0.06);
-  transition: transform 0.25s, box-shadow 0.25s;
-}
-
-.pricingCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 48px rgba(71, 92, 76, 0.1);
 }
 
 .pricingCardFeatured {
-  background: rgba(255, 254, 250, 0.95);
   border: 2px solid var(--gold-400);
-  box-shadow: 0 20px 48px rgba(181, 132, 20, 0.15);
+  box-shadow: var(--shadow-raised);
+  position: relative;
 }
 
-.pricingFeaturedBadge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 14px;
-  background: var(--gold-400);
-  color: #fff;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+.tierHeader {
+  margin-bottom: 1.75rem;
+}
+
+.tierBadge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
-  box-shadow: 0 2px 8px rgba(124, 88, 4, 0.3);
+  color: var(--ink-muted);
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.featuredBadge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-500);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 6px;
 }
 
 .tierName {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.75rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 8px;
 }
 
 .tierPriceRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 0.75rem;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
 .tierPrice {
   font-family: var(--font-display), Georgia, serif;
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--gold-400);
-  line-height: 1;
+  color: var(--ink-primary);
 }
 
 .tierPeriod {
-  font-size: 0.88rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
 }
 
 .tierDesc {
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  min-height: 48px;
-  margin-bottom: 1.5rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
 }
 
 .tierFeatureList {
-  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 2rem;
+  gap: 10px;
+  margin: 1.5rem 0 2.25rem;
   flex: 1;
 }
 
 .tierFeatureItem {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  font-size: 0.88rem;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--ink-secondary);
   line-height: 1.45;
-  color: var(--text-secondary);
+}
+
+.checkIcon {
+  color: var(--dim-theological);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tierActionPrimary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--ink-primary);
+  color: #ffffff !important;
+  border-radius: var(--radius-sm);
+  font-size: 0.90rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.18s ease;
+}
+
+.tierActionPrimary:hover {
+  background: #2b332c;
+  transform: translateY(-1px);
+}
+
+.tierActionSecondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  background: var(--surface-ground);
+  color: var(--ink-primary) !important;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.90rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+}
+
+.tierActionSecondary:hover {
+  background: var(--canvas-subdued);
+  border-color: var(--border-strong);
 }
 
 .covenantBanner {
+  margin-top: 2.5rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 1.25rem 1.75rem;
-  background: rgba(181, 132, 20, 0.08);
-  border: 1px solid rgba(181, 132, 20, 0.3);
-  border-radius: 16px;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--text-primary);
+  gap: 12px;
 }
 
-/* ── 7. FAQ Section ────────────────────────────────────────── */
+.covenantIcon {
+  color: var(--gold-400);
+  flex-shrink: 0;
+}
+
+.covenantText {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+/* ── 7. Scholarly FAQ Accordion ─────────────────────────────── */
 
 .faqSection {
-  max-width: 900px;
+  max-width: 860px;
   margin: 0 auto 6rem;
 }
 
 .faqList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 10px;
 }
 
 .faqCard {
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(107, 142, 123, 0.25);
-  border-radius: 16px;
+  background: var(--surface-ground);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  transition: all 0.2s var(--ease-out);
+  transition: border-color 0.2s ease;
 }
 
 .faqCardOpen {
-  border-color: var(--gold-400);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(71, 92, 76, 0.06);
+  border-color: var(--gold-border);
 }
 
 .faqQuestionBtn {
   width: 100%;
-  padding: 1.25rem 1.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  padding: 1.15rem 1.35rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
   text-align: left;
+  gap: 1rem;
 }
 
 .faqQuestionText {
+  font-family: var(--font-display), Georgia, serif;
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--ink-primary);
 }
 
 .faqIcon {
-  color: var(--gold-400);
+  color: var(--ink-muted);
   flex-shrink: 0;
 }
 
-.faqAnswer {
-  padding: 0 1.5rem 1.25rem;
-  font-size: 0.94rem;
-  line-height: 1.65;
-  color: var(--text-secondary);
-}
-
-/* ── 8. Bottom CTA Banner ──────────────────────────────────── */
-
-.finalCtaSection {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.finalCtaCard {
-  background: linear-gradient(135deg, rgba(255, 254, 250, 0.95) 0%, rgba(247, 248, 239, 0.95) 100%);
-  border: 1px solid rgba(181, 132, 20, 0.35);
-  border-radius: 32px;
-  padding: 4rem 2rem;
-  text-align: center;
-  box-shadow:
-    0 24px 60px rgba(71, 92, 76, 0.12),
-    0 4px 16px rgba(181, 132, 20, 0.08);
-}
-
-.finalCtaEyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 9999px;
-  background: rgba(181, 132, 20, 0.12);
+.faqCardOpen .faqIcon {
   color: var(--gold-400);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 1.25rem;
 }
 
-.finalCtaTitle {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-  line-height: 1.2;
+.faqAnswer {
+  padding: 0 1.35rem 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.85rem;
 }
 
-.finalCtaSubtitle {
-  font-size: 1.1rem;
+.faqAnswer p {
+  font-size: 0.90rem;
   line-height: 1.65;
-  color: var(--text-secondary);
-  max-width: 680px;
-  margin: 0 auto 2.5rem;
+  color: var(--ink-secondary);
 }
 
-.finalCtaActions {
+/* ── 8. Architectural Closing Banner ────────────────────────── */
+
+.closingSection {
+  max-width: 1080px;
+  margin: 0 auto 2rem;
+}
+
+.closingCard {
+  background: var(--surface-ground);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.closingTag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold-400);
+  margin-bottom: 0.85rem;
+}
+
+.closingTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 600;
+  color: var(--ink-primary);
+  line-height: 1.2;
+  margin-bottom: 0.85rem;
+  max-width: 700px;
+}
+
+.closingSubtitle {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  max-width: 580px;
+  margin-bottom: 2rem;
+}
+
+.closingActions {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1.75rem;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
-.finalPrimaryBtn {
-  display: inline-flex;
+.closingFootnote {
+  display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px 14px 28px;
-  background: linear-gradient(135deg, #7c5804 0%, #6e4e04 100%);
-  color: #fff !important;
-  border-radius: 9999px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-decoration: none !important;
-  box-shadow: 0 12px 28px rgba(124, 88, 4, 0.3);
-}
-
-.finalPrimaryBtn:hover {
-  background: linear-gradient(135deg, #8a6305 0%, #7c5804 100%);
-}
-
-.finalSecondaryBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(107, 142, 123, 0.35);
-  border-radius: 9999px;
-  color: var(--text-primary) !important;
-  font-size: 0.98rem;
-  font-weight: 600;
-  text-decoration: none !important;
-}
-
-.finalSecondaryBtn:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: var(--sage);
-}
-
-.finalCtaFootnote {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
   flex-wrap: wrap;
-  font-size: 0.82rem;
-  color: var(--text-muted);
+  justify-content: center;
 }
 
-/* ── Mobile Responsive Overrides ───────────────────────────── */
+/* ── Responsive Behavior ────────────────────────────────────── */
 
-@media (max-width: 900px) {
-  .bentoGrid {
+@media (max-width: 1024px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .heroEditorial {
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroActions {
+    justify-content: center;
+  }
+
+  .assuranceLedger {
+    justify-content: center;
+  }
+
+  .ledgerGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ledgerCell:nth-child(2n) {
+    border-right: none;
+  }
+
+  .ledgerCell:nth-child(5) {
+    grid-column: span 2;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .comparisonMatrix {
     grid-template-columns: 1fr;
   }
-  .bentoLarge, .bentoWide {
+
+  .matrixColumnLegacy {
+    border-right: none;
+    border-bottom: 1px solid var(--border-medium);
+  }
+
+  .compassGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cardPraxis {
+    grid-column: span 2;
+  }
+
+  .suiteGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .suiteCellHero {
     grid-column: span 1;
   }
-  .comparisonGrid {
+
+  .pricingGrid {
     grid-template-columns: 1fr;
-  }
-  .comparisonColOld {
-    border-right: none;
-    border-bottom: 1px solid rgba(107, 142, 123, 0.2);
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
 @media (max-width: 640px) {
   .container {
-    padding: 1rem 1rem 3rem;
+    padding: 1rem 1rem 5rem;
   }
+
   .heroSection {
-    padding: 1.5rem 0 2rem;
+    margin-bottom: 3rem;
   }
-  .teaserHeader {
-    flex-direction: column;
-    align-items: flex-start;
+
+  .dimensionRail {
+    grid-template-columns: repeat(3, 1fr);
   }
-  .finalCtaCard {
-    padding: 2.5rem 1.25rem;
+
+  .dimTabBtn:nth-child(4),
+  .dimTabBtn:nth-child(5) {
+    grid-column: span 1.5;
+    border-top: 1px solid var(--border-subtle);
   }
-  .covenantBanner {
-    flex-direction: column;
-    text-align: center;
+
+  .ledgerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ledgerCell {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .ledgerCell:last-child {
+    border-bottom: none;
+  }
+
+  .compassGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardPraxis {
+    grid-column: span 1;
+  }
+
+  .closingCard {
+    padding: 2.5rem 1.5rem;
   }
 }

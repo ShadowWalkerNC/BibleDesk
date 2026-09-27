@@ -18,6 +18,9 @@ import {
   Search,
   CheckCircle2,
   XCircle,
+  Compass,
+  Download,
+  Share2,
 } from 'lucide-react';
 import styles from './MarketingShowcase.module.css';
 
@@ -125,415 +128,494 @@ export default function MarketingShowcase() {
 
   return (
     <div className={styles.container}>
-      {/* ── 1. Hero Section ── */}
+      {/* ── 1. Editorial Split Hero Section ── */}
       <section className={styles.heroSection} aria-label="BibleDesk Overview">
-        {/* Glowing Ambient Mesh */}
-        <div className={styles.ambientGlow} aria-hidden="true" />
+        <div className={styles.heroGrid}>
+          
+          {/* Left Column: Scholarly Editorial Masthead */}
+          <div className={styles.heroEditorial}>
+            <div className={styles.heroLedgerTag}>
+              <span className={styles.tagDot} aria-hidden="true" />
+              <span>BIBLEDESK CODEX · REVISED EDITION 2026</span>
+            </div>
 
-        <div className={styles.heroInner}>
-          {/* Eyebrow / Social Proof Tag */}
-          <div className={styles.heroEyebrow}>
-            <Sparkles size={14} className={styles.sparkleIcon} />
-            <span>Open-Source Scripture Intelligence · 100% Free Core Forever</span>
-          </div>
+            <h1 className={styles.heroTitle}>
+              A Living Codex for Scripture &amp; <em>Systematic Inquiry</em>
+            </h1>
 
-          {/* High-Impact Headline */}
-          <h1 className={styles.heroTitle}>
-            Where Deep Biblical Scholarship Meets <span>Verifiable Intelligence</span>
-          </h1>
+            <p className={styles.heroSubtitle}>
+              Engineered for deep study without commercial compromise. Read six public-domain translations offline, interrogate Strong’s lexical philology, and research theological questions through an open 5-dimension evidence engine that cites primary manuscripts instead of guessing.
+            </p>
 
-          {/* Persuasive Subheadline */}
-          <p className={styles.heroSubtitle}>
-            Read and search 6 bundled public-domain translations completely offline. Explore Strong’s Greek &amp; Hebrew
-            lexicons, evaluate theological claims through our 5-dimension evidence engine, and intercede globally —
-            with zero paywalls, zero ads, and zero tracking.
-          </p>
+            <div className={styles.heroActions}>
+              <Link href="/bible" className={styles.primaryAction}>
+                <BookOpen size={16} />
+                <span>Open Study Desk</span>
+                <ArrowRight size={14} className={styles.actionArrow} />
+              </Link>
 
-          {/* Dual Action CTAs */}
-          <div className={styles.heroActions}>
-            <Link href="/bible" className={`${styles.primaryCta} button-kinetic`}>
-              <BookOpen size={18} />
-              <span>Open Study Desk — Free Forever</span>
-              <div className={styles.ctaIconCircle}>
-                <ArrowRight size={15} className="kinetic-icon" />
+              <Link href="/research" className={styles.secondaryAction}>
+                <Sparkles size={15} color="var(--gold-400)" />
+                <span>5D Research Workbench</span>
+                <kbd className={styles.kbdPill}>⌘K</kbd>
+              </Link>
+            </div>
+
+            {/* Architectural Ledger Assurances */}
+            <div className={styles.assuranceLedger}>
+              <div className={styles.assuranceItem}>
+                <span className={styles.assuranceCheck}>✓</span>
+                <span>Works 100% Offline</span>
               </div>
-            </Link>
-
-            <Link href="/research" className={`${styles.secondaryCta} button-kinetic`}>
-              <Sparkles size={18} color="var(--gold-400)" />
-              <span>Explore 5D Research</span>
-            </Link>
-          </div>
-
-          {/* Friction-Reduction Reassurances */}
-          <div className={styles.microAssurances}>
-            <div className={styles.assuranceItem}>
-              <CheckCircle2 size={15} color="#0a6b48" />
-              <span>No credit card required</span>
-            </div>
-            <div className={styles.assuranceItem}>
-              <CheckCircle2 size={15} color="#0a6b48" />
-              <span>Works 100% offline</span>
-            </div>
-            <div className={styles.assuranceItem}>
-              <CheckCircle2 size={15} color="#0a6b48" />
-              <span>BYOK unlimited free AI</span>
-            </div>
-            <div className={styles.assuranceItem}>
-              <CheckCircle2 size={15} color="#0a6b48" />
-              <span>MIT Open Source</span>
+              <div className={styles.assuranceDivider} />
+              <div className={styles.assuranceItem}>
+                <span className={styles.assuranceCheck}>✓</span>
+                <span>Free BYOK Unlimited AI</span>
+              </div>
+              <div className={styles.assuranceDivider} />
+              <div className={styles.assuranceItem}>
+                <span className={styles.assuranceCheck}>✓</span>
+                <span>Zero Ads or Trackers</span>
+              </div>
+              <div className={styles.assuranceDivider} />
+              <div className={styles.assuranceItem}>
+                <span className={styles.assuranceCheck}>✓</span>
+                <span>MIT Open-Source Core</span>
+              </div>
             </div>
           </div>
 
-          {/* ── Interactive Hero Teaser Card ── */}
-          <div className={styles.heroTeaserCard}>
-            <div className={styles.teaserHeader}>
-              <div className={styles.teaserTabs}>
-                {DEMO_QUERIES.map(q => (
-                  <button
-                    key={q.id}
-                    type="button"
-                    className={`${styles.teaserTabBtn} ${activeDemo.id === q.id ? styles.teaserTabActive : ''}`}
-                    onClick={() => {
-                      setActiveDemo(q);
-                      setActiveDimension('originalLanguage');
-                    }}
-                  >
-                    <span>{q.reference}</span>
-                  </button>
-                ))}
+          {/* Right Column: Live Interactive Philology Workbench Terminal */}
+          <div className={styles.heroWorkbench}>
+            <div className={styles.terminalBezel}>
+              {/* Terminal Window Header Bar */}
+              <div className={styles.terminalHeader}>
+                <div className={styles.passageTabs}>
+                  {DEMO_QUERIES.map(q => (
+                    <button
+                      key={q.id}
+                      type="button"
+                      className={`${styles.passageTabBtn} ${activeDemo.id === q.id ? styles.passageTabActive : ''}`}
+                      onClick={() => {
+                        setActiveDemo(q);
+                        setActiveDimension('originalLanguage');
+                      }}
+                    >
+                      <span className={styles.tabMarker}>§</span>
+                      <span>{q.reference}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className={styles.confidenceScoreBadge}>
+                  <ShieldCheck size={13} color="var(--dim-theological)" />
+                  <span className={styles.confidenceScoreText}>
+                    {activeDemo.confidence}% Confidence · {activeDemo.confidenceTier}
+                  </span>
+                </div>
               </div>
 
-              <div className={styles.confidenceBadge}>
-                <ShieldCheck size={14} color="#0a6b48" />
-                <span>{activeDemo.confidence}% Confidence · {activeDemo.confidenceTier}</span>
-              </div>
-            </div>
-
-            <div className={styles.teaserBody}>
-              <div className={styles.queryPrompt}>
-                <Search size={16} color="var(--gold-400)" />
-                <span className={styles.queryText}>{activeDemo.query}</span>
+              {/* Terminal Sub-Bar: Subject Line */}
+              <div className={styles.terminalSubjectBar}>
+                <div className={styles.subjectPrompt}>
+                  <Search size={14} className={styles.subjectIcon} />
+                  <span className={styles.subjectTitle}>{activeDemo.query}</span>
+                </div>
+                <span className={styles.subjectScope}>[COGNITIVE 5D ENGINE]</span>
               </div>
 
-              {/* 5-Dimension Pill Bar */}
-              <div className={styles.dimensionPills}>
+              {/* 5-Dimension Precision Indicator Matrix */}
+              <div className={styles.dimensionRail} role="tablist">
                 <button
                   type="button"
-                  className={`${styles.dimPill} ${activeDimension === 'scripture' ? styles.dimPillActiveScripture : ''}`}
+                  role="tab"
+                  aria-selected={activeDimension === 'scripture'}
+                  className={`${styles.dimTabBtn} ${activeDimension === 'scripture' ? styles.dimTabActiveScripture : ''}`}
                   onClick={() => setActiveDimension('scripture')}
                 >
-                  📖 Scripture
+                  <span className={styles.dimNum}>01</span>
+                  <span>Scripture</span>
                 </button>
                 <button
                   type="button"
-                  className={`${styles.dimPill} ${activeDimension === 'historical' ? styles.dimPillActiveHistorical : ''}`}
+                  role="tab"
+                  aria-selected={activeDimension === 'historical'}
+                  className={`${styles.dimTabBtn} ${activeDimension === 'historical' ? styles.dimTabActiveHistorical : ''}`}
                   onClick={() => setActiveDimension('historical')}
                 >
-                  🏛️ Historical
+                  <span className={styles.dimNum}>02</span>
+                  <span>Historical</span>
                 </button>
                 <button
                   type="button"
-                  className={`${styles.dimPill} ${activeDimension === 'originalLanguage' ? styles.dimPillActiveLang : ''}`}
+                  role="tab"
+                  aria-selected={activeDimension === 'originalLanguage'}
+                  className={`${styles.dimTabBtn} ${activeDimension === 'originalLanguage' ? styles.dimTabActiveLanguage : ''}`}
                   onClick={() => setActiveDimension('originalLanguage')}
                 >
-                  📜 Greek / Hebrew
+                  <span className={styles.dimNum}>03</span>
+                  <span>Philology</span>
                 </button>
                 <button
                   type="button"
-                  className={`${styles.dimPill} ${activeDimension === 'theological' ? styles.dimPillActiveTheological : ''}`}
+                  role="tab"
+                  aria-selected={activeDimension === 'theological'}
+                  className={`${styles.dimTabBtn} ${activeDimension === 'theological' ? styles.dimTabActiveTheology : ''}`}
                   onClick={() => setActiveDimension('theological')}
                 >
-                  ⚖️ Theological
+                  <span className={styles.dimNum}>04</span>
+                  <span>Theology</span>
                 </button>
                 <button
                   type="button"
-                  className={`${styles.dimPill} ${activeDimension === 'practical' ? styles.dimPillActivePractical : ''}`}
+                  role="tab"
+                  aria-selected={activeDimension === 'practical'}
+                  className={`${styles.dimTabBtn} ${activeDimension === 'practical' ? styles.dimTabActivePraxis : ''}`}
                   onClick={() => setActiveDimension('practical')}
                 >
-                  💡 Life Application
+                  <span className={styles.dimNum}>05</span>
+                  <span>Praxis</span>
                 </button>
               </div>
 
-              {/* Dynamic Dimension Output Content */}
-              <div className={styles.dimensionContentBox}>
-                <p className={styles.dimensionText}>
-                  {activeDemo.dimensions[activeDimension]}
-                </p>
+              {/* Dimension Body Content & Scholarly Margin */}
+              <div className={styles.terminalBody}>
+                <div className={styles.manuscriptView}>
+                  <p className={styles.manuscriptText}>
+                    {activeDemo.dimensions[activeDimension]}
+                  </p>
+                </div>
 
-                {/* Sources strip */}
-                <div className={styles.sourcesRow}>
-                  <span className={styles.sourcesLabel}>Verifiable Citations:</span>
-                  {activeDemo.sources.map((src, i) => (
-                    <a
-                      key={i}
-                      href={src.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.sourceTag}
-                    >
-                      <span>{src.title}</span>
-                      <ExternalLink size={11} />
-                    </a>
-                  ))}
+                {/* Footnote Citations Tray */}
+                <div className={styles.citationsTray}>
+                  <span className={styles.citationsHeading}>Primary Sourced Citations:</span>
+                  <div className={styles.citationLinks}>
+                    {activeDemo.sources.map((src, i) => (
+                      <a
+                        key={i}
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.citationChip}
+                      >
+                        <span>{src.title}</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Terminal Footer Status Bar */}
+              <div className={styles.terminalFooter}>
+                <div className={styles.statusIndicator}>
+                  <span className={styles.statusDot} />
+                  <span>LOCAL-FIRST ENGINE · ZERO LATENCY</span>
+                </div>
+                <div className={styles.statusMeta}>
+                  <span>TSK cross-refs: 29,481</span>
+                  <span>·</span>
+                  <span>Morphology: Verified</span>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* ── 2. Authority & Proof Bar ── */}
-      <section className={styles.statsSection} aria-label="System Metrics">
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>6</div>
-            <div className={styles.statLabel}>Translations Offline</div>
-            <div className={styles.statSub}>KJV, ASV, WEB, BBE, Darby, YLT</div>
+      {/* ── 2. Architectural Metrics Ledger ── */}
+      <section className={styles.ledgerSection} aria-label="System Metrics Ledger">
+        <div className={styles.ledgerGrid}>
+          <div className={styles.ledgerCell}>
+            <div className={styles.ledgerNumber}>6</div>
+            <div className={styles.ledgerLabel}>Translations Offline</div>
+            <div className={styles.ledgerDetail}>KJV, ASV, WEB, BBE, Darby, YLT</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>14,100+</div>
-            <div className={styles.statLabel}>Strong’s Lexicon Entries</div>
-            <div className={styles.statSub}>8,600+ Hebrew &amp; 5,500+ Greek</div>
+          <div className={styles.ledgerCell}>
+            <div className={styles.ledgerNumber}>14,100+</div>
+            <div className={styles.ledgerLabel}>Strong’s Lemmata</div>
+            <div className={styles.ledgerDetail}>8,600+ Hebrew &amp; 5,500+ Greek</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>500,000+</div>
-            <div className={styles.statLabel}>TSK Cross-References</div>
-            <div className={styles.statSub}>Indexed canonically for deep study</div>
+          <div className={styles.ledgerCell}>
+            <div className={styles.ledgerNumber}>500,000+</div>
+            <div className={styles.ledgerLabel}>TSK Cross-References</div>
+            <div className={styles.ledgerDetail}>Bidirectional scripture indexing</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>5</div>
-            <div className={styles.statLabel}>Analytical Dimensions</div>
-            <div className={styles.statSub}>Scripture, History, Lang, Theol, Life</div>
+          <div className={styles.ledgerCell}>
+            <div className={styles.ledgerNumber}>5</div>
+            <div className={styles.ledgerLabel}>Analytical Dimensions</div>
+            <div className={styles.ledgerDetail}>Scripture, History, Lang, Theol, Praxis</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>100%</div>
-            <div className={styles.statLabel}>Open-Core MIT License</div>
-            <div className={styles.statSub}>Zero tracking &bull; Local-first privacy</div>
+          <div className={styles.ledgerCell}>
+            <div className={styles.ledgerNumber}>100%</div>
+            <div className={styles.ledgerLabel}>Open-Core MIT Covenant</div>
+            <div className={styles.ledgerDetail}>Zero corporate tracking &bull; Local data</div>
           </div>
         </div>
       </section>
 
-      {/* ── 3. Pain vs. Gain: Traditional Software vs BibleDesk ── */}
-      <section className={styles.comparisonSection} aria-label="Comparison">
-        <div className={styles.sectionHeading}>
-          <span className={styles.sectionBadge}>The Honest Comparison</span>
-          <h2 className={styles.sectionTitle}>Why Scholars &amp; Believers Are Switching to BibleDesk</h2>
+      {/* ── 3. The Comparative Scriptorium Ledger ── */}
+      <section className={styles.comparisonSection} aria-label="Comparative Architecture">
+        <div className={styles.sectionHeader}>
+          <span className={styles.headerTag}>ARCHITECTURAL AUDIT</span>
+          <h2 className={styles.sectionTitle}>
+            Why Scholars &amp; Ministers Are Migrating to BibleDesk
+          </h2>
           <p className={styles.sectionSubtitle}>
-            Traditional Bible software built multi-million dollar empires by locking public-domain Scripture behind expensive paywalls. We took a radically different path.
+            Traditional software built multi-million dollar walled gardens by locking public-domain Scripture behind paywalls. Commercial AI fabricates quotes. BibleDesk restores academic rigor and honest stewardship.
           </p>
         </div>
 
-        <div className={styles.comparisonTableCard}>
-          <div className={styles.comparisonGrid}>
-            {/* The Old Way */}
-            <div className={styles.comparisonColOld}>
-              <div className={styles.colHeaderOld}>
-                <XCircle size={20} color="#b81d58" />
-                <h3>Traditional Bible Software &amp; Generic AI</h3>
+        <div className={styles.comparisonMatrix}>
+          {/* Legacy Software Column */}
+          <div className={styles.matrixColumnLegacy}>
+            <div className={styles.columnHeader}>
+              <div className={styles.columnBadgeLegacy}>
+                <XCircle size={15} />
+                <span>Commercial Software &amp; Generic AI</span>
               </div>
-              <ul className={styles.comparisonList}>
-                <li>
-                  <XCircle size={16} className={styles.iconRed} />
-                  <span><strong>$300&ndash;$1,500 License Paywalls:</strong> Base packages lock basic commentaries and lexicons behind expensive tier upgrades.</span>
-                </li>
-                <li>
-                  <XCircle size={16} className={styles.iconRed} />
-                  <span><strong>Hallucinating Black-Box Chatbots:</strong> Commercial AI chatbots fabricate Bible verses, invent church history, and provide zero source verification.</span>
-                </li>
-                <li>
-                  <XCircle size={16} className={styles.iconRed} />
-                  <span><strong>Intrusive Surveillance &amp; Ads:</strong> Free online Bible portals monetize your reading habits with banner advertisements and behavioral ad trackers.</span>
-                </li>
-                <li>
-                  <XCircle size={16} className={styles.iconRed} />
-                  <span><strong>Proprietary Data Lock-In:</strong> Your highlights, notes, and study guides are trapped in closed formats that cannot be exported to Obsidian or Markdown.</span>
-                </li>
-                <li>
-                  <XCircle size={16} className={styles.iconRed} />
-                  <span><strong>Fragile Online-Only Dependency:</strong> If your network drops in church, on a mission trip, or in a rural retreat, your study tools break.</span>
-                </li>
-              </ul>
+              <h3 className={styles.columnTitle}>The Walled Garden &amp; Black Box</h3>
             </div>
 
-            {/* The BibleDesk Way */}
-            <div className={styles.comparisonColNew}>
-              <div className={styles.colHeaderNew}>
-                <CheckCircle2 size={20} color="#0a6b48" />
-                <h3>The BibleDesk Promise</h3>
+            <ul className={styles.matrixList}>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <XCircle size={16} className={styles.legacyIcon} />
+                  <strong>$300–$1,500 License Paywalls</strong>
+                </div>
+                <p>Basic commentaries, concordance search, and morphological lexicons are gated behind escalating price tiers.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <XCircle size={16} className={styles.legacyIcon} />
+                  <strong>Hallucinatory Black-Box AI</strong>
+                </div>
+                <p>Commercial chatbots invent verses, confabulate historical context, and offer zero verifiable citations.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <XCircle size={16} className={styles.legacyIcon} />
+                  <strong>Surveillance &amp; Ad Monetization</strong>
+                </div>
+                <p>Free Bible portals clutter reading with behavioral ad pixels, banners, and analytics tracking.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <XCircle size={16} className={styles.legacyIcon} />
+                  <strong>Proprietary Data Lock-In</strong>
+                </div>
+                <p>Your notes and insights are held hostage in proprietary database formats that cannot export to Markdown or Obsidian.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <XCircle size={16} className={styles.legacyIcon} />
+                  <strong>Fragile Online Dependency</strong>
+                </div>
+                <p>If network connectivity falters during sermon preparation or a rural retreat, your study library is unreachable.</p>
+              </li>
+            </ul>
+          </div>
+
+          {/* BibleDesk Column */}
+          <div className={styles.matrixColumnDesk}>
+            <div className={styles.columnHeader}>
+              <div className={styles.columnBadgeDesk}>
+                <CheckCircle2 size={15} />
+                <span>BibleDesk Scriptorium</span>
               </div>
-              <ul className={styles.comparisonList}>
-                <li>
-                  <CheckCircle2 size={16} className={styles.iconGreen} />
-                  <span><strong>100% Free Core Scripture:</strong> Six public-domain translations and Strong’s lexicons are bundled forever with zero paywalls.</span>
-                </li>
-                <li>
-                  <CheckCircle2 size={16} className={styles.iconGreen} />
-                  <span><strong>Verifiable 5-Dimension Grounding:</strong> Every theological claim is rigorously evaluated across 5 scholarly dimensions with clickable, traceable source links.</span>
-                </li>
-                <li>
-                  <CheckCircle2 size={16} className={styles.iconGreen} />
-                  <span><strong>Local-First &amp; Zero Tracking:</strong> No corporate trackers, no banner ads, and complete data privacy. Your reflections belong to you.</span>
-                </li>
-                <li>
-                  <CheckCircle2 size={16} className={styles.iconGreen} />
-                  <span><strong>Universal Markdown &amp; Obsidian Export:</strong> 1-click export of your study notes with `[[wikilinks]]`, printable PDF worksheets, and open REST/MCP APIs.</span>
-                </li>
-                <li>
-                  <CheckCircle2 size={16} className={styles.iconGreen} />
-                  <span><strong>True Offline Independence:</strong> Read, search, and cross-reference Scripture anywhere in the world without an internet connection.</span>
-                </li>
-              </ul>
+              <h3 className={styles.columnTitle}>The Open Scripture Codex</h3>
             </div>
+
+            <ul className={styles.matrixList}>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <CheckCircle2 size={16} className={styles.deskIcon} />
+                  <strong>100% Free Core Scripture Forever</strong>
+                </div>
+                <p>Six public-domain translations and complete Strong’s lexicons bundled forever with zero paywalls.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <CheckCircle2 size={16} className={styles.deskIcon} />
+                  <strong>Verifiable 5-Dimension Evidence</strong>
+                </div>
+                <p>Every finding is tested against 5 scholarly dimensions, mathematically scored, and backed by primary citations.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <CheckCircle2 size={16} className={styles.deskIcon} />
+                  <strong>Local-First &amp; Zero Surveillance</strong>
+                </div>
+                <p>No corporate ad pixels, no tracking cookies, and complete data sovereignty. Your study belongs entirely to you.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <CheckCircle2 size={16} className={styles.deskIcon} />
+                  <strong>Universal Markdown &amp; Obsidian Export</strong>
+                </div>
+                <p>1-click export of personal notes with `[[wikilinks]]`, formatted PDF study guides, and open REST/MCP agent endpoints.</p>
+              </li>
+              <li className={styles.matrixRow}>
+                <div className={styles.rowLead}>
+                  <CheckCircle2 size={16} className={styles.deskIcon} />
+                  <strong>True Offline Independence</strong>
+                </div>
+                <p>Read, search, and cross-reference Scripture anywhere in the world with zero network connection required.</p>
+              </li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* ── 4. The 5-Dimension Evidence Framework ── */}
-      <section className={styles.frameworkSection} aria-label="5-Dimension Evidence Framework">
-        <div className={styles.sectionHeading}>
-          <span className={styles.sectionBadge}>Uncompromising Rigor</span>
-          <h2 className={styles.sectionTitle}>The Five Dimensions of Biblical Truth</h2>
+      {/* ── 4. The 5-Dimension Evidence Compass ── */}
+      <section className={styles.compassSection} aria-label="5-Dimension Evidence Compass">
+        <div className={styles.sectionHeader}>
+          <span className={styles.headerTag}>HERMENEUTICAL METHOD</span>
+          <h2 className={styles.sectionTitle}>The Five Dimensions of Sourced Truth</h2>
           <p className={styles.sectionSubtitle}>
-            To guard against false teaching and AI confabulation, every BibleDesk insight is analyzed through 5 distinct lenses.
+            To eliminate superficial answers and theological hallucinations, every BibleDesk insight is evaluated through five interconnected scholarly dimensions.
           </p>
         </div>
 
-        <div className={styles.dimensionsGrid}>
-          <div className={`${styles.dimensionCard} ${styles.dimCardScripture}`}>
-            <div className={styles.dimIconBadge}>📖</div>
-            <h3>1. Scripture Context</h3>
-            <p>Direct textual fidelity, literary genre, preceding and succeeding verses, and canonical harmony across both Testaments.</p>
-            <span className={styles.dimWeightTag}>Weight: 30%</span>
+        <div className={styles.compassGrid}>
+          <div className={`${styles.compassCard} ${styles.cardScripture}`}>
+            <div className={styles.compassBadge}>01 · SCRIPTURE</div>
+            <h3 className={styles.compassTitle}>Scriptural Context</h3>
+            <p className={styles.compassText}>Textual fidelity, grammatical syntax, genre conventions, and canonical harmony across Old and New Testaments.</p>
+            <div className={styles.compassWeight}>Mathematical Weight: 30%</div>
           </div>
 
-          <div className={`${styles.dimensionCard} ${styles.dimCardHistorical}`}>
-            <div className={styles.dimIconBadge}>🏛️</div>
-            <h3>2. Historical Setting</h3>
-            <p>Ancient Near Eastern culture, Greco-Roman imperial context, authorial background, archaeological findings, and primary recipients.</p>
-            <span className={styles.dimWeightTag}>Weight: 20%</span>
+          <div className={`${styles.compassCard} ${styles.cardHistory}`}>
+            <div className={styles.compassBadge}>02 · HISTORICAL</div>
+            <h3 className={styles.compassTitle}>Historical Setting</h3>
+            <p className={styles.compassText}>Ancient Near Eastern culture, Second Temple Judaism, Greco-Roman imperialism, authorial context, and archaeology.</p>
+            <div className={styles.compassWeight}>Mathematical Weight: 20%</div>
           </div>
 
-          <div className={`${styles.dimensionCard} ${styles.dimCardLang}`}>
-            <div className={styles.dimIconBadge}>📜</div>
-            <h3>3. Original Language</h3>
-            <p>Greek (Koine) &amp; Hebrew lexical roots, grammatical parsing, morphology, and Strong’s concordance without linguistic overreach.</p>
-            <span className={styles.dimWeightTag}>Weight: 20%</span>
+          <div className={`${styles.compassCard} ${styles.cardPhilology}`}>
+            <div className={styles.compassBadge}>03 · PHILOLOGY</div>
+            <h3 className={styles.compassTitle}>Original Language</h3>
+            <p className={styles.compassText}>Koine Greek, Biblical Hebrew, and Aramaic lemmata parsed through Strong’s concordance without illegitimate root transfer.</p>
+            <div className={styles.compassWeight}>Mathematical Weight: 20%</div>
           </div>
 
-          <div className={`${styles.dimensionCard} ${styles.dimCardTheol}`}>
-            <div className={styles.dimIconBadge}>⚖️</div>
-            <h3>4. Theological Coherence</h3>
-            <p>Systematic biblical orthodoxy, historic ecumenical creeds (Nicene, Apostles&rsquo;), and historic confessions (Westminster, Heidelberg, 1689).</p>
-            <span className={styles.dimWeightTag}>Weight: 15%</span>
+          <div className={`${styles.compassCard} ${styles.cardTheology}`}>
+            <div className={styles.compassBadge}>04 · THEOLOGY</div>
+            <h3 className={styles.compassTitle}>Theological Coherence</h3>
+            <p className={styles.compassText}>Ecumenical creeds (Nicene, Chalcedonian), historic confessions, and systematic canonical dogmatics.</p>
+            <div className={styles.compassWeight}>Mathematical Weight: 15%</div>
           </div>
 
-          <div className={`${styles.dimensionCard} ${styles.dimCardPractical}`}>
-            <div className={styles.dimIconBadge}>💡</div>
-            <h3>5. Practical Application</h3>
-            <p>Heart-level sanctification, pastoral care, ethical discipleship, and spiritual renewal for your contemporary daily walk.</p>
-            <span className={styles.dimWeightTag}>Weight: 15%</span>
+          <div className={`${styles.compassCard} ${styles.cardPraxis}`}>
+            <div className={styles.compassBadge}>05 · PRAXIS</div>
+            <h3 className={styles.compassTitle}>Practical Application</h3>
+            <p className={styles.compassText}>Pastoral sanctification, ethical discipleship, liturgical renewal, and heart-level discipleship for contemporary life.</p>
+            <div className={styles.compassWeight}>Mathematical Weight: 15%</div>
           </div>
         </div>
 
-        {/* Formula Box */}
-        <div className={styles.formulaBox}>
-          <div className={styles.formulaTitle}>Transparent Multi-Factor Confidence Scoring</div>
-          <div className={styles.formulaMath}>
-            Confidence Score = 0.30(Scripture) + 0.20(Language) + 0.20(History) + 0.15(Theology) + 0.15(Citations)
+        {/* Mathematical Derivation Box */}
+        <div className={styles.derivationBox}>
+          <div className={styles.derivationHeader}>
+            <Compass size={16} className={styles.derivationIcon} />
+            <span>TRANSPARENT CONFIDENCE DERIVATION FORMULA</span>
           </div>
-          <div className={styles.formulaDesc}>
-            High Confidence (&ge; 75%) requires grounded evidence across all five dimensions. No fabricated citations are ever accepted.
+          <div className={styles.derivationFormula}>
+            Confidence = 0.30(Scripture) + 0.20(Language) + 0.20(History) + 0.15(Theology) + 0.15(Citations)
           </div>
+          <p className={styles.derivationNote}>
+            A High Confidence score (&ge; 75%) requires positive grounding across all five factors. Answers with missing manuscript provenance are flagged with transparent uncertainty.
+          </p>
         </div>
       </section>
 
-      {/* ── 5. Superpowers Bento Grid ── */}
-      <section className={styles.bentoSection} aria-label="Product Features">
-        <div className={styles.sectionHeading}>
-          <span className={styles.sectionBadge}>Complete Study Suite</span>
-          <h2 className={styles.sectionTitle}>Everything You Need for Lifelong Study</h2>
+      {/* ── 5. Lifelong Study Suite ── */}
+      <section className={styles.suiteSection} aria-label="Product Features">
+        <div className={styles.sectionHeader}>
+          <span className={styles.headerTag}>RESEARCH INSTRUMENT</span>
+          <h2 className={styles.sectionTitle}>Everything Required for Lifelong Study</h2>
           <p className={styles.sectionSubtitle}>
-            A unified suite designed for personal discipleship, seminary research, pastoral preaching, and church intercession.
+            A precision scholarly instrument for pastors, seminary researchers, small group teachers, and prayer intercessors.
           </p>
         </div>
 
-        <div className={styles.bentoGrid}>
-          {/* Card 1: Focus Reader */}
-          <div className={`${styles.bentoCard} ${styles.bentoLarge}`}>
-            <div className={styles.bentoContent}>
-              <div className={styles.bentoIcon}><BookOpen size={20} /></div>
-              <h3>3-Column Study Desk &amp; Parallel Compare</h3>
-              <p>
-                A distraction-free reading sanctuary with customizable typography, instant parallel translation comparison (e.g. WEB alongside KJV), and Quick Jump (Ctrl+K) navigation.
-              </p>
-              <div className={styles.pillList}>
-                <span>Parallel Translation</span>
-                <span>6 Offline Modules</span>
-                <span>Custom Line-Height</span>
-                <span>Quick Jump (Ctrl+K)</span>
-              </div>
+        <div className={styles.suiteGrid}>
+          {/* Feature 1: Study Desk */}
+          <div className={styles.suiteCellHero}>
+            <div className={styles.suiteCellHeader}>
+              <div className={styles.cellIconWrap}><BookOpen size={18} /></div>
+              <span className={styles.cellTag}>CORE SANCTUARY</span>
+            </div>
+            <h3 className={styles.cellTitle}>3-Column Study Desk &amp; Parallel Comparison</h3>
+            <p className={styles.cellBody}>
+              A distraction-free reading sanctuary. Read translations side-by-side (e.g. WEB alongside KJV), inspect Strong’s lexicons on click, navigate via ⌘K Quick Jump, and customize line height to your exact reading cadence.
+            </p>
+            <div className={styles.cellPills}>
+              <span>Parallel Translation</span>
+              <span>6 Bundled Modules</span>
+              <span>Focus Reader Mode</span>
+              <span>Ctrl+K Quick Jump</span>
             </div>
           </div>
 
-          {/* Card 2: Research Workbench */}
-          <div className={`${styles.bentoCard} ${styles.bentoWide}`}>
-            <div className={styles.bentoContent}>
-              <div className={styles.bentoIcon}><Sparkles size={20} /></div>
-              <h3>Claude 3.5 Sonnet Scholarly Research</h3>
-              <p>
-                Equipped with live academic web search tools to unearth historical context, theological treatises, and linguistic commentaries with verifiable clickable citations.
-              </p>
-              <div className={styles.pillList}>
-                <span>Web Grounding</span>
-                <span>Real URL Citations</span>
-                <span>Save to Notes</span>
-              </div>
+          {/* Feature 2: Research Workbench */}
+          <div className={styles.suiteCell}>
+            <div className={styles.suiteCellHeader}>
+              <div className={styles.cellIconWrap}><Sparkles size={18} /></div>
+              <span className={styles.cellTag}>ACADEMIC WEB GROUNDING</span>
             </div>
+            <h3 className={styles.cellTitle}>Anthropic Claude 3.5 Sonnet Workbench</h3>
+            <p className={styles.cellBody}>
+              Equipped with live academic web tools to unearth primary historical treatises, scholarly lexicons, and verifiable theological citations.
+            </p>
           </div>
 
-          {/* Card 3: World PrayerAtlas */}
-          <div className={styles.bentoCard}>
-            <div className={styles.bentoContent}>
-              <div className={styles.bentoIcon}><Globe size={20} /></div>
-              <h3>Interactive 2D World PrayerAtlas</h3>
-              <p>
-                Intercede for global beacons across restricted regions, church plants, and medical needs with consent-gated public submissions.
-              </p>
+          {/* Feature 3: World PrayerAtlas */}
+          <div className={styles.suiteCell}>
+            <div className={styles.suiteCellHeader}>
+              <div className={styles.cellIconWrap}><Globe size={18} /></div>
+              <span className={styles.cellTag}>GLOBAL INTERCESSION</span>
             </div>
+            <h3 className={styles.cellTitle}>Interactive 2D World PrayerAtlas</h3>
+            <p className={styles.cellBody}>
+              Intercede for global beacons across restricted regions, church plants, and medical needs with consent-gated public submissions.
+            </p>
           </div>
 
-          {/* Card 4: Catechisms Lab */}
-          <div className={styles.bentoCard}>
-            <div className={styles.bentoContent}>
-              <div className={styles.bentoIcon}><Scroll size={20} /></div>
-              <h3>Multi-Tradition Catechism Lab</h3>
-              <p>
-                Study and memorize Westminster, Heidelberg, Luther’s Small, 1689 London Baptist, and 39 Articles with interactive recall quizzes.
-              </p>
+          {/* Feature 4: Catechisms Lab */}
+          <div className={styles.suiteCell}>
+            <div className={styles.suiteCellHeader}>
+              <div className={styles.cellIconWrap}><Scroll size={18} /></div>
+              <span className={styles.cellTag}>HISTORIC RECALL</span>
             </div>
+            <h3 className={styles.cellTitle}>Multi-Tradition Catechism &amp; Creedal Lab</h3>
+            <p className={styles.cellBody}>
+              Study Westminster, Heidelberg, Luther’s Small, 1689 London Baptist, and 39 Articles with interactive recall and verse memory.
+            </p>
           </div>
 
-          {/* Card 5: Knowledge Vault */}
-          <div className={styles.bentoCard}>
-            <div className={styles.bentoContent}>
-              <div className={styles.bentoIcon}><Layers size={20} /></div>
-              <h3>Obsidian &amp; PDF Vault Export</h3>
-              <p>
-                Own your knowledge forever. Export your notes and scripture references as an Obsidian markdown vault (.zip) or print clean PDF study worksheets.
-              </p>
+          {/* Feature 5: Knowledge Vault */}
+          <div className={styles.suiteCell}>
+            <div className={styles.suiteCellHeader}>
+              <div className={styles.cellIconWrap}><Layers size={18} /></div>
+              <span className={styles.cellTag}>LOCAL SOVEREIGNTY</span>
             </div>
+            <h3 className={styles.cellTitle}>Obsidian &amp; PDF Vault Exporter</h3>
+            <p className={styles.cellBody}>
+              Own your research forever. Export your notes and scripture references as an Obsidian Markdown vault (.zip) or print passage study guides.
+            </p>
           </div>
         </div>
       </section>
 
       {/* ── 6. Kingdom Stewardship Pricing ── */}
-      <section className={styles.pricingSection} aria-label="Transparent Pricing">
-        <div className={styles.sectionHeading}>
-          <span className={styles.sectionBadge}>Transparent Stewardship</span>
-          <h2 className={styles.sectionTitle}>Simple, Kingdom-First Pricing</h2>
+      <section className={styles.pricingSection} aria-label="Transparent Membership">
+        <div className={styles.sectionHeader}>
+          <span className={styles.headerTag}>KINGDOM COVENANT</span>
+          <h2 className={styles.sectionTitle}>Simple, Transparent Stewardship</h2>
           <p className={styles.sectionSubtitle}>
-            The Word of God is never for sale. Core Scripture is free forever. Paid tiers sponsor hosted server AI compute and multi-device cloud synchronization.
+            God’s Word is never for sale. Core Scripture reading is free forever. Paid tiers sponsor hosted server AI compute and multi-device cloud synchronization.
           </p>
 
           {/* Billing Switcher Toggle */}
@@ -556,127 +638,135 @@ export default function MarketingShowcase() {
         <div className={styles.pricingGrid}>
           {/* Tier 1: Free Community */}
           <div className={styles.pricingCard}>
-            <h3 className={styles.tierName}>Community / Open Core</h3>
-            <div className={styles.tierPriceRow}>
-              <span className={styles.tierPrice}>$0</span>
-              <span className={styles.tierPeriod}>Free Forever</span>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadge}>FREE COVENANT</span>
+              <h3 className={styles.tierName}>Community Open Core</h3>
+              <div className={styles.tierPriceRow}>
+                <span className={styles.tierPrice}>$0</span>
+                <span className={styles.tierPeriod}>Free Forever</span>
+              </div>
+              <p className={styles.tierDesc}>
+                Complete, unhindered Scripture study and prayer tools for every believer on earth.
+              </p>
             </div>
-            <p className={styles.tierDesc}>
-              Complete, unhindered Scripture study and prayer tools for every believer on earth.
-            </p>
 
             <div className={styles.tierFeatureList}>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>6 Bundled Offline Translations</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Strong’s Greek &amp; Hebrew Lexicons</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>500,000+ TSK Cross-References</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Local Notes &amp; Highlights</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>5 Free Hosted AI Answers / Day</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span><strong>Unlimited AI with BYOK (Free Gemini)</strong></span>
               </div>
             </div>
 
-            <Link href="/bible" className={styles.secondaryCta} style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/bible" className={styles.tierActionSecondary}>
               <span>Start Studying Free</span>
             </Link>
           </div>
 
           {/* Tier 2: BibleDesk Pro */}
           <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
-            <div className={styles.pricingFeaturedBadge}>Most Popular</div>
-            <h3 className={styles.tierName}>BibleDesk Pro</h3>
-            <div className={styles.tierPriceRow}>
-              <span className={styles.tierPrice}>{annualBilling ? '$5' : '$7'}</span>
-              <span className={styles.tierPeriod}>/ month {annualBilling ? '($60 billed yearly)' : ''}</span>
+            <div className={styles.tierHeader}>
+              <span className={styles.featuredBadge}>MOST POPULAR</span>
+              <h3 className={styles.tierName}>BibleDesk Pro</h3>
+              <div className={styles.tierPriceRow}>
+                <span className={styles.tierPrice}>{annualBilling ? '$5' : '$7'}</span>
+                <span className={styles.tierPeriod}>/ month {annualBilling ? '($60 billed yearly)' : ''}</span>
+              </div>
+              <p className={styles.tierDesc}>
+                For deep researchers, seminary students, and teachers who want hosted AI compute with zero key configuration.
+              </p>
             </div>
-            <p className={styles.tierDesc}>
-              For deep researchers, students, and teachers who want hosted AI with zero API setup and seamless cloud sync.
-            </p>
 
             <div className={styles.tierFeatureList}>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Everything in Free Core</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span><strong>250 Hosted 5D AI Answers / Day</strong></span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
-                <span>Real-Time Cloud Notes &amp; Highlights Sync</span>
+                <Check size={14} className={styles.checkIcon} />
+                <span>Real-Time Cloud Notes Sync</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>1-Click Obsidian Vault (.zip) Export</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
-                <span>Formatted Printable PDF Study Guides</span>
+                <Check size={14} className={styles.checkIcon} />
+                <span>Printable Passage Study Guides</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Google Calendar Prayer Care Sync</span>
               </div>
             </div>
 
-            <Link href="/pricing" className={styles.primaryCta} style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/pricing" className={styles.tierActionPrimary}>
               <span>Upgrade to Pro</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Tier 3: Ministry & Church Leader */}
+          {/* Tier 3: Ministry & Pastoral */}
           <div className={styles.pricingCard}>
-            <h3 className={styles.tierName}>Ministry &amp; Pastoral</h3>
-            <div className={styles.tierPriceRow}>
-              <span className={styles.tierPrice}>{annualBilling ? '$15' : '$19'}</span>
-              <span className={styles.tierPeriod}>/ month {annualBilling ? '($180 billed yearly)' : ''}</span>
+            <div className={styles.tierHeader}>
+              <span className={styles.tierBadge}>MINISTRY</span>
+              <h3 className={styles.tierName}>Pastoral &amp; Ministry</h3>
+              <div className={styles.tierPriceRow}>
+                <span className={styles.tierPrice}>{annualBilling ? '$15' : '$19'}</span>
+                <span className={styles.tierPeriod}>/ month {annualBilling ? '($180 billed yearly)' : ''}</span>
+              </div>
+              <p className={styles.tierDesc}>
+                For pastors, small group leaders, and church care teams discipling congregations.
+              </p>
             </div>
-            <p className={styles.tierDesc}>
-              For pastors, small group leaders, and church ministry teams discipling congregations.
-            </p>
 
             <div className={styles.tierFeatureList}>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Everything in BibleDesk Pro</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span><strong>1,000 Hosted AI Answers / Day</strong></span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Reviewed Pastoral Gmail Draft Export</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Priority Research Assistant Compute</span>
               </div>
               <div className={styles.tierFeatureItem}>
-                <Check size={16} color="#0a6b48" />
+                <Check size={14} className={styles.checkIcon} />
                 <span>Church Directory &amp; Group Workspaces</span>
               </div>
             </div>
 
-            <Link href="/pricing" className={styles.secondaryCta} style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/pricing" className={styles.tierActionSecondary}>
               <span>View Ministry Plans</span>
             </Link>
           </div>
@@ -684,20 +774,20 @@ export default function MarketingShowcase() {
 
         {/* Covenant Guarantee Banner */}
         <div className={styles.covenantBanner}>
-          <ShieldCheck size={20} color="var(--gold-400)" />
-          <div>
-            <strong>The BibleDesk Covenant Guarantee:</strong> Scripture reading, concordance searches, and Strong&rsquo;s lexicons will never be paywalled. Self-hosters can run 100% of the platform for free using our open-source Docker and PGlite stack.
+          <ShieldCheck size={18} className={styles.covenantIcon} />
+          <div className={styles.covenantText}>
+            <strong>The BibleDesk Covenant Guarantee:</strong> Scripture reading, concordance searches, and Strong&rsquo;s lexicons will never be paywalled. Self-hosters can run 100% of the platform for free using our open-source Docker and PGlite stack (`NEXT_PUBLIC_SELF_HOSTED=true`).
           </div>
         </div>
       </section>
 
-      {/* ── 7. Objection-Busting FAQ Accordion ── */}
+      {/* ── 7. Scholarly FAQ Accordion ── */}
       <section className={styles.faqSection} aria-label="Frequently Asked Questions">
-        <div className={styles.sectionHeading}>
-          <span className={styles.sectionBadge}>Got Questions?</span>
+        <div className={styles.sectionHeader}>
+          <span className={styles.headerTag}>DIRECT ANSWERS</span>
           <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
           <p className={styles.sectionSubtitle}>
-            Everything you need to know about our data privacy, free-tier guarantees, and AI grounding.
+            Clear, transparent answers about our data privacy, free-tier guarantees, and evidence grounding.
           </p>
         </div>
 
@@ -714,7 +804,7 @@ export default function MarketingShowcase() {
                 >
                   <span className={styles.faqQuestionText}>{faq.q}</span>
                   <span className={styles.faqIcon}>
-                    {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </span>
                 </button>
                 {isOpen && (
@@ -728,46 +818,40 @@ export default function MarketingShowcase() {
         </div>
       </section>
 
-      {/* ── 8. High-Converting Bottom CTA Banner ── */}
-      <section className={styles.finalCtaSection} aria-label="Get Started">
-        <div className={styles.finalCtaCard}>
-          <div className={styles.finalCtaEyebrow}>
-            <Sparkles size={14} />
-            <span>Ready for a Deeper Study Experience?</span>
-          </div>
-
-          <h2 className={styles.finalCtaTitle}>
-            Step Into God’s Word with Complete Clarity
+      {/* ── 8. Architectural Closing Banner ── */}
+      <section className={styles.closingSection} aria-label="Begin Study">
+        <div className={styles.closingCard}>
+          <div className={styles.closingTag}>[ENTER THE SCRIPTorium]</div>
+          <h2 className={styles.closingTitle}>
+            Step Into Scripture with Precision &amp; Reverence
           </h2>
-
-          <p className={styles.finalCtaSubtitle}>
-            No subscriptions required to read. No tracking. No advertisements. Open the Study Desk right now in your browser, or install the standalone PWA on your desktop and phone.
+          <p className={styles.closingSubtitle}>
+            Zero paywalls. Zero advertising. Zero corporate surveillance. Open the Study Desk immediately in your browser, or deploy your private container.
           </p>
 
-          <div className={styles.finalCtaActions}>
-            <Link href="/bible" className={`${styles.finalPrimaryBtn} button-kinetic`}>
-              <BookOpen size={18} />
-              <span>Launch BibleDesk Study Desk</span>
-              <div className={styles.ctaIconCircle}>
-                <ArrowRight size={15} className="kinetic-icon" />
-              </div>
+          <div className={styles.closingActions}>
+            <Link href="/bible" className={styles.primaryAction}>
+              <BookOpen size={16} />
+              <span>Launch Study Desk</span>
+              <ArrowRight size={14} className={styles.actionArrow} />
             </Link>
 
-            <Link href="/developers" className={styles.finalSecondaryBtn}>
-              <Code size={16} />
+            <Link href="/developers" className={styles.secondaryAction}>
+              <Code size={15} />
               <span>Developer SDK &amp; MCP</span>
             </Link>
           </div>
 
-          <div className={styles.finalCtaFootnote}>
-            <span>✓ Instant access in browser</span>
+          <div className={styles.closingFootnote}>
+            <span>✓ Instant browser access</span>
             <span>&bull;</span>
-            <span>✓ Zero installation required</span>
+            <span>✓ Works completely offline</span>
             <span>&bull;</span>
-            <span>✓ 100% Free Core Open Source</span>
+            <span>✓ MIT Open-Source Covenant</span>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

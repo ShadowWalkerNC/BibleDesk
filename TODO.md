@@ -9,7 +9,8 @@
 - [x] Strong's Greek/Hebrew lexicons and TSK cross-references are bundled.
 - [x] Study Desk, Study Resources, Prayer, Developers, Download, Login, Moderation, Pricing and share surfaces compile.
 - [x] Five-dimension assistant, streaming, rate limiting, SDK, REST API, MCP and Sigil HMAC endpoint remain in scope.
-- [x] Turnkey deployment suite ready: multi-stage Dockerfile, docker-compose.yml, and environment doctor (`npm run check:env`).
+- [x] Turnkey deployment suite ready: multi-stage Dockerfile, docker-compose.yml, railway.json, dedicated `/api/health` endpoint, and environment doctor (`npm run check:env`).
+- [x] Railway cloud hosting compatibility: Next.js standalone output mode, dynamic `$PORT` binding, unified web/API server, and automatic `RAILWAY_PUBLIC_DOMAIN` origin detection.
 - [x] Consolidated single-file database migration (`supabase/schema-init.sql`) bundles all 12 schemas into a 1-click execution.
 - [x] First-run Onboarding Modal (`OnboardingModal.tsx`) personalizes translation, study persona, and AI mode.
 - [x] Dual-tier Open Core & SaaS architecture established: 100% Free Core Scripture + Pro/Ministry Cloud Tiers (`src/lib/tiers.ts`, `/pricing`, `/api/billing/*`).
