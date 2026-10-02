@@ -17,7 +17,10 @@ import { TRANSLATIONS, type TranslationId, type BibleAnswer } from '@/types';
 import { MIN_QUESTION_LENGTH } from '@/lib/ask-validation';
 import { runPipeline, type PipelineOptions } from '@/lib/pipeline';
 import { runRAG } from '@/lib/rag';
-import { saveAnswer, getServerClient } from '@/lib/supabase';
+import { saveAnswer } from '@/lib/answers';
+import { getDb } from '@/db';
+import { profiles } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { checkAutoFlag, saveFlag } from '@/lib/moderation';
 import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth';
@@ -111,13 +114,16 @@ export async function POST(req: NextRequest) {
   let userTier: SubscriptionTier = 'free';
   if (user) {
     try {
-      const client = getServerClient();
-      const { data: profile } = await client
-        .from('profiles')
-        .select('subscription_tier, subscription_status')
-        .eq('id', user.id)
-        .maybeSingle();
-      userTier = getUserTier(profile);
+      const db = await getDb();
+      const rows = await db
+        .select({
+          subscriptionTier: profiles.subscriptionTier,
+          subscriptionStatus: profiles.subscriptionStatus,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, user.id))
+        .limit(1);
+      userTier = getUserTier(rows[0] ?? null);
     } catch {
       userTier = 'free';
     }

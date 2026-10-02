@@ -2,7 +2,9 @@
 // Admin manually promotes a flagged answer to canonical_answers.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { answers, flags } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { promoteToCanonical } from '@/lib/moderation';
 import { getActiveModerator } from '@/lib/mod-auth';
 
@@ -49,24 +51,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const svc = getServerClient();
+    const db = await getDb();
 
-    const { data: flagRow } = await svc
-      .from('flags')
-      .select('answer_id')
-      .eq('id', flagId)
-      .single();
+    const flagRows = await db
+      .select({ answerId: flags.answerId })
+      .from(flags)
+      .where(eq(flags.id, flagId))
+      .limit(1);
 
-    await svc
-      .from('flags')
-      .update({ status: 'approved' })
-      .eq('id', flagId);
+    await db
+      .update(flags)
+      .set({ status: 'approved' })
+      .where(eq(flags.id, flagId));
 
-    if (flagRow?.answer_id) {
-      await svc
-        .from('answers')
-        .update({ status: 'approved' })
-        .eq('id', flagRow.answer_id);
+    if (flagRows[0]?.answerId) {
+      await db
+        .update(answers)
+        .set({ status: 'approved' })
+        .where(eq(answers.id, flagRows[0].answerId));
     }
 
     return NextResponse.json({ success: true, promoted: true });

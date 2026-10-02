@@ -151,7 +151,7 @@ const SECTIONS = [
       await typeSlowly(page, 'input[placeholder*="church" i], #church-input', 'Grace Fellowship', 'Church field');
       await typeSlowly(page, 'input[type="email"]', 'caleb@example.com', 'Email field');
       await typeSlowly(page, 'input[type="password"]', 'securepass123', 'Password field');
-      await showSubtitle(page, 'Offline fallback — works without Supabase configured');
+      await showSubtitle(page, 'Offline fallback — local study profile, no server required');
       await page.waitForTimeout(2500);
       await showSubtitle(page, '');
     },

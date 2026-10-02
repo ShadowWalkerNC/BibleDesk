@@ -26,6 +26,7 @@ ENV NEXT_PUBLIC_APP_URL=http://localhost:3000
 # Build Next.js application
 RUN npm run build
 
+
 # Stage 3: Runner
 FROM base AS runner
 WORKDIR /app
@@ -61,4 +62,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-3000}/api/health || exit 1
 
-CMD ["node", "server.js"]
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/drizzle-kit ./node_modules/.bin/drizzle-kit
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
+
+CMD ["sh", "-c", "npx drizzle-kit migrate --config=drizzle.config.ts 2>/dev/null || true && node server.js"]

@@ -1,17 +1,22 @@
 import path from 'path';
 import fs from 'fs';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgliteDatabase } from 'drizzle-orm/pglite';
 import * as schema from './schema';
 
-let dbInstance: any = null;
+/** Union of the two supported Drizzle backends (Railway PostgreSQL / embedded PGlite). */
+export type BibleDeskDb = NodePgDatabase<typeof schema> | PgliteDatabase<typeof schema>;
+
+let dbInstance: BibleDeskDb | null = null;
 
 /**
- * Initializes and returns the Drizzle database client.
+ * Initializes and returns the typed Drizzle database client.
  *
  * Supports dual-mode execution:
- * 1. Standard PostgreSQL via `DATABASE_URL` (production Supabase, Docker, RDS).
+ * 1. Standard PostgreSQL via `DATABASE_URL` (Railway production, Docker, RDS).
  * 2. Embedded PostgreSQL (`@electric-sql/pglite`) for local zero-config runs and testing.
  */
-export async function getDb() {
+export async function getDb(): Promise<BibleDeskDb> {
   if (dbInstance) return dbInstance;
 
   const databaseUrl = process.env.DATABASE_URL;
@@ -45,22 +50,29 @@ export async function getDb() {
 }
 
 /**
- * Auto-applies initial migration to PGlite if tables are not yet created.
+ * Auto-applies every migration in drizzle/*.sql to PGlite if tables are missing.
+ * Idempotent: "already exists" errors are swallowed so re-runs are safe.
  */
-async function ensureSchema(client: any) {
+async function ensureSchema(client: { exec: (sql: string) => Promise<unknown> }) {
   try {
-    const migrationPath = path.join(process.cwd(), 'drizzle', '0000_previous_firedrake.sql');
-    if (fs.existsSync(migrationPath)) {
-      const sql = fs.readFileSync(migrationPath, 'utf8');
-      const statements = sql.split('--> statement-breakpoint');
+    const drizzleDir = path.join(process.cwd(), 'drizzle');
+    if (!fs.existsSync(drizzleDir)) return;
+    const files = fs
+      .readdirSync(drizzleDir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort();
+    for (const file of files) {
+      const sqlText = fs.readFileSync(path.join(drizzleDir, file), 'utf8');
+      const statements = sqlText.split('--> statement-breakpoint');
       for (const stmt of statements) {
         const trimmed = stmt.trim();
         if (trimmed) {
           try {
             await client.exec(trimmed);
-          } catch (e: any) {
+          } catch (e: unknown) {
             // Ignore if table/index already exists
-            if (!e.message?.includes('already exists')) {
+            const message = e instanceof Error ? e.message : String(e);
+            if (!message.includes('already exists')) {
               // Only throw if unexpected
             }
           }

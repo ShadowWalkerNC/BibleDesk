@@ -18,7 +18,7 @@ import RateLimitBar from '@/components/RateLimitBar/RateLimitBar';
 import SacredHaloCanvas from '@/components/SacredHaloCanvas/SacredHaloCanvas';
 import { ErrorState } from '@/components/LoadingState/LoadingState';
 import { useStreamingAsk } from '@/hooks/useStreamingAsk';
-import { getBrowserClient } from '@/lib/supabase';
+import { getAuthUser, subscribeAuth } from '@/lib/client-auth';
 import MarketingShowcase from '@/components/MarketingShowcase/MarketingShowcase';
 import styles from './page.module.css';
 
@@ -55,14 +55,8 @@ export default function HomePage() {
   const [user, setUser] = useState<any>(undefined);
 
   useEffect(() => {
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+    setUser(getAuthUser());
+    return subscribeAuth(() => setUser(getAuthUser()));
   }, []);
 
   useEffect(() => {

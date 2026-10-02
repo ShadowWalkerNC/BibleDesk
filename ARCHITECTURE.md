@@ -1,9 +1,9 @@
 # BibleDesk Architecture
 
 > **Status:** Phase 0 — local-first Bible foundation
-> **Updated:** 2026-09-19
+> **Updated:** 2026-09-30
 
-BibleDesk is a Next.js 16 and React 19 web application. Its product center is the bundled public-domain Bible reader and search experience. AI, Supabase-backed accounts, public prayer, and Google Prayer Care exports are optional server capabilities.
+BibleDesk is a Next.js 16 and React 19 web application. Its product center is the bundled public-domain Bible reader and search experience. AI, JWT accounts on Railway PostgreSQL, public prayer, and Google Prayer Care exports are optional server capabilities.
 
 ## Active product surfaces
 
@@ -17,7 +17,7 @@ BibleDesk is a Next.js 16 and React 19 web application. Its product center is th
 | `/developers` | REST API, SDK and MCP documentation |
 | `/download` | PWA installation guidance and accurate status of parked native shells |
 | `/pricing` | Transparent Kingdom-first pricing and Pro SaaS membership tiers |
-| `/login` | Supabase authentication, with a local profile only when Supabase is intentionally unconfigured |
+| `/login` | JWT email/password auth (`/api/auth/*`), with a local profile only in explicitly local/development builds |
 | `/mod` | Server-authorized moderation UI |
 | `/system` | In-app System Health, Diagnostics & Disaster Recovery Hub (diagnostics, 1-click repairs, full JSON backup/restore) |
 | `/share/[slug]` | Public shared study answers |
@@ -30,7 +30,7 @@ Sermons, church tools, creator pages, the graph explorer UI, radio, Discord and 
 Browser / installed PWA
   ├─ bundled Bible modules, Strong's lexicons and TSK data
   ├─ local notes, highlights, personal collections, and private prayer commitments
-  └─ authenticated requests with a Supabase access token
+  └─ authenticated requests with a stateless JWT Bearer header
 
 Next.js server routes
   ├─ Bible, cross-references, commentary, research, notes, collections, search, and MCP APIs
@@ -45,7 +45,7 @@ Next.js server routes
   └─ moderation and HMAC-protected Sigil endpoint
 
 External services when configured
-  ├─ PostgreSQL (Drizzle ORM) / Supabase Postgres/Auth/pgvector
+  ├─ Railway PostgreSQL via Drizzle ORM (+ pgvector extension for RAG)
   ├─ Anthropic Claude (claude-3-5-sonnet) with web search for research assistant
   ├─ Google Gemini and OpenAI embeddings
   ├─ Stripe for subscription billing & Customer Portal
@@ -56,25 +56,25 @@ External services when configured
 
 - Server keys never enter the browser bundle.
 - Paid AI routes are rate limited. AI output must preserve the five dimensions and cite Scripture.
-- Prayer Care derives ownership from a verified Supabase bearer token. Request JSON cannot select an owner.
+- Prayer Care derives ownership from a verified JWT bearer token. Request JSON cannot select an owner.
 - Public Atlas submission requires explicit consent and creates a pending moderation record. Private local commitments are not published by escalation alone.
-- Google tokens are encrypted at rest in `google_connections`, which is accessed only with the service role.
+- Google tokens are encrypted at rest in `google_connections`, which the browser can never touch; all access is server-side via Drizzle.
 - Gmail export requires a reviewed request and creates an editable draft. There is no automatic send path.
-- Billing portal (`/api/billing/portal`) derives customer identity solely from verified Supabase sessions.
+- Billing portal (`/api/billing/portal`) derives customer identity solely from verified JWT sessions.
 - Obsidian export with personal notes verifies Pro/Ministry tier or `NEXT_PUBLIC_SELF_HOSTED=true` before inclusion.
 - `/api/v1/bible/answer` retains the Sigil-compatible HMAC contract.
 
 ## Data and migrations
 
-For turnkey deployment on a fresh Supabase project, execute the consolidated initialization script in one step:
+For turnkey deployment, apply the versioned Drizzle migrations (run automatically by the Docker CMD, or manually):
 
-`supabase/schema-init.sql`
+`npx drizzle-kit migrate` (applies `drizzle/0000` + `drizzle/0001_railway-migration`, 35 tables)
 
-Alternatively, the sequential canonical migration chain can be run in order:
+The legacy Supabase SQL chain under `supabase/` is kept as a data-migration reference only and is no longer applied:
 
 `schema.sql` → `schema-v2.sql` → `schema-v3.sql` → `schema-v4.sql` → `schema-v5.sql` → `schema-v6.sql` → `schema-v7.sql` → `schema-v8.sql` → `schema-v9.sql` → `schema-v10-public-prayer.sql` → `rpc.sql` → `migrations/20260918_saas_subscriptions.sql`
 
-The repository build and mocked boundary tests do not prove these migrations against a live database. A fresh-schema run, existing-schema upgrade run, RLS verification, and cross-user denial test are release gates.
+The repository build and mocked boundary tests do not prove these migrations against a live database. A fresh-schema run, existing-schema upgrade run, server-side ownership verification, and cross-user denial test are release gates.
 
 ## Deployment model
 
@@ -110,7 +110,7 @@ src/components/          product UI and navigation
 src/lib/bibleModules/    bundled public-domain Scripture modules
 src/lib/data/            Strong's and TSK data
 packages/sdk/            TypeScript/JavaScript client SDK
-supabase/                ordered schema and RPC SQL
+supabase/                legacy SQL reference (active migrations live in drizzle/)
 archive/                 preserved, non-MVP product work
 public/                  PWA manifest and static assets
 ```

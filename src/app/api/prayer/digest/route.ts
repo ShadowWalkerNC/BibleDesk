@@ -4,7 +4,15 @@
 // renders a preview. Wiring a real provider is an explicit product decision
 // tracked separately.
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import {
+  prayerCommitments,
+  prayerContacts,
+  prayerNotificationPreferences,
+  type PrayerCommitment,
+  type PrayerContact,
+} from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
@@ -23,13 +31,13 @@ interface DigestCommitment {
   id: string;
   title: string;
   private_details: string | null;
-  recurrence_rule: string;
+  schedule_kind: string;
   next_due_at: string;
   contact?: {
     display_name: string;
     email: string | null;
     phone: string | null;
-    category: string;
+    category: string | null;
   } | null;
 }
 
@@ -38,54 +46,71 @@ export async function GET(req: NextRequest) {
     const user = await getAuthenticatedUser(req);
 
     if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication required to access prayer digest.' 
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required to access prayer digest.'
       }, { status: 401 });
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.DATABASE_URL) {
       return NextResponse.json({
         success: true,
         offline: true,
-        message: 'Supabase unconfigured; digest available in offline UI.',
+        message: 'Database unconfigured; digest available in offline UI.',
         digest: null,
       });
     }
 
-    const supabase = getServerClient();
+    const db = await getDb();
 
     // Fetch user's active commitments and contacts
-    const [commitmentsRes, contactsRes] = await Promise.all([
-      supabase
-        .from('prayer_commitments')
-        .select('*')
-        .eq('owner_id', user.id)
-        .eq('status', 'active')
-        .order('next_due_at', { ascending: true }),
-      supabase
-        .from('prayer_contacts')
-        .select('*')
-        .eq('owner_id', user.id)
-        .eq('is_archived', false),
+    const [commitments, contacts] = await Promise.all([
+      db
+        .select()
+        .from(prayerCommitments)
+        .where(
+          and(
+            eq(prayerCommitments.userId, user.id),
+            eq(prayerCommitments.status, 'active')
+          )
+        ),
+      db
+        .select()
+        .from(prayerContacts)
+        .where(
+          and(
+            eq(prayerContacts.userId, user.id),
+            eq(prayerContacts.isArchived, false)
+          )
+        ),
     ]);
 
     const now = new Date();
-    const contactsMap = new Map((contactsRes.data || []).map(c => [c.id, c]));
+    const contactsMap = new Map<string, PrayerContact>(contacts.map((c) => [c.id, c]));
 
-    const dueCommitments: DigestCommitment[] = (commitmentsRes.data || [])
-      .filter(c => new Date(c.next_due_at) <= now)
-      .map(c => ({
-        id: c.id,
-        title: c.title,
-        private_details: c.private_details,
-        recurrence_rule: c.recurrence_rule,
-        next_due_at: c.next_due_at,
-        contact: c.contact_id ? contactsMap.get(c.contact_id) : null,
-      }));
+    const dueCommitments: DigestCommitment[] = (commitments as PrayerCommitment[])
+      .filter((c) => c.nextDueAt != null && c.nextDueAt <= now)
+      .map((c) => {
+        const contact = c.contactId ? contactsMap.get(c.contactId) ?? null : null;
+        return {
+          id: c.id,
+          title: c.title,
+          private_details: c.privateDetails,
+          schedule_kind: c.scheduleKind,
+          next_due_at: (c.nextDueAt as Date).toISOString(),
+          contact: contact
+            ? {
+                display_name: contact.displayName,
+                email: contact.email,
+                phone: contact.phone,
+                category: contact.category,
+              }
+            : null,
+        };
+      });
 
     // Generate formatted HTML & plain text digest
-    const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Friend';
+    const userName = user.name || user.email?.split('@')[0] || 'Friend';
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
     const subject = `Your Prayer Focus for ${dateStr} (${dueCommitments.length} to hold in prayer)`;
@@ -101,7 +126,7 @@ export async function GET(req: NextRequest) {
         const contactName = escapeHtml(item.contact?.display_name) || 'Personal Intention';
         const category = item.contact?.category ? `(${escapeHtml(item.contact.category)})` : '';
         const details = item.private_details ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">${escapeHtml(item.private_details)}</div>` : '';
-        
+
         return `
           <div style="padding: 12px 16px; margin-bottom: 10px; background: #f8fafc; border-left: 4px solid #d4a017; border-radius: 4px;">
             <strong style="color: #0f172a; font-size: 15px;">${idx + 1}. ${contactName} ${category}</strong>
@@ -152,9 +177,10 @@ export async function GET(req: NextRequest) {
       },
       message: 'Digest preview generated. Preview only — no mail provider is configured.',
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[api/prayer/digest] Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -165,34 +191,36 @@ export async function POST(req: NextRequest) {
     const expectedSecret = process.env.CRON_SECRET;
 
     // Check if called with authorized cron secret or user token
-    const isCron = expectedSecret && cronSecret === expectedSecret;
+    const isCron = Boolean(expectedSecret) && cronSecret === expectedSecret;
     const user = !isCron ? await getAuthenticatedUser(req) : null;
 
     if (!isCron && !user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.DATABASE_URL) {
       return NextResponse.json({
         success: true,
         preview: true,
         emailSent: false,
-        message: 'Supabase unconfigured; digest preview only, nothing mailed out.',
+        message: 'Database unconfigured; digest preview only, nothing mailed out.',
       });
     }
 
-    const supabase = getServerClient();
+    const db = await getDb();
 
     // If cron, find all users who have enabled email digests
     if (isCron) {
-      const { data: prefs, error: prefsErr } = await supabase
-        .from('prayer_notification_preferences')
-        .select('owner_id, email_enabled, timezone')
-        .eq('email_enabled', true);
+      const prefs = await db
+        .select({
+          userId: prayerNotificationPreferences.userId,
+          emailEnabled: prayerNotificationPreferences.emailEnabled,
+          timezone: prayerNotificationPreferences.timezone,
+        })
+        .from(prayerNotificationPreferences)
+        .where(eq(prayerNotificationPreferences.emailEnabled, true));
 
-      if (prefsErr) throw prefsErr;
-
-      const processedCount = (prefs || []).length;
+      const processedCount = prefs.length;
       return NextResponse.json({
         success: true,
         preview: true,
@@ -204,8 +232,9 @@ export async function POST(req: NextRequest) {
 
     // User-triggered POST returns today's digest summary
     return GET(req);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[api/prayer/digest] POST Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

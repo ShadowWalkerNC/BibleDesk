@@ -29,7 +29,7 @@ import PrayerEscalationModal from '@/components/PrayerEscalationModal/PrayerEsca
 import PrayerCare from '@/components/PrayerCare/PrayerCare';
 import ConnectedKnowledgeDrawer from '@/components/ConnectedKnowledgeDrawer';
 import { extractScriptureReferences, extractStrongsNumbers } from '@/lib/universalIndexer';
-import { getBrowserClient } from '@/lib/supabase';
+import { getAuthToken, getAuthUser } from '@/lib/client-auth';
 import { 
   COUNTRIES_SORTED, 
   getCountryByCode, 
@@ -134,7 +134,7 @@ export default function PrayerBoardPage() {
     id: '',
   });
 
-  // ── Prayer Care Workflow State (Local-first & Supabase synced) ───────────
+  // ── Prayer Care Workflow State (Local-first, synced to Railway PostgreSQL when signed in) ───────────
   const [contacts, setContacts] = useState<PrayerContact[]>([]);
   const [commitments, setCommitments] = useState<PrayerCommitment[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -204,14 +204,12 @@ export default function PrayerBoardPage() {
     }
 
     // 3. Auth Session Check
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-        const name = session.user.user_metadata?.name || session.user.email?.split('@')[0] || '';
-        setDisplayName(name);
-      }
-    });
+    const sessionUser = getAuthUser();
+    if (sessionUser) {
+      setUserId(sessionUser.id);
+      const name = sessionUser.name || sessionUser.email?.split('@')[0] || '';
+      setDisplayName(name);
+    }
 
     // 4. Check browser notification support
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -228,11 +226,10 @@ export default function PrayerBoardPage() {
       // B14: the Community Wall reads only the server's approved public rows.
       // Local draft/guest prayers are never mixed into the public feed — that
       // was the mock-success seam ("pinned to your local map view").
-      const supabase = getBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = getAuthToken();
       const headers: Record<string, string> = {};
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       let serverPrayers: PublicPrayerRequest[] = [];
@@ -274,11 +271,11 @@ export default function PrayerBoardPage() {
 
       if (data.targetLevel === 'atlas') {
         if (data.atlasConsent !== true) throw new Error('Confirm consent before submitting this prayer for public review.');
-        const { data: { session } } = await getBrowserClient().auth.getSession();
-        if (!session) throw new Error('Sign in before submitting a prayer for public review.');
+        const token = getAuthToken();
+        if (!token) throw new Error('Sign in before submitting a prayer for public review.');
         const res = await fetch('/api/prayer', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             request: commitment.private_details || commitment.title,
             display_name: 'BibleDesk member',
@@ -614,11 +611,10 @@ export default function PrayerBoardPage() {
   async function handlePreviewDigest() {
     setDigestSending(true);
     try {
-      const supabase = getBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = getAuthToken();
       const headers: Record<string, string> = {};
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       const res = await fetch('/api/prayer/digest', { headers });
@@ -714,10 +710,10 @@ export default function PrayerBoardPage() {
     setPrayers(prev => [optimisticPrayer, ...prev]);
 
     try {
-      const { data: { session } } = await getBrowserClient().auth.getSession();
+      const token = getAuthToken();
       const res = await fetch('/api/prayer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           request: newRequest.trim(),
           display_name: authorName,

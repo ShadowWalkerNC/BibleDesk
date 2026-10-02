@@ -13,7 +13,7 @@ import {
   Unplug,
 } from 'lucide-react';
 import { createGmailComposeUrl, type ScheduleKind } from '@/lib/prayer-care';
-import { getBrowserClient } from '@/lib/supabase';
+import { getAuthToken, subscribeAuth } from '@/lib/client-auth';
 import styles from './PrayerCare.module.css';
 
 type Contact = {
@@ -111,16 +111,12 @@ export default function PrayerCare() {
   }, [accessToken, api]);
 
   useEffect(() => {
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data }) => {
-      setAccessToken(data.session?.access_token ?? null);
+    setAccessToken(getAuthToken());
+    setSessionReady(true);
+    return subscribeAuth(() => {
+      setAccessToken(getAuthToken());
       setSessionReady(true);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAccessToken(session?.access_token ?? null);
-      setSessionReady(true);
-    });
-    return () => listener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {

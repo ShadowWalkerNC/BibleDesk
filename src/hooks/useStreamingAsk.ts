@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import type { BibleAnswer, TranslationId } from '@/types';
-import { getBrowserClient } from '@/lib/supabase';
 
 export interface StageProgress {
   stage: number;
@@ -29,6 +28,12 @@ export interface StreamingAskState {
 export interface UseStreamingAskReturn extends StreamingAskState {
   ask: (question: string, translation: TranslationId, isNonAI?: boolean) => void;
   retry: () => void;
+}
+
+/** Read the JWT token from localStorage (set by the login flow). */
+function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('bibledesk_token');
 }
 
 export function useStreamingAsk(): UseStreamingAskReturn {
@@ -60,7 +65,6 @@ export function useStreamingAsk(): UseStreamingAskReturn {
     }));
 
     if (isNonAI) {
-      // Direct Non-AI search mode
       fetch('/api/search/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,17 +96,15 @@ export function useStreamingAsk(): UseStreamingAskReturn {
       return;
     }
 
-    // AI Streaming Mode — Attach Supabase Auth Bearer token if logged in
+    // AI Streaming Mode — attach JWT Bearer token if logged in
     (async () => {
       try {
-        const supabase = getBrowserClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
+        const token = getStoredToken();
         const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-        if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`;
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
         if (userGeminiKey) {
           headers['x-gemini-api-key'] = userGeminiKey;
@@ -132,63 +134,62 @@ export function useStreamingAsk(): UseStreamingAskReturn {
         const decoder = new TextDecoder();
         let buffer = '';
 
-       
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split('\n\n');
-        buffer = parts.pop() ?? '';
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() ?? '';
 
-        for (const part of parts) {
-          const eventMatch = part.match(/^event: (\w+)/);
-          const dataMatch  = part.match(/^data: (.+)$/m);
-          if (!eventMatch || !dataMatch) continue;
+          for (const part of parts) {
+            const eventMatch = part.match(/^event: (\w+)/);
+            const dataMatch  = part.match(/^data: (.+)$/m);
+            if (!eventMatch || !dataMatch) continue;
 
-          const eventType = eventMatch[1];
-          let payload: unknown;
-          try { payload = JSON.parse(dataMatch[1]); } catch { continue; }
+            const eventType = eventMatch[1];
+            let payload: unknown;
+            try { payload = JSON.parse(dataMatch[1]); } catch { continue; }
 
-          switch (eventType) {
-            case 'stage': {
-              const p = payload as StageProgress;
-              setState((s) => ({ ...s, stages: [...s.stages, p] }));
-              break;
-            }
-            case 'answer': {
-              const p = payload as any;
-              const ans: BibleAnswer = p.answer || (p.id && p.dimensions ? p : null);
-              const slug: string = p.shareSlug || (ans?.id ? ans.id.slice(0, 8) : '');
-              setState((s) => ({
-                ...s,
-                answer: ans,
-                shareSlug: slug,
-              }));
-              break;
-            }
-            case 'rate_limit': {
-              const p = payload as RateLimitInfo;
-              setState((s) => ({ ...s, rateLimit: p }));
-              break;
-            }
-            case 'done': {
-              setState((s) => ({ ...s, status: 'done' }));
-              break;
-            }
-            case 'error': {
-              const p = payload as { message: string };
-              setState((s) => ({ ...s, status: 'error', error: p.message }));
-              break;
+            switch (eventType) {
+              case 'stage': {
+                const p = payload as StageProgress;
+                setState((s) => ({ ...s, stages: [...s.stages, p] }));
+                break;
+              }
+              case 'answer': {
+                const p = payload as any;
+                const ans: BibleAnswer = p.answer || (p.id && p.dimensions ? p : null);
+                const slug: string = p.shareSlug || (ans?.id ? ans.id.slice(0, 8) : '');
+                setState((s) => ({
+                  ...s,
+                  answer: ans,
+                  shareSlug: slug,
+                }));
+                break;
+              }
+              case 'rate_limit': {
+                const p = payload as RateLimitInfo;
+                setState((s) => ({ ...s, rateLimit: p }));
+                break;
+              }
+              case 'done': {
+                setState((s) => ({ ...s, status: 'done' }));
+                break;
+              }
+              case 'error': {
+                const p = payload as { message: string };
+                setState((s) => ({ ...s, status: 'error', error: p.message }));
+                break;
+              }
             }
           }
         }
+      } catch {
+        setState((s) => ({ ...s, status: 'error', error: 'Network error. Please try again.' }));
       }
-    } catch {
-      setState((s) => ({ ...s, status: 'error', error: 'Network error. Please try again.' }));
-    }
-  })();
-}, []);
+    })();
+  }, []);
 
   const retry = useCallback(() => {
     if (lastQ) ask(lastQ, lastT, lastIsNonAI);

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { apiError } from '@/lib/api-response';
 import { googleApi } from '@/lib/google-oauth';
 import { requireUuid } from '@/lib/prayer-care';
-import { requireSupabaseUser } from '@/lib/server-auth';
-import { getServerClient } from '@/lib/supabase';
+import { requireUser } from '@/lib/server-auth';
+import { getDb } from '@/db';
+import { prayerCommitments, prayerFollowups } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 type GoogleDraft = { id: string; message?: { id?: string } };
 
@@ -20,7 +23,7 @@ function mimeHeader(value: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireSupabaseUser(request);
+    const user = await requireUser(request);
     const body = await request.json() as Record<string, unknown>;
     if (body.reviewed !== true) {
       return NextResponse.json({ error: 'Review the recipient and message before creating a draft' }, { status: 400 });
@@ -31,14 +34,18 @@ export async function POST(request: NextRequest) {
     const message = requiredText(body.message, 'message', 10000);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) throw new Error('recipient is invalid');
 
-    const client = getServerClient();
-    const { data: commitment, error } = await client
-      .from('prayer_commitments')
-      .select('id, contact_id')
-      .eq('id', commitmentId)
-      .eq('owner_id', user.id)
-      .maybeSingle();
-    if (error) throw new Error(`Unable to load prayer commitment: ${error.message}`);
+    const db = await getDb();
+    const commitmentRows = await db
+      .select({ id: prayerCommitments.id, contactId: prayerCommitments.contactId })
+      .from(prayerCommitments)
+      .where(
+        and(
+          eq(prayerCommitments.id, commitmentId),
+          eq(prayerCommitments.userId, user.id)
+        )
+      )
+      .limit(1);
+    const commitment = commitmentRows[0] ?? null;
     if (!commitment) return NextResponse.json({ error: 'Prayer commitment not found' }, { status: 404 });
 
     const rawMime = [
@@ -56,27 +63,36 @@ export async function POST(request: NextRequest) {
       'https://gmail.googleapis.com/gmail/v1/users/me/drafts',
       { method: 'POST', body: JSON.stringify({ message: { raw } }) },
     );
-    const now = new Date().toISOString();
-    const { data: followup, error: saveError } = await client
-      .from('prayer_followups')
-      .insert({
-        owner_id: user.id,
-        contact_id: commitment.contact_id,
+    const now = new Date();
+    const followupRows = await db
+      .insert(prayerFollowups)
+      .values({
+        id: uuidv4(),
+        userId: user.id,
+        contactId: commitment.contactId,
         channel: 'email',
         recipient,
         subject,
         message,
         status: 'external_draft',
-        google_draft_id: draft.id,
-        reviewed_at: now,
-        approved_at: now,
+        googleDraftId: draft.id,
+        reviewedAt: now,
+        approvedAt: now,
       })
-      .select('id, status, recipient, subject, google_draft_id, created_at')
-      .single();
-    if (saveError) throw new Error(`Gmail draft was created but its metadata could not be saved: ${saveError.message}`);
-    return NextResponse.json({ draft: followup }, { status: 201 });
+      .returning();
+    const followup = followupRows[0];
+    if (!followup) throw new Error('Gmail draft was created but its metadata could not be saved');
+    return NextResponse.json({
+      draft: {
+        id: followup.id,
+        status: followup.status,
+        recipient: followup.recipient,
+        subject: followup.subject,
+        google_draft_id: followup.googleDraftId,
+        created_at: followup.createdAt.toISOString(),
+      },
+    }, { status: 201 });
   } catch (error) {
     return apiError(error, 'POST /api/prayer-care/followups/gmail-draft');
   }
 }
-

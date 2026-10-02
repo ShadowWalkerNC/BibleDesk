@@ -1,8 +1,12 @@
 // BibleDesk — Bookmarks helpers
-// Synced to public.bookmarks with user_id and Row-Level Security.
+// Uses Railway PostgreSQL via Drizzle ORM.
 // SERVER ONLY
 
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { bookmarks as bookmarksTable } from '@/db/schema';
+import { eq, and, ilike, desc, count as countFn } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+import type { Bookmark as BookmarkRow } from '@/db/schema';
 
 export interface Bookmark {
   id: string;
@@ -26,62 +30,98 @@ export async function addBookmark(
   confidence: string | null,
   userId?: string | null
 ): Promise<Bookmark | null> {
-  const client = getServerClient();
-  const payload: Record<string, any> = {
-    answer_id: answerId,
-    share_slug: shareSlug,
-    question,
-    summary,
-    translation,
-    confidence,
-  };
+  try {
+    const db = await getDb();
+    const id = uuidv4();
 
-  if (userId) {
-    payload.user_id = userId;
-  }
+    const rows = await db
+      .insert(bookmarksTable)
+      .values({
+        id,
+        userId: userId ?? null,
+        answerId,
+        shareSlug,
+        question,
+        summary,
+        translation,
+        confidence,
+      })
+      .onConflictDoUpdate({
+        target: userId
+          ? [bookmarksTable.userId, bookmarksTable.answerId]
+          : [bookmarksTable.answerId],
+        set: {
+          shareSlug,
+          question,
+          summary,
+          translation,
+          confidence,
+        },
+      })
+      .returning();
 
-  const { data, error } = await client
-    .from('bookmarks')
-    .upsert(payload, {
-      onConflict: userId ? 'user_id,answer_id' : 'answer_id',
-      ignoreDuplicates: false,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('addBookmark error:', error.message);
+    if (rows.length === 0) return null;
+    const r = rows[0];
+    return {
+      id: r.id,
+      user_id: r.userId ?? undefined,
+      answer_id: r.answerId,
+      share_slug: r.shareSlug,
+      question: r.question,
+      summary: r.summary ?? null,
+      translation: r.translation ?? null,
+      confidence: r.confidence ?? null,
+      note: r.note ?? null,
+      created_at: r.createdAt.toISOString(),
+    };
+  } catch (err) {
+    console.error('addBookmark error:', err);
     return null;
   }
-  return data as Bookmark;
 }
 
 export async function removeBookmark(answerId: string, userId?: string | null): Promise<boolean> {
-  const client = getServerClient();
-  let query = client.from('bookmarks').delete().eq('answer_id', answerId);
-
-  if (userId) {
-    query = query.eq('user_id', userId);
-  }
-
-  const { error } = await query;
-  if (error) {
-    console.error('removeBookmark error:', error.message);
+  try {
+    const db = await getDb();
+    if (userId) {
+      await db
+        .delete(bookmarksTable)
+        .where(
+          and(
+            eq(bookmarksTable.answerId, answerId),
+            eq(bookmarksTable.userId, userId)
+          )
+        );
+    } else {
+      await db
+        .delete(bookmarksTable)
+        .where(eq(bookmarksTable.answerId, answerId));
+    }
+    return true;
+  } catch (err) {
+    console.error('removeBookmark error:', err);
     return false;
   }
-  return true;
 }
 
 export async function isBookmarked(answerId: string, userId?: string | null): Promise<boolean> {
-  const client = getServerClient();
-  let query = client.from('bookmarks').select('id').eq('answer_id', answerId);
-
-  if (userId) {
-    query = query.eq('user_id', userId);
+  try {
+    const db = await getDb();
+    const rows = userId
+      ? await db
+          .select({ id: bookmarksTable.id })
+          .from(bookmarksTable)
+          .where(and(eq(bookmarksTable.answerId, answerId), eq(bookmarksTable.userId, userId)))
+          .limit(1)
+      : await db
+          .select({ id: bookmarksTable.id })
+          .from(bookmarksTable)
+          .where(eq(bookmarksTable.answerId, answerId))
+          .limit(1);
+    return rows.length > 0;
+  } catch {
+    return false;
   }
-
-  const { data } = await query.maybeSingle();
-  return !!data;
 }
 
 export async function getBookmarks(opts?: {
@@ -90,29 +130,49 @@ export async function getBookmarks(opts?: {
   search?: string;
   userId?: string | null;
 }): Promise<{ bookmarks: Bookmark[]; total: number }> {
-  const client = getServerClient();
-  const page  = opts?.page  ?? 1;
-  const limit = opts?.limit ?? 20;
-  const offset = (page - 1) * limit;
+  try {
+    const db = await getDb();
+    const page  = opts?.page  ?? 1;
+    const limit = opts?.limit ?? 20;
+    const offset = (page - 1) * limit;
 
-  let query = client
-    .from('bookmarks')
-    .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    const conditions = [];
+    if (opts?.userId) conditions.push(eq(bookmarksTable.userId, opts.userId));
+    if (opts?.search) conditions.push(ilike(bookmarksTable.question, `%${opts.search}%`));
 
-  if (opts?.userId) {
-    query = query.eq('user_id', opts.userId);
-  }
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-  if (opts?.search) {
-    query = query.ilike('question', `%${opts.search}%`);
-  }
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select()
+        .from(bookmarksTable)
+        .where(where)
+        .orderBy(desc(bookmarksTable.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ c: countFn() })
+        .from(bookmarksTable)
+        .where(where),
+    ]);
 
-  const { data, count, error } = await query;
-  if (error) {
-    console.error('getBookmarks error:', error.message);
+    return {
+      bookmarks: rows.map((r: BookmarkRow) => ({
+        id: r.id,
+        user_id: r.userId ?? undefined,
+        answer_id: r.answerId,
+        share_slug: r.shareSlug,
+        question: r.question,
+        summary: r.summary ?? null,
+        translation: r.translation ?? null,
+        confidence: r.confidence ?? null,
+        note: r.note ?? null,
+        created_at: r.createdAt.toISOString(),
+      })),
+      total: Number(totalRows[0]?.c ?? 0),
+    };
+  } catch (err) {
+    console.error('getBookmarks error:', err);
     return { bookmarks: [], total: 0 };
   }
-  return { bookmarks: (data ?? []) as Bookmark[], total: count ?? 0 };
 }

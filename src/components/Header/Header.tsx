@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Search, LogIn, LogOut, Menu, X } from 'lucide-react';
-import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
+import { getAuthUser, isLocalStudyProfileEnabled, signOutLocal, subscribeAuth } from '@/lib/client-auth';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import styles from './Header.module.css';
 
@@ -37,33 +37,12 @@ export default function Header() {
 
   useEffect(() => {
     function checkUser() {
-      const supabase = getBrowserClient();
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-        } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
-          const local = localStorage.getItem('bibledesk_local_user');
-          if (local) {
-            try {
-              setUser(JSON.parse(local));
-            } catch {
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
-        } else {
-          setUser(null);
-        }
-      });
-    }
-
-    checkUser();
-    const supabase = getBrowserClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
+      const sessionUser = getAuthUser();
+      if (sessionUser) {
+        setUser(sessionUser);
+        return;
+      }
+      if (isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {
@@ -71,30 +50,18 @@ export default function Header() {
           } catch {
             setUser(null);
           }
-        } else {
-          setUser(null);
+          return;
         }
-      } else {
-        setUser(null);
       }
-    });
+      setUser(null);
+    }
 
-    const handleStorage = () => checkUser();
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      subscription.unsubscribe();
-      window.removeEventListener('storage', handleStorage);
-    };
+    checkUser();
+    return subscribeAuth(checkUser);
   }, []);
 
   async function handleSignOut() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('bibledesk_local_user');
-      window.dispatchEvent(new Event('storage'));
-    }
-    const supabase = getBrowserClient();
-    await supabase.auth.signOut();
+    signOutLocal();
     setUser(null);
     router.push('/');
     router.refresh();
@@ -142,7 +109,7 @@ export default function Header() {
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>
-                {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
+                {user.name || user.user_metadata?.name || user.email?.split('@')[0]}
               </span>
               <button onClick={handleSignOut} className={styles.signOutBtn} title="Sign Out">
                 <LogOut size={14} />
@@ -192,7 +159,7 @@ export default function Header() {
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderTop: '1px solid rgba(107, 142, 123, 0.2)', marginTop: '6px' }}>
               <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>
-                {user.user_metadata?.name || user.email?.split('@')[0]}
+                {user.name || user.user_metadata?.name || user.email?.split('@')[0]}
               </span>
               <button onClick={handleSignOut} className={styles.signOutBtn}>
                 <LogOut size={14} />

@@ -1,7 +1,7 @@
 /**
  * GET /api/history
  *
- * Returns paginated answer history from Supabase.
+ * Returns paginated answer history from Railway PostgreSQL (Drizzle).
  *
  * Query params:
  *   page        — 1-based page number (default 1)
@@ -12,10 +12,13 @@
  * Response:
  *   { answers: HistoryAnswer[], total: number, page: number, limit: number }
  *
- * Returns { answers: [], total: 0 } gracefully if Supabase is not configured.
+ * Returns { answers: [], total: 0 } gracefully when the database is unavailable.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getDb } from '@/db';
+import { answers } from '@/db/schema';
+import { and, count, desc, ilike, sql, type SQL } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,51 +30,51 @@ export async function GET(req: NextRequest) {
   const search     = searchParams.get('search')?.trim() ?? '';
   const confidence = searchParams.get('confidence')?.trim() ?? '';
 
-  const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supaKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supaUrl || !supaKey) {
-    return NextResponse.json({ answers: [], total: 0, page, limit });
-  }
-
   const offset = (page - 1) * limit;
 
-  // Build Supabase REST query params
-  const params = new URLSearchParams({
-    select:  'id,question,summary,confidence,translation_used,status,created_at',
-    order:   'created_at.desc',
-    offset:  String(offset),
-    limit:   String(limit),
-  });
-
-  if (search)     params.set('question', `ilike.*${search}*`);
-  if (confidence) params.set('confidence', `eq.${confidence}`);
-
   try {
-    // Fetch page
-    const res = await fetch(
-      `${supaUrl}/rest/v1/answers?${params}`,
-      {
-        headers: {
-          apikey:        supaKey,
-          Authorization: `Bearer ${supaKey}`,
-          'Content-Range': '0-*',
-          Prefer:        'count=exact',
-        },
-      }
-    );
+    const db = await getDb();
 
-    if (!res.ok) {
-      return NextResponse.json({ answers: [], total: 0, page, limit });
+    const conditions: SQL[] = [];
+    if (search) conditions.push(ilike(answers.question, `%${search}%`));
+    if (confidence) {
+      conditions.push(sql`${answers.answerJson}->>'confidence' = ${confidence}`);
     }
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const answers = await res.json();
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select()
+        .from(answers)
+        .where(where)
+        .orderBy(desc(answers.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ c: count() })
+        .from(answers)
+        .where(where),
+    ]);
 
-    // Supabase returns total count in Content-Range header: "0-19/543"
-    const range = res.headers.get('content-range') ?? '';
-    const total = parseInt(range.split('/')[1] ?? '0', 10) || answers.length;
+    const mapped = rows.map((row) => {
+      const answerJson = row.answerJson as {
+        summary?: string;
+        confidence?: string;
+      };
+      return {
+        id: row.id,
+        question: row.question,
+        summary: answerJson?.summary ?? null,
+        confidence: answerJson?.confidence ?? null,
+        translation_used: row.translation,
+        status: row.status,
+        created_at: row.createdAt.toISOString(),
+      };
+    });
 
-    return NextResponse.json({ answers, total, page, limit });
+    const total = Number(totalRows[0]?.c ?? mapped.length);
+
+    return NextResponse.json({ answers: mapped, total, page, limit });
   } catch {
     return NextResponse.json({ answers: [], total: 0, page, limit });
   }

@@ -2,7 +2,9 @@
 // Admin invites a new moderator by email.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { moderators } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { inviteModerator } from '@/lib/moderation';
 import { getActiveModerator } from '@/lib/mod-auth';
 
@@ -57,16 +59,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const svc = getServerClient();
+  const db = await getDb();
   const normalizedEmail = email.toLowerCase().trim();
 
-  const { data: existing } = await svc
-    .from('moderators')
-    .select('id')
-    .eq('email', normalizedEmail)
-    .maybeSingle();
+  const existingRows = await db
+    .select({ id: moderators.id })
+    .from(moderators)
+    .where(eq(moderators.email, normalizedEmail))
+    .limit(1);
 
-  if (existing) {
+  if (existingRows[0]) {
     return NextResponse.json(
       { success: false, error: 'This email is already registered as a moderator.', code: 'DUPLICATE' },
       { status: 409 }

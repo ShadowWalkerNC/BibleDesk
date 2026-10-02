@@ -24,7 +24,7 @@ import {
   Compass,
   Activity,
 } from 'lucide-react';
-import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
+import { authHeaders, getAuthUser, isLocalStudyProfileEnabled, signOutLocal, subscribeAuth } from '@/lib/client-auth';
 import { getUserTier, type SubscriptionTier } from '@/lib/tiers';
 import QuickJumpModal from '@/components/QuickJumpModal/QuickJumpModal';
 import ApiKeyModal from '@/components/ApiKeyModal/ApiKeyModal';
@@ -81,87 +81,38 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   // Auth state
   useEffect(() => {
     function checkUser() {
-      const supabase = getBrowserClient();
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-          if (isSupabaseConfigured()) {
-            supabase
-              .from('profiles')
-              .select('subscription_tier, subscription_status')
-              .eq('id', session.user.id)
-              .maybeSingle()
-              .then(({ data }) => {
-                setUserTier(getUserTier(data));
-              });
-          } else {
-            setUserTier(getUserTier(null));
-          }
-        } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
-          const local = localStorage.getItem('bibledesk_local_user');
-          if (local) {
-            try {
-              setUser(JSON.parse(local));
-              setUserTier(getUserTier(null));
-            } catch {
-              setUser(null);
-              setUserTier('free');
-            }
-          } else {
-            setUser(null);
-            setUserTier('free');
-          }
-        } else {
-          setUser(null);
-          setUserTier('free');
-        }
-      });
-    }
-
-    checkUser();
-    const supabase = getBrowserClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        if (isSupabaseConfigured()) {
-          supabase
-            .from('profiles')
-            .select('subscription_tier, subscription_status')
-            .eq('id', session.user.id)
-            .maybeSingle()
-            .then(({ data }) => {
-              setUserTier(getUserTier(data));
-            });
-        } else {
-          setUserTier(getUserTier(null));
-        }
-      } else if (!isSupabaseConfigured() && isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
+      const sessionUser = getAuthUser();
+      if (sessionUser) {
+        setUser(sessionUser);
+        fetch('/api/auth/me', { headers: authHeaders(), cache: 'no-store' })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            const tier = data?.tier;
+            setUserTier(
+              tier === 'pro' || tier === 'ministry' || tier === 'lifetime' ? tier : getUserTier(null)
+            );
+          })
+          .catch(() => setUserTier(getUserTier(null)));
+        return;
+      }
+      if (isLocalStudyProfileEnabled() && typeof window !== 'undefined') {
         const local = localStorage.getItem('bibledesk_local_user');
         if (local) {
           try {
             setUser(JSON.parse(local));
-            setUserTier(getUserTier(null));
           } catch {
             setUser(null);
-            setUserTier('free');
           }
-        } else {
-          setUser(null);
-          setUserTier('free');
+          setUserTier(getUserTier(null));
+          return;
         }
-      } else {
-        setUser(null);
-        setUserTier('free');
       }
-    });
+      setUser(null);
+      setUserTier('free');
+    }
 
-    const handleStorage = () => checkUser();
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      subscription.unsubscribe();
-      window.removeEventListener('storage', handleStorage);
-    };
+    checkUser();
+    return subscribeAuth(checkUser);
   }, []);
 
   // Ctrl+K shortcut
@@ -182,13 +133,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }, [pathname]);
 
   async function handleSignOut() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('bibledesk_local_user');
-      window.dispatchEvent(new Event('storage'));
-    }
-    const supabase = getBrowserClient();
-    await supabase.auth.signOut();
+    signOutLocal();
     setUser(null);
+    setUserTier('free');
     router.push('/');
     router.refresh();
   }
@@ -316,7 +263,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {!collapsed && (
                 <div className={styles.userMeta}>
                   <span className={styles.userName}>
-                    {!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}
+                    {user.name || user.user_metadata?.name || user.email?.split('@')[0]}
                   </span>
                   <Link
                     href="/pricing"
@@ -517,7 +464,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <div className={styles.mobileUserRow}>
                   <div className={styles.userAvatar}><User size={14} /></div>
                   <div className={styles.userMeta}>
-                    <span className={styles.userName}>{!isSupabaseConfigured() ? 'Local study profile' : (user.user_metadata?.name || user.email?.split('@')[0])}</span>
+                    <span className={styles.userName}>{user.name || user.user_metadata?.name || user.email?.split('@')[0]}</span>
                     <Link
                       href="/pricing"
                       className={userTier === 'pro' || userTier === 'ministry' ? styles.tierBadgePro : styles.tierBadgeFree}

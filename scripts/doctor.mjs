@@ -118,20 +118,21 @@ if (appUrl) {
   warn('NEXT_PUBLIC_APP_URL is not defined in .env.local', 'Defaulting to http://localhost:3000 (detected Railway/local fallback)');
 }
 
-// 5. Supabase Configuration check
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// 5. Database (Railway PostgreSQL) & JWT auth check
+const databaseUrl = process.env.DATABASE_URL;
+const jwtSecret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
 
-if (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('placeholder')) {
-  pass(`Supabase Connection: Configured (${supabaseUrl})`);
-  if (supabaseServiceKey) {
-    pass('Supabase Service Role Key: Present (Server operations enabled)');
-  } else {
-    warn('SUPABASE_SERVICE_ROLE_KEY is unset', 'Server-only operations and RAG moderation will fall back to mock/offline');
-  }
+if (databaseUrl && !databaseUrl.includes('placeholder')) {
+  const redacted = databaseUrl.replace(/:\/\/[^@]+@/, '://***@');
+  pass(`Railway PostgreSQL: Configured (${redacted})`);
 } else {
-  warn('Supabase is not configured', 'Running in local/offline storage mode. Cloud sync & accounts will be local-only.');
+  warn('DATABASE_URL is not configured', 'Running in embedded PGlite mode. Set DATABASE_URL to a Railway PostgreSQL connection string for shared production data.');
+}
+
+if (jwtSecret) {
+  pass('JWT Authentication: Secret configured (stateless Bearer sessions enabled)');
+} else {
+  warn('JWT_SECRET is unset', 'Auth API (/api/auth/*) returns 503 and login falls back to local-only study profiles in development.');
 }
 
 // 6. AI Engine Configuration check

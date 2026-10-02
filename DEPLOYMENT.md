@@ -1,6 +1,6 @@
 # BibleDesk — Turnkey Deployment & Installation Guide
 
-A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on cloud platforms (Railway, Vercel, Supabase).
+A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on cloud platforms (Railway, Vercel).
 
 ---
 
@@ -18,7 +18,7 @@ BibleDesk is built on Next.js 16 (App Router) and React 19. It operates in two c
 
 2. **Pro Cloud & Ministry SaaS**:
    - Hosted AI study assistant quota (250–1000 answers/day) with zero key setup.
-   - Real-time multi-device cloud synchronization for notes and highlights via Supabase PostgreSQL + RLS.
+   - Real-time multi-device cloud synchronization for notes and highlights via Railway PostgreSQL.
    - 1-click Obsidian Markdown Vault (`.zip`) and formatted PDF study guide exports.
    - Google Calendar Prayer Care rhythm export and reviewed Gmail draft generation.
    - Self-hosters can unlock all Pro capabilities for their community by setting `NEXT_PUBLIC_SELF_HOSTED=true`.
@@ -82,13 +82,13 @@ Run BibleDesk in a production container with standalone Next.js 16 runtime:
 ### Architecture: Unified Web App & API Server
 BibleDesk is built on Next.js 16 with the App Router. The built application (`standalone` mode running `server.js`) **contains both the web client and all backend API routes** (`/api/bible`, `/api/ask`, `/api/research`, `/api/mcp`, `/api/health`, etc.). **You do not need a separate API server or secondary microservice.** The single container processes both UI page requests and backend JSON/streaming API requests.
 
-### Step 1: Initialize the Supabase Database (Optional for Cloud Sync)
-1. Create a project in [Supabase](https://supabase.com).
-2. Go to **Database** → **Extensions** and ensure `vector` (pgvector) is enabled.
-3. Open **SQL Editor** → **New query**.
-4. Copy the entire contents of [`supabase/schema-init.sql`](supabase/schema-init.sql) and click **Run**.
-   - *This single file consolidates all base tables, RLS policies, RPC functions, and SaaS subscription columns.*
-   - *Note: If Supabase is omitted, BibleDesk automatically operates in self-contained local storage mode.*
+### Step 1: Provision Railway PostgreSQL (Optional for Cloud Sync)
+1. In Railway, click **New** → **Database** → **PostgreSQL** (or attach any PostgreSQL 15+ with pgvector).
+2. Ensure the `vector` (pgvector) extension is enabled for RAG similarity search.
+3. Set `DATABASE_URL` to the Railway connection string (`${{Postgres.DATABASE_URL}}`).
+4. Run `npm run db:migrate` (or let the Docker CMD apply the `drizzle/` migrations automatically on first boot).
+   - *The `drizzle/` chain creates all 35 tables: accounts, profiles, answers, prayer, Prayer Care, billing, graph, and study resources.*
+   - *Note: If `DATABASE_URL` is omitted, BibleDesk automatically operates in self-contained embedded (PGlite) mode.*
 
 ### Step 2: Configure Environment Variables
 In your Railway (or Vercel) project environment settings, add the following variables:
@@ -96,9 +96,9 @@ In your Railway (or Vercel) project environment settings, add the following vari
 | Variable | Required? | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_APP_URL` | Recommended | Canonical HTTPS URL (e.g. `https://bibledesk.up.railway.app`). If unset, Railway's assigned public domain is detected automatically. |
-| `NEXT_PUBLIC_SUPABASE_URL` | Optional | Supabase project URL (`https://your-project.supabase.co`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional | Supabase client anon public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Optional | Server-only secret key (bypasses RLS for secure routes) |
+| `DATABASE_URL` | Recommended | Railway PostgreSQL connection string (enables accounts, cloud sync, prayer) |
+| `JWT_SECRET` | Recommended | Secret for stateless auth sessions (`openssl rand -hex 32`) |
+| `PGLITE_DATA_DIR` | Optional | Embedded database directory when `DATABASE_URL` is unset |
 | `GEMINI_API_KEY` | Recommended | Google Gemini key for hosted AI study assistant |
 | `OPENAI_API_KEY` | Recommended | OpenAI key for text-embedding-3-small pgvector RAG |
 | `IP_HASH_SALT` | Recommended | Secret salt for SHA-256 rate limiting (`openssl rand -hex 16`) |
@@ -138,7 +138,7 @@ The tool validates:
 - Bundled Bible translation files integrity.
 - Strong's Greek/Hebrew lexicons and TSK cross-references.
 - Canonical app origin formatting.
-- Supabase credentials and service-role privileges.
+- Railway PostgreSQL (`DATABASE_URL`) and JWT secret configuration.
 - AI keys (Gemini, OpenAI RAG).
 - Rate limiter salt and MCP secrets.
 - Stripe billing integration.

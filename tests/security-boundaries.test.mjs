@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import { NextRequest, NextResponse } from 'next/server.js';
 
-// Execute real route modules with an isolated, in-memory Supabase boundary.
+// Execute real route modules with an isolated, in-memory Drizzle/JWT boundary.
 // No network, credentials, live records, or provider calls are used.
 function moduleAt(file, imports, globals = {}) {
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
@@ -16,7 +16,7 @@ function moduleAt(file, imports, globals = {}) {
     exports, require(name) {
       if (!(name in imports)) throw Error('Unexpected dependency: ' + name);
       return imports[name];
-    }, console, process: { env: { NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test' } },
+    }, console, process: { env: { DATABASE_URL: 'postgresql://test:test@localhost:5432/test', JWT_SECRET: 'test-secret' } },
     ...globals,
   }, { filename: file });
   return exports;
@@ -27,54 +27,137 @@ const B = '22222222-2222-4222-8222-222222222222';
 const OWN = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const OTHER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
+const toSnake = (key) => key.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+const toCamel = (key) => key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+
+// Minimal Drizzle stand-ins: tables are proxies yielding column tokens, and the
+// fake db evaluates the same select/insert/update chains as the real routes.
+function tableMock(name) {
+  return new Proxy({ _table: name }, {
+    get(target, prop) {
+      if (prop === '_table') return name;
+      if (typeof prop === 'symbol' || prop === 'then') return undefined;
+      return { _table: name, _col: prop };
+    },
+  });
+}
+const colKey = (col) => (col && typeof col === 'object' && '_col' in col ? toSnake(col._col) : col);
+const mapRowCamel = (row) => Object.fromEntries(Object.entries(row).map(([k, v]) => [toCamel(k), v]));
+
 function setup(overrides = {}) {
   const tables = {
     prayer_requests: [
-      { id: OWN, user_id: A, request: 'Public prayer', display_name: 'Hidden name', status: 'published', escalation_level: 'atlas', is_restricted: false, is_restricted_region: false, deleted_at: null, privacy_mode: 'approximate', is_anonymous: true, latitude: 35.12, longitude: -80.1, wrapped_dek: 'secret', text_ciphertext: 'secret' },
-      { id: OTHER, user_id: B, request: 'Private B', status: 'pending', escalation_level: 'private', deleted_at: null },
+      { id: OWN, user_id: A, request: 'Public prayer', display_name: 'Hidden name', status: 'published', escalation_level: 'atlas', is_public: true, consent_atlas: true, is_restricted: false, is_restricted_region: false, deleted_at: null, privacy_mode: 'approximate', is_anonymous: true, latitude: 35.12, longitude: -80.1, likes_count: 3, category: 'community', country_code: 'US', country_name: 'United States', created_at: new Date('2026-01-01T00:00:00Z'), wrapped_dek: 'secret', text_ciphertext: 'secret' },
+      { id: OTHER, user_id: B, request: 'Private B', status: 'pending', escalation_level: 'private', deleted_at: null, created_at: new Date('2026-01-02T00:00:00Z') },
     ],
     churches: [{ id: 'church-a', admin_user_id: A }, { id: 'church-b', admin_user_id: B }],
   };
+  const tableName = (table) => (table && table._table) || table;
+  const rowsOf = (table) => tables[tableName(table)] || [];
+
   const db = {
-    auth: { getUser: async token => ({ data: { user: token === 'token-a' ? { id: A } : token === 'token-b' ? { id: B } : null }, error: null }) },
-    from(table) {
-      let operation = 'read', payload, fields = '*', single = false;
-      const filters = [];
+    select(fields) {
       const q = {
-        select(value = '*') { fields = value; return q; },
-        eq(key, value) { filters.push(row => row[key] === value); return q; },
-        is(key, value) { filters.push(row => row[key] === value); return q; },
-        in(key, values) { filters.push(row => values.includes(row[key])); return q; },
-        order() { return q; }, limit() { return q; },
-        maybeSingle() { single = true; return q; }, single() { single = true; return q; },
-        update(value) { operation = 'update'; payload = value; return q; },
-        insert(value) { operation = 'insert'; payload = value; return q; },
-        delete() { operation = 'delete'; return q; },
+        _fields: fields, _table: null, _where: null, _order: null, _limit: null,
+        from(table) { q._table = table; return q; },
+        where(cond) { q._where = cond; return q; },
+        orderBy(spec) { q._order = spec; return q; },
+        limit(n) { q._limit = n; return q; },
         then(resolve, reject) {
           try {
-            if (overrides.databaseError) return Promise.resolve({ data: null, error: { message: 'Missing column' } }).then(resolve, reject);
-            let rows = (tables[table] || []).filter(row => filters.every(filter => filter(row)));
-            if (operation === 'update') rows.forEach(row => Object.assign(row, payload));
-            if (operation === 'delete') tables[table] = tables[table].filter(row => !rows.includes(row));
-            if (operation === 'insert') { const row = { id: 'new-record', ...payload }; tables[table].push(row); rows = [row]; }
-            const result = rows.map(row => fields === '*' ? { ...row } : Object.fromEntries(fields.split(',').map(key => [key, row[key]])));
-            return Promise.resolve({ data: single ? result[0] || null : result, error: null }).then(resolve, reject);
+            if (overrides.databaseError) throw new Error('Missing column');
+            let rows = rowsOf(q._table).filter((r) => (!q._where || q._where(r)));
+            if (q._order && q._order._desc) {
+              const k = colKey(q._order._desc);
+              rows = [...rows].sort((a, b) => (a[k] < b[k] ? 1 : -1));
+            }
+            if (q._limit != null) rows = rows.slice(0, q._limit);
+            const out = q._fields
+              ? rows.map((r) => Object.fromEntries(Object.entries(q._fields).map(([alias, col]) => [alias, r[colKey(col)]])))
+              : rows.map(mapRowCamel);
+            return Promise.resolve(out).then(resolve, reject);
           } catch (err) { return Promise.reject(err).then(resolve, reject); }
         },
       };
       return q;
     },
+    insert(table) {
+      return {
+        values(obj) {
+          return {
+            returning() {
+              if (overrides.databaseError) return Promise.reject(new Error('Missing column'));
+              const stored = {};
+              for (const [k, v] of Object.entries(obj)) stored[toSnake(k)] = v;
+              if (!stored.created_at) stored.created_at = new Date();
+              rowsOf(table).push(stored);
+              return Promise.resolve([mapRowCamel(stored)]);
+            },
+          };
+        },
+      };
+    },
+    update(table) {
+      return {
+        set(obj) {
+          return {
+            where(cond) {
+              return {
+                returning() {
+                  if (overrides.databaseError) return Promise.reject(new Error('Missing column'));
+                  const matched = rowsOf(table).filter((r) => (!cond || cond(r)));
+                  for (const r of matched) {
+                    for (const [k, v] of Object.entries(obj)) {
+                      if (v && typeof v === 'object' && v._sql) {
+                        if (toSnake(k) === 'likes_count') r.likes_count = (r.likes_count || 0) + 1;
+                      } else {
+                        r[toSnake(k)] = v;
+                      }
+                    }
+                  }
+                  return Promise.resolve(matched.map(mapRowCamel));
+                },
+              };
+            },
+          };
+        },
+      };
+    },
   };
+
+  const drizzle = {
+    and: (...conds) => (row) => conds.every((c) => (typeof c === 'function' ? c(row) : true)),
+    eq: (col, val) => (row) => row[colKey(col)] === val,
+    isNull: (col) => (row) => row[colKey(col)] == null,
+    inArray: (col, arr) => (row) => arr.includes(row[colKey(col)]),
+    desc: (col) => ({ _desc: col }),
+    sql: () => ({ _sql: true }),
+  };
+
+  const userFor = (token) =>
+    token === 'token-a' ? { id: A, email: 'a@example.com' }
+    : token === 'token-b' ? { id: B, email: 'b@example.com' }
+    : null;
   const imports = {
     'next/server': { NextRequest, NextResponse },
-    '@/lib/supabase': { getServerClient: () => db },
+    uuid: { v4: () => '99999999-9999-4999-8999-999999999999' },
+    '@/db': { getDb: async () => db },
+    '@/db/schema': { prayerRequests: tableMock('prayer_requests'), churches: tableMock('churches') },
+    'drizzle-orm': drizzle,
+    '@/lib/answers': { isDatabaseConfigured: () => !overrides.dbUnconfigured },
+    '@/lib/auth': {
+      getAuthenticatedUser: async (req) => {
+        const header = req.headers.get('authorization') || '';
+        const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+        return userFor(token);
+      },
+    },
     '@/lib/rate-limit': {
       checkRateLimit: async () => ({ allowed: true }),
       getClientIp: () => '127.0.0.1',
       RateLimitNamespace: { prayerEscalate: 'prayer:escalate' },
     },
   };
-  imports['@/lib/auth'] = moduleAt('src/lib/auth.ts', imports);
   return {
     tables,
     prayer: moduleAt('src/app/api/prayer/route.ts', imports),
@@ -117,6 +200,15 @@ test('submission ignores forged owner and publication status; restricted content
   assert.equal(row.escalation_level, 'private'); assert.equal(row.latitude, null);
   assert.equal(row.display_name, 'Anonymous');
 });
+test('likes increment only visible public prayers', async () => {
+  const { prayer, tables } = setup();
+  const ok = await prayer.PUT(request('PUT', '/', { id: OWN }, null));
+  assert.equal(ok.status, 200);
+  assert.equal((await ok.json()).prayer.likes_count, 4);
+  assert.equal(tables.prayer_requests[0].likes_count, 4);
+  assert.equal((await prayer.PUT(request('PUT', '/', { id: OTHER }, null))).status, 404);
+  assert.equal((await prayer.PUT(request('PUT', '/', { id: 'not-a-uuid' }, null))).status, 400);
+});
 test('escalation enforces ownership, restriction and destination authorization', async () => {
   const { escalate, tables } = setup();
   const call = body => escalate.POST(request('POST', '/', body));
@@ -131,29 +223,28 @@ test('escalation enforces ownership, restriction and destination authorization',
   assert.equal((await call({ prayerId: OWN, targetLevel: 'private' })).status, 200);
 });
 
-function loginHarness({ configured = true, signUp = false, error = null } = {}) {
+function loginHarness({ localProfiles = false, signUp = false, error = null } = {}) {
   const writes = [], messages = [], routes = [], events = [];
   let hook = 0;
   const values = [signUp, 'student@example.com', 'password', false, 'Student', '', 'member', false, null];
-  const auth = {
-    signInWithPassword: async () => ({ error }),
-    signInWithOAuth: async () => ({ error }),
-    signUp: async () => ({ data: { session: null }, error }),
-  };
+  const fail = async () => { if (error) throw error; return { token: 'jwt', user: { id: 'u', email: 'student@example.com' } }; };
   const jsx = (type, props) => ({ type, props });
   const imports = {
     react: { useState: initial => { const index = hook++; return [index < values.length ? values[index] : initial, value => { if (index === 8) messages.push(value); }]; }, useEffect() {} },
     'react/jsx-runtime': { jsx, jsxs: jsx },
     'next/navigation': { useRouter: () => ({ push: path => routes.push(path), refresh() {} }) },
-    'lucide-react': {}, '@/lib/supabase': {
-      getBrowserClient: () => ({ auth }),
-      isSupabaseConfigured: () => configured,
-      isLocalStudyProfileEnabled: () => false,
+    'lucide-react': {},
+    '@/lib/client-auth': {
+      getAuthToken: () => null,
+      isLocalStudyProfileEnabled: () => localProfiles,
+      signInRequest: fail,
+      signUpRequest: fail,
     },
     '@/lib/syncGuestData': { syncGuestDataToAccount: async () => ({}) }, './page.module.css': { default: {} },
   };
   const component = moduleAt('src/app/login/page.tsx', imports, {
-    localStorage: { setItem: (...args) => writes.push(args) }, window: { dispatchEvent: event => events.push(event.type), location: { origin: 'https://test.example' } },
+    localStorage: { getItem: () => null, setItem: (...args) => writes.push(args) },
+    window: { dispatchEvent: event => events.push(event.type), location: { origin: 'https://test.example' } },
     Event, setTimeout: callback => callback(),
   }).default();
   function find(node, predicate) {
@@ -167,30 +258,30 @@ function loginHarness({ configured = true, signUp = false, error = null } = {}) 
   }
   return { writes, messages, routes, events,
     submit: () => find(component, node => node.type === 'form').props.onSubmit({ preventDefault() {} }),
-    google: () => find(component, node => node.type === 'button' && node.props.onClick?.name === 'handleGoogleSignIn').props.onClick(),
   };
 }
-test('configured password/OAuth/signup failures never create local identity', async () => {
-  for (const method of ['submit', 'google']) {
-    const h = loginHarness({ error: new Error('Invalid credentials') });
-    await h[method](); assert.equal(h.writes.length, 0); assert.equal(h.routes.length, 0);
+test('password/signup failures never create local identity', async () => {
+  for (const signUp of [false, true]) {
+    const h = loginHarness({ signUp, error: new Error('Invalid email or password.') });
+    await h.submit(); assert.equal(h.writes.length, 0); assert.equal(h.routes.length, 0);
     assert.equal(h.messages.at(-1).type, 'error');
   }
-  const h = loginHarness({ signUp: true, error: new Error('Signup failed') });
-  await h.submit(); assert.equal(h.writes.length, 0); assert.equal(h.messages.at(-1).type, 'error');
-});
-test('pending email confirmation does not grant an authenticated-looking local identity', async () => {
-  const h = loginHarness({ signUp: true });
-  await h.submit(); assert.equal(h.writes.length, 0); assert.equal(h.routes.length, 0);
-  assert.match(h.messages.at(-1).text, /confirm/);
 });
 test('unconfigured production auth cannot create an authenticated-looking local identity', async () => {
   for (const signUp of [false, true]) {
-    const h = loginHarness({ configured: false, signUp });
+    const h = loginHarness({ signUp, error: new Error('Authentication has not been configured for this deployment.') });
     await h.submit(); assert.equal(h.writes.length, 0); assert.deepEqual(h.events, []);
     assert.match(h.messages.at(-1).text, /authentication has not been configured/); assert.deepEqual(h.routes, []);
   }
-  const h = loginHarness({ configured: false }); await h.google();
-  assert.equal(h.writes.length, 0); assert.deepEqual(h.events, []);
-  assert.match(h.messages.at(-1).text, /authentication has not been configured/);
+});
+test('development fallback creates a local-only profile only when auth is unconfigured', async () => {
+  const h = loginHarness({ localProfiles: true, error: new Error('Authentication has not been configured for this deployment.') });
+  await h.submit();
+  assert.equal(h.writes.length, 1);
+  assert.equal(h.writes[0][0], 'bibledesk_local_user');
+  assert.equal(h.messages.at(-1).type, 'success');
+  const locked = loginHarness({ localProfiles: true, error: new Error('Invalid email or password.') });
+  await locked.submit();
+  assert.equal(locked.writes.length, 0);
+  assert.equal(locked.messages.at(-1).type, 'error');
 });

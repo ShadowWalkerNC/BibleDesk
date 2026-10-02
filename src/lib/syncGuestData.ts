@@ -1,21 +1,15 @@
 // BibleDesk — Guest Data Auto-Merge Engine
 // Migrates locally created guest bookmarks and verse highlights
-// into the newly authenticated Supabase account under strict RLS.
-// (Guest sermon notes are no longer migrated — sermons were archived by A03;
-// any stale `bibledesk_sermons_guest` entries are left untouched in localStorage.)
+// into the newly authenticated account via the server API.
+// (Guest sermon notes are no longer migrated — sermons were archived by A03.)
 //
-// Prayer circle data (contacts, commitments, check-ins, follow-ups) stays
-// LOCAL-ONLY: the server-side /api/prayer/circle route was deleted, so there is
-// no endpoint to migrate them to. This migration never touches the prayer
-// circle store.
+// Auth tokens are now JWT-based, stored in localStorage as 'bibledesk_token'.
 //
 // DATA-SAFETY CONTRACT (task B10):
 // localStorage is cleared ONLY for records whose server insert returned verified
 // success. A record is never bulk-cleared after a mere attempt. Failed inserts are
 // persisted in a retry queue in localStorage and re-attempted on the next sync
-// run (e.g. next login). No login can destroy prayer data.
-
-import { getBrowserClient } from '@/lib/supabase';
+// run. No login can destroy prayer data.
 
 export interface SyncSummary {
   bookmarksCount: number;
@@ -23,16 +17,12 @@ export interface SyncSummary {
   notesCount: number;
 }
 
-// ── Persistent retry queue ────────────────────────────────────────────────────
-// Holds records whose server insert failed, so they survive and retry on the
-// next sync run instead of being dropped into the void.
 const RETRY_QUEUE_KEY = 'bibledesk_sync_retry_queue_v1';
 
 type SyncableKind = 'bookmark' | 'highlight' | 'note';
 
 interface RetryItem {
   kind: SyncableKind;
-  /** The original local record, so the insert can be rebuilt on retry. */
   payload: Record<string, any>;
   attempts: number;
   lastError: string | null;
@@ -53,21 +43,16 @@ function saveRetryQueue(queue: RetryItem[]): void {
   try {
     localStorage.setItem(RETRY_QUEUE_KEY, JSON.stringify(queue));
   } catch (e) {
-    // If the queue itself cannot persist, say so loudly: those records would
-    // otherwise be lost when their source keys are consumed below.
     console.error('[syncGuestDataToAccount] Could not persist retry queue:', e);
   }
 }
 
 interface MigrateResult {
   ok: boolean;
-  /** Server-side ID of the created record, when the endpoint returns one. */
   serverId?: string;
   error?: string;
 }
 
-// Drain order is bookmark → highlight (order only matters for the
-// retry queue, which no longer has dependencies between kinds).
 const KIND_ORDER: Record<SyncableKind, number> = {
   bookmark: 0,
   highlight: 1,
@@ -90,20 +75,26 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
   if (typeof window === 'undefined') return summary;
 
   try {
-    const supabase = getBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user || !session.access_token) return summary;
+    // Read JWT from localStorage (set by the login flow)
+    const token = localStorage.getItem('bibledesk_token');
+    if (!token) return summary;
 
-    const userId = session.user.id;
+    // Decode JWT payload to get userId (no verification — server verifies)
+    let userId: string;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return summary;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      userId = payload.sub || payload.id;
+      if (!userId) return summary;
+    } catch {
+      return summary;
+    }
+
     const authHeaders = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
+      'Authorization': `Bearer ${token}`,
     };
-
-    // ── Verified per-record migration helpers ───────────────────────────────
-    // Each returns ok:true ONLY when the server confirms the record was
-    // created (returned row ID). Offline/guest acknowledgements
-    // ({ success:true, acknowledged:true } with no row) are NOT success.
 
     async function postJson(
       path: string,
@@ -117,9 +108,7 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
       let data: any = null;
       try {
         data = await res.json();
-      } catch {
-        /* non-JSON body */
-      }
+      } catch { /* non-JSON body */ }
       return { statusOk: res.ok, status: res.status, data };
     }
 
@@ -141,25 +130,20 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
     }
 
     async function migrateHighlight(h: { ref: string; color: string }): Promise<MigrateResult> {
-      const { error } = await supabase.from('verse_highlights').insert({
-        user_id: userId,
+      const { statusOk, status } = await postJson('/api/highlights', {
         reference: h.ref,
         color: h.color,
       });
-      return error ? { ok: false, error: error.message } : { ok: true };
+      return statusOk ? { ok: true } : { ok: false, error: `HTTP ${status}` };
     }
 
     async function migrateNote(n: { ref: string; content: string }): Promise<MigrateResult> {
-      const { error } = await supabase.from('verse_notes').upsert({
-        user_id: userId,
+      const { statusOk, status } = await postJson('/api/notes', {
         reference: n.ref,
         content: n.content,
-      }, { onConflict: 'user_id,reference' });
-      return error ? { ok: false, error: error.message } : { ok: true };
+      });
+      return statusOk ? { ok: true } : { ok: false, error: `HTTP ${status}` };
     }
-
-    // ── Dispatcher: per-record attempt ──────────────────────────────────────────
-    // Never throws: transport/parse failures become { ok:false }.
 
     async function attemptMigration(kind: SyncableKind, payload: Record<string, any>): Promise<MigrateResult> {
       try {
@@ -193,7 +177,7 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
       newFailures.push({ kind, payload, attempts, lastError: error, queuedAt: new Date().toISOString() });
     };
 
-    // ── 0. Drain the retry queue from previous runs ────────────────────────────
+    // 0. Drain the retry queue from previous runs
     const pendingRetry = loadRetryQueue();
     for (const item of [...pendingRetry].sort((a, b) => (KIND_ORDER[a.kind] ?? 99) - (KIND_ORDER[b.kind] ?? 99))) {
       const result = await attemptMigration(item.kind, item.payload);
@@ -204,10 +188,9 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
           lastError: result.error ?? item.lastError,
         });
       }
-      // ok:true → drop from the queue: verified on the server.
     }
 
-    // ── 1. Sync Guest Bookmarks ──────────────────────────────────────────────
+    // 1. Sync Guest Bookmarks
     let consumeBookmarksKey = false;
     const rawBookmarks = localStorage.getItem('bibledesk_bookmarks_guest');
     if (rawBookmarks) {
@@ -224,20 +207,16 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
             }
           }
         }
-        // Source key is fully consumed: successes are verified on the server,
-        // failures live in the retry queue. Never delete unaccounted data.
         consumeBookmarksKey = true;
       } catch (e) {
         console.warn('Failed to sync guest bookmarks:', e);
       }
     }
 
-    // ── 2. Prayer circle stays local ──────────────────────────────────────────
-    // Contacts, commitments, check-ins, and follow-ups are stored on this
-    // device only (src/lib/prayerCareLocal.ts). The server-side /api/prayer/circle
-    // route was deleted, so there is no endpoint to migrate them to — this
-    // migration deliberately does not touch the prayer circle store.
-    // ── 3. Sync Guest Verse Highlights ───────────────────────────────────────
+    // 2. Prayer circle stays local
+    // Contacts, commitments, and follow-ups remain in prayerCareLocal.ts only.
+
+    // 3. Sync Guest Verse Highlights
     let consumeHighlightsKey = false;
     const rawHighlights = localStorage.getItem('bibledesk_verse_highlights');
     if (rawHighlights) {
@@ -261,7 +240,7 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
       }
     }
 
-    // ── 4. Sync Guest Verse Notes ─────────────────────────────────────────────
+    // 4. Sync Guest Verse Notes
     if (typeof localStorage !== 'undefined') {
       try {
         for (let i = 0; i < localStorage.length; i++) {
@@ -287,11 +266,8 @@ export async function syncGuestDataToAccount(): Promise<SyncSummary> {
       }
     }
 
-    // ── Finalize ─────────────────────────────────────────────────────────────
-    // Persist failures BEFORE consuming source keys, so a crash between the two
-    // can never drop a record.
+    // Finalize
     const finalQueue = [...stillQueued, ...newFailures];
-
     saveRetryQueue(finalQueue);
 
     if (consumeBookmarksKey) localStorage.removeItem('bibledesk_bookmarks_guest');

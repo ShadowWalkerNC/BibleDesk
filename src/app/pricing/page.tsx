@@ -12,7 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { TIERS, getUserTier, type SubscriptionTier } from '@/lib/tiers';
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { authHeaders, getAuthToken, getAuthUser } from '@/lib/client-auth';
 import styles from './page.module.css';
 
 export default function PricingPage() {
@@ -24,25 +24,21 @@ export default function PricingPage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) return;
-    const supabase = getBrowserClient();
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        supabase
-          .from('profiles')
-          .select('subscription_tier, subscription_status')
-          .eq('id', u.id)
-          .maybeSingle()
-          .then(({ data }) => {
-            if (data) {
-              setCurrentTier(getUserTier(data));
-            }
-          });
-      }
-    });
+    const sessionUser = getAuthUser();
+    setUser(sessionUser);
+    if (sessionUser) {
+      fetch('/api/auth/me', { headers: authHeaders(), cache: 'no-store' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          const tier = data?.tier;
+          if (tier === 'pro' || tier === 'ministry' || tier === 'lifetime') {
+            setCurrentTier(tier);
+          } else {
+            setCurrentTier(getUserTier(null));
+          }
+        })
+        .catch(() => setCurrentTier(getUserTier(null)));
+    }
   }, []);
 
   async function handleSubscribe(tier: SubscriptionTier) {
@@ -64,7 +60,7 @@ export default function PricingPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await getBrowserClient().auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${getAuthToken()}`,
         },
         body: JSON.stringify({
           tier,
@@ -104,7 +100,7 @@ export default function PricingPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await getBrowserClient().auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${getAuthToken()}`,
         },
       });
 

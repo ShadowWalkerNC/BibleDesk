@@ -8,14 +8,17 @@
 //      b. contextMatches → inject contextPrompt into pipeline Stage 1
 //      c. no match → pipeline runs cold (original behavior)
 //   3. generateBibleAnswer (pipeline) → BibleAnswer
-//   4. Persist to Supabase (non-blocking), capture share_slug
+//   4. Persist to Railway PostgreSQL (non-blocking), capture share_slug
 //   5. Return answer + shareSlug
 //
 // SECURITY: Server Route — Anthropic + OpenAI API keys never reach the browser.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateBibleAnswer } from '@/lib/claude';
-import { saveAnswer, getServerClient } from '@/lib/supabase';
+import { saveAnswer } from '@/lib/answers';
+import { getDb } from '@/db';
+import { profiles } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { checkAutoFlag, saveFlag } from '@/lib/moderation';
 import { checkRateLimit, getClientIp, RateLimitNamespace } from '@/lib/rate-limit';
 import { runRAG } from '@/lib/rag';
@@ -108,13 +111,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     let userTier: SubscriptionTier = 'free';
     if (user) {
       try {
-        const client = getServerClient();
-        const { data: profile } = await client
-          .from('profiles')
-          .select('subscription_tier, subscription_status')
-          .eq('id', user.id)
-          .maybeSingle();
-        userTier = getUserTier(profile);
+        const db = await getDb();
+        const rows = await db
+          .select({
+            subscriptionTier: profiles.subscriptionTier,
+            subscriptionStatus: profiles.subscriptionStatus,
+          })
+          .from(profiles)
+          .where(eq(profiles.id, user.id))
+          .limit(1);
+        userTier = getUserTier(rows[0] ?? null);
       } catch {
         userTier = 'free';
       }
@@ -184,7 +190,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     saveAnswer(answer)
       .then(() => runAutoModeration(question, answer))
       .catch((err) =>
-        console.error('[ask] Failed to save answer to Supabase:', err)
+        console.error('[ask] Failed to save answer:', err)
       );
 
     // ── 6. Return answer + shareSlug ─────────────────────────────────────────

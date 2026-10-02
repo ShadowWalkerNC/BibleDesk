@@ -37,7 +37,7 @@ import { resolveConnectionsForVerse } from '@/lib/universalIndexer';
 import { BIBLE_BOOKS, getBookChapters, getNextChapter, getPrevChapter, parseReference } from '@/lib/books';
 import { READING_PLANS } from '@/lib/plansData';
 import { TRANSLATIONS, type TranslationId, type BibleVerse, type BibleAnswer } from '@/types';
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase';
+import { authHeaders, getAuthToken, getAuthUser, subscribeAuth } from '@/lib/client-auth';
 import { getUserTier, type SubscriptionTier } from '@/lib/tiers';
 import styles from './page.module.css';
 
@@ -467,9 +467,9 @@ function BibleReaderContent() {
       try {
         const userGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('bibledesk_gemini_key') : null;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        const { data: { session } } = await getBrowserClient().auth.getSession();
-        if (session?.access_token) {
-          headers.Authorization = `Bearer ${session.access_token}`;
+        const token = getAuthToken();
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
         }
         if (userGeminiKey) {
           headers['x-gemini-api-key'] = userGeminiKey;
@@ -619,44 +619,25 @@ function BibleReaderContent() {
   const [userTier, setUserTier] = useState<SubscriptionTier>('free');
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      setUserTier(getUserTier(null));
-      return;
+    function checkUser() {
+      const sessionUser = getAuthUser();
+      setCurrentUser(sessionUser);
+      if (sessionUser) {
+        fetch('/api/auth/me', { headers: authHeaders(), cache: 'no-store' })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            const tier = data?.tier;
+            setUserTier(
+              tier === 'pro' || tier === 'ministry' || tier === 'lifetime' ? tier : getUserTier(null)
+            );
+          })
+          .catch(() => setUserTier(getUserTier(null)));
+      } else {
+        setUserTier(getUserTier(null));
+      }
     }
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setCurrentUser(u);
-      if (u) {
-        supabase
-          .from('profiles')
-          .select('subscription_tier, subscription_status')
-          .eq('id', u.id)
-          .maybeSingle()
-          .then(({ data }) => {
-            setUserTier(getUserTier(data));
-          });
-      } else {
-        setUserTier(getUserTier(null));
-      }
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const u = session?.user ?? null;
-      setCurrentUser(u);
-      if (u) {
-        supabase
-          .from('profiles')
-          .select('subscription_tier, subscription_status')
-          .eq('id', u.id)
-          .maybeSingle()
-          .then(({ data }) => {
-            setUserTier(getUserTier(data));
-          });
-      } else {
-        setUserTier(getUserTier(null));
-      }
-    });
-    return () => subscription.unsubscribe();
+    checkUser();
+    return subscribeAuth(checkUser);
   }, []);
 
   const hasCloudSync = userTier === 'pro' || userTier === 'ministry' || userTier === 'lifetime' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
@@ -682,21 +663,6 @@ function BibleReaderContent() {
       })
       .catch((err) => console.warn('[notes] Database load failed:', err));
 
-    // If authenticated & on cloud sync tier, fetch from Supabase to ensure cross-device sync
-    if (currentUser && isSupabaseConfigured() && hasCloudSync) {
-      const supabase = getBrowserClient();
-      supabase
-        .from('verse_notes')
-        .select('content')
-        .eq('reference', ref)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (!error && data && data.content) {
-            setNotes(data.content);
-            localStorage.setItem(key, data.content);
-          }
-        });
-    }
   }, [selectedVerse, currentUser, hasCloudSync]);
 
   // 5. Save Note Helper (Local + Database + Cloud Sync)
@@ -723,30 +689,6 @@ function BibleReaderContent() {
       localStorage.removeItem(key);
     }
 
-    // If authenticated and on cloud sync tier, sync to Supabase verse_notes table
-    if (currentUser && isSupabaseConfigured() && hasCloudSync) {
-      const supabase = getBrowserClient();
-      if (val.trim()) {
-        supabase
-          .from('verse_notes')
-          .upsert(
-            { user_id: currentUser.id, reference: ref, content: val.trim() },
-            { onConflict: 'user_id,reference' }
-          )
-          .then(({ error }) => {
-            if (error) console.warn('[verse_notes] Cloud sync failed:', error.message);
-          });
-      } else {
-        supabase
-          .from('verse_notes')
-          .delete()
-          .eq('user_id', currentUser.id)
-          .eq('reference', ref)
-          .then(({ error }) => {
-            if (error) console.warn('[verse_notes] Cloud delete failed:', error.message);
-          });
-      }
-    }
   };
 
   // Toast helper
@@ -767,11 +709,10 @@ function BibleReaderContent() {
   const handleExportObsidian = async () => {
     setExportingObsidian(true);
     try {
-      const supabase = getBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = getAuthToken();
       const headers: Record<string, string> = {};
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       const res = await fetch('/api/export/obsidian', { headers });

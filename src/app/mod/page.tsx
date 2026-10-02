@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, FormEvent } from 'react';
 import styles from './page.module.css';
-import { getBrowserClient } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/client-auth';
 
 interface FlagItem {
   id: string;
@@ -28,11 +28,7 @@ type Tab = 'queue' | 'approve' | 'invite' | 'system';
 
 async function getToken(): Promise<string | null> {
   try {
-    const supabase = getBrowserClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session?.access_token ?? null;
+    return getAuthToken();
   } catch {
     return null;
   }
@@ -297,7 +293,7 @@ function InvitePanel() {
     <section className={styles.panel}>
       <h2 className={styles.panelTitle}>📧 Invite Moderator / Role Management</h2>
       <p className={styles.panelDesc}>
-        Sends a Supabase magic-link invite and creates a moderator record. Grants review permissions across BibleDesk theological answers.
+        Creates a moderator record for an existing account email. The invitee signs in with email and password. Grants review permissions across BibleDesk theological answers.
       </p>
       <form className={styles.simpleForm} onSubmit={handleInvite}>
         <label className={styles.fieldLabel} htmlFor="invite-name">

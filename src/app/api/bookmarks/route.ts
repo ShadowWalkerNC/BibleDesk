@@ -11,12 +11,6 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const check = searchParams.get('check');
 
-    // Offline guard — Supabase not configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      if (check) return NextResponse.json({ bookmarked: false, offline: true });
-      return NextResponse.json({ bookmarks: [], total: 0, page: 1, totalPages: 0, offline: true });
-    }
-
     const user = await getAuthenticatedUser(req);
 
     // Quick "is this answer bookmarked?" check

@@ -2,7 +2,9 @@
 // Submit a moderator vote on a flagged answer.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { moderationVotes } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { castVote } from '@/lib/moderation';
 import { getActiveModerator } from '@/lib/mod-auth';
 
@@ -61,15 +63,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const svc = getServerClient();
-  const { data: existing } = await svc
-    .from('moderation_votes')
-    .select('id')
-    .eq('flag_id', flagId)
-    .eq('moderator_id', mod.id)
-    .maybeSingle();
+  const db = await getDb();
+  const existingRows = await db
+    .select({ id: moderationVotes.id })
+    .from(moderationVotes)
+    .where(
+      and(
+        eq(moderationVotes.flagId, flagId),
+        eq(moderationVotes.moderatorId, mod.id)
+      )
+    )
+    .limit(1);
 
-  if (existing) {
+  if (existingRows[0]) {
     return NextResponse.json(
       { success: false, error: 'You have already voted on this flag.', code: 'DUPLICATE_VOTE' },
       { status: 409 }

@@ -1,7 +1,7 @@
 import 'server-only';
 
-import type { User } from '@supabase/supabase-js';
-import { getServerClient } from '@/lib/supabase';
+import { jwtVerify } from 'jose';
+import type { AuthUser } from '@/lib/auth';
 
 export class AuthenticationError extends Error {
   status = 401;
@@ -12,11 +12,18 @@ export class AuthenticationError extends Error {
   }
 }
 
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new AuthenticationError('JWT_SECRET is not configured');
+  return new TextEncoder().encode(secret);
+}
+
 /**
- * Verifies a Supabase access token with Supabase Auth and returns its user.
+ * Verifies a JWT access token from the Authorization Bearer header.
  * Route handlers must derive ownership from this result, never request JSON.
+ * Throws AuthenticationError if missing, invalid, or expired.
  */
-export async function requireSupabaseUser(request: Request): Promise<User> {
+export async function requireUser(request: Request): Promise<AuthUser> {
   const authorization = request.headers.get('authorization') ?? '';
   const [scheme, token, extra] = authorization.trim().split(/\s+/);
 
@@ -24,11 +31,23 @@ export async function requireSupabaseUser(request: Request): Promise<User> {
     throw new AuthenticationError();
   }
 
-  const { data, error } = await getServerClient().auth.getUser(token);
-  if (error || !data.user) {
+  try {
+    const { payload } = await jwtVerify(token, getJwtSecret());
+
+    const id = typeof payload.sub === 'string' ? payload.sub : (payload.id as string | undefined);
+    const email = payload.email as string | undefined;
+
+    if (!id || !email) {
+      throw new AuthenticationError('Invalid token payload');
+    }
+
+    return {
+      id,
+      email,
+      name: (payload.name as string | null) ?? null,
+    };
+  } catch (err) {
+    if (err instanceof AuthenticationError) throw err;
     throw new AuthenticationError('Invalid or expired session');
   }
-
-  return data.user;
 }
-

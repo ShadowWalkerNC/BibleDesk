@@ -47,7 +47,7 @@ export interface Dimension {
 }
 
 export interface BibleAnswer {
-  id: string;                // UUID stored in Supabase
+  id: string;                // UUID stored in Railway PostgreSQL
   question: string;
   summary: string;           // 1–2 sentence overview shown above tabs
   dimensions: {

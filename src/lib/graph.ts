@@ -1,10 +1,9 @@
 // BibleDesk — Knowledge Graph library
-// Wraps Supabase graph_nodes + graph_edges tables.
+// Uses Railway PostgreSQL via Drizzle ORM (graph_nodes + graph_edges tables).
 //
 // Design follows graphify's extraction schema:
 //   Node: { id, label, source_file, source_location }
 //   Edge: { source, target, relation, confidence }
-// See: https://github.com/safishamsi/graphify/blob/main/ARCHITECTURE.md
 //
 // Exports:
 //   upsertNode(node)            — create or update a graph node
@@ -14,7 +13,11 @@
 //   getSubgraph(nodeKey)        — 1-hop neighbourhood around a node
 //   getNodeByKey(key)           — single node lookup
 
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { graphNodes as graphNodesTable, graphEdges as graphEdgesTable } from '@/db/schema';
+import type { GraphNode as GraphNodeRow, GraphEdge as GraphEdgeRow } from '@/db/schema';
+import { eq, or, inArray, desc } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 import type { BibleAnswer } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -36,12 +39,12 @@ export type EdgeConfidence = 'EXTRACTED' | 'INFERRED' | 'AMBIGUOUS';
 
 export interface GraphNode {
   id?:          string;
-  node_key:     string;          // stable slug
-  label:        string;          // display name
+  node_key:     string;
+  label:        string;
   description?: string;
   category:     NodeCategory;
   source_type:  NodeSourceType;
-  source_id?:   string;          // UUID of originating row
+  source_id?:   string;
   dimension?:   string;
   scripture_ref?: string;
   strongs_num?:   string;
@@ -52,11 +55,11 @@ export interface GraphNode {
 
 export interface GraphEdge {
   id?:        string;
-  source_id:  string;            // graph_nodes.id
-  target_id:  string;            // graph_nodes.id
+  source_id:  string;
+  target_id:  string;
   relation:   EdgeRelation;
   confidence: EdgeConfidence;
-  weight?:    number;            // 0.0–1.0
+  weight?:    number;
   label?:     string;
   metadata?:  Record<string, unknown>;
 }
@@ -68,7 +71,6 @@ export interface GraphData {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Normalise a string to a stable slug. */
 function toKey(s: string): string {
   return s
     .toLowerCase()
@@ -79,110 +81,143 @@ function toKey(s: string): string {
     .slice(0, 128);
 }
 
-/** Clamp weight to [0, 1]. */
 function clampWeight(w: number): number {
   return Math.max(0, Math.min(1, w));
 }
 
 // ─── Node operations ─────────────────────────────────────────────────────────
 
-/**
- * Upsert a graph node by node_key.
- * Returns the persisted node (with its UUID id).
- */
 export async function upsertNode(node: GraphNode): Promise<GraphNode | null> {
-  const svc = getServerClient();
-  const key = toKey(node.node_key || node.label);
+  try {
+    const db = await getDb();
+    const key = toKey(node.node_key || node.label);
+    const id = uuidv4();
 
-  const payload = {
-    node_key:    key,
-    label:       node.label,
-    description: node.description ?? null,
-    category:    node.category,
-    source_type: node.source_type,
-    source_id:   node.source_id ?? null,
-    dimension:   node.dimension ?? null,
-    metadata:    node.metadata ?? {},
-  };
+    const rows = await db
+      .insert(graphNodesTable)
+      .values({
+        id,
+        nodeKey: key,
+        label: node.label,
+        description: node.description ?? null,
+        category: node.category,
+        sourceType: node.source_type,
+        sourceId: node.source_id ?? null,
+        dimension: node.dimension ?? null,
+        metadata: node.metadata ?? {},
+      })
+      .onConflictDoUpdate({
+        target: graphNodesTable.nodeKey,
+        set: {
+          label: node.label,
+          description: node.description ?? null,
+          category: node.category,
+          sourceType: node.source_type,
+          sourceId: node.source_id ?? null,
+          dimension: node.dimension ?? null,
+          metadata: node.metadata ?? {},
+        },
+      })
+      .returning();
 
-  const { data, error } = await svc
-    .from('graph_nodes')
-    .upsert(payload, { onConflict: 'node_key', ignoreDuplicates: false })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[graph] upsertNode error:', error.message);
+    if (rows.length === 0) return null;
+    const r = rows[0];
+    return {
+      id: r.id,
+      node_key: r.nodeKey,
+      label: r.label,
+      description: r.description ?? undefined,
+      category: r.category as NodeCategory,
+      source_type: r.sourceType as NodeSourceType,
+      source_id: r.sourceId ?? undefined,
+      dimension: r.dimension ?? undefined,
+      metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+    };
+  } catch (err) {
+    console.error('[graph] upsertNode error:', err);
     return null;
   }
-
-  return data as GraphNode;
 }
 
-/**
- * Look up a node by its stable node_key.
- */
 export async function getNodeByKey(nodeKey: string): Promise<GraphNode | null> {
-  const svc = getServerClient();
-  const key = toKey(nodeKey);
+  try {
+    const db = await getDb();
+    const key = toKey(nodeKey);
+    const rows = await db
+      .select()
+      .from(graphNodesTable)
+      .where(eq(graphNodesTable.nodeKey, key))
+      .limit(1);
 
-  const { data, error } = await svc
-    .from('graph_nodes')
-    .select('*')
-    .eq('node_key', key)
-    .single();
-
-  if (error || !data) return null;
-  return data as GraphNode;
+    if (rows.length === 0) return null;
+    const r = rows[0];
+    return {
+      id: r.id,
+      node_key: r.nodeKey,
+      label: r.label,
+      description: r.description ?? undefined,
+      category: r.category as NodeCategory,
+      source_type: r.sourceType as NodeSourceType,
+      source_id: r.sourceId ?? undefined,
+      dimension: r.dimension ?? undefined,
+      metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+    };
+  } catch (err) {
+    console.error('[graph] getNodeByKey error:', err);
+    return null;
+  }
 }
 
 // ─── Edge operations ─────────────────────────────────────────────────────────
 
-/**
- * Upsert a graph edge by (source_id, target_id, relation).
- * Returns the persisted edge.
- */
 export async function upsertEdge(edge: GraphEdge): Promise<GraphEdge | null> {
-  const svc = getServerClient();
+  try {
+    const db = await getDb();
+    const id = uuidv4();
 
-  const payload = {
-    source_id:  edge.source_id,
-    target_id:  edge.target_id,
-    relation:   edge.relation,
-    confidence: edge.confidence,
-    weight:     clampWeight(edge.weight ?? 0.5),
-    label:      edge.label ?? null,
-    metadata:   edge.metadata ?? {},
-  };
+    const rows = await db
+      .insert(graphEdgesTable)
+      .values({
+        id,
+        sourceId: edge.source_id,
+        targetId: edge.target_id,
+        relation: edge.relation,
+        confidence: edge.confidence,
+        weight: clampWeight(edge.weight ?? 0.5),
+        label: edge.label ?? null,
+        metadata: edge.metadata ?? {},
+      })
+      .onConflictDoUpdate({
+        target: [graphEdgesTable.sourceId, graphEdgesTable.targetId, graphEdgesTable.relation],
+        set: {
+          confidence: edge.confidence,
+          weight: clampWeight(edge.weight ?? 0.5),
+          label: edge.label ?? null,
+          metadata: edge.metadata ?? {},
+        },
+      })
+      .returning();
 
-  const { data, error } = await svc
-    .from('graph_edges')
-    .upsert(payload, { onConflict: 'source_id,target_id,relation', ignoreDuplicates: false })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[graph] upsertEdge error:', error.message);
+    if (rows.length === 0) return null;
+    const r = rows[0];
+    return {
+      id: r.id,
+      source_id: r.sourceId,
+      target_id: r.targetId,
+      relation: r.relation as EdgeRelation,
+      confidence: r.confidence as EdgeConfidence,
+      weight: r.weight ?? undefined,
+      label: r.label ?? undefined,
+      metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+    };
+  } catch (err) {
+    console.error('[graph] upsertEdge error:', err);
     return null;
   }
-
-  return data as GraphEdge;
 }
 
 // ─── Batch write from a BibleAnswer ──────────────────────────────────────────
 
-/**
- * Given a completed BibleAnswer, extract concept nodes from each dimension
- * and wire them together with INFERRED edges.
- *
- * Strategy (mirrors graphify's INFERRED second-pass logic):
- *   1. Create a "question" node for the question text.
- *   2. For each dimension answer, create a "concept" node keyed on the dimension.
- *   3. Link: question → dimension node  (relation: 'leads_to', INFERRED)
- *   4. Link: dimension nodes → each other  (relation: 'related_to', INFERRED)
- *   5. Extract scripture references from answer text → verse nodes.
- *   6. Link: verse node ← dimension node  (relation: 'references', EXTRACTED)
- */
 export async function writeGraphFromAnswer(
   answer: BibleAnswer,
   answerId: string,
@@ -190,7 +225,6 @@ export async function writeGraphFromAnswer(
   let nodeCount = 0;
   let edgeCount = 0;
 
-  // 1. Question node
   const qNode = await upsertNode({
     node_key:    toKey(answer.question),
     label:       answer.question.slice(0, 128),
@@ -203,7 +237,6 @@ export async function writeGraphFromAnswer(
 
   const dimensionNodeIds: string[] = [];
 
-  // 2–3. Dimension nodes + edges from question
   for (const [dimKey, dim] of Object.entries(answer.dimensions ?? {})) {
     const dimNode = await upsertNode({
       node_key:    `${dimKey}-${toKey(answer.question).slice(0, 40)}`,
@@ -230,7 +263,6 @@ export async function writeGraphFromAnswer(
       if (e?.id) edgeCount++;
     }
 
-    // 5–6. Scripture reference nodes
     const versePattern = /\b(\d?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?\s+\d+:\d+(?:-\d+)?)\b/g;
     const verseMatches = [...(dim.content ?? '').matchAll(versePattern)];
 
@@ -258,7 +290,6 @@ export async function writeGraphFromAnswer(
     }
   }
 
-  // 4. Cross-link dimension nodes
   for (let i = 0; i < dimensionNodeIds.length; i++) {
     for (let j = i + 1; j < dimensionNodeIds.length; j++) {
       const e = await upsertEdge({
@@ -277,63 +308,101 @@ export async function writeGraphFromAnswer(
 
 // ─── Graph queries ────────────────────────────────────────────────────────────
 
-/**
- * Returns the full graph (up to 2000 nodes and 2000 edges).
- * Used to build the initial /api/graph payload.
- */
 export async function getFullGraph(): Promise<GraphData> {
-  const svc = getServerClient();
+  try {
+    const db = await getDb();
+    const [nodeRows, edgeRows] = await Promise.all([
+      db.select().from(graphNodesTable).orderBy(desc(graphNodesTable.createdAt)).limit(2000),
+      db.select().from(graphEdgesTable).orderBy(desc(graphEdgesTable.createdAt)).limit(2000),
+    ]);
 
-  const [nodesRes, edgesRes] = await Promise.all([
-    svc.from('graph_nodes').select('*').order('created_at', { ascending: false }).limit(2000),
-    svc.from('graph_edges').select('*').order('created_at', { ascending: false }).limit(2000),
-  ]);
-
-  return {
-    nodes: (nodesRes.data ?? []) as GraphNode[],
-    edges: (edgesRes.data ?? []) as GraphEdge[],
-  };
+    return {
+      nodes: nodeRows.map((r: GraphNodeRow) => ({
+        id: r.id,
+        node_key: r.nodeKey,
+        label: r.label,
+        description: r.description ?? undefined,
+        category: r.category as NodeCategory,
+        source_type: r.sourceType as NodeSourceType,
+        source_id: r.sourceId ?? undefined,
+        dimension: r.dimension ?? undefined,
+        metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+      })),
+      edges: edgeRows.map((r: GraphEdgeRow) => ({
+        id: r.id,
+        source_id: r.sourceId,
+        target_id: r.targetId,
+        relation: r.relation as EdgeRelation,
+        confidence: r.confidence as EdgeConfidence,
+        weight: r.weight ?? undefined,
+        label: r.label ?? undefined,
+        metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+      })),
+    };
+  } catch (err) {
+    console.error('[graph] getFullGraph error:', err);
+    return { nodes: [], edges: [] };
+  }
 }
 
-/**
- * Returns the 1-hop subgraph centred on a node_key.
- * Fetches the root node, all connecting edges, and the neighbour nodes.
- */
 export async function getSubgraph(nodeKey: string): Promise<GraphData> {
-  const svc = getServerClient();
+  try {
+    const db = await getDb();
+    const root = await getNodeByKey(nodeKey);
+    if (!root?.id) return { nodes: [], edges: [] };
 
-  const root = await getNodeByKey(nodeKey);
-  if (!root?.id) return { nodes: [], edges: [] };
-
-  // All edges touching the root (source or target)
-  const { data: edges } = await svc
-    .from('graph_edges')
-    .select('*')
-    .or(`source_id.eq.${root.id},target_id.eq.${root.id}`)
-    .limit(200);
-
-  const typedEdges = (edges ?? []) as GraphEdge[];
-
-  // Collect all neighbour IDs
-  const neighbourIds = [
-    ...new Set(
-      typedEdges.flatMap((e) =>
-        [e.source_id, e.target_id].filter((id) => id !== root.id)
+    const edgeRows = await db
+      .select()
+      .from(graphEdgesTable)
+      .where(
+        or(
+          eq(graphEdgesTable.sourceId, root.id),
+          eq(graphEdgesTable.targetId, root.id)
+        )
       )
-    ),
-  ];
+      .limit(200);
 
-  let neighbours: GraphNode[] = [];
-  if (neighbourIds.length > 0) {
-    const { data: nData } = await svc
-      .from('graph_nodes')
-      .select('*')
-      .in('id', neighbourIds);
-    neighbours = (nData ?? []) as GraphNode[];
+    const typedEdges: GraphEdge[] = edgeRows.map((r: GraphEdgeRow) => ({
+      id: r.id,
+      source_id: r.sourceId,
+      target_id: r.targetId,
+      relation: r.relation as EdgeRelation,
+      confidence: r.confidence as EdgeConfidence,
+      weight: r.weight ?? undefined,
+      label: r.label ?? undefined,
+      metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+    }));
+
+    const neighbourIds = [
+      ...new Set(
+        typedEdges.flatMap((e) =>
+          [e.source_id, e.target_id].filter((id) => id !== root.id)
+        )
+      ),
+    ];
+
+    let neighbours: GraphNode[] = [];
+    if (neighbourIds.length > 0) {
+      const nRows = await db
+        .select()
+        .from(graphNodesTable)
+        .where(inArray(graphNodesTable.id, neighbourIds));
+      neighbours = nRows.map((r: GraphNodeRow) => ({
+        id: r.id,
+        node_key: r.nodeKey,
+        label: r.label,
+        description: r.description ?? undefined,
+        category: r.category as NodeCategory,
+        source_type: r.sourceType as NodeSourceType,
+        source_id: r.sourceId ?? undefined,
+        dimension: r.dimension ?? undefined,
+        metadata: (r.metadata as Record<string, unknown>) ?? undefined,
+      }));
+    }
+
+    return { nodes: [root, ...neighbours], edges: typedEdges };
+  } catch (err) {
+    console.error('[graph] getSubgraph error:', err);
+    return { nodes: [], edges: [] };
   }
-
-  return {
-    nodes: [root, ...neighbours],
-    edges: typedEdges,
-  };
 }

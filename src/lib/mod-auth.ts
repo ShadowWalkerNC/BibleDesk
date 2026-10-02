@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { moderators } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export interface ActiveModerator {
   id: string;
@@ -9,35 +11,44 @@ export interface ActiveModerator {
   user_id?: string;
 }
 
+/**
+ * Verifies the JWT Bearer token and checks that the authenticated user
+ * has an active moderator row in the moderators table.
+ * Returns null if the token is invalid or the user is not an active moderator.
+ */
 export async function getActiveModerator(req: NextRequest): Promise<ActiveModerator | null> {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
+  const user = await getAuthenticatedUser(req);
+  if (!user) return null;
 
-  const token = authHeader.slice(7).trim();
-  if (!token) return null;
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({
+        id:      moderators.id,
+        role:    moderators.role,
+        active:  moderators.active,
+        user_id: moderators.userId,
+      })
+      .from(moderators)
+      .where(
+        and(
+          eq(moderators.userId, user.id),
+          eq(moderators.active, true)
+        )
+      )
+      .limit(1);
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
+    if (rows.length === 0) return null;
 
-  const authClient = createClient(url, anonKey, {
-    auth: { persistSession: false },
-  });
-
-  const {
-    data: { user },
-    error,
-  } = await authClient.auth.getUser(token);
-
-  if (error || !user) return null;
-
-  const svc = getServerClient();
-  const { data: mod } = await svc
-    .from('moderators')
-    .select('id, role, active, user_id')
-    .eq('user_id', user.id)
-    .eq('active', true)
-    .single();
-
-  return (mod as ActiveModerator | null) ?? null;
+    const mod = rows[0];
+    return {
+      id:      mod.id,
+      role:    mod.role ?? 'moderator',
+      active:  mod.active,
+      user_id: mod.user_id ?? undefined,
+    };
+  } catch (err) {
+    console.error('[mod-auth] getActiveModerator error:', err);
+    return null;
+  }
 }

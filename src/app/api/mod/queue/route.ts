@@ -1,6 +1,6 @@
 // BibleDesk — GET /api/mod/queue
 // Returns all pending flags with answer JSON + vote summaries.
-// Auth-gated: caller must be an active moderator (Supabase session).
+// Auth-gated: caller must be an active moderator (JWT session).
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getFlagQueue } from '@/lib/moderation';

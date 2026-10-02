@@ -4,7 +4,7 @@
  * Responsibilities:
  *   1. Retrieve grounded historical Christian doctrines & catechisms (offline/instant)
  *   2. Generate a 1536-dim embedding for any text (OpenAI text-embedding-3-small)
- *   3. Search canonical_answers by vector cosine similarity (pgvector in Supabase)
+ *   3. Search canonical_answers by vector cosine similarity (pgvector in Railway PostgreSQL)
  *   4. Return an exact cached answer OR a unified context string for pipeline Stage 1 & Stage 4
  *
  * Server-only — never import from client components.
@@ -12,23 +12,17 @@
 
 import OpenAI from 'openai';
 import crypto from 'crypto';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { sql } from 'drizzle-orm';
 import type { BibleAnswer } from '@/types';
 import { searchDoctrines } from '@/lib/doctrinesData';
 import { searchCatechisms } from '@/lib/catechismData';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-/** Embedding model — 1536 dims, matches pgvector column */
 const EMBEDDING_MODEL = 'text-embedding-3-small';
-
-/** Cosine similarity threshold to treat a match as "exact" (skip pipeline) */
 const EXACT_MATCH_THRESHOLD = 0.97;
-
-/** Cosine similarity threshold to include a match as RAG context */
 const CONTEXT_MATCH_THRESHOLD = 0.75;
-
-/** Max similar answers injected as context into Stage 1 */
 const MAX_CONTEXT_MATCHES = 3;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -37,23 +31,17 @@ export interface CanonicalMatch {
   id: string;
   question: string;
   answer_json: BibleAnswer;
-  similarity: number; // cosine similarity 0–1
+  similarity: number;
 }
 
 export interface RAGResult {
-  /** True if similarity >= EXACT_MATCH_THRESHOLD — skip the pipeline entirely */
   exactMatch: boolean;
-  /** The cached BibleAnswer to return directly when exactMatch is true */
   exactAnswer: BibleAnswer | null;
-  /** Top similar approved answers to inject as context (empty if exactMatch) */
   contextMatches: CanonicalMatch[];
-  /** Formatted context string ready to inject into pipeline Stage 1 prompt */
   contextPrompt: string;
-  /** Grounded doctrinal summaries and catechism questions */
   doctrinalContext?: string;
 }
 
-/** Shape of a row returned by the match_canonical_answers() Supabase RPC */
 interface MatchRow {
   id: string;
   question: string;
@@ -75,11 +63,6 @@ function getOpenAIClient(): OpenAI {
 
 // ─── Doctrinal Retrieval (Offline / Zero-Cost) ─────────────────────────────────
 
-/**
- * Searches local core doctrines, confessions, and catechisms to build a
- * high-authority theological grounding prompt for the pipeline.
- * Runs instantly in 0ms without requiring network or external API keys.
- */
 export function findRelevantDoctrinalContext(question: string): string {
   const matchedDoctrines = searchDoctrines(question);
   const matchedCatechisms = searchCatechisms(question);
@@ -123,10 +106,6 @@ export function findRelevantDoctrinalContext(question: string): string {
 
 // ─── Embedding ────────────────────────────────────────────────────────────────
 
-/**
- * Generate a 1536-dimension embedding for the given text.
- * Uses OpenAI text-embedding-3-small.
- */
 export async function generateEmbedding(text: string): Promise<number[]> {
   const client = getOpenAIClient();
   const normalized = text.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -162,41 +141,39 @@ export function hashQuestion(question: string): string {
     .digest('hex');
 }
 
-// ─── Vector Search ────────────────────────────────────────────────────────────
+// ─── Vector Search (pgvector via raw SQL) ────────────────────────────────────
 
 async function searchCanonicalAnswers(embedding: number[]): Promise<CanonicalMatch[]> {
-  const supabase = getServerClient();
+  try {
+    const db = await getDb();
+    // pgvector cosine similarity via raw SQL
+    // Requires: CREATE EXTENSION IF NOT EXISTS vector;
+    // and canonical_answers.embedding column type = vector(1536)
+    const vectorLiteral = `[${embedding.join(',')}]`;
+    const rows = await db.execute(sql`
+      SELECT id, question, answer_json,
+             1 - (embedding <=> ${vectorLiteral}::vector) AS similarity
+      FROM canonical_answers
+      WHERE 1 - (embedding <=> ${vectorLiteral}::vector) >= ${CONTEXT_MATCH_THRESHOLD}
+      ORDER BY similarity DESC
+      LIMIT ${MAX_CONTEXT_MATCHES + 1}
+    `);
 
-  const { data, error } = await supabase.rpc('match_canonical_answers', {
-    query_embedding: embedding,
-    match_threshold: CONTEXT_MATCH_THRESHOLD,
-    match_count: MAX_CONTEXT_MATCHES + 1,
-  });
-
-  if (error) {
-    console.error('[RAG] Vector search error:', error.message);
+    return (rows.rows as unknown as MatchRow[]).map((row) => ({
+      id: row.id,
+      question: row.question,
+      answer_json: row.answer_json,
+      similarity: Number(row.similarity),
+    }));
+  } catch (err) {
+    // pgvector may not be available — fall back gracefully
+    console.warn('[RAG] Vector search unavailable (pgvector not installed or column missing):', err);
     return [];
   }
-
-  return (data as MatchRow[]).map((row) => ({
-    id: row.id,
-    question: row.question,
-    answer_json: row.answer_json,
-    similarity: row.similarity,
-  }));
 }
 
 // ─── RAG Orchestration ────────────────────────────────────────────────────────
 
-/**
- * Main RAG function. Called by /api/ask before the pipeline runs.
- *
- * Flow:
- *   1. Retrieve local doctrinal/catechism grounding (instant, offline-ready)
- *   2. If OpenAI key available, generate question embedding and query Supabase
- *   3. If exact canonical match (>= 0.97), return cached answer immediately
- *   4. Merge canonical answers with doctrinal context for Stage 1 and Stage 4
- */
 export async function runRAG(question: string): Promise<RAGResult> {
   const doctrinalContext = findRelevantDoctrinalContext(question);
 
@@ -208,7 +185,6 @@ export async function runRAG(question: string): Promise<RAGResult> {
     doctrinalContext,
   };
 
-  // If OpenAI key is missing, return grounded doctrinal context immediately
   if (!process.env.OPENAI_API_KEY) {
     if (doctrinalContext) {
       console.log('[RAG] Offline/Local doctrinal grounding injected into pipeline');
@@ -222,7 +198,6 @@ export async function runRAG(question: string): Promise<RAGResult> {
 
     if (matches.length === 0) return fallbackResult;
 
-    // Exact match — return cached approved answer
     const top = matches[0];
     if (top.similarity >= EXACT_MATCH_THRESHOLD) {
       console.log(`[RAG] Exact match (${(top.similarity * 100).toFixed(1)}%) — serving cached answer`);
@@ -235,7 +210,6 @@ export async function runRAG(question: string): Promise<RAGResult> {
       };
     }
 
-    // Context matches — combine with doctrinal context
     const contextMatches = matches
       .filter((m) => m.similarity >= CONTEXT_MATCH_THRESHOLD)
       .slice(0, MAX_CONTEXT_MATCHES);
@@ -331,28 +305,30 @@ export async function storeCanonicalAnswer(
   answer: BibleAnswer,
   approvedBy: string
 ): Promise<void> {
-  const supabase = getServerClient();
+  const db = await getDb();
   const embedding = await generateEmbedding(question);
   const questionHash = hashQuestion(question);
+  const vectorLiteral = `[${embedding.join(',')}]`;
 
-  const { error } = await supabase
-    .from('canonical_answers')
-    .upsert(
-      {
-        question_hash: questionHash,
-        question,
-        answer_json: answer,
-        embedding,
-        approved_by: approvedBy,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'question_hash' }
-    );
-
-  if (error) {
-    console.error('[RAG] storeCanonicalAnswer error:', error.message);
-    throw new Error(`Failed to store canonical answer: ${error.message}`);
-  }
+  // Upsert with pgvector column via raw SQL (Drizzle doesn't have native vector type)
+  await db.execute(sql`
+    INSERT INTO canonical_answers (id, question_hash, question, answer_json, embedding, approved_by, updated_at)
+    VALUES (
+      gen_random_uuid()::text,
+      ${questionHash},
+      ${question},
+      ${JSON.stringify(answer)}::jsonb,
+      ${vectorLiteral}::vector,
+      ${approvedBy},
+      NOW()
+    )
+    ON CONFLICT (question_hash) DO UPDATE SET
+      question    = EXCLUDED.question,
+      answer_json = EXCLUDED.answer_json,
+      embedding   = EXCLUDED.embedding,
+      approved_by = EXCLUDED.approved_by,
+      updated_at  = EXCLUDED.updated_at
+  `);
 
   console.log(`[RAG] Stored canonical answer for: "${question.slice(0, 60)}..."`);
 }

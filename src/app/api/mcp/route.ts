@@ -207,26 +207,47 @@ const TOOL_MANIFEST = [
   },
 ];
 
-// ─── Supabase helpers (lazy, won’t crash if env vars missing) ──────────────────
+// ─── Answer helpers (Railway PostgreSQL via Drizzle) ────────────────────────────
 
-async function querySupabase<T>(
-  path: string,
-  params: Record<string, string> = {}
-): Promise<T[] | null> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+interface AnswerRow {
+  id: string;
+  question: string;
+  summary: string | null;
+  confidence: string | null;
+  translation_used: string | null;
+  status: string | null;
+  created_at: string;
+}
 
-  const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${url}/rest/v1/${path}${qs ? '?' + qs : ''}`, {
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!res.ok) return null;
-  return res.json() as Promise<T[]>;
+async function listRecentAnswers(limit: number): Promise<AnswerRow[] | null> {
+  try {
+    const { getDb } = await import('@/db');
+    const { answers } = await import('@/db/schema');
+    const { desc } = await import('drizzle-orm');
+    const db = await getDb();
+    const rows = await db
+      .select()
+      .from(answers)
+      .orderBy(desc(answers.createdAt))
+      .limit(limit);
+    return rows.map((row) => {
+      const answerJson = row.answerJson as {
+        summary?: string;
+        confidence?: string;
+      };
+      return {
+        id: row.id,
+        question: row.question,
+        summary: answerJson?.summary ?? null,
+        confidence: answerJson?.confidence ?? null,
+        translation_used: row.translation,
+        status: row.status,
+        created_at: row.createdAt.toISOString(),
+      };
+    });
+  } catch {
+    return null;
+  }
 }
 
 // ─── Tool handlers ──────────────────────────────────────────────────────────────
@@ -410,22 +431,10 @@ async function handleGetConceptSubgraph(args: Record<string, unknown>) {
 async function handleGetAnswerHistory(args: Record<string, unknown>) {
   const limit = Math.min(50, Math.max(1, Number(args.limit ?? 10)));
 
-  const rows = await querySupabase<{
-    id: string;
-    question: string;
-    summary: string;
-    confidence: string;
-    translation_used: string;
-    status: string;
-    created_at: string;
-  }>('answers', {
-    select: 'id,question,summary,confidence,translation_used,status,created_at',
-    order: 'created_at.desc',
-    limit: String(limit),
-  });
+  const rows = await listRecentAnswers(limit);
 
   if (!rows) {
-    return { error: 'Could not fetch answers — Supabase may not be configured' };
+    return { error: 'Could not fetch answers — database may not be configured' };
   }
 
   return { answers: rows, count: rows.length };
@@ -442,16 +451,14 @@ async function handleGetDimension(args: Record<string, unknown>) {
     return { error: `dimension must be one of: ${VALID_DIMS.join(', ')}` };
   }
 
-  const rows = await querySupabase<{ id: string; dimensions: Record<string, unknown> }>(
-    'answers',
-    { select: 'id,dimensions', 'id.eq': answerId, limit: '1' }
-  );
+  const { getAnswerById } = await import('@/lib/answers');
+  const answer = await getAnswerById(answerId);
 
-  if (!rows || rows.length === 0) {
+  if (!answer) {
     return { error: `Answer not found: ${answerId}` };
   }
 
-  const dimData = rows[0].dimensions?.[dimension];
+  const dimData = (answer.dimensions as Record<string, unknown> | undefined)?.[dimension];
   if (!dimData) return { error: `Dimension "${dimension}" not found on answer ${answerId}` };
 
   return { answer_id: answerId, dimension, data: dimData };

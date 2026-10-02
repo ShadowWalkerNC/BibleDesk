@@ -1,28 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiError } from '@/lib/api-response';
-import { createCommitmentIcs, requireUuid } from '@/lib/prayer-care';
-import { requireSupabaseUser } from '@/lib/server-auth';
-import { getServerClient } from '@/lib/supabase';
+import { createCommitmentIcs, requireUuid, type ScheduleKind } from '@/lib/prayer-care';
+import { requireUser } from '@/lib/server-auth';
+import { getDb } from '@/db';
+import { prayerCommitments, prayerContacts } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireSupabaseUser(request);
+    const user = await requireUser(request);
     const { id: rawId } = await context.params;
     const id = requireUuid(rawId);
-    const { data, error } = await getServerClient()
-      .from('prayer_commitments')
-      .select('id, title, private_details, next_due_at, schedule_kind, prayer_contacts!inner(is_sensitive)')
-      .eq('id', id)
-      .eq('owner_id', user.id)
-      .maybeSingle();
-    if (error) throw new Error(`Unable to load prayer commitment: ${error.message}`);
-    if (!data) return NextResponse.json({ error: 'Prayer commitment not found' }, { status: 404 });
-    const contact = Array.isArray(data.prayer_contacts)
-      ? data.prayer_contacts[0]
-      : data.prayer_contacts;
+    const db = await getDb();
+    const rows = await db
+      .select({ commitment: prayerCommitments, contact: prayerContacts })
+      .from(prayerCommitments)
+      .innerJoin(prayerContacts, eq(prayerCommitments.contactId, prayerContacts.id))
+      .where(
+        and(
+          eq(prayerCommitments.id, id),
+          eq(prayerCommitments.userId, user.id)
+        )
+      )
+      .limit(1);
+    const row = rows[0] ?? null;
+    if (!row) return NextResponse.json({ error: 'Prayer commitment not found' }, { status: 404 });
     return new NextResponse(createCommitmentIcs({
-      ...data,
-      is_sensitive: contact?.is_sensitive === true,
+      id: row.commitment.id,
+      title: row.commitment.title,
+      private_details: row.commitment.privateDetails,
+      next_due_at: (row.commitment.nextDueAt ?? new Date()).toISOString(),
+      schedule_kind: row.commitment.scheduleKind as ScheduleKind,
+      is_sensitive: row.contact.isSensitive === true,
     }), {
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',

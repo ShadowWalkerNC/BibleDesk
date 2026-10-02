@@ -4,7 +4,7 @@ import path from 'path';
 import { getDb } from '@/db';
 import { scriptureVerses, studyNotes, studyCollections } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isDatabaseConfigured } from '@/lib/answers';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,14 +113,14 @@ export async function GET() {
   };
 
   // 5. Cloud Sync & Security Check
-  const supabaseOk = isSupabaseConfigured();
+  const dbConfigured = isDatabaseConfigured();
   checks.cloudSync = {
     status: 'healthy',
     label: 'Account & Multi-Device Sync',
-    description: supabaseOk
+    description: dbConfigured
       ? 'Cloud account synchronization is active and secure.'
       : 'Local-first privacy mode: your study notes and prayer commitments remain securely stored on this device.',
-    cloudActive: supabaseOk,
+    cloudActive: dbConfigured,
   };
 
   const totalDuration = Date.now() - startedAt;

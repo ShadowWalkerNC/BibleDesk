@@ -7,7 +7,9 @@ import {
   randomBytes,
   timingSafeEqual,
 } from 'node:crypto';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { googleConnections } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const GOOGLE_SCOPES = [
   'openid',
@@ -15,15 +17,6 @@ export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/gmail.compose',
 ] as const;
-
-type GoogleConnection = {
-  owner_id: string;
-  google_account_email: string;
-  encrypted_access_token: string;
-  encrypted_refresh_token: string | null;
-  token_expires_at: string | null;
-  scopes: string[];
-};
 
 function required(name: 'GOOGLE_CLIENT_ID' | 'GOOGLE_CLIENT_SECRET' | 'GOOGLE_TOKEN_ENCRYPTION_KEY' | 'NEXT_PUBLIC_APP_URL'): string {
   const value = process.env[name];
@@ -171,45 +164,62 @@ export async function saveGoogleConnection(
   ownerId: string,
   tokens: Awaited<ReturnType<typeof exchangeGoogleCode>>,
 ): Promise<void> {
-  const client = getServerClient();
-  const { data: existing } = await client
-    .from('google_connections')
-    .select('encrypted_refresh_token')
-    .eq('owner_id', ownerId)
-    .maybeSingle();
-  const { error } = await client.from('google_connections').upsert({
-    owner_id: ownerId,
-    google_account_email: tokens.email,
-    encrypted_access_token: encryptToken(tokens.accessToken),
-    encrypted_refresh_token: tokens.refreshToken
-      ? encryptToken(tokens.refreshToken)
-      : existing?.encrypted_refresh_token ?? null,
-    token_expires_at: tokens.expiresAt,
-    scopes: tokens.scopes,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: 'owner_id' });
-  if (error) throw new Error(`Unable to save Google connection: ${error.message}`);
+  const db = await getDb();
+
+  // Check for existing refresh token to preserve it
+  const existing = await db
+    .select({ encryptedRefreshToken: googleConnections.encryptedRefreshToken })
+    .from(googleConnections)
+    .where(eq(googleConnections.ownerId, ownerId))
+    .limit(1);
+
+  await db
+    .insert(googleConnections)
+    .values({
+      ownerId,
+      googleAccountEmail: tokens.email,
+      encryptedAccessToken: encryptToken(tokens.accessToken),
+      encryptedRefreshToken: tokens.refreshToken
+        ? encryptToken(tokens.refreshToken)
+        : existing[0]?.encryptedRefreshToken ?? null,
+      tokenExpiresAt: tokens.expiresAt,
+      scopes: tokens.scopes,
+    })
+    .onConflictDoUpdate({
+      target: googleConnections.ownerId,
+      set: {
+        googleAccountEmail: tokens.email,
+        encryptedAccessToken: encryptToken(tokens.accessToken),
+        encryptedRefreshToken: tokens.refreshToken
+          ? encryptToken(tokens.refreshToken)
+          : existing[0]?.encryptedRefreshToken ?? null,
+        tokenExpiresAt: tokens.expiresAt,
+        scopes: tokens.scopes,
+        updatedAt: new Date(),
+      },
+    });
 }
 
-async function loadGoogleConnection(ownerId: string): Promise<GoogleConnection> {
-  const { data, error } = await getServerClient()
-    .from('google_connections')
-    .select('owner_id, google_account_email, encrypted_access_token, encrypted_refresh_token, token_expires_at, scopes')
-    .eq('owner_id', ownerId)
-    .maybeSingle();
-  if (error) throw new Error(`Unable to load Google connection: ${error.message}`);
-  if (!data) throw new Error('Google account is not connected');
-  return data as GoogleConnection;
+async function loadGoogleConnection(ownerId: string) {
+  const db = await getDb();
+  const rows = await db
+    .select()
+    .from(googleConnections)
+    .where(eq(googleConnections.ownerId, ownerId))
+    .limit(1);
+
+  if (rows.length === 0) throw new Error('Google account is not connected');
+  return rows[0];
 }
 
 export async function getGoogleAccessToken(ownerId: string): Promise<string> {
   const connection = await loadGoogleConnection(ownerId);
-  const expiresAt = connection.token_expires_at ? new Date(connection.token_expires_at).getTime() : 0;
-  if (expiresAt > Date.now() + 60_000) return decryptToken(connection.encrypted_access_token);
-  if (!connection.encrypted_refresh_token) throw new Error('Google connection needs to be re-authorized');
+  const expiresAt = connection.tokenExpiresAt ? new Date(connection.tokenExpiresAt).getTime() : 0;
+  if (expiresAt > Date.now() + 60_000) return decryptToken(connection.encryptedAccessToken);
+  if (!connection.encryptedRefreshToken) throw new Error('Google connection needs to be re-authorized');
 
   const payload = await tokenRequest(new URLSearchParams({
-    refresh_token: decryptToken(connection.encrypted_refresh_token),
+    refresh_token: decryptToken(connection.encryptedRefreshToken),
     client_id: required('GOOGLE_CLIENT_ID'),
     client_secret: required('GOOGLE_CLIENT_SECRET'),
     grant_type: 'refresh_token',
@@ -218,13 +228,18 @@ export async function getGoogleAccessToken(ownerId: string): Promise<string> {
   const expiresAtIso = typeof payload.expires_in === 'number'
     ? new Date(Date.now() + payload.expires_in * 1000).toISOString()
     : null;
-  const { error } = await getServerClient().from('google_connections').update({
-    encrypted_access_token: encryptToken(payload.access_token),
-    token_expires_at: expiresAtIso,
-    scopes: typeof payload.scope === 'string' ? payload.scope.split(' ') : connection.scopes,
-    updated_at: new Date().toISOString(),
-  }).eq('owner_id', ownerId);
-  if (error) throw new Error(`Unable to persist refreshed Google token: ${error.message}`);
+
+  const db = await getDb();
+  await db
+    .update(googleConnections)
+    .set({
+      encryptedAccessToken: encryptToken(payload.access_token),
+      tokenExpiresAt: expiresAtIso,
+      scopes: typeof payload.scope === 'string' ? payload.scope.split(' ') : connection.scopes,
+      updatedAt: new Date(),
+    })
+    .where(eq(googleConnections.ownerId, ownerId));
+
   return payload.access_token;
 }
 
@@ -247,4 +262,3 @@ export async function googleApi<T>(
   if (!response.ok) throw new Error(payload.error?.message || `Google API returned ${response.status}`);
   return payload;
 }
-

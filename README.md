@@ -60,7 +60,7 @@ When investigating difficult passages, claims, or interpretations, BibleDesk app
   - `GET /api/graph?nodeKey=grace`
   - `GET /api/daily`
 - **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 5 free questions/day, then BYOK for unlimited) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
-- **Prayer Care**: Local private commitments support recurring rhythms and gratitude tracking. With Supabase and direct BibleDesk Google OAuth configured, signed-in users can export ICS/Calendar events and create an editable Gmail draft after explicit review. BibleDesk does not send Gmail messages automatically.
+- **Prayer Care**: Local private commitments support recurring rhythms and gratitude tracking. With Railway PostgreSQL (`DATABASE_URL`) and direct BibleDesk Google OAuth configured, signed-in users can export ICS/Calendar events and create an editable Gmail draft after explicit review. BibleDesk does not send Gmail messages automatically.
 
 ### 3. Bidirectional Biblical Knowledge Graph
 The Concept Graph indexes verses, lexical roots (e.g. `G2889`, `H7225`), TSK cross-references, and theological topics into an open semantic network. Users and external AI agents can traverse this graph to discover linked passages and themes instantly without slow, expensive RAG recalculations.
@@ -141,7 +141,7 @@ Visit `http://localhost:3000` to open the Study Desk.
 ## Production Deployment & Database Setup
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions:
-- **Consolidated Database Init**: Paste [`supabase/schema-init.sql`](supabase/schema-init.sql) into your Supabase SQL Editor for 1-click database initialization.
+- **Database Migrations**: [`drizzle/`](drizzle/) holds the versioned Drizzle migrations (`0000` + `0001_railway-migration`, 35 tables), applied automatically by the Docker CMD via `drizzle-kit migrate`, or manually with `npm run db:migrate`.
 - **Railway**: 1-click deployment via `railway.json` and production `Dockerfile` (healthcheck `/api/health`, dynamic `$PORT` handling, unified Next.js API & web server).
 - **Docker**: Production-ready multi-stage container (`Dockerfile` & `docker-compose.yml`).
 - **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { churches, prayerRequests } from '@/db/schema';
+import { and, eq, isNull } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { checkRateLimit, RateLimitNamespace } from '@/lib/rate-limit';
 
@@ -36,33 +38,65 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid prayer or destination.' }, { status: 400 });
     }
     if (targetLevel === 'circle') return NextResponse.json({ error: 'Shared circles are not available yet. Keep this prayer private.' }, { status: 409 });
-    const supabase = getServerClient();
-    const { data: prayer, error } = await supabase.from('prayer_requests')
-      .select('id,is_restricted,is_restricted_region,privacy_mode,deleted_at,status')
-      .eq('id', prayerId).eq('user_id', user.id).maybeSingle();
-    if (error) return NextResponse.json({ error: 'Prayer service unavailable.' }, { status: 503 });
-    if (!prayer || prayer.deleted_at) return NextResponse.json({ error: 'Prayer not found.' }, { status: 404 });
-    if (targetLevel !== 'private' && (prayer.is_restricted || prayer.is_restricted_region || prayer.privacy_mode === 'restricted')) {
+    const db = await getDb();
+    const prayerRows = await db
+      .select({
+        id: prayerRequests.id,
+        isRestricted: prayerRequests.isRestricted,
+        isRestrictedRegion: prayerRequests.isRestrictedRegion,
+        privacyMode: prayerRequests.privacyMode,
+        deletedAt: prayerRequests.deletedAt,
+        status: prayerRequests.status,
+      })
+      .from(prayerRequests)
+      .where(and(eq(prayerRequests.id, prayerId), eq(prayerRequests.userId, user.id)))
+      .limit(1);
+    const prayer = prayerRows[0] ?? null;
+    if (!prayer || prayer.deletedAt) return NextResponse.json({ error: 'Prayer not found.' }, { status: 404 });
+    if (targetLevel !== 'private' && (prayer.isRestricted || prayer.isRestrictedRegion || prayer.privacyMode === 'restricted')) {
       return NextResponse.json({ error: 'Restricted prayers cannot be shared.' }, { status: 403 });
     }
     if (targetLevel === 'church') {
       // Self-service membership rows cannot establish trusted destination authorization.
-      const { data: church, error: churchError } = await supabase.from('churches')
-        .select('id').eq('id', churchId).eq('admin_user_id', user.id).maybeSingle();
-      if (churchError) return NextResponse.json({ error: 'Church service unavailable.' }, { status: 503 });
-      if (!church) return NextResponse.json({ error: 'Church administration is required for this destination.' }, { status: 403 });
+      const churchRows = await db
+        .select({ id: churches.id })
+        .from(churches)
+        .where(and(eq(churches.id, churchId), eq(churches.adminUserId, user.id)))
+        .limit(1);
+      if (!churchRows[0]) return NextResponse.json({ error: 'Church administration is required for this destination.' }, { status: 403 });
     }
     const limit = await checkRateLimit(user.id, { namespace: RateLimitNamespace.prayerEscalate });
     if (!limit.allowed) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
-    const { data, error: updateError } = await supabase.from('prayer_requests').update({
-      escalation_level: targetLevel, urgency_level: urgencyLevel, is_anonymous: isAnonymous,
-      church_id: targetLevel === 'church' ? churchId : null,
-      status: targetLevel === 'atlas' ? 'pending' : prayer.status,
-      updated_at: new Date().toISOString(),
-    }).eq('id', prayerId).eq('user_id', user.id).is('deleted_at', null)
-      .select('id,escalation_level,urgency_level,is_anonymous,church_id,status').maybeSingle();
-    if (updateError) return NextResponse.json({ error: 'Unable to save visibility change.' }, { status: 503 });
-    if (!data) return NextResponse.json({ error: 'Prayer not found.' }, { status: 404 });
-    return NextResponse.json({ success: true, prayer: data });
+    const updated = await db
+      .update(prayerRequests)
+      .set({
+        escalationLevel: targetLevel,
+        urgencyLevel,
+        isAnonymous,
+        churchId: targetLevel === 'church' ? churchId : null,
+        status: targetLevel === 'atlas' ? 'pending' : prayer.status,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(prayerRequests.id, prayerId),
+          eq(prayerRequests.userId, user.id),
+          isNull(prayerRequests.deletedAt)
+        )
+      )
+      .returning();
+    const row = updated[0] ?? null;
+    if (!row) return NextResponse.json({ error: 'Prayer not found.' }, { status: 404 });
+    return NextResponse.json({
+      success: true,
+      prayer: {
+        id: row.id,
+        escalation_level: row.escalationLevel,
+        urgency_level: row.urgencyLevel,
+        is_anonymous: row.isAnonymous,
+        church_id: row.churchId,
+        status: row.status,
+      },
+    });
   } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }); }
 }

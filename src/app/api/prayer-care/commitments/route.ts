@@ -1,29 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { apiError } from '@/lib/api-response';
 import { calculateInitialDueAt, parseCommitmentInput } from '@/lib/prayer-care';
-import { requireSupabaseUser } from '@/lib/server-auth';
-import { getServerClient } from '@/lib/supabase';
+import { requireUser } from '@/lib/server-auth';
+import { getDb } from '@/db';
+import {
+  prayerCommitments,
+  prayerContacts,
+  type PrayerCommitment,
+  type PrayerContact,
+} from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const COMMITMENT_SELECT = `
-  id, contact_id, title, private_details, schedule_kind, timezone, local_time,
-  next_due_at, status, google_event_id, google_event_link, created_at, updated_at,
-  prayer_contacts!inner(id, display_name, email, category, is_sensitive)
-`;
+export function toCommitmentJson(
+  commitment: PrayerCommitment,
+  contact: Pick<PrayerContact, 'id' | 'displayName' | 'email' | 'category' | 'isSensitive'>
+) {
+  return {
+    id: commitment.id,
+    contact_id: commitment.contactId,
+    title: commitment.title,
+    private_details: commitment.privateDetails,
+    schedule_kind: commitment.scheduleKind,
+    timezone: commitment.timezone,
+    local_time: commitment.localTime,
+    next_due_at: commitment.nextDueAt ? commitment.nextDueAt.toISOString() : null,
+    status: commitment.status,
+    google_event_id: commitment.googleEventId,
+    google_event_link: commitment.googleEventLink,
+    created_at: commitment.createdAt.toISOString(),
+    updated_at: commitment.updatedAt ? commitment.updatedAt.toISOString() : null,
+    prayer_contacts: {
+      id: contact.id,
+      display_name: contact.displayName,
+      email: contact.email,
+      category: contact.category,
+      is_sensitive: contact.isSensitive,
+    },
+  };
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireSupabaseUser(request);
-    const { data, error } = await getServerClient()
-      .from('prayer_commitments')
-      .select(COMMITMENT_SELECT)
-      .eq('owner_id', user.id)
-      .eq('status', 'active')
-      .order('next_due_at', { ascending: true })
+    const user = await requireUser(request);
+    const db = await getDb();
+    const rows = await db
+      .select({ commitment: prayerCommitments, contact: prayerContacts })
+      .from(prayerCommitments)
+      .innerJoin(prayerContacts, eq(prayerCommitments.contactId, prayerContacts.id))
+      .where(
+        and(
+          eq(prayerCommitments.userId, user.id),
+          eq(prayerCommitments.status, 'active')
+        )
+      )
+      .orderBy(prayerCommitments.nextDueAt)
       .limit(100);
-    if (error) throw new Error(`Unable to list prayer commitments: ${error.message}`);
-    return NextResponse.json({ commitments: data ?? [] }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json(
+      { commitments: rows.map((row) => toCommitmentJson(row.commitment, row.contact)) },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch (error) {
     return apiError(error, 'GET /api/prayer-care/commitments');
   }
@@ -31,37 +69,42 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireSupabaseUser(request);
+    const user = await requireUser(request);
     const input = parseCommitmentInput(await request.json());
-    const client = getServerClient();
-    const { data: contact, error: contactError } = await client
-      .from('prayer_contacts')
-      .select('id')
-      .eq('id', input.contactId)
-      .eq('owner_id', user.id)
-      .eq('is_archived', false)
-      .maybeSingle();
-    if (contactError) throw new Error(`Unable to verify prayer contact: ${contactError.message}`);
+    const db = await getDb();
+    const contactRows = await db
+      .select()
+      .from(prayerContacts)
+      .where(
+        and(
+          eq(prayerContacts.id, input.contactId),
+          eq(prayerContacts.userId, user.id),
+          eq(prayerContacts.isArchived, false)
+        )
+      )
+      .limit(1);
+    const contact = contactRows[0] ?? null;
     if (!contact) return NextResponse.json({ error: 'Prayer contact not found' }, { status: 404 });
 
-    const { data, error } = await client
-      .from('prayer_commitments')
-      .insert({
-        owner_id: user.id,
-        contact_id: input.contactId,
+    const inserted = await db
+      .insert(prayerCommitments)
+      .values({
+        id: uuidv4(),
+        userId: user.id,
+        contactId: input.contactId,
         title: input.title,
-        private_details: input.privateDetails,
-        schedule_kind: input.scheduleKind,
+        privateDetails: input.privateDetails,
+        scheduleKind: input.scheduleKind,
         timezone: input.timezone,
-        local_time: input.localTime,
-        next_due_at: calculateInitialDueAt(input.scheduleKind, input.timezone, input.localTime).toISOString(),
+        localTime: input.localTime,
+        nextDueAt: calculateInitialDueAt(input.scheduleKind, input.timezone, input.localTime),
+        status: 'active',
       })
-      .select(COMMITMENT_SELECT)
-      .single();
-    if (error) throw new Error(`Unable to create prayer commitment: ${error.message}`);
-    return NextResponse.json({ commitment: data }, { status: 201 });
+      .returning();
+    const commitment = inserted[0];
+    if (!commitment) throw new Error('Unable to create prayer commitment');
+    return NextResponse.json({ commitment: toCommitmentJson(commitment, contact) }, { status: 201 });
   } catch (error) {
     return apiError(error, 'POST /api/prayer-care/commitments');
   }
 }
-

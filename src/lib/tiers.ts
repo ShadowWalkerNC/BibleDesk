@@ -135,7 +135,9 @@ export type TierFeature = keyof TierConfig['features'];
  */
 export function getUserTier(profile?: {
   subscription_tier?: string | null;
+  subscriptionTier?: string | null;
   subscription_status?: string | null;
+  subscriptionStatus?: string | null;
 } | null): SubscriptionTier {
   // Allow self-hosters to enable Pro mode globally for their church/community
   if (
@@ -147,8 +149,8 @@ export function getUserTier(profile?: {
 
   if (!profile) return 'free';
 
-  const tier = (profile.subscription_tier as SubscriptionTier) || 'free';
-  const status = (profile.subscription_status as SubscriptionStatus) || 'active';
+  const tier = ((profile.subscription_tier ?? profile.subscriptionTier) as SubscriptionTier) || 'free';
+  const status = ((profile.subscription_status ?? profile.subscriptionStatus) as SubscriptionStatus) || 'active';
 
   if (!['active', 'trialing'].includes(status)) {
     return 'free';

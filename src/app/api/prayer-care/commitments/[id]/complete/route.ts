@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { apiError } from '@/lib/api-response';
 import { calculateNextDueAt, requireUuid, type ScheduleKind } from '@/lib/prayer-care';
-import { requireSupabaseUser } from '@/lib/server-auth';
-import { getServerClient } from '@/lib/supabase';
+import { requireUser } from '@/lib/server-auth';
+import { getDb } from '@/db';
+import { prayerCheckins, prayerCommitments } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireSupabaseUser(request);
+    const user = await requireUser(request);
     const { id: rawId } = await context.params;
     const id = requireUuid(rawId);
     const body = await request.json().catch(() => ({})) as { privateNote?: unknown };
@@ -16,55 +19,76 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     const privateNote = typeof body.privateNote === 'string' ? body.privateNote.trim() : null;
     if (privateNote && privateNote.length > 5000) throw new Error('privateNote is too long');
 
-    const client = getServerClient();
-    const { data: commitment, error: findError } = await client
-      .from('prayer_commitments')
-      .select('id, schedule_kind, timezone, local_time, next_due_at, status')
-      .eq('id', id)
-      .eq('owner_id', user.id)
-      .maybeSingle();
-    if (findError) throw new Error(`Unable to load prayer commitment: ${findError.message}`);
+    const db = await getDb();
+    const commitmentRows = await db
+      .select()
+      .from(prayerCommitments)
+      .where(
+        and(
+          eq(prayerCommitments.id, id),
+          eq(prayerCommitments.userId, user.id)
+        )
+      )
+      .limit(1);
+    const commitment = commitmentRows[0] ?? null;
     if (!commitment) return NextResponse.json({ error: 'Prayer commitment not found' }, { status: 404 });
     if (commitment.status !== 'active') {
       return NextResponse.json({ error: 'Only active commitments can be completed' }, { status: 409 });
     }
 
     const nextDueAt = calculateNextDueAt(
-      commitment.schedule_kind as ScheduleKind,
+      commitment.scheduleKind as ScheduleKind,
       commitment.timezone,
-      String(commitment.local_time).slice(0, 5),
-      commitment.next_due_at,
+      String(commitment.localTime).slice(0, 5),
+      (commitment.nextDueAt ?? new Date()).toISOString(),
     );
-    const now = new Date().toISOString();
-    const { data: checkin, error: checkinError } = await client
-      .from('prayer_checkins')
-      .insert({
-        owner_id: user.id,
-        commitment_id: id,
+    const now = new Date();
+    const checkinRows = await db
+      .insert(prayerCheckins)
+      .values({
+        id: uuidv4(),
+        userId: user.id,
+        commitmentId: id,
         outcome: 'prayed',
-        private_note: privateNote || null,
-        completed_at: now,
-        next_due_at: nextDueAt?.toISOString() ?? null,
+        privateNote: privateNote || null,
+        completedAt: now,
+        nextDueAt: nextDueAt ?? null,
       })
-      .select('id, outcome, private_note, completed_at, next_due_at')
-      .single();
-    if (checkinError) throw new Error(`Unable to record prayer check-in: ${checkinError.message}`);
+      .returning();
+    const checkin = checkinRows[0];
+    if (!checkin) throw new Error('Unable to record prayer check-in');
 
-    const { data: updated, error: updateError } = await client
-      .from('prayer_commitments')
-      .update({
-        next_due_at: nextDueAt?.toISOString() ?? commitment.next_due_at,
+    const updatedRows = await db
+      .update(prayerCommitments)
+      .set({
+        nextDueAt: nextDueAt ?? commitment.nextDueAt,
         status: nextDueAt ? 'active' : 'archived',
-        updated_at: now,
+        updatedAt: now,
       })
-      .eq('id', id)
-      .eq('owner_id', user.id)
-      .select('id, next_due_at, status')
-      .single();
-    if (updateError) throw new Error(`Prayer was recorded but the schedule could not advance: ${updateError.message}`);
-    return NextResponse.json({ checkin, commitment: updated });
+      .where(
+        and(
+          eq(prayerCommitments.id, id),
+          eq(prayerCommitments.userId, user.id)
+        )
+      )
+      .returning();
+    const updated = updatedRows[0];
+    if (!updated) throw new Error('Prayer was recorded but the schedule could not advance');
+    return NextResponse.json({
+      checkin: {
+        id: checkin.id,
+        outcome: checkin.outcome,
+        private_note: checkin.privateNote,
+        completed_at: checkin.completedAt.toISOString(),
+        next_due_at: checkin.nextDueAt ? checkin.nextDueAt.toISOString() : null,
+      },
+      commitment: {
+        id: updated.id,
+        next_due_at: updated.nextDueAt ? updated.nextDueAt.toISOString() : null,
+        status: updated.status,
+      },
+    });
   } catch (error) {
     return apiError(error, 'POST /api/prayer-care/commitments/[id]/complete');
   }
 }
-

@@ -2,8 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Sparkles, Eye, EyeOff, Mail } from 'lucide-react';
-import { getBrowserClient, isLocalStudyProfileEnabled, isSupabaseConfigured } from '@/lib/supabase';
+import { BookOpen, Sparkles, Eye, EyeOff } from 'lucide-react';
+import {
+  getAuthToken,
+  isLocalStudyProfileEnabled,
+  signInRequest,
+  signUpRequest,
+} from '@/lib/client-auth';
 import { syncGuestDataToAccount } from '@/lib/syncGuestData';
 import styles from './page.module.css';
 
@@ -16,78 +21,78 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [churchName, setChurchName] = useState('');
   const [role, setRole] = useState<'member' | 'pastor'>('member');
-  
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Check if session already active
   useEffect(() => {
-    if (!isSupabaseConfigured() && isLocalStudyProfileEnabled()) {
+    if (getAuthToken()) {
+      router.push('/bible');
+      return;
+    }
+    if (isLocalStudyProfileEnabled()) {
       const local = localStorage.getItem('bibledesk_local_user');
       if (local) {
         router.push('/bible');
-        return;
       }
     }
-    const supabase = getBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.push('/bible');
-      }
-    });
   }, [router]);
-
-  // Google OAuth sign in — falls back to instant local session when Supabase is not configured
-  async function handleGoogleSignIn() {
-    setLoading(true);
-    setMessage(null);
-
-    // Local profiles are permitted only in explicitly local/development builds.
-    if (!isSupabaseConfigured()) {
-      if (!isLocalStudyProfileEnabled()) {
-        setMessage({ text: 'Account sign-in is temporarily unavailable because authentication has not been configured for this deployment.', type: 'error' });
-        setLoading(false);
-        return;
-      }
-      const localUser = {
-        id: 'local-user-' + Date.now().toString(36),
-        email: 'google-user@local.bibledesk',
-        user_metadata: { name: 'Bible Student', role: 'member' },
-      };
-      localStorage.setItem('bibledesk_local_user', JSON.stringify(localUser));
-      window.dispatchEvent(new Event('storage'));
-      await syncGuestDataToAccount();
-      setMessage({ text: 'Local study profile ready. Data stays on this device.', type: 'success' });
-      setTimeout(() => { router.push('/bible'); router.refresh(); }, 600);
-      return;
-    }
-
-    const supabase = getBrowserClient();
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/bible`,
-        },
-      });
-
-      if (error) throw error;
-    } catch (err: any) {
-      setMessage({ text: err instanceof Error ? err.message : 'Google sign-in failed. Please try again.', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
-    const supabase = getBrowserClient();
-
     try {
-      const fallbackLocalLogin = async (customMsg?: string) => {
+      if (isSignUp) {
+        await signUpRequest({
+          email: email.trim(),
+          password,
+          name: name.trim() || undefined,
+          churchName: churchName.trim() || undefined,
+          role,
+        });
+
+        // Auto-merge local guest bookmarks, notes, and prayer requests
+        await syncGuestDataToAccount();
+        window.dispatchEvent(new Event('storage'));
+        setMessage({ text: 'Account created! Welcome to BibleDesk...', type: 'success' });
+        setTimeout(() => {
+          router.push('/bible');
+          router.refresh();
+        }, 800);
+      } else {
+        await signInRequest(email.trim(), password);
+
+        // Auto-merge local guest items on successful login
+        await syncGuestDataToAccount();
+        window.dispatchEvent(new Event('storage'));
+
+        setMessage({ text: 'Logged in successfully! Redirecting to Bible reader...', type: 'success' });
+        setTimeout(() => {
+          router.push('/bible');
+          router.refresh();
+        }, 800);
+      }
+    } catch (err: unknown) {
+      // Structural check (not instanceof) so mock/proxied errors still surface.
+      const text =
+        typeof err === 'object' && err !== null && 'message' in err &&
+        typeof (err as { message?: unknown }).message === 'string' &&
+        (err as { message: string }).message
+          ? (err as { message: string }).message
+          : 'Sign-in failed. Please try again.';
+      // Local / Offline fallback when authentication is not configured.
+      // A wrong password must NEVER create a local identity — only an
+      // unconfigured deployment (or unreachable server) in an explicitly
+      // local/development build falls back.
+      const unconfigured =
+        text.includes('has not been configured') ||
+        text.includes('Failed to fetch') ||
+        text.includes('NetworkError') ||
+        text.includes('fetch failed');
+      if (unconfigured && isLocalStudyProfileEnabled()) {
         const localUser = {
           id: 'local-user-' + Date.now().toString(36),
           email: email.trim(),
@@ -101,111 +106,20 @@ export default function LoginPage() {
         window.dispatchEvent(new Event('storage'));
         await syncGuestDataToAccount();
         setMessage({
-          text: customMsg || 'Local study profile ready. Data stays on this device.',
+          text: 'Local study profile ready. Data stays on this device.',
           type: 'success',
         });
         setTimeout(() => {
           router.push('/bible');
           router.refresh();
         }, 600);
-      };
-
-      // Local / Offline fallback when Supabase is not configured with live credentials
-      if (!isSupabaseConfigured()) {
-        if (!isLocalStudyProfileEnabled()) {
-          setMessage({ text: 'Account sign-in is temporarily unavailable because authentication has not been configured for this deployment.', type: 'error' });
-          return;
-        }
-        await fallbackLocalLogin();
         return;
       }
-
-      if (isSignUp) {
-        // Sign Up with Name, Church, and Role in user metadata
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              name: name.trim() || undefined,
-              church_name: churchName.trim() || undefined,
-              role,
-            },
-          },
-        });
-
-        if (error) throw error;
-
-        // Auto-merge local guest bookmarks, notes, and prayer requests
-        await syncGuestDataToAccount();
-
-        // Email confirmation must complete before treating the user as signed in.
-        if (data.session) {
-          window.dispatchEvent(new Event('storage'));
-          setMessage({ text: 'Account created! Welcome to BibleDesk...', type: 'success' });
-          setTimeout(() => {
-            router.push('/bible');
-            router.refresh();
-          }, 800);
-        } else {
-          setMessage({ text: 'Check your email to confirm your account, then sign in. You can continue reading as a guest.', type: 'success' });
-        }
-      } else {
-        // Sign In
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-
-        if (error) throw error;
-
-        // Auto-merge local guest items on successful login
-        await syncGuestDataToAccount();
-        window.dispatchEvent(new Event('storage'));
-
-        setMessage({ text: 'Logged in successfully! Redirecting to Bible reader...', type: 'success' });
-        setTimeout(() => {
-          router.push('/bible');
-          router.refresh();
-        }, 800);
+      if (unconfigured) {
+        setMessage({ text: 'Account sign-in is temporarily unavailable because authentication has not been configured for this deployment.', type: 'error' });
+        return;
       }
-    } catch (err: any) {
-      setMessage({ text: err instanceof Error ? err.message : 'Sign-in failed. Please try again.', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleMagicLink() {
-    if (!email) {
-      setMessage({ text: 'Please enter your email address first.', type: 'error' });
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    if (!isSupabaseConfigured()) {
-      setMessage({ text: 'Magic-link sign-in is unavailable because authentication has not been configured for this deployment.', type: 'error' });
-      setLoading(false);
-      return;
-    }
-
-    const supabase = getBrowserClient();
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/bible`,
-        },
-      });
-
-      if (error) throw error;
-
-      setMessage({ text: 'Magic link sent! Check your email inbox to sign in instantly.', type: 'success' });
-    } catch (err: any) {
-      console.error('Magic Link error:', err);
-      setMessage({ text: err.message || 'Failed to send magic link.', type: 'error' });
+      setMessage({ text, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -246,7 +160,7 @@ export default function LoginPage() {
           {isSignUp ? 'Create your Account' : 'Welcome to BibleDesk'}
         </h1>
         <p className={styles.subtitle}>
-          {isSignUp 
+          {isSignUp
             ? 'Create an account for authenticated study and Prayer Care features'
             : 'Sign in to access your notes, private prayer circle, and study desk'}
         </p>
@@ -264,39 +178,6 @@ export default function LoginPage() {
             <strong>5-Dimension AI Study Assistant Included</strong>
             <span>A verified account can use 5 server AI answers per day when authentication and the server AI key are configured. You can also use your own Gemini key.</span>
           </div>
-        </div>
-
-        {/* Google OAuth Button */}
-        <button
-          type="button"
-          disabled={loading}
-          onClick={handleGoogleSignIn}
-          className={styles.googleBtn}
-          aria-label="Continue with Google"
-        >
-          <svg className={styles.googleIcon} viewBox="0 0 24 24">
-            <path
-              fill="#4285F4"
-              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.98 0 12s.45 3.84 1.25 5.42l4.03-3.15z"
-            />
-            <path
-              fill="#EA4335"
-              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-            />
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
-        <div className={styles.divider}>
-          <span>or continue with email</span>
         </div>
 
         <form onSubmit={handleAuth} className={styles.form}>
@@ -363,10 +244,10 @@ export default function LoginPage() {
                 id="password-input"
                 type={showPassword ? 'text' : 'password'}
                 required
-                minLength={6}
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="•••••••• (at least 6 characters)"
+                placeholder="•••••••• (at least 8 characters)"
                 className={styles.input}
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
               />
@@ -386,20 +267,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className={styles.divider}>
-          <span>or passwordless</span>
-        </div>
-
-        <button 
-          type="button" 
-          disabled={loading} 
-          onClick={handleMagicLink} 
-          className={styles.otpBtn}
-        >
-          <Mail size={16} />
-          <span>Send Magic Link to Email</span>
-        </button>
-
         {/* 100% Free Bible Guarantee */}
         <div className={styles.sharedBibleNotice} style={{ marginTop: '1.25rem', marginBottom: 0 }}>
           <BookOpen size={16} className={styles.sharedNoticeIcon} />
@@ -410,16 +277,16 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.footer}>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => {
               setIsSignUp(!isSignUp);
               setMessage(null);
             }}
             className={styles.toggleBtn}
           >
-            {isSignUp 
-              ? 'Already have an account? Sign In' 
+            {isSignUp
+              ? 'Already have an account? Sign In'
               : "Don't have an account? Sign Up"}
           </button>
         </div>

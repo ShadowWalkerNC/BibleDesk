@@ -1,5 +1,5 @@
 // BibleDesk — Moderation Library
-// Server-only: uses SUPABASE_SERVICE_ROLE_KEY
+// Uses Railway PostgreSQL via Drizzle ORM.
 //
 // Responsibilities:
 //   checkAutoFlag(question, answer)  — scan for sensitive topics, set status
@@ -8,32 +8,27 @@
 //   tallyVotes(flagId)               — count votes, resolve flag when threshold met
 //   promoteToCanonical(flagId)       — embed + store as canonical answer
 //   getFlagQueue()                   — return pending flags for /mod/queue
-//   inviteModerator(data)            — create moderator row + Supabase Auth invite
+//   inviteModerator(data)            — create moderator row (email/password sign-in)
 //
 // Vote resolution threshold: 3 votes
-//   Majority 'accurate'   → flag APPROVED, answer status stays 'approved'
-//   Majority 'inaccurate' → flag REJECTED, answer status set to 'under_review'
-//                           (correction stored for display)
-//   Tie                   → no resolution until a 4th vote breaks it
 
-import { createClient } from '@supabase/supabase-js';
+import { getDb } from '@/db';
+import {
+  flaggedTopics,
+  flags,
+  answers,
+  moderationVotes,
+  moderators,
+} from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import type { BibleAnswer } from '@/types';
-import { getAppUrl } from '@/lib/appUrl';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const VOTE_THRESHOLD = 3;       // votes required to resolve a flag
-const EMBED_MODEL   = 'text-embedding-3-small'; // same model as rag.ts
-
-// ─── Supabase client (service role — server only) ────────────────────────────
-
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error('Supabase env vars not set');
-  return createClient(url, key);
-}
+const VOTE_THRESHOLD = 3;
+const EMBED_MODEL = 'text-embedding-3-small';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -75,39 +70,32 @@ export interface InviteData {
   email:      string;
   name:       string;
   role?:      'moderator' | 'admin';
-  invitedBy:  string;   // moderator.id of the admin sending the invite
+  invitedBy:  string;
 }
 
 export interface AutoFlagResult {
   flagged:    boolean;
-  reasons:    string[];     // matched keywords
-  categories: string[];     // unique categories matched
+  reasons:    string[];
+  categories: string[];
 }
 
 // ─── checkAutoFlag ────────────────────────────────────────────────────────────
-// Fetch active flagged_topics from DB and check question + answer summary.
-// Returns flagged=false on any DB error (fail open — don't block answers).
 
 export async function checkAutoFlag(
   question: string,
   answer: BibleAnswer
 ): Promise<AutoFlagResult> {
   try {
-    const supabase = getServiceClient();
-    const { data: topics, error } = await supabase
-      .from('flagged_topics')
-      .select('keyword, category')
-      .eq('active', true);
-
-    if (error || !topics) {
-      console.error('[moderation] Failed to fetch flagged_topics:', error);
-      return { flagged: false, reasons: [], categories: [] };
-    }
+    const db = await getDb();
+    const topics = await db
+      .select({ keyword: flaggedTopics.keyword, category: flaggedTopics.category })
+      .from(flaggedTopics)
+      .where(eq(flaggedTopics.active, true));
 
     const haystack = [
       question,
       answer.summary,
-      answer.dimensions.theological.content,
+      answer.dimensions?.theological?.content,
     ]
       .join(' ')
       .toLowerCase();
@@ -126,40 +114,29 @@ export async function checkAutoFlag(
 }
 
 // ─── saveFlag ─────────────────────────────────────────────────────────────────
-// Write the flag row and flip answers.status to 'under_review'.
-// Both writes happen in the same try block; answers.status update is best-effort.
 
 export async function saveFlag(data: FlagData): Promise<string | null> {
   try {
-    const supabase = getServiceClient();
+    const db = await getDb();
+    const id = uuidv4();
 
-    const { data: flag, error: flagError } = await supabase
-      .from('flags')
-      .insert({
-        answer_id:   data.answerId,
-        question:    data.question,
-        flag_type:   data.flagType,
-        flag_reason: data.flagReason,
-        status:      'pending',
-      })
-      .select('id')
-      .single();
+    await db.insert(flags).values({
+      id,
+      answerId:   data.answerId,
+      question:   data.question,
+      flagType:   data.flagType,
+      flagReason: data.flagReason,
+      status:     'pending',
+    });
 
-    if (flagError || !flag) {
-      console.error('[moderation] saveFlag insert error:', flagError);
-      return null;
-    }
+    // Flip answer status — best-effort
+    await db
+      .update(answers)
+      .set({ status: 'under_review' })
+      .where(eq(answers.id, data.answerId))
+      .catch((err) => console.error('[moderation] Failed to set answer under_review:', err));
 
-    // Flip answer status — best-effort, don't fail if it errors
-    await supabase
-      .from('answers')
-      .update({ status: 'under_review' })
-      .eq('id', data.answerId)
-      .then(({ error }) => {
-        if (error) console.error('[moderation] Failed to set answer under_review:', error);
-      });
-
-    return flag.id;
+    return id;
   } catch (err) {
     console.error('[moderation] saveFlag error:', err);
     return null;
@@ -167,36 +144,26 @@ export async function saveFlag(data: FlagData): Promise<string | null> {
 }
 
 // ─── castVote ─────────────────────────────────────────────────────────────────
-// Insert a moderation vote. Returns the new vote id, or null on error.
-// After inserting, triggers tallyVotes to resolve if threshold is reached.
 
 export async function castVote(data: VoteData): Promise<string | null> {
   try {
-    const supabase = getServiceClient();
+    const db = await getDb();
+    const id = uuidv4();
 
-    const { data: vote, error } = await supabase
-      .from('moderation_votes')
-      .insert({
-        flag_id:        data.flagId,
-        moderator_id:   data.moderatorId,
-        vote:           data.vote,
-        correction:     data.correction     ?? null,
-        scripture_refs: data.scriptureRefs  ?? null,
-      })
-      .select('id')
-      .single();
+    await db.insert(moderationVotes).values({
+      id,
+      flagId:        data.flagId,
+      moderatorId:   data.moderatorId,
+      vote:          data.vote,
+      correction:    data.correction     ?? null,
+      scriptureRefs: data.scriptureRefs  ?? null,
+    });
 
-    if (error || !vote) {
-      console.error('[moderation] castVote insert error:', error);
-      return null;
-    }
-
-    // Non-blocking tally check
     tallyVotes(data.flagId).catch((err) =>
       console.error('[moderation] tallyVotes error after vote:', err)
     );
 
-    return vote.id;
+    return id;
   } catch (err) {
     console.error('[moderation] castVote error:', err);
     return null;
@@ -204,131 +171,126 @@ export async function castVote(data: VoteData): Promise<string | null> {
 }
 
 // ─── tallyVotes ───────────────────────────────────────────────────────────────
-// Count all votes for a flag. If >= VOTE_THRESHOLD and majority is clear,
-// resolve the flag and take the appropriate action.
 
 export async function tallyVotes(flagId: string): Promise<void> {
-  const supabase = getServiceClient();
+  try {
+    const db = await getDb();
+    const votes = await db
+      .select({ vote: moderationVotes.vote })
+      .from(moderationVotes)
+      .where(eq(moderationVotes.flagId, flagId));
 
-  const { data: votes, error } = await supabase
-    .from('moderation_votes')
-    .select('vote, flag_id')
-    .eq('flag_id', flagId);
+    if (votes.length < VOTE_THRESHOLD) return;
 
-  if (error || !votes || votes.length < VOTE_THRESHOLD) return;
+    const accurate   = votes.filter((v) => v.vote === 'accurate').length;
+    const inaccurate = votes.filter((v) => v.vote === 'inaccurate').length;
 
-  const accurate   = votes.filter((v) => v.vote === 'accurate').length;
-  const inaccurate = votes.filter((v) => v.vote === 'inaccurate').length;
+    if (accurate === inaccurate) return;
 
-  if (accurate === inaccurate) return; // tie — wait for more votes
+    if (accurate > inaccurate) {
+      await db.update(flags).set({ status: 'approved' }).where(eq(flags.id, flagId));
 
-  if (accurate > inaccurate) {
-    // Majority says answer is accurate → approve + promote to canonical
-    await supabase
-      .from('flags')
-      .update({ status: 'approved' })
-      .eq('id', flagId);
+      const flagRow = await db
+        .select({ answerId: flags.answerId })
+        .from(flags)
+        .where(eq(flags.id, flagId))
+        .limit(1);
 
-    await supabase
-      .from('answers')
-      .update({ status: 'approved' })
-      .eq('id', await getAnswerIdForFlag(flagId, supabase));
+      if (flagRow[0]?.answerId) {
+        await db
+          .update(answers)
+          .set({ status: 'approved' })
+          .where(eq(answers.id, flagRow[0].answerId));
+      }
 
-    // Promote to canonical (fire-and-forget — embedding generation is slow)
-    promoteToCanonical(flagId).catch((err) =>
-      console.error('[moderation] promoteToCanonical error:', err)
-    );
-  } else {
-    // Majority says answer is inaccurate → reject, keep under_review
-    await supabase
-      .from('flags')
-      .update({ status: 'rejected' })
-      .eq('id', flagId);
-    // answer.status stays 'under_review' — correction shown in UI
+      promoteToCanonical(flagId).catch((err) =>
+        console.error('[moderation] promoteToCanonical error:', err)
+      );
+    } else {
+      await db.update(flags).set({ status: 'rejected' }).where(eq(flags.id, flagId));
+    }
+  } catch (err) {
+    console.error('[moderation] tallyVotes error:', err);
   }
 }
 
 // ─── promoteToCanonical ───────────────────────────────────────────────────────
-// Generate an embedding for the question and store the approved answer
-// in canonical_answers for future RAG retrieval.
-//
-// Called after majority-accurate vote OR directly from /api/mod/approve.
 
 export async function promoteToCanonical(
   flagId: string,
   overrideApproverId?: string
 ): Promise<boolean> {
   try {
-    const supabase = getServiceClient();
+    const db = await getDb();
 
-    // Load flag + answer
-    const { data: flag, error: flagErr } = await supabase
-      .from('flags')
-      .select('answer_id, question')
-      .eq('id', flagId)
-      .single();
+    const flagRows = await db
+      .select({ answerId: flags.answerId, question: flags.question })
+      .from(flags)
+      .where(eq(flags.id, flagId))
+      .limit(1);
 
-    if (flagErr || !flag) {
-      console.error('[moderation] promoteToCanonical: flag not found', flagErr);
+    if (!flagRows[0]) {
+      console.error('[moderation] promoteToCanonical: flag not found');
       return false;
     }
 
-    const { data: answerRow, error: answerErr } = await supabase
-      .from('answers')
-      .select('answer_json')
-      .eq('id', flag.answer_id)
-      .single();
+    const { answerId, question } = flagRows[0];
 
-    if (answerErr || !answerRow) {
-      console.error('[moderation] promoteToCanonical: answer not found', answerErr);
+    const answerRows = await db
+      .select({ answerJson: answers.answerJson })
+      .from(answers)
+      .where(eq(answers.id, answerId))
+      .limit(1);
+
+    if (!answerRows[0]) {
+      console.error('[moderation] promoteToCanonical: answer not found');
       return false;
     }
 
-    // Find approving moderator (most recent 'accurate' vote, or override)
     let approverId = overrideApproverId ?? null;
     if (!approverId) {
-      const { data: accurateVote } = await supabase
-        .from('moderation_votes')
-        .select('moderator_id')
-        .eq('flag_id', flagId)
-        .eq('vote', 'accurate')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      approverId = accurateVote?.moderator_id ?? null;
+      const voteRows = await db
+        .select({ moderatorId: moderationVotes.moderatorId })
+        .from(moderationVotes)
+        .where(and(eq(moderationVotes.flagId, flagId), eq(moderationVotes.vote, 'accurate')))
+        .orderBy(moderationVotes.createdAt)
+        .limit(1);
+      approverId = voteRows[0]?.moderatorId ?? null;
     }
 
-    // Generate embedding via OpenAI (same model as rag.ts)
-    const embedding = await generateEmbedding(flag.question);
+    const embedding = await generateEmbedding(question);
     if (!embedding) {
       console.error('[moderation] promoteToCanonical: embedding generation failed');
       return false;
     }
 
-    const questionHash = sha256(normalizeQuestion(flag.question));
+    const questionHash = sha256(normalizeQuestion(question));
+    const vectorLiteral = `[${embedding.join(',')}]`;
 
-    const { error: upsertErr } = await supabase
-      .from('canonical_answers')
-      .upsert(
-        {
-          question_hash: questionHash,
-          question:      flag.question,
-          answer_json:   answerRow.answer_json,
-          embedding,
-          approved_by:   approverId,
-          vote_count:    VOTE_THRESHOLD,
-        },
-        { onConflict: 'question_hash' }
-      );
+    // Use raw SQL for pgvector upsert
+    const { sql } = await import('drizzle-orm');
+    await db.execute(sql`
+      INSERT INTO canonical_answers (id, question_hash, question, answer_json, embedding, approved_by, vote_count, updated_at)
+      VALUES (
+        gen_random_uuid()::text,
+        ${questionHash},
+        ${question},
+        ${JSON.stringify(answerRows[0].answerJson)}::jsonb,
+        ${vectorLiteral}::vector,
+        ${approverId},
+        ${VOTE_THRESHOLD},
+        NOW()
+      )
+      ON CONFLICT (question_hash) DO UPDATE SET
+        question    = EXCLUDED.question,
+        answer_json = EXCLUDED.answer_json,
+        embedding   = EXCLUDED.embedding,
+        approved_by = EXCLUDED.approved_by,
+        vote_count  = canonical_answers.vote_count + 1,
+        updated_at  = EXCLUDED.updated_at
+    `);
 
-    if (upsertErr) {
-      console.error('[moderation] promoteToCanonical upsert error:', upsertErr);
-      return false;
-    }
-
-    console.log(
-      `[moderation] Promoted to canonical: "${flag.question.slice(0, 60)}..."`
-    );
+    console.log(`[moderation] Promoted to canonical: "${question.slice(0, 60)}..."`);
     return true;
   } catch (err) {
     console.error('[moderation] promoteToCanonical error:', err);
@@ -337,58 +299,60 @@ export async function promoteToCanonical(
 }
 
 // ─── getFlagQueue ─────────────────────────────────────────────────────────────
-// Returns all pending flags with their answer + vote summaries.
-// Used by GET /api/mod/queue.
 
 export async function getFlagQueue(): Promise<FlagQueueItem[]> {
   try {
-    const supabase = getServiceClient();
+    const db = await getDb();
 
-    const { data: flags, error } = await supabase
-      .from('flags')
-      .select(`
-        id,
-        answer_id,
-        question,
-        flag_type,
-        flag_reason,
-        status,
-        created_at,
-        answers ( answer_json ),
-        moderation_votes (
-          vote,
-          correction,
-          scripture_refs,
-          moderator_id,
-          moderators ( name )
-        )
-      `)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
+    // Load flags with status=pending
+    const flagRows = await db
+      .select()
+      .from(flags)
+      .where(eq(flags.status, 'pending'))
+      .orderBy(flags.createdAt);
 
-    if (error || !flags) {
-      console.error('[moderation] getFlagQueue error:', error);
-      return [];
-    }
+    if (flagRows.length === 0) return [];
 
-    return flags.map((f: any) => ({
-      id:         f.id,
-      answerId:   f.answer_id,
-      question:   f.question,
-      flagType:   f.flag_type,
-      flagReason: f.flag_reason,
-      status:     f.status,
-      createdAt:  f.created_at,
-      answerJson: f.answers?.answer_json ?? null,
-      voteCount:  f.moderation_votes?.length ?? 0,
-      votes: (f.moderation_votes ?? []).map((v: any) => ({
-        moderatorId:   v.moderator_id,
-        moderatorName: v.moderators?.name ?? 'Unknown',
-        vote:          v.vote,
-        correction:    v.correction ?? null,
-        scriptureRefs: v.scripture_refs ?? null,
-      })),
-    }));
+    const flagIds = flagRows.map((f) => f.id);
+    const answerIds = flagRows.map((f) => f.answerId);
+
+    // Load related answers and votes in parallel
+    const { inArray } = await import('drizzle-orm');
+    const [answerRows, voteRows, modRows] = await Promise.all([
+      db.select({ id: answers.id, answerJson: answers.answerJson })
+        .from(answers)
+        .where(inArray(answers.id, answerIds)),
+      db.select()
+        .from(moderationVotes)
+        .where(inArray(moderationVotes.flagId, flagIds)),
+      db.select({ id: moderators.id, name: moderators.name })
+        .from(moderators),
+    ]);
+
+    const answerMap = new Map(answerRows.map((a) => [a.id, a.answerJson]));
+    const modMap    = new Map(modRows.map((m) => [m.id, m.name]));
+
+    return flagRows.map((f) => {
+      const relatedVotes = voteRows.filter((v) => v.flagId === f.id);
+      return {
+        id:         f.id,
+        answerId:   f.answerId,
+        question:   f.question,
+        flagType:   f.flagType as 'auto' | 'user',
+        flagReason: f.flagReason,
+        status:     (f.status ?? 'pending') as 'pending' | 'approved' | 'rejected',
+        createdAt:  f.createdAt.toISOString(),
+        answerJson: (answerMap.get(f.answerId) as BibleAnswer) ?? null,
+        voteCount:  relatedVotes.length,
+        votes: relatedVotes.map((v) => ({
+          moderatorId:   v.moderatorId,
+          moderatorName: modMap.get(v.moderatorId) ?? 'Unknown',
+          vote:          v.vote as 'accurate' | 'inaccurate',
+          correction:    v.correction ?? null,
+          scriptureRefs: (v.scriptureRefs as string[] | null) ?? null,
+        })),
+      };
+    });
   } catch (err) {
     console.error('[moderation] getFlagQueue error:', err);
     return [];
@@ -396,55 +360,35 @@ export async function getFlagQueue(): Promise<FlagQueueItem[]> {
 }
 
 // ─── inviteModerator ─────────────────────────────────────────────────────────
-// Create a moderators row and send a Supabase Auth magic-link invite email.
 
 export async function inviteModerator(data: InviteData): Promise<boolean> {
   try {
-    const supabase = getServiceClient();
+    const db = await getDb();
 
-    // Verify the inviting moderator is an active admin
-    const { data: admin, error: adminErr } = await supabase
-      .from('moderators')
-      .select('id, role, active')
-      .eq('id', data.invitedBy)
-      .single();
+    const adminRows = await db
+      .select({ id: moderators.id, role: moderators.role, active: moderators.active })
+      .from(moderators)
+      .where(eq(moderators.id, data.invitedBy))
+      .limit(1);
 
-    if (adminErr || !admin || !admin.active || admin.role !== 'admin') {
+    const admin = adminRows[0];
+    if (!admin || !admin.active || admin.role !== 'admin') {
       console.error('[moderation] inviteModerator: inviter is not an active admin');
       return false;
     }
 
-    // Create moderator row
-    const { error: insertErr } = await supabase
-      .from('moderators')
-      .insert({
-        email:      data.email,
-        name:       data.name,
-        role:       data.role ?? 'moderator',
-        invited_by: data.invitedBy,
-        active:     false,  // becomes true when invite is accepted
-      });
+    await db.insert(moderators).values({
+      id:         uuidv4(),
+      email:      data.email,
+      name:       data.name,
+      role:       data.role ?? 'moderator',
+      invitedBy:  data.invitedBy,
+      active:     false,
+    });
 
-    if (insertErr) {
-      console.error('[moderation] inviteModerator insert error:', insertErr);
-      return false;
-    }
-
-    // Send Supabase Auth invite email (magic link)
-    const { error: authErr } = await supabase.auth.admin.inviteUserByEmail(
-      data.email,
-      {
-        redirectTo: `${getAppUrl()}/mod`,
-        data: { name: data.name, role: data.role ?? 'moderator' },
-      }
-    );
-
-    if (authErr) {
-      console.error('[moderation] inviteModerator auth invite error:', authErr);
-      // Row created but email failed — moderator can still log in manually
-      // Don't return false here; partial success is acceptable
-    }
-
+    // Note: there is no email invite flow. Moderators sign in with
+    // email/password and must be activated manually or via a custom email flow.
+    console.log(`[moderation] Moderator row created for ${data.email}. Manual activation required.`);
     return true;
   } catch (err) {
     console.error('[moderation] inviteModerator error:', err);
@@ -475,17 +419,4 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
     console.error('[moderation] generateEmbedding error:', err);
     return null;
   }
-}
-
-async function getAnswerIdForFlag(
-  flagId: string,
-   
-  supabase: any
-): Promise<string | null> {
-  const { data } = await supabase
-    .from('flags')
-    .select('answer_id')
-    .eq('id', flagId)
-    .single();
-  return data?.answer_id ?? null;
 }

@@ -1,27 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiError } from '@/lib/api-response';
-import { requireSupabaseUser } from '@/lib/server-auth';
-import { getServerClient } from '@/lib/supabase';
+import { requireUser } from '@/lib/server-auth';
+import { getDb } from '@/db';
+import { googleConnections } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireSupabaseUser(request);
-    const { data, error } = await getServerClient()
-      .from('google_connections')
-      .select('google_account_email, scopes, created_at, updated_at')
-      .eq('owner_id', user.id)
-      .maybeSingle();
-    if (error) throw new Error(`Unable to read Google connection status: ${error.message}`);
+    const user = await requireUser(request);
+    const db = await getDb();
+    const rows = await db
+      .select({
+        googleAccountEmail: googleConnections.googleAccountEmail,
+        scopes: googleConnections.scopes,
+        createdAt: googleConnections.createdAt,
+        updatedAt: googleConnections.updatedAt,
+      })
+      .from(googleConnections)
+      .where(eq(googleConnections.ownerId, user.id))
+      .limit(1);
+    const data = rows[0] ?? null;
     return NextResponse.json({
       connected: Boolean(data),
-      accountEmail: data?.google_account_email ?? null,
+      accountEmail: data?.googleAccountEmail ?? null,
       scopes: data?.scopes ?? [],
-      connectedAt: data?.created_at ?? null,
+      connectedAt: data?.createdAt ? data.createdAt.toISOString() : null,
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     return apiError(error, 'GET /api/google/status');
   }
 }
-

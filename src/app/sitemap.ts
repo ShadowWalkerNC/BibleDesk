@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
-import { getServerClient } from '@/lib/supabase';
+import { getDb } from '@/db';
+import { answers } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 import { getAppUrl } from '@/lib/appUrl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getAppUrl();
 
-  // Base routes
   const routes = ['', '/bible', '/study-resources', '/prayer', '/developers', '/download'].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -13,27 +14,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1.0 : 0.8,
   }));
 
-  // Fetch shareable answers from Supabase to include in sitemap
   let answersSitemap: MetadataRoute.Sitemap = [];
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('Skipping sitemap answer generation: SUPABASE_SERVICE_ROLE_KEY is not set.');
+    if (!process.env.DATABASE_URL) {
+      console.log('Skipping sitemap answer generation: DATABASE_URL is not set.');
     } else {
-      const supabase = getServerClient();
-      const { data: answers } = await supabase
-        .from('answers')
-        .select('share_slug, created_at')
-        .order('created_at', { ascending: false })
+      const db = await getDb();
+      const rows = await db
+        .select({ shareSlug: answers.shareSlug, createdAt: answers.createdAt })
+        .from(answers)
+        .orderBy(desc(answers.createdAt))
         .limit(1000);
 
-      if (answers) {
-        answersSitemap = answers.map((answer) => ({
-          url: `${baseUrl}/share/${answer.share_slug}`,
-          lastModified: new Date(answer.created_at),
+      answersSitemap = rows
+        .filter((r) => r.shareSlug)
+        .map((r) => ({
+          url: `${baseUrl}/share/${r.shareSlug}`,
+          lastModified: r.createdAt,
           changeFrequency: 'weekly' as const,
           priority: 0.6,
         }));
-      }
     }
   } catch (error) {
     console.error('Sitemap answer generation failed:', error);

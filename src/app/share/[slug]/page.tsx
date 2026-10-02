@@ -3,7 +3,7 @@
 // Includes full OpenGraph + Twitter card meta for rich link previews.
 
 import type { Metadata } from 'next';
-import { getAnswerBySlug } from '@/lib/supabase';
+import { getAnswerBySlug } from '@/lib/answers';
 import { getAppUrl } from '@/lib/appUrl';
 import SharePageClient from './SharePageClient';
 
@@ -14,9 +14,9 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  // Supabase may be unconfigured (service-role key missing) — getAnswerBySlug
-  // then throws instead of returning null. Catch and treat as not-found so the
-  // page renders its designed not-found state instead of throwing a 500.
+  // The database may be unreachable — getAnswerBySlug then throws instead of
+  // returning null. Catch and treat as not-found so the page renders its
+  // designed not-found state instead of throwing a 500.
   let answer = null;
   try {
     answer = await getAnswerBySlug(slug);
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SharePage({ params }: Props) {
   const { slug } = await params;
 
-  // Same guard as generateMetadata: unconfigured Supabase throws instead of
+  // Same guard as generateMetadata: an unreachable database throws instead of
   // returning null. SharePageClient already renders the designed not-found UI
   // when initialAnswer is null, so fall back to null here.
   let answer = null;

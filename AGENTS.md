@@ -24,7 +24,7 @@ Phase:        Phase 0 — Local-first Bible foundation
 ```
 Language:     TypeScript
 Framework:    Next.js 16 (App Router) · React 19
-Database:     Supabase (PostgreSQL + pgvector + RLS)
+Database:     Railway PostgreSQL + pgvector (Drizzle ORM) · stateless JWT auth
 AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
@@ -57,7 +57,7 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 
 ## Project-Specific Rules
 
-1. **API keys are server-only.** `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_TOKEN_ENCRYPTION_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
+1. **API keys are server-only.** `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_TOKEN_ENCRYPTION_KEY` must NEVER appear in client bundles. Verify with `next build` before every deploy.
 2. **Bible text is public domain only** unless a license review lands. Prefer local modules; bible-api.com is interim.
 3. **All AI answers must be grounded.** Cite specific scripture references. Do not invent lexicon facts — use structured Strong’s/morphology data when claiming original-language detail.
 4. **Rate limiting is non-negotiable.** Every API route that calls Claude (or other paid AI) must be gated by rate-limit middleware.
@@ -66,8 +66,8 @@ On-demand:       ARCHITECT · ENGINEER · AI · DATABASE · DEVOPS · UX · PROD
 7. **Docs follow code.** Update `README.md`, `ARCHITECTURE.md`, and `TODO.md` every session that changes behavior. Keep phase labels consistent across all four docs (including this file).
 8. **Bible-first UX.** Do not make the AI ask box the only hero. Reader/search are the product core; AI is assistant.
 9. **Honest marketing.** Do not claim offline lexicon, Midvash ingest, or production deploy until those exist.
-10. **Prayer Care ownership is server-derived.** Verify the Supabase bearer token and use its user ID; never accept an owner/user ID from request JSON.
-11. **Google exports use BibleDesk OAuth only.** Do not use Perplexity connector credentials in application code. Encrypt tokens at rest, keep `google_connections` service-role-only, and never add an automatic Gmail send path.
+10. **Prayer Care ownership is server-derived.** Verify the JWT bearer token and use its subject user ID; never accept an owner/user ID from request JSON.
+11. **Google exports use BibleDesk OAuth only.** Do not use Perplexity connector credentials in application code. Encrypt tokens at rest, keep `google_connections` server-only (no browser access), and never add an automatic Gmail send path.
 12. **Human review precedes follow-up.** Gmail integration may create a draft only after explicit review. Recipient, subject, and message remain editable.
 
 ---
@@ -98,11 +98,12 @@ Active work (Phase 0 Complete):
   ✓ Five-dimension evidence model and transparent multi-factor confidence rating system
   ✓ Anthropic Claude 3.5 Sonnet research assistant with web search and verifiable citations
   ✓ Dedicated Research Assistant workbench (`/research`) and Study Desk tab (`/bible`)
-  ✓ 32 automated tests passing across unit, database, API, and E2E critical path suites
+  ✓ Pure Railway PostgreSQL via Drizzle (35 tables, `drizzle/0001_railway-migration`) + stateless JWT auth (`/api/auth/*`); Supabase dependency removed
+  ✓ 33 automated tests passing across unit, database, API, security-boundary, and E2E critical path suites
 
 Release gates:
-  □ Apply and validate all Supabase schemas through v10 plus rpc.sql
-  □ Verify RLS with cross-user denial tests
+  □ Apply and validate Drizzle migrations (`drizzle-kit migrate`) on Railway PostgreSQL + enable pgvector for RAG
+  □ Verify server-side ownership checks with cross-user denial tests
   □ Configure Google OAuth consent/client, APIs, callback, encryption key, host, and smoke tests
   □ Deploy to Railway or Vercel and complete authenticated/public production smoke tests
 ```
@@ -130,7 +131,7 @@ src/
   types/
 archive/                         ← preserved non-MVP features and native shells
 supabase/
-  schema.sql → schema-v10-public-prayer.sql + rpc.sql  ← Apply and validate in order
+  legacy SQL, kept as data-migration reference only
 public/
   manifest.json, icon-*.png
 TODO.md · README.md · ARCHITECTURE.md · .env.example
@@ -138,7 +139,7 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
-*Updated: 2026-09-19 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-09-30 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
 
 <!-- BEGIN:nextjs-agent-rules -->
 

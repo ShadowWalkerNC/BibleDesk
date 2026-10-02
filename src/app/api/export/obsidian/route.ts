@@ -22,8 +22,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFullGraph } from '@/lib/graph';
 import type { GraphNode, GraphEdge } from '@/lib/graph';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { getServerClient, isSupabaseConfigured } from '@/lib/supabase';
+import { isDatabaseConfigured } from '@/lib/answers';
 import { getUserTier } from '@/lib/tiers';
+import { getDb } from '@/db';
+import { profiles, verseNotes } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const GRAPH_WRITE_SECRET = process.env.GRAPH_WRITE_SECRET;
 
@@ -227,14 +230,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if (user && isSupabaseConfigured()) {
-      const client = getServerClient();
-      const { data: profile } = await client
-        .from('profiles')
-        .select('subscription_tier, subscription_status')
-        .eq('id', user.id)
-        .maybeSingle();
-      userTier = getUserTier(profile);
+    if (user && isDatabaseConfigured()) {
+      const db = await getDb();
+      const rows = await db
+        .select({
+          subscriptionTier: profiles.subscriptionTier,
+          subscriptionStatus: profiles.subscriptionStatus,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, user.id))
+        .limit(1);
+      userTier = getUserTier(rows[0] ?? null);
     } else {
       userTier = getUserTier(null);
     }
@@ -286,13 +292,17 @@ export async function GET(req: NextRequest) {
     }
 
     // Attach personal verse notes if exporting for an authenticated user
-    if (user && isSupabaseConfigured()) {
+    if (user && isDatabaseConfigured()) {
       try {
-        const client = getServerClient();
-        const { data: notesList } = await client
-          .from('verse_notes')
-          .select('reference, content, created_at')
-          .eq('user_id', user.id);
+        const db = await getDb();
+        const notesList = await db
+          .select({
+            reference: verseNotes.reference,
+            content: verseNotes.content,
+            createdAt: verseNotes.createdAt,
+          })
+          .from(verseNotes)
+          .where(eq(verseNotes.userId, user.id));
 
         if (notesList && notesList.length > 0) {
           for (const note of notesList) {
@@ -300,7 +310,7 @@ export async function GET(req: NextRequest) {
             const noteFm = [
               '---',
               `reference: "${note.reference}"`,
-              `created_at: "${note.created_at}"`,
+              `created_at: "${note.createdAt.toISOString()}"`,
               'tags: [bibledesk, personal-note]',
               '---',
             ].join('\n');

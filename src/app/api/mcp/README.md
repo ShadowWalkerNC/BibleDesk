@@ -9,7 +9,7 @@ HTTP MCP server at `/api/mcp`. Implements [Model Context Protocol](https://model
 | `get_verse` | Fetch a specific Bible verse or passage |
 | `search_scripture` | Search verses by keyword or phrase |
 | `get_concept_subgraph` | 1-hop theology graph around a concept |
-| `get_answer_history` | Recent BibleDesk answers from Supabase |
+| `get_answer_history` | Recent BibleDesk answers from Railway PostgreSQL |
 | `get_dimension` | One dimension from a stored answer |
 | `ask_bible_question` | Full 6-stage pipeline — the crown jewel |
 
