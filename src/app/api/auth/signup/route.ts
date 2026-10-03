@@ -92,13 +92,17 @@ export async function POST(req: NextRequest) {
       { success: true, token, user: { id, email, name }, tier: 'free' },
       { status: 201 }
     );
-  } catch (err) {
+  } catch (err: any) {
     if (err instanceof PasswordError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
     console.error('[api/auth/signup] Error:', err);
+    const detail = err?.message || 'Database error';
     return NextResponse.json(
-      { success: false, error: 'Unable to create account. Try again later.' },
+      {
+        success: false,
+        error: `Unable to create account: ${detail}`,
+      },
       { status: 500 }
     );
   }
