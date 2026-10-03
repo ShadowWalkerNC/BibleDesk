@@ -26,8 +26,19 @@ export async function getDb(): Promise<BibleDeskDb> {
     const { Pool } = await import('pg');
     const { drizzle } = await import('drizzle-orm/node-postgres');
 
-    const pool = new Pool({ connectionString: databaseUrl });
+    const pool = new Pool({
+      connectionString: databaseUrl,
+      ssl: databaseUrl.includes('localhost') ? false : { rejectUnauthorized: false },
+    });
     dbInstance = drizzle(pool, { schema });
+
+    // Auto-apply schema migrations if tables do not exist
+    await ensureSchema({
+      exec: async (sqlText: string) => {
+        await pool.query(sqlText);
+      },
+    });
+
     return dbInstance;
   }
 

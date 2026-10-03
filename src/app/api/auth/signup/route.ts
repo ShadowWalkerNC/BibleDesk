@@ -24,19 +24,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Rate-limit signups when a shared store exists. Pure-PGlite local runs skip
-  // the limiter (single-user device; the fail-closed limiter would deny them).
+  // Rate-limit signups when a shared store exists.
   if (process.env.DATABASE_URL) {
-    const rl = await checkRateLimit(getClientIp(req), {
-      namespace: 'auth:signup',
-      limit: 10,
-      windowMs: 60 * 60 * 1000,
-    });
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { success: false, error: 'Too many signup attempts. Try again later.' },
-        { status: 429 }
-      );
+    try {
+      const rl = await checkRateLimit(getClientIp(req), {
+        namespace: 'auth:signup',
+        limit: 10,
+        windowMs: 60 * 60 * 1000,
+      });
+      if (!rl.allowed) {
+        return NextResponse.json(
+          { success: false, error: 'Too many signup attempts from this IP address. Please try again later.' },
+          { status: 429 }
+        );
+      }
+    } catch (rlErr: any) {
+      console.warn('[api/auth/signup] Rate limiter bypass due to DB initialization:', rlErr?.message);
     }
   }
 

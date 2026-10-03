@@ -151,12 +151,11 @@ export async function checkRateLimit(
       remaining: limit - existing.count - 1,
       resetAt: new Date(existing.windowStart.getTime() + windowMs),
     };
-  } catch (err) {
-    // FAIL-CLOSED (2): any store error => deny, never fail open.
+  } catch (err: any) {
     console.error(
-      '[rate-limit] DENY: backing store error. Refusing request instead of failing open:',
-      err
+      '[rate-limit] backing store error:',
+      err?.message || err
     );
-    return denied(windowMs);
+    throw new Error(`Database unavailable: ${err?.message || 'connection error'}`);
   }
 }
