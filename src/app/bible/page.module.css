@@ -155,6 +155,7 @@
 .deskGrid {
   display: grid;
   grid-template-columns: 280px 1fr 390px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 1rem;
   flex: 1;
   min-height: 0;
