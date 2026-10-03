@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node -e \"require('fs').renameSync('dist/esm/index.js','dist/esm/index.mjs')\""
   },
-  "homepage": "https://bible-desk.vercel.app/developers",
+  "homepage": "https://bibledesk.up.railway.app/developers",
   "repository": {
     "type": "git",
     "url": "https://github.com/ShadowWalkerNC/BibleDesk.git",

@@ -1,27 +1,22 @@
 # BibleDesk — Turnkey Deployment & Installation Guide
 
-A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on cloud platforms (Railway, Vercel).
+A complete, production-ready guide to deploying and operating BibleDesk locally, in Docker, or on Railway (`https://bibledesk.up.railway.app`).
 
 ---
 
-## Architecture & Deployment Tiers
+## Architecture & Access Model
 
-BibleDesk is built on Next.js 16 (App Router) and React 19. It operates in two complementary modes:
+BibleDesk is built on Next.js 16 (App Router) and React 19. **There are no paywalls or paid tiers**:
 
-1. **Free & Open Core (Local-First)**:
+1. **Free & Open Core (100% Free Forever)**:
    - Zero cloud configuration required.
    - 6 bundled public-domain Bible translations (KJV, ASV, WEB, BBE, Darby, YLT) stored locally in JSON format.
    - 14,000+ Strong's Greek/Hebrew lexical definitions and 29,000+ TSK cross-references.
-   - Local verse notes, bookmarks, highlights, and reading plan progress saved to the browser.
-   - Bring-Your-Own-Key (BYOK) Google Gemini AI key option.
+   - Local and cloud verse notes, bookmarks, highlights, and collections.
+   - 5 free server-hosted AI questions daily for signed-in users.
+   - Bring-Your-Own-Key (BYOK) Google Gemini AI key option for unlimited questions.
+   - Connect your personal Muse AI account token to execute queries against your Muse quota.
    - Open Model Context Protocol (MCP) server (`POST /api/mcp`) and REST API endpoints.
-
-2. **Pro Cloud & Ministry SaaS**:
-   - Hosted AI study assistant quota (250–1000 answers/day) with zero key setup.
-   - Real-time multi-device cloud synchronization for notes and highlights via Railway PostgreSQL.
-   - 1-click Obsidian Markdown Vault (`.zip`) and formatted PDF study guide exports.
-   - Google Calendar Prayer Care rhythm export and reviewed Gmail draft generation.
-   - Self-hosters can unlock all Pro capabilities for their community by setting `NEXT_PUBLIC_SELF_HOSTED=true`.
 
 ---
 

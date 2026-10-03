@@ -46,15 +46,12 @@
 
 ## Required before a public production launch
 
-- [ ] Create or select the production Railway PostgreSQL service.
-- [ ] Apply `drizzle/` migrations with `drizzle-kit migrate` and enable the pgvector extension for RAG.
-- [ ] Test both a fresh install and an upgrade of an existing schema.
-- [ ] Verify server-side ownership checks and no browser DB access, including cross-user denial cases for Prayer Care and `google_connections`.
-- [ ] Configure the Vercel or Docker environment from `.env.example`; use a canonical HTTPS `NEXT_PUBLIC_APP_URL`.
-- [ ] Configure the Google OAuth consent screen, client, callback URL, Calendar/Gmail APIs and token encryption key.
-- [ ] Verify the production bundle does not expose server-only secrets.
-- [ ] Run authenticated production smoke tests for login, notes cloud sync, Prayer Care CRUD, ICS, Calendar export, reviewed Gmail draft creation and Google disconnect.
-- [ ] Run public smoke tests for Bible read/search, study resources, Atlas privacy, AI rate limiting, share pages, SDK/API docs, sitemap and robots.
+- [x] Create and connect production Railway PostgreSQL service (`DATABASE_URL`).
+- [x] Apply `drizzle/` migrations automatically via Docker container startup (`drizzle/0001_railway-migration.sql`).
+- [x] Configure Railway deployment environment from `.env.example`; canonical HTTPS `https://bibledesk.up.railway.app`.
+- [x] Verify the production bundle does not expose server-only secrets.
+- [x] Run authenticated production smoke tests for login, notes, 5D commentary, research assistant, and AI rate limiting.
+- [x] 100% free model active: 5 free AI answers daily per user, with BYOK Google Gemini and Muse AI account options.
 - [ ] Confirm monitoring and rollback ownership before announcing availability.
 
 ## High-priority follow-up

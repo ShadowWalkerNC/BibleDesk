@@ -119,7 +119,7 @@ export class BibleDeskClient {
         // ── Model Context Protocol (MCP) Integration Helper ──
         this.mcp = {
             getSetupConfig: (client = 'claude') => {
-                const targetUrl = this.baseUrl || 'https://bible-desk.vercel.app';
+                const targetUrl = this.baseUrl || 'https://bibledesk.up.railway.app';
                 if (client === 'cursor') {
                     return {
                         mcpServers: {
@@ -150,7 +150,7 @@ export class BibleDeskClient {
                 };
             },
         };
-        this.baseUrl = config.baseUrl || (typeof window !== 'undefined' ? '' : 'https://bible-desk.vercel.app');
+        this.baseUrl = config.baseUrl || (typeof window !== 'undefined' ? '' : 'https://bibledesk.up.railway.app');
         this.apiKey = config.apiKey;
         this.authToken = config.authToken;
     }

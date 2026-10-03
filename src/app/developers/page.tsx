@@ -219,7 +219,7 @@ console.log(graphData.nodes, graphData.edges);`;
                 Fetch an entire chapter with verses, book metadata, and translation notes. Supported translations: <code>web</code>, <code>kjv</code>, <code>asv</code>, <code>bbe</code>, <code>darby</code>, <code>ylt</code>.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/chapter?book=John&amp;chapter=3&amp;translation=web"</pre>
+                <pre className={styles.codePre}>curl "https://bibledesk.up.railway.app/api/bible/chapter?book=John&amp;chapter=3&amp;translation=web"</pre>
               </div>
             </div>
 
@@ -232,7 +232,7 @@ console.log(graphData.nodes, graphData.edges);`;
                 High-performance full-text search across all 31,102 verses of the Bible.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/search?query=grace&amp;translation=kjv&amp;limit=10"</pre>
+                <pre className={styles.codePre}>curl "https://bibledesk.up.railway.app/api/bible/search?query=grace&amp;translation=kjv&amp;limit=10"</pre>
               </div>
             </div>
 
@@ -245,7 +245,7 @@ console.log(graphData.nodes, graphData.edges);`;
                 Retrieve a bundled Strong's Greek or Hebrew dictionary entry by a known Strong's number. Verse-level word tagging and morphology are not currently exposed.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/bible/lexicon?strongs=G2889"</pre>
+                <pre className={styles.codePre}>curl "https://bibledesk.up.railway.app/api/bible/lexicon?strongs=G2889"</pre>
               </div>
             </div>
 
@@ -258,7 +258,7 @@ console.log(graphData.nodes, graphData.edges);`;
                 Query the bidirectional Biblical Knowledge Graph connecting scripture verses, theological themes, and TSK cross-references.
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
-                <pre className={styles.codePre}>curl "https://bible-desk.vercel.app/api/graph?nodeKey=grace"</pre>
+                <pre className={styles.codePre}>curl "https://bibledesk.up.railway.app/api/graph?nodeKey=grace"</pre>
               </div>
             </div>
 
@@ -272,7 +272,7 @@ console.log(graphData.nodes, graphData.edges);`;
               </p>
               <div className={styles.codeBlock} style={{ margin: 0 }}>
                 <pre className={styles.codePre}>
-                  {`curl -X POST "https://bible-desk.vercel.app/api/ask" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "question": "What does the Bible say about grace?", "translation": "web" }'`}
+                  {`curl -X POST "https://bibledesk.up.railway.app/api/ask" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "question": "What does the Bible say about grace?", "translation": "web" }'`}
                 </pre>
               </div>
             </div>

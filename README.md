@@ -138,29 +138,30 @@ Visit `http://localhost:3000` to open the Study Desk.
 
 ---
 
-## Production Deployment & Database Setup
+## Production Deployment & Canonical URL
+
+BibleDesk is deployed on Railway at:
+👉 **[https://bibledesk.up.railway.app](https://bibledesk.up.railway.app)**
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions:
-- **Database Migrations**: [`drizzle/`](drizzle/) holds the versioned Drizzle migrations (`0000` + `0001_railway-migration`, 35 tables), applied automatically by the Docker CMD via `drizzle-kit migrate`, or manually with `npm run db:migrate`.
-- **Railway**: 1-click deployment via `railway.json` and production `Dockerfile` (healthcheck `/api/health`, dynamic `$PORT` handling, unified Next.js API & web server).
-- **Docker**: Production-ready multi-stage container (`Dockerfile` & `docker-compose.yml`).
-- **Vercel**: Deploy with canonical HTTPS `NEXT_PUBLIC_APP_URL`.
+- **Database Migrations**: [`drizzle/`](drizzle/) holds versioned Drizzle migrations (`0000` + `0001_railway-migration`, 35 tables), applied automatically by the Docker container on startup, or manually with `npm run db:migrate`.
+- **Railway**: Fully managed cloud deployment via `railway.json` and multi-stage `Dockerfile` with native Railway PostgreSQL and pgvector support.
+- **Docker**: Production-ready container (`Dockerfile` & `docker-compose.yml`).
 
 ---
 
-## SaaS Membership & Open-Source Self-Hosting
+## 100% Free Access & AI Compute Model
 
-BibleDesk balances open-source Kingdom stewardship with sustainable SaaS operations:
+BibleDesk has **no paid tiers, no paywalls, and no subscriptions**:
 
-1. **100% Free & Open-Source Core**:
-   - Bundled public-domain Bibles (KJV, ASV, WEB, BBE, Darby, YLT), Strong's lexicons, TSK cross-references, and local notes are **never paywalled**.
-   - Unlimited AI queries with your own free Google Gemini API key (BYOK).
-2. **Pro & Ministry SaaS Tiers** (`/pricing`):
-   - For users who prefer a turnkey cloud experience without managing API keys or infrastructure.
-   - Includes hosted AI quotas (250–1,000 answers/day), real-time cloud sync for verse notes, 1-click Obsidian Markdown vault (.zip) downloads, and printable PDF study guides.
-   - Self-service billing via Stripe Customer Portal (`POST /api/billing/portal`).
-3. **Open Self-Hosting Guarantee**:
-   - Churches, ministries, and self-hosters running their own instances can set `NEXT_PUBLIC_SELF_HOSTED=true` (enabled by default in `docker-compose.yml`) to unlock all Pro capabilities for their community without any subscription or Stripe account.
+1. **Free Core Foundation**:
+   - Bundled public-domain Bibles (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references, prayer tracking, notes, and exports are completely free.
+2. **5 Free AI Questions / Day**:
+   - Every signed-in user receives 5 free AI answers daily powered by the server's Google Gemini engine.
+3. **Bring Your Own Key (BYOK Gemini)**:
+   - Provide your personal free Google Gemini API key from Google AI Studio in settings to unlock unlimited 5-dimension study queries.
+4. **Muse AI Account Connection**:
+   - Connect your personal Muse AI account token to execute queries against your Muse quota instead of the default 5 free daily answers. Fully integrates with the Muse Code CLI for terminal-based study pairing.
 
 ---
 

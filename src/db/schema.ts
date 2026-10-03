@@ -34,6 +34,7 @@ export const profiles = pgTable('profiles', {
   stripeCustomerId: text('stripe_customer_id'),
   stripeSubscriptionId: text('stripe_subscription_id'),
   byokGeminiKey: text('byok_gemini_key'), // AES-256 encrypted at rest
+  byokMuseKey: text('byok_muse_key'),     // Optional Muse AI account connection key
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });

@@ -12,7 +12,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "test": "node --test tests/security-boundaries.test.mjs packages/sdk/test/sdk.test.mjs && tsx --test tests/evidence.test.ts tests/db.test.ts tests/api.test.ts tests/critical-path.test.ts",
+    "test": "node --test tests/security-boundaries.test.mjs packages/sdk/test/sdk.test.mjs && tsx --test tests/evidence.test.ts && tsx --test tests/db.test.ts && tsx --test tests/api.test.ts && tsx --test tests/critical-path.test.ts",
     "test:unit": "tsx --test tests/evidence.test.ts tests/db.test.ts",
     "test:api": "tsx --test tests/api.test.ts",
     "test:e2e": "tsx --test tests/critical-path.test.ts",

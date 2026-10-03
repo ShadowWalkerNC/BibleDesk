@@ -128,31 +128,16 @@ export default function PricingPage() {
       <section className={styles.hero}>
         <div className={styles.badge}>
           <Crown size={14} />
-          <span>Kingdom-First Stewardship</span>
+          <span>100% Free &amp; Open Access</span>
         </div>
         <h1 className={`${styles.title} text-serif`}>
-          Honest, Transparent Study Tiers
+          Completely Free Bible Study Platform
         </h1>
         <p className={styles.subtitle}>
-          God’s Word should never be locked behind a paywall. Scripture reading, concordance search,
-          and Strong’s lexicons remain free forever. Paid tiers fund hosted AI compute and cloud infrastructure.
+          No subscriptions, no paywalls, and no paid tiers. All Scripture reading, Strong’s lexicons, concordance search,
+          and prayer features are 100% free forever. Every user receives 5 free AI answers daily, or connect your personal
+          Google Gemini or Muse AI account for unlimited study queries!
         </p>
-
-        {/* Billing Cycle Toggle */}
-        <div className={styles.toggleContainer}>
-          <span className={!isAnnual ? styles.toggleActive : ''}>Monthly</span>
-          <button
-            type="button"
-            className={styles.toggleTrack}
-            onClick={() => setIsAnnual(!isAnnual)}
-            aria-label="Toggle annual billing"
-          >
-            <div className={`${styles.toggleThumb} ${isAnnual ? styles.toggleThumbRight : ''}`} />
-          </button>
-          <span className={isAnnual ? styles.toggleActive : ''}>
-            Annual <span className={styles.discountBadge}>Save 30%</span>
-          </span>
-        </div>
 
         {notification && (
           <div className={styles.notificationBanner}>
@@ -163,104 +148,94 @@ export default function PricingPage() {
 
       {/* ── Pricing Grid ── */}
       <section className={styles.cardsGrid}>
-        {/* Tier 1: Community (Free) */}
-        <div className={`${styles.card} ${currentTier === 'free' ? styles.cardCurrent : ''}`}>
+        {/* Tier 1: Community (Free Core) */}
+        <div className={`${styles.card} ${styles.cardFeatured}`}>
+          <div className={styles.popularPill}>100% Free Forever</div>
           <div className={styles.cardHeader}>
             <div className={styles.cardIconBox}><BookOpen size={20} /></div>
-            <h2 className={styles.cardTitle}>Community Core</h2>
-            <p className={styles.cardDesc}>Complete, offline Scripture study for individual believers.</p>
+            <h2 className={styles.cardTitle}>Community Foundation</h2>
+            <p className={styles.cardDesc}>Complete Scripture study and 5-dimension grounded research.</p>
             <div className={styles.priceRow}>
               <span className={styles.priceAmount}>$0</span>
-              <span className={styles.pricePeriod}>Free Forever</span>
+              <span className={styles.pricePeriod}>Free for Everyone</span>
             </div>
           </div>
 
           <div className={styles.featureList}>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>6 Offline Bible Translations</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Strong’s Greek &amp; Hebrew Lexicons</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>6 Offline Bible Translations (KJV, ASV, WEB, BBE, Darby, YLT)</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Strong’s Greek (5.5k) &amp; Hebrew (8.6k) Lexicons</span></div>
             <div className={styles.featureItem}><Check size={16} color="#059669" /><span>500,000+ TSK Cross-References</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>5 Free Server AI Answers / Day</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Unlimited AI with BYOK Gemini Key</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Local Notes, Bookmarks &amp; Highlights</span></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Open REST API &amp; Local MCP Engine</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>5 Free Server AI Answers / Day per user</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Local Notes, Bookmarks, Highlights &amp; Collections</span></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><span>Open REST API &amp; Model Context Protocol (MCP)</span></div>
           </div>
 
           <button
             type="button"
-            onClick={() => handleSubscribe('free')}
-            className={styles.tierBtnSecondary}
+            onClick={() => router.push('/bible')}
+            className={styles.tierBtnPrimary}
           >
-            {currentTier === 'free' ? 'Current Plan' : 'Use Free Core'}
+            Start Reading Scripture
           </button>
         </div>
 
-        {/* Tier 2: Pro (Featured) */}
-        <div className={`${styles.card} ${styles.cardFeatured} ${currentTier === 'pro' ? styles.cardCurrent : ''}`}>
-          <div className={styles.popularPill}>Most Popular</div>
+        {/* Tier 2: BYOK Gemini */}
+        <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIconBox} style={{ background: 'rgba(181, 132, 20, 0.15)', color: '#b58414' }}>
               <Sparkles size={20} />
             </div>
-            <h2 className={styles.cardTitle}>BibleDesk Pro</h2>
-            <p className={styles.cardDesc}>Deep study superpowers with cloud sync and hosted AI compute.</p>
+            <h2 className={styles.cardTitle}>BYOK Gemini AI</h2>
+            <p className={styles.cardDesc}>Bring your free personal Google Gemini key for unlimited queries.</p>
             <div className={styles.priceRow}>
-              <span className={styles.priceAmount}>
-                ${isAnnual ? Math.round(TIERS.pro.priceAnnual / 12) : TIERS.pro.priceMonthly}
-              </span>
-              <span className={styles.pricePeriod}>/ month {isAnnual ? '(billed $60/yr)' : ''}</span>
+              <span className={styles.priceAmount}>$0</span>
+              <span className={styles.pricePeriod}>Google AI Studio Key</span>
             </div>
           </div>
 
           <div className={styles.featureList}>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>All Community Features Included</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>250 Hosted AI Answers / Day (Zero Config)</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Real-Time Cloud Notes &amp; Highlights Sync</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Cross-Device Reading History &amp; Plans</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>1-Click Obsidian Vault (.zip) Export</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Formatted PDF Study Worksheets</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Google Calendar Prayer Care Sync</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>All Foundation Features Included</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Unlimited 5-Dimension AI Study Answers</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Bypass the Daily 5-Answer Server Limit</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Stored Privately on Your User Profile</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Direct Google Gemini 2.5 Flash Inference</strong></div>
           </div>
 
           <button
             type="button"
-            disabled={loadingTier === 'pro'}
-            onClick={() => currentTier === 'pro' ? handleManageBilling() : handleSubscribe('pro')}
-            className={styles.tierBtnPrimary}
+            onClick={() => router.push('/bible')}
+            className={styles.tierBtnSecondary}
           >
-            {loadingTier === 'pro' ? 'Opening...' : currentTier === 'pro' ? 'Manage Subscription' : 'Upgrade to Pro'}
+            Configure in Study Settings
           </button>
         </div>
 
-        {/* Tier 3: Ministry & Leader */}
-        <div className={`${styles.card} ${currentTier === 'ministry' ? styles.cardCurrent : ''}`}>
+        {/* Tier 3: Muse AI Integration */}
+        <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIconBox}><Crown size={20} /></div>
-            <h2 className={styles.cardTitle}>Ministry &amp; Church Leader</h2>
-            <p className={styles.cardDesc}>Collaborative tools for pastors, teachers, and small groups.</p>
+            <h2 className={styles.cardTitle}>Muse AI Account Connection</h2>
+            <p className={styles.cardDesc}>Connect your Muse AI account directly to BibleDesk.</p>
             <div className={styles.priceRow}>
-              <span className={styles.priceAmount}>
-                ${isAnnual ? Math.round(TIERS.ministry.priceAnnual / 12) : TIERS.ministry.priceMonthly}
-              </span>
-              <span className={styles.pricePeriod}>/ month {isAnnual ? '(billed $180/yr)' : ''}</span>
+              <span className={styles.priceAmount}>$0</span>
+              <span className={styles.pricePeriod}>Personal Muse Account</span>
             </div>
           </div>
 
           <div className={styles.featureList}>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Everything in BibleDesk Pro</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>1,000 Hosted AI Answers / Day</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Sermon Prep Workspace &amp; Scripture Clipper</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Shared Small Group Study Notes</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Shared Group Prayer Boards &amp; Rhythms</strong></div>
-            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Priority Pastoral Support &amp; Roadmap Voting</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>All Foundation Features Included</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Use Your Own Muse Account Quota</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Unlimited AI Answers via Muse</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Muse Code CLI &amp; Terminal Pairing Ready</strong></div>
+            <div className={styles.featureItem}><Check size={16} color="#059669" /><strong>Works Across All BibleDesk Workspaces</strong></div>
           </div>
 
           <button
             type="button"
-            disabled={loadingTier === 'ministry'}
-            onClick={() => currentTier === 'ministry' ? handleManageBilling() : handleSubscribe('ministry')}
+            onClick={() => router.push('/bible')}
             className={styles.tierBtnSecondary}
           >
-            {loadingTier === 'ministry' ? 'Opening...' : currentTier === 'ministry' ? 'Manage Subscription' : 'Select Ministry Tier'}
+            Connect Muse Account
           </button>
         </div>
       </section>
@@ -278,8 +253,8 @@ export default function PricingPage() {
               <tr>
                 <th className={styles.colFeature}>Feature</th>
                 <th className={styles.colTier}>Free Core</th>
-                <th className={`${styles.colTier} ${styles.colTierHighlight}`}>Pro</th>
-                <th className={styles.colTier}>Ministry</th>
+                <th className={`${styles.colTier} ${styles.colTierHighlight}`}>BYOK Gemini</th>
+                <th className={styles.colTier}>Muse AI Account</th>
               </tr>
             </thead>
             <tbody>
@@ -302,51 +277,39 @@ export default function PricingPage() {
                 <td>✓ Included</td>
               </tr>
               <tr>
-                <td>Daily Hosted AI Answers Quota</td>
-                <td>5 / day</td>
-                <td><strong>250 / day</strong></td>
-                <td><strong>1,000 / day</strong></td>
+                <td>Daily AI Answers Quota</td>
+                <td>5 / day (Server-managed)</td>
+                <td><strong>Unlimited (Personal Key)</strong></td>
+                <td><strong>Unlimited (Muse Account)</strong></td>
               </tr>
               <tr>
-                <td>Bring-Your-Own-Key (BYOK Gemini)</td>
-                <td>✓ Unlimited</td>
-                <td>✓ Unlimited</td>
-                <td>✓ Unlimited</td>
+                <td>Custom API Key / Account Connectivity</td>
+                <td>Server default</td>
+                <td>✓ Google Gemini Key</td>
+                <td>✓ Muse AI Token</td>
               </tr>
               <tr>
-                <td>Cloud Notes &amp; Highlights Sync</td>
-                <td>Local only</td>
-                <td>✓ Real-Time</td>
-                <td>✓ Real-Time</td>
+                <td>Notes, Bookmarks &amp; Highlights</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+              </tr>
+              <tr>
+                <td>Biblical Knowledge Graph Explorer</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
+                <td>✓ Included</td>
               </tr>
               <tr>
                 <td>1-Click Obsidian Vault (.zip) Export</td>
-                <td>—</td>
                 <td>✓ Included</td>
-                <td>✓ Included</td>
-              </tr>
-              <tr>
-                <td>Formatted Printable PDF Worksheets</td>
-                <td>—</td>
                 <td>✓ Included</td>
                 <td>✓ Included</td>
               </tr>
               <tr>
-                <td>Google Calendar Prayer Care Sync</td>
-                <td>—</td>
+                <td>Terminal AI Pairing &amp; MCP Server</td>
                 <td>✓ Included</td>
                 <td>✓ Included</td>
-              </tr>
-              <tr>
-                <td>Pastoral Reviewed Gmail Follow-ups</td>
-                <td>—</td>
-                <td>—</td>
-                <td>✓ Included</td>
-              </tr>
-              <tr>
-                <td>Group Workspaces &amp; Shared Notes</td>
-                <td>—</td>
-                <td>—</td>
                 <td>✓ Included</td>
               </tr>
             </tbody>

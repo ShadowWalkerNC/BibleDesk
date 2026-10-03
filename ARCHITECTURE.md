@@ -78,11 +78,11 @@ The repository build and mocked boundary tests do not prove these migrations aga
 
 ## Deployment model
 
-BibleDesk supports Railway cloud hosting, Vercel, and turnkey Docker containerization (`Dockerfile` and `docker-compose.yml`):
-- **Railway Cloud Deployment**: Automated 1-click deployment via `railway.json` and the production multi-stage `Dockerfile`. Next.js 16 standalone mode runs a unified Node.js process (`server.js`) that handles both the web frontend and all `/api/...` routes without requiring a separate backend service. Dynamic `$PORT` binding and `/api/health` probes provide zero-downtime healthcheck compliance.
-- **Docker Compose**: Run `docker compose up -d` for an instant self-hosted production container (`NEXT_PUBLIC_SELF_HOSTED=true` by default, unlocking all Pro features for self-hosted instances).
+BibleDesk runs on Railway cloud hosting (https://bibledesk.up.railway.app) with native Docker containerization (`Dockerfile` and `docker-compose.yml`):
+- **Railway Cloud Deployment**: Primary production deployment at `https://bibledesk.up.railway.app`. Automated deployment via `railway.json` and the production multi-stage `Dockerfile`. Next.js 16 standalone mode runs a unified Node.js process (`server.js`) that handles both the web frontend and all `/api/...` routes without requiring a separate backend service. Dynamic `$PORT` binding and `/api/health` probes provide zero-downtime healthcheck compliance.
+- **Docker Compose**: Run `docker compose up -d` for an instant self-hosted production container.
 - **Environment Doctor**: Run `npm run check:env` to validate environment variables, keys, and database connectivity.
-- **Vercel**: Deployable via standard Next.js Vercel preset. `NEXT_PUBLIC_APP_URL` or `RAILWAY_PUBLIC_DOMAIN` defines canonical origin so metadata, OAuth callbacks, sitemap URLs and share links agree.
+- **Canonical Origin**: `NEXT_PUBLIC_APP_URL` defines `https://bibledesk.up.railway.app` so metadata, OAuth callbacks, sitemap URLs and share links agree.
 
 ## Multi-Device Responsive Architecture
 

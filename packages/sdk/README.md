@@ -1,6 +1,6 @@
 # @bibledesk/sdk
 
-Official isomorphic TypeScript/JavaScript client library for [BibleDesk](https://bible-desk.vercel.app) — the open-source, local-first Bible platform and Model Context Protocol (MCP) engine.
+Official isomorphic TypeScript/JavaScript client library for [BibleDesk](https://bibledesk.up.railway.app) — the open-source, local-first Bible platform and Model Context Protocol (MCP) engine.
 
 Zero API keys or authentication required for public domain Scripture reading, concordance search, and Strong's lexicons.
 
@@ -23,7 +23,7 @@ yarn add @bibledesk/sdk
 ```typescript
 import { createBibleDeskClient } from '@bibledesk/sdk';
 
-// Initialize client (defaults to https://bible-desk.vercel.app)
+// Initialize client (defaults to https://bibledesk.up.railway.app)
 const bibledesk = createBibleDeskClient();
 
 // 1. Read Chapter Text (KJV, ASV, WEB, BBE, Darby, YLT)

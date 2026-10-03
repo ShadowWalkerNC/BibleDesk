@@ -5,7 +5,7 @@
  * Vercel preview/production deployments, and custom domains.
  */
 
-export const DEFAULT_PRODUCTION_URL = 'https://bible-desk.vercel.app';
+export const DEFAULT_PRODUCTION_URL = 'https://bibledesk.up.railway.app';
 
 export function getAppUrl(): string {
   // 1. Explicit environment variable set by user / deploy configuration

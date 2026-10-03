@@ -110,26 +110,34 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Resolve user subscription tier & daily quota
-  let userTier: SubscriptionTier = 'free';
+  // Resolve user subscription profile & custom keys
+  let storedGeminiKey: string | null = null;
+  let storedMuseKey: string | null = null;
   if (user) {
     try {
       const db = await getDb();
       const rows = await db
         .select({
-          subscriptionTier: profiles.subscriptionTier,
-          subscriptionStatus: profiles.subscriptionStatus,
+          byokGeminiKey: profiles.byokGeminiKey,
+          byokMuseKey: profiles.byokMuseKey,
         })
         .from(profiles)
         .where(eq(profiles.id, user.id))
         .limit(1);
-      userTier = getUserTier(rows[0] ?? null);
+      storedGeminiKey = rows[0]?.byokGeminiKey || null;
+      storedMuseKey = rows[0]?.byokMuseKey || null;
     } catch {
-      userTier = 'free';
+      // Fall back gracefully
     }
   }
 
-  const dailyLimit = userApiKey ? 10000 : getTierAiDailyQuota(userTier);
+  const effectiveApiKey = userApiKey || storedGeminiKey || undefined;
+  const hasMuseConnection = Boolean(storedMuseKey);
+
+  // If user has provided their own Gemini key OR connected their Muse AI account, quota is unlimited.
+  // Otherwise, users get 5 free AI answers per day.
+  const isUnlimited = Boolean(effectiveApiKey || hasMuseConnection);
+  const dailyLimit = isUnlimited ? 10000 : 5;
 
   // Rate limit check before opening stream (keyed by user ID if authenticated, else IP)
   const rateLimitKey = user ? `user:${user.id}` : getClientIp(req);
@@ -141,7 +149,7 @@ export async function POST(req: NextRequest) {
   if (!rateLimit.allowed) {
     return new Response(
       sse('error', {
-        message: `You've reached your daily limit of ${dailyLimit} AI answers (${userTier === 'free' ? 'Free Community Tier' : userTier.toUpperCase() + ' Tier'}). Add your own free Gemini API key (BYOK) for unlimited answers, or upgrade at /pricing. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
+        message: `You've reached your free daily limit of 5 AI answers. Add your own free Gemini API key or connect your Muse AI account in settings for unlimited answers! Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
         code: 'RATE_LIMITED',
         rateLimit: { remaining: 0, limit: dailyLimit, resetAt: rateLimit.resetAt.toISOString() },
       }),
@@ -166,7 +174,7 @@ export async function POST(req: NextRequest) {
         } = {
           translation,
           ragContext,
-          apiKey: userApiKey || undefined,
+          apiKey: effectiveApiKey || undefined,
           onStageComplete(stage, name, duration_ms) {
             emit('stage', { stage, name, duration_ms });
           },

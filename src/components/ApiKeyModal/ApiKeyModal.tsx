@@ -13,47 +13,96 @@ interface ApiKeyModalProps {
 
 export default function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
   const [apiKey, setApiKey] = useState('');
+  const [museKey, setMuseKey] = useState('');
   const [saved, setSaved] = useState(false);
   const [hasExistingKey, setHasExistingKey] = useState(false);
+  const [hasExistingMuseKey, setHasExistingMuseKey] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [showOverride, setShowOverride] = useState(false);
+  const [showOverride, setShowOverride] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && isOpen) {
       const stored = localStorage.getItem('bibledesk_gemini_key') || '';
+      const storedMuse = localStorage.getItem('bibledesk_muse_key') || '';
       setApiKey(stored);
+      setMuseKey(storedMuse);
       setHasExistingKey(!!stored);
+      setHasExistingMuseKey(!!storedMuse);
       setSaved(false);
 
       const sessionUser = getAuthUser();
       setUser(sessionUser);
-      if (!sessionUser) {
-        setShowOverride(true);
+
+      // Fetch server-synced keys if user is logged in
+      if (sessionUser) {
+        import('@/lib/client-auth').then(({ authHeaders }) => {
+          fetch('/api/auth/me', { headers: authHeaders(), cache: 'no-store' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+              if (data?.hasByokGemini) setHasExistingKey(true);
+              if (data?.hasByokMuse) setHasExistingMuseKey(true);
+            })
+            .catch(() => {});
+        });
       }
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    const trimmed = apiKey.trim();
-    if (trimmed) {
-      localStorage.setItem('bibledesk_gemini_key', trimmed);
+    const trimmedGemini = apiKey.trim();
+    const trimmedMuse = museKey.trim();
+
+    if (trimmedGemini) {
+      localStorage.setItem('bibledesk_gemini_key', trimmedGemini);
       setHasExistingKey(true);
-      setSaved(true);
-      setTimeout(() => {
-        setSaved(false);
-        onClose();
-      }, 1000);
     }
+    if (trimmedMuse) {
+      localStorage.setItem('bibledesk_muse_key', trimmedMuse);
+      setHasExistingMuseKey(true);
+    }
+
+    // Sync to user account if logged in
+    const sessionUser = getAuthUser();
+    if (sessionUser) {
+      const { authHeaders } = await import('@/lib/client-auth');
+      await fetch('/api/auth/me', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({
+          geminiKey: trimmedGemini || undefined,
+          museKey: trimmedMuse || undefined,
+        }),
+      }).catch(() => {});
+    }
+
+    setSaved(true);
+    setTimeout(() => {
+      setSaved(false);
+      onClose();
+    }, 1000);
   }
 
-  function handleClear() {
+  async function handleClear() {
     localStorage.removeItem('bibledesk_gemini_key');
+    localStorage.removeItem('bibledesk_muse_key');
     setApiKey('');
+    setMuseKey('');
     setHasExistingKey(false);
+    setHasExistingMuseKey(false);
     setSaved(false);
+
+    const sessionUser = getAuthUser();
+    if (sessionUser) {
+      const { authHeaders } = await import('@/lib/client-auth');
+      await fetch('/api/auth/me', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ geminiKey: null, museKey: null }),
+      }).catch(() => {});
+    }
   }
 
   return (
@@ -192,7 +241,30 @@ export default function ApiKeyModal({ isOpen, onClose }: ApiKeyModalProps) {
                 spellCheck={false}
               />
               <p className={styles.fieldHint}>
-                Overrides the default server quota with your own personal Gemini API key. Stored locally in your browser only.
+                Overrides the default server quota with your own personal Gemini API key. Enables unlimited 5-dimension AI study answers.
+              </p>
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label htmlFor="muse-key-input" className={styles.label}>
+                <Sparkles size={14} className={styles.sparkleIcon} />
+                <span>Muse AI Account Token / Key</span>
+              </label>
+              <input
+                id="muse-key-input"
+                type="password"
+                value={museKey}
+                onChange={(e) => {
+                  setMuseKey(e.target.value);
+                  setSaved(false);
+                }}
+                placeholder="muse_..."
+                className={styles.input}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <p className={styles.fieldHint}>
+                Connects your personal Muse AI account so you can utilize your Muse account's quota instead of the default 5 free answers per day.
               </p>
             </div>
 
