@@ -25,6 +25,45 @@ export class BibleDeskClient {
                 return this.request(`/api/bible/lexicon?${params.toString()}`);
             },
         };
+        // ── 5-Dimension Grounded Study & Research API ──
+        this.study = {
+            getCrossReferences: async ({ book, chapter, verse }) => {
+                const params = new URLSearchParams({
+                    book,
+                    chapter: String(chapter),
+                    verse: String(verse),
+                });
+                return this.request(`/api/cross-references?${params.toString()}`);
+            },
+            getCommentary: async ({ verseRef }) => {
+                const params = new URLSearchParams({ verseRef });
+                return this.request(`/api/commentary?${params.toString()}`);
+            },
+            research: async (req) => {
+                return this.request('/api/research', {
+                    method: 'POST',
+                    body: JSON.stringify(req),
+                });
+            },
+        };
+        // ── Personal Study Notes & Annotations API ──
+        this.notes = {
+            list: async (verseRef) => {
+                const query = verseRef ? `?verseRef=${encodeURIComponent(verseRef)}` : '';
+                return this.request(`/api/notes${query}`);
+            },
+            create: async (note) => {
+                return this.request('/api/notes', {
+                    method: 'POST',
+                    body: JSON.stringify(note),
+                });
+            },
+            delete: async (noteId) => {
+                return this.request(`/api/notes?id=${encodeURIComponent(noteId)}`, {
+                    method: 'DELETE',
+                });
+            },
+        };
         // ── Biblical Knowledge Graph API ──
         this.graph = {
             query: async ({ nodeKey }) => {
@@ -68,7 +107,7 @@ export class BibleDeskClient {
             getObsidianVault: async (authToken) => {
                 const headers = {
                     Accept: 'application/zip',
-                    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+                    ...(authToken || this.authToken ? { Authorization: `Bearer ${authToken || this.authToken}` } : {}),
                 };
                 const res = await fetch(`${this.baseUrl}/api/export/obsidian`, { headers });
                 if (!res.ok) {
@@ -80,12 +119,21 @@ export class BibleDeskClient {
         // ── Model Context Protocol (MCP) Integration Helper ──
         this.mcp = {
             getSetupConfig: (client = 'claude') => {
+                const targetUrl = this.baseUrl || 'https://bible-desk.vercel.app';
                 if (client === 'cursor') {
                     return {
                         mcpServers: {
                             bibledesk: {
-                                url: `${this.baseUrl || 'https://bible-desk.vercel.app'}/api/mcp`,
+                                url: `${targetUrl}/api/mcp`,
                             },
+                        },
+                    };
+                }
+                if (client === 'muse') {
+                    return {
+                        tools: ['@bibledesk/mcp-server'],
+                        env: {
+                            BIBLEDESK_URL: targetUrl,
                         },
                     };
                 }
@@ -95,7 +143,7 @@ export class BibleDeskClient {
                             command: 'npx',
                             args: ['-y', '@bibledesk/mcp-server'],
                             env: {
-                                BIBLEDESK_URL: this.baseUrl || 'https://bible-desk.vercel.app',
+                                BIBLEDESK_URL: targetUrl,
                             },
                         },
                     },
@@ -104,6 +152,10 @@ export class BibleDeskClient {
         };
         this.baseUrl = config.baseUrl || (typeof window !== 'undefined' ? '' : 'https://bible-desk.vercel.app');
         this.apiKey = config.apiKey;
+        this.authToken = config.authToken;
+    }
+    setAuthToken(token) {
+        this.authToken = token;
     }
     async request(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
@@ -111,6 +163,7 @@ export class BibleDeskClient {
             'Content-Type': 'application/json',
             Accept: 'application/json',
             ...(this.apiKey ? { 'x-gemini-api-key': this.apiKey } : {}),
+            ...(this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {}),
             ...(options.headers || {}),
         };
         const res = await fetch(url, { ...options, headers });

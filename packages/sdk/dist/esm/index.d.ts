@@ -31,15 +31,50 @@ export interface PrayerEscalateRequest {
     isAnonymous?: boolean;
     updateNote?: string;
 }
+export interface CrossReferencesRequest {
+    book: string;
+    chapter: number;
+    verse: number;
+}
+export interface CommentaryRequest {
+    verseRef: string;
+}
+export interface ResearchRequest {
+    query: string;
+    perspective?: 'exegetical' | 'historical' | 'theological' | 'practical' | 'all';
+}
+export interface CreateNoteRequest {
+    verseRef: string;
+    noteText: string;
+    tags?: string[];
+    isPrivate?: boolean;
+}
+export interface BibleDeskClientConfig {
+    baseUrl?: string;
+    apiKey?: string;
+    authToken?: string;
+}
 export declare class BibleDeskClient {
     private baseUrl;
     private apiKey?;
+    private authToken?;
     constructor(config?: BibleDeskClientConfig);
+    setAuthToken(token: string): void;
     private request;
     readonly bible: {
         getChapter: ({ book, chapter, translation }: ChapterRequest) => Promise<any>;
         search: ({ query, translation, limit }: SearchRequest) => Promise<any>;
         getLexicon: ({ strongs }: LexiconRequest) => Promise<any>;
+    };
+    readonly study: {
+        getCrossReferences: ({ book, chapter, verse }: CrossReferencesRequest) => Promise<any>;
+        getCommentary: ({ verseRef }: CommentaryRequest) => Promise<any>;
+        research: (req: ResearchRequest) => Promise<any>;
+    };
+    readonly notes: {
+        list: (verseRef?: string) => Promise<any>;
+        create: (note: CreateNoteRequest) => Promise<any>;
+        delete: (noteId: string) => Promise<any>;
     };
     readonly graph: {
         query: ({ nodeKey }: {
@@ -59,7 +94,7 @@ export declare class BibleDeskClient {
         getObsidianVault: (authToken?: string) => Promise<ArrayBuffer>;
     };
     readonly mcp: {
-        getSetupConfig: (client?: "claude" | "cursor" | "windsurf") => {
+        getSetupConfig: (client?: "claude" | "cursor" | "windsurf" | "muse") => {
             mcpServers: {
                 bibledesk: {
                     url: string;
@@ -68,6 +103,14 @@ export declare class BibleDeskClient {
                     env?: undefined;
                 };
             };
+            tools?: undefined;
+            env?: undefined;
+        } | {
+            tools: string[];
+            env: {
+                BIBLEDESK_URL: string;
+            };
+            mcpServers?: undefined;
         } | {
             mcpServers: {
                 bibledesk: {
@@ -79,6 +122,8 @@ export declare class BibleDeskClient {
                     url?: undefined;
                 };
             };
+            tools?: undefined;
+            env?: undefined;
         };
     };
 }

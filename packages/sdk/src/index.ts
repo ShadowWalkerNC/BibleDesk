@@ -40,13 +40,47 @@ export interface PrayerEscalateRequest {
   updateNote?: string;
 }
 
+export interface CrossReferencesRequest {
+  book: string;
+  chapter: number;
+  verse: number;
+}
+
+export interface CommentaryRequest {
+  verseRef: string; // e.g. "John 1:1"
+}
+
+export interface ResearchRequest {
+  query: string;
+  perspective?: 'exegetical' | 'historical' | 'theological' | 'practical' | 'all';
+}
+
+export interface CreateNoteRequest {
+  verseRef: string;
+  noteText: string;
+  tags?: string[];
+  isPrivate?: boolean;
+}
+
+export interface BibleDeskClientConfig {
+  baseUrl?: string;
+  apiKey?: string; // Optional Gemini API key for AI assistant endpoints
+  authToken?: string; // Stateless JWT token for authenticated operations
+}
+
 export class BibleDeskClient {
   private baseUrl: string;
   private apiKey?: string;
+  private authToken?: string;
 
   constructor(config: BibleDeskClientConfig = {}) {
     this.baseUrl = config.baseUrl || (typeof window !== 'undefined' ? '' : 'https://bible-desk.vercel.app');
     this.apiKey = config.apiKey;
+    this.authToken = config.authToken;
+  }
+
+  public setAuthToken(token: string) {
+    this.authToken = token;
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -55,6 +89,7 @@ export class BibleDeskClient {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...(this.apiKey ? { 'x-gemini-api-key': this.apiKey } : {}),
+      ...(this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {}),
       ...((options.headers as Record<string, string>) || {}),
     };
 
@@ -89,6 +124,51 @@ export class BibleDeskClient {
     getLexicon: async ({ strongs }: LexiconRequest) => {
       const params = new URLSearchParams({ strongs });
       return this.request<any>(`/api/bible/lexicon?${params.toString()}`);
+    },
+  };
+
+  // ── 5-Dimension Grounded Study & Research API ──
+  public readonly study = {
+    getCrossReferences: async ({ book, chapter, verse }: CrossReferencesRequest) => {
+      const params = new URLSearchParams({
+        book,
+        chapter: String(chapter),
+        verse: String(verse),
+      });
+      return this.request<any>(`/api/cross-references?${params.toString()}`);
+    },
+
+    getCommentary: async ({ verseRef }: CommentaryRequest) => {
+      const params = new URLSearchParams({ verseRef });
+      return this.request<any>(`/api/commentary?${params.toString()}`);
+    },
+
+    research: async (req: ResearchRequest) => {
+      return this.request<any>('/api/research', {
+        method: 'POST',
+        body: JSON.stringify(req),
+      });
+    },
+  };
+
+  // ── Personal Study Notes & Annotations API ──
+  public readonly notes = {
+    list: async (verseRef?: string) => {
+      const query = verseRef ? `?verseRef=${encodeURIComponent(verseRef)}` : '';
+      return this.request<any>(`/api/notes${query}`);
+    },
+
+    create: async (note: CreateNoteRequest) => {
+      return this.request<any>('/api/notes', {
+        method: 'POST',
+        body: JSON.stringify(note),
+      });
+    },
+
+    delete: async (noteId: string) => {
+      return this.request<any>(`/api/notes?id=${encodeURIComponent(noteId)}`, {
+        method: 'DELETE',
+      });
     },
   };
 
@@ -141,7 +221,7 @@ export class BibleDeskClient {
     getObsidianVault: async (authToken?: string) => {
       const headers: Record<string, string> = {
         Accept: 'application/zip',
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(authToken || this.authToken ? { Authorization: `Bearer ${authToken || this.authToken}` } : {}),
       };
       const res = await fetch(`${this.baseUrl}/api/export/obsidian`, { headers });
       if (!res.ok) {
@@ -153,13 +233,22 @@ export class BibleDeskClient {
 
   // ── Model Context Protocol (MCP) Integration Helper ──
   public readonly mcp = {
-    getSetupConfig: (client: 'claude' | 'cursor' | 'windsurf' = 'claude') => {
+    getSetupConfig: (client: 'claude' | 'cursor' | 'windsurf' | 'muse' = 'claude') => {
+      const targetUrl = this.baseUrl || 'https://bible-desk.vercel.app';
       if (client === 'cursor') {
         return {
           mcpServers: {
             bibledesk: {
-              url: `${this.baseUrl || 'https://bible-desk.vercel.app'}/api/mcp`,
+              url: `${targetUrl}/api/mcp`,
             },
+          },
+        };
+      }
+      if (client === 'muse') {
+        return {
+          tools: ['@bibledesk/mcp-server'],
+          env: {
+            BIBLEDESK_URL: targetUrl,
           },
         };
       }
@@ -169,7 +258,7 @@ export class BibleDeskClient {
             command: 'npx',
             args: ['-y', '@bibledesk/mcp-server'],
             env: {
-              BIBLEDESK_URL: this.baseUrl || 'https://bible-desk.vercel.app',
+              BIBLEDESK_URL: targetUrl,
             },
           },
         },

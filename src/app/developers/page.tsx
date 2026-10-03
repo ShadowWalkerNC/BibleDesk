@@ -27,9 +27,9 @@ export default function DevelopersPage() {
 
   const SDK_CODE_SNIPPET = `import { createBibleDeskClient } from '@bibledesk/sdk';
 
-// Initialize isomorphic client (no key needed for public domain Scripture & lexicons)
+// Initialize isomorphic client
 const bibledesk = createBibleDeskClient({
-  baseUrl: 'https://bible-desk.vercel.app',
+  baseUrl: 'https://your-bibledesk.up.railway.app',
 });
 
 // 1. Read Chapter Text (KJV, ASV, WEB, BBE, Darby, YLT)
@@ -44,13 +44,21 @@ console.log(passage.reference, passage.verses[15].text);
 const greekWord = await bibledesk.bible.getLexicon({ strongs: 'G2889' }); // Kosmos
 console.log(greekWord.lemma, greekWord.definition);
 
-// 3. Query Biblical Concept Knowledge Graph
-const graphData = await bibledesk.graph.query({ nodeKey: 'grace' });
-console.log(graphData.nodes, graphData.edges);
+// 3. Bidirectional Treasury of Scripture Knowledge (TSK) Cross-References
+const crossRefs = await bibledesk.study.getCrossReferences({
+  book: 'John',
+  chapter: 1,
+  verse: 1,
+});
+console.log('Cross references:', crossRefs.references);
 
-// 4. Full-Text Scripture Search
-const searchResults = await bibledesk.bible.search({ query: 'grace', translation: 'kjv', limit: 5 });
-console.log(searchResults.total, searchResults.results[0].reference);`;
+// 4. Grounded 5-Dimension Commentary & Evidence Assessment
+const commentary = await bibledesk.study.getCommentary({ verseRef: 'John 1:1' });
+console.log(commentary.summary, commentary.confidence);
+
+// 5. Query Biblical Concept Knowledge Graph
+const graphData = await bibledesk.graph.query({ nodeKey: 'grace' });
+console.log(graphData.nodes, graphData.edges);`;
 
   const MCP_CLAUDE_CONFIG = `{
   "mcpServers": {
@@ -58,7 +66,7 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
       "command": "npx",
       "args": ["-y", "@bibledesk/mcp-server"],
       "env": {
-        "BIBLEDESK_URL": "https://bible-desk.vercel.app"
+        "BIBLEDESK_URL": "https://your-bibledesk.up.railway.app"
       }
     }
   }
@@ -67,8 +75,15 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
   const MCP_CURSOR_CONFIG = `{
   "mcpServers": {
     "bibledesk": {
-      "url": "https://bible-desk.vercel.app/api/mcp"
+      "url": "https://your-bibledesk.up.railway.app/api/mcp"
     }
+  }
+}`;
+
+  const MCP_MUSE_CONFIG = `{
+  "tools": ["@bibledesk/mcp-server"],
+  "env": {
+    "BIBLEDESK_URL": "https://your-bibledesk.up.railway.app"
   }
 }`;
 
@@ -307,6 +322,21 @@ console.log(searchResults.total, searchResults.results[0].reference);`;
             >
               {copiedKey === 'cursor-mcp' ? <Check size={13} color="#34d399" /> : <Copy size={13} />}
               <span>{copiedKey === 'cursor-mcp' ? 'Copied' : 'Copy JSON'}</span>
+            </button>
+          </div>
+
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '1.75rem 0 0.5rem', color: '#1e1913' }}>
+            Muse Code CLI Setup (muse.json)
+          </h3>
+          <div className={styles.codeBlock}>
+            <pre className={styles.codePre}>{MCP_MUSE_CONFIG}</pre>
+            <button
+              type="button"
+              className={styles.copyBtn}
+              onClick={() => copyCode(MCP_MUSE_CONFIG, 'muse-mcp')}
+            >
+              {copiedKey === 'muse-mcp' ? <Check size={13} color="#34d399" /> : <Copy size={13} />}
+              <span>{copiedKey === 'muse-mcp' ? 'Copied' : 'Copy JSON'}</span>
             </button>
           </div>
 
