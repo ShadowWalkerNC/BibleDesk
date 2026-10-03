@@ -93,9 +93,12 @@ export async function GET() {
     checks.database = {
       status: 'error',
       label: 'Relational Database Engine',
-      description: 'Could not connect to the database. Storage and search functions may be unavailable.',
-      error: err.message,
-      action: 'Click "Verify & Repair Database" below to re-initialize your local database.',
+      description: err?.message
+        ? `Could not connect to the database: ${err.message}`
+        : 'Could not connect to the database. Storage and search functions may be unavailable.',
+      error: err?.message || 'Unknown database error',
+      databaseType: process.env.DATABASE_URL ? 'PostgreSQL Server (Railway)' : 'Embedded WASM PostgreSQL (PGlite)',
+      action: 'Check that DATABASE_URL is set in your Railway environment variables and the PostgreSQL service is active.',
     };
   }
 
