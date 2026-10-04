@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "name": "BibleDesk",
+  "repository": "ShadowWalkerNC/BibleDesk",
+  "classification": "product",
+  "lifecycle": "active",
+  "priority": 2,
+  "ecosystem": "BibleDesk",
+  "visibility": "public",
+  "languages": [
+    "typescript",
+    "sql"
+  ],
+  "capabilities": [
+    "scripture.study",
+    "prayer.care",
+    "api.domain",
+    "mcp.adapter"
+  ],
+  "integrations": {
+    "models": [
+      "google-gemini",
+      "anthropic",
+      "openai"
+    ],
+    "codingAgents": [],
+    "muse": [],
+    "xr": [],
+    "deploymentProviders": [
+      "railway",
+      "vercel"
+    ],
+    "mcp": [
+      "bibledesk"
+    ],
+    "sdks": [
+      "@google/genai",
+      "@anthropic-ai/sdk",
+      "openai",
+      "@electric-sql/pglite",
+      "stripe"
+    ],
+    "extensions": []
+  },
+  "notes": [
+    "Identity installed during P02 on 2026-10-03. Integration entries describe inspected source/package declarations or P00 hosting mappings, not verified operational compatibility.",
+    "Empty capability/integration arrays mean not cataloged; no SDK installation or adoption was performed.",
+    "Lifecycle is a portfolio designation; implementation, migration and production acceptance remain separate.",
+    "Provenance and checks: PORTFOLIO_HANDOFF.md and the central P02_INSTALLATION_REPORT.json."
+  ]
+}

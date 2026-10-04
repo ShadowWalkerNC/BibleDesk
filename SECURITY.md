@@ -1,0 +1,4 @@
+# BibleDesk security policy
+Keep model/database/OAuth keys server-only, rate-limit paid model calls and derive Prayer Care owner identity from verified sessions. Use licensed/public-domain Scripture. Google exports require per-user OAuth, encrypted token storage and human-reviewed Gmail drafts; do not add automatic sending. Existing controls are described in [AGENTS.md](AGENTS.md) and [docs/SECURITY_BATCH_1.md](docs/SECURITY_BATCH_1.md); presence of these docs is not a security certification.
+
+Report suspected vulnerabilities privately to ShadowWalkerNC through an established private owner channel. Do not post credentials, resident/customer data or exploit payloads in public issues. Keep secrets outside Git. Production, secret, access-control and destructive changes require explicit owner approval and recovery planning. This policy describes required boundaries; it does not certify their implementation.
