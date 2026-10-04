@@ -116,19 +116,20 @@ function BibleReaderContent() {
   }
 
   const getDeskGridClass = () => {
+    const base = styles.deskGrid;
     if (isReaderMaximized || (!showLeftHub && !showRightStudy)) {
-      return styles.deskGridMaximized;
+      return `${base} ${styles.deskGridMaximized}`;
     }
     if (!showLeftHub && showRightStudy) {
-      return isStudyExpanded ? styles.deskGridLeftCollapsedRightExpanded : styles.deskGridLeftCollapsed;
+      return `${base} ${isStudyExpanded ? styles.deskGridLeftCollapsedRightExpanded : styles.deskGridLeftCollapsed}`;
     }
     if (showLeftHub && !showRightStudy) {
-      return styles.deskGridRightCollapsed;
+      return `${base} ${styles.deskGridRightCollapsed}`;
     }
     if (isStudyExpanded) {
-      return styles.deskGridRightExpanded;
+      return `${base} ${styles.deskGridRightExpanded}`;
     }
-    return styles.deskGrid;
+    return base;
   };
 
   // Initialize responsive panel visibility:

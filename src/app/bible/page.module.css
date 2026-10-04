@@ -163,27 +163,48 @@
 }
 
 .deskGridLeftCollapsed {
+  display: grid;
   grid-template-columns: 0px 1fr 390px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 0 1rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .deskGridRightCollapsed {
+  display: grid;
   grid-template-columns: 280px 1fr 0px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 1rem 0;
+  flex: 1;
+  min-height: 0;
 }
 
 .deskGridMaximized {
+  display: grid;
   grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 0;
+  flex: 1;
+  min-height: 0;
 }
 
 .deskGridRightExpanded {
+  display: grid;
   grid-template-columns: 250px 1fr 580px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .deskGridLeftCollapsedRightExpanded {
+  display: grid;
   grid-template-columns: 0px 1fr 680px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 0 1rem;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Panel Controls in Selector Bar */
@@ -390,6 +411,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .chapterHeader {
@@ -1020,31 +1044,6 @@
 
 /* ─── Responsive adaptations ────────────────────────────────── */
 
-@media (max-width: 1200px) {
-  .deskGrid {
-    grid-template-columns: 1fr 360px;
-  }
-  .leftHubPanel {
-    display: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .deskGrid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    height: auto;
-  }
-  
-  .mainContainer {
-    height: auto;
-    overflow: auto;
-  }
-  
-  .textPanel, .studyPanel {
-    height: 550px;
-  }
-}
 
 @media (max-width: 640px) {
   .selectorBar {
