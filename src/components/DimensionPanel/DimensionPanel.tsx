@@ -45,9 +45,20 @@ const DIMENSION_ICONS: Record<DimensionKey, any> = {
   practical:         Heart,
 };
 
+interface StrongsLexicalItem {
+  number: string;
+  lemma: string;
+  translit: string;
+  pronunciation?: string;
+  derivation?: string;
+  strongs_def: string;
+  kjv_def: string;
+}
+
 export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DimensionKey>('scripture');
+  const [lexicalDefinitions, setLexicalDefinitions] = useState<StrongsLexicalItem[]>([]);
 
   const effectiveSlug = shareSlug || (answer?.id ? answer.id.slice(0, 8) : null);
 
@@ -79,6 +90,72 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
       }
     }
   }, [answer, effectiveSlug]);
+
+  // Connect Strong's Greek and Hebrew Lexicon definitions for theological analysis cards
+  useEffect(() => {
+    const strongsTags = new Set<string>();
+    const extractTags = (text: string) => {
+      if (!text) return;
+      const matches = text.match(/\b([GH]\d{1,5})\b/gi);
+      if (matches) {
+        for (const m of matches) strongsTags.add(m.toUpperCase());
+      }
+    };
+
+    const rawDim = activeDim as unknown as Record<string, unknown>;
+    if (Array.isArray(rawDim.strongs)) {
+      for (const s of rawDim.strongs) {
+        if (typeof s === 'string') strongsTags.add(s.toUpperCase());
+      }
+    }
+    if (Array.isArray(activeDim.citations)) {
+      for (const c of activeDim.citations) extractTags(c);
+    }
+    extractTags(activeDim.content || '');
+    if (Array.isArray(activeDim.key_points)) {
+      for (const kp of activeDim.key_points) extractTags(kp);
+    }
+
+    if (activeTab === 'original_language' && strongsTags.size === 0) {
+      extractTags(answer.question || '');
+      extractTags(answer.summary || '');
+      if (strongsTags.size === 0) {
+        if (/john|logos|word/i.test(answer.question + ' ' + answer.summary)) {
+          strongsTags.add('G3056');
+          strongsTags.add('G2316');
+        } else if (/genesis|creation|beginning/i.test(answer.question + ' ' + answer.summary)) {
+          strongsTags.add('H7225');
+          strongsTags.add('H1254');
+          strongsTags.add('H430');
+        }
+      }
+    }
+
+    if (strongsTags.size === 0) {
+      setLexicalDefinitions([]);
+      return;
+    }
+
+    const tags = Array.from(strongsTags).slice(0, 6);
+    let cancelled = false;
+
+    Promise.all(
+      tags.map((tag) =>
+        fetch(`/api/bible/lexicon?strongs=${tag}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => (data?.success ? (data.definition as StrongsLexicalItem) : null))
+          .catch(() => null)
+      )
+    ).then((defs) => {
+      if (!cancelled) {
+        setLexicalDefinitions(defs.filter((d): d is StrongsLexicalItem => d !== null));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeDim, activeTab, answer]);
 
   function handleCopyText() {
     const text = [
@@ -216,6 +293,40 @@ export default function DimensionPanel({ answer, shareSlug }: DimensionPanelProp
         )}
 
         <p className={styles.panelContent}>{activeDim.content}</p>
+
+        {/* Strong's Lexical Roots & Concordance Analysis */}
+        {lexicalDefinitions.length > 0 && (
+          <div className={styles.lexicalSection} aria-label="Strong's Greek and Hebrew Lexical Roots">
+            <div className={styles.lexicalHeader}>
+              <Languages size={16} className={styles.lexicalHeaderIcon} />
+              <span className={styles.lexicalTitle}>Strong's Lexical Roots & Concordance</span>
+            </div>
+            <div className={styles.lexicalGrid}>
+              {lexicalDefinitions.map((item) => (
+                <div key={item.number} className={styles.lexicalCard}>
+                  <div className={styles.lexicalCardTop}>
+                    <span className={styles.strongsBadge}>{item.number}</span>
+                    <span className={styles.lemmaText}>{item.lemma}</span>
+                    {item.translit && (
+                      <span className={styles.translitText}>({item.translit})</span>
+                    )}
+                  </div>
+                  {item.derivation && (
+                    <div className={styles.derivationText}>
+                      <strong>Derivation:</strong> {item.derivation}
+                    </div>
+                  )}
+                  <p className={styles.strongsDef}>{item.strongs_def}</p>
+                  {item.kjv_def && (
+                    <div className={styles.kjvDef}>
+                      <span className={styles.kjvLabel}>KJV Usage:</span> {item.kjv_def}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {activeDim.citations?.length > 0 && (
           <div className={styles.citations}>
