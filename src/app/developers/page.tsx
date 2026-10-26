@@ -29,7 +29,7 @@ export default function DevelopersPage() {
 
 // Initialize isomorphic client
 const bibledesk = createBibleDeskClient({
-  baseUrl: 'https://your-bibledesk.up.railway.app',
+  baseUrl: 'https://bibledesk.up.railway.app',
 });
 
 // 1. Read Chapter Text (KJV, ASV, WEB, BBE, Darby, YLT)
@@ -66,7 +66,7 @@ console.log(graphData.nodes, graphData.edges);`;
       "command": "npx",
       "args": ["-y", "@bibledesk/mcp-server"],
       "env": {
-        "BIBLEDESK_URL": "https://your-bibledesk.up.railway.app"
+        "BIBLEDESK_URL": "https://bibledesk.up.railway.app"
       }
     }
   }
@@ -75,7 +75,7 @@ console.log(graphData.nodes, graphData.edges);`;
   const MCP_CURSOR_CONFIG = `{
   "mcpServers": {
     "bibledesk": {
-      "url": "https://your-bibledesk.up.railway.app/api/mcp"
+      "url": "https://bibledesk.up.railway.app/api/mcp"
     }
   }
 }`;
@@ -83,7 +83,7 @@ console.log(graphData.nodes, graphData.edges);`;
   const MCP_MUSE_CONFIG = `{
   "tools": ["@bibledesk/mcp-server"],
   "env": {
-    "BIBLEDESK_URL": "https://your-bibledesk.up.railway.app"
+    "BIBLEDESK_URL": "https://bibledesk.up.railway.app"
   }
 }`;
 

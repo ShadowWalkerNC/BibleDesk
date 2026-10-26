@@ -219,41 +219,14 @@ export async function GET(req: NextRequest) {
   const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_COMMUNITY_MODE === 'true';
 
   let user = null;
-  let userTier = 'free';
 
   if (!isServerSecret) {
     user = await getAuthenticatedUser(req);
+    // In free open access model, any signed-in user or self-hosted deployment can export
     if (!user && !isSelfHosted) {
       return NextResponse.json(
-        { success: false, error: 'Authentication required to export study vault', code: 'UNAUTHORIZED' },
+        { success: false, error: 'Sign in to export your personal study vault', code: 'UNAUTHORIZED' },
         { status: 401 }
-      );
-    }
-
-    if (user && isDatabaseConfigured()) {
-      const db = await getDb();
-      const rows = await db
-        .select({
-          subscriptionTier: profiles.subscriptionTier,
-          subscriptionStatus: profiles.subscriptionStatus,
-        })
-        .from(profiles)
-        .where(eq(profiles.id, user.id))
-        .limit(1);
-      userTier = getUserTier(rows[0] ?? null);
-    } else {
-      userTier = getUserTier(null);
-    }
-
-    const hasAccess = userTier === 'pro' || userTier === 'ministry' || userTier === 'lifetime' || isSelfHosted;
-    if (!hasAccess) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Obsidian Vault Export is a BibleDesk Pro feature. Upgrade at /pricing to download your study vault.',
-          code: 'PRO_REQUIRED',
-        },
-        { status: 403 }
       );
     }
   }

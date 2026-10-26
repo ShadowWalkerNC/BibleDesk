@@ -609,41 +609,25 @@ export default function MarketingShowcase() {
         </div>
       </section>
 
-      {/* ── 6. Kingdom Stewardship Pricing ── */}
-      <section className={styles.pricingSection} aria-label="Transparent Membership">
+      {/* ── 6. 100% Free & Open Access ── */}
+      <section className={styles.pricingSection} aria-label="100% Free Access">
         <div className={styles.sectionHeader}>
-          <span className={styles.headerTag}>KINGDOM COVENANT</span>
-          <h2 className={styles.sectionTitle}>Simple, Transparent Stewardship</h2>
+          <span className={styles.headerTag}>ZERO PAYWALL</span>
+          <h2 className={styles.sectionTitle}>100% Free &amp; Open Access</h2>
           <p className={styles.sectionSubtitle}>
-            God’s Word is never for sale. Core Scripture reading is free forever. Paid tiers sponsor hosted server AI compute and multi-device cloud synchronization.
+            God’s Word is never for sale. BibleDesk has no paid tiers, no paywalls, and no subscriptions. All Scripture reading, Strong’s lexicons, concordance search, notes, and prayer features are completely free forever.
           </p>
-
-          {/* Billing Switcher Toggle */}
-          <div className={styles.billingToggle}>
-            <span className={!annualBilling ? styles.billingActive : ''}>Monthly</span>
-            <button
-              type="button"
-              className={styles.toggleTrack}
-              onClick={() => setAnnualBilling(!annualBilling)}
-              aria-label="Toggle Annual Billing"
-            >
-              <div className={`${styles.toggleThumb} ${annualBilling ? styles.toggleThumbActive : ''}`} />
-            </button>
-            <span className={annualBilling ? styles.billingActive : ''}>
-              Annual <span className={styles.saveBadge}>Save 30%</span>
-            </span>
-          </div>
         </div>
 
         <div className={styles.pricingGrid}>
-          {/* Tier 1: Free Community */}
+          {/* Option 1: Free Community Core */}
           <div className={styles.pricingCard}>
             <div className={styles.tierHeader}>
-              <span className={styles.tierBadge}>FREE COVENANT</span>
-              <h3 className={styles.tierName}>Community Open Core</h3>
+              <span className={styles.tierBadge}>FREE FOREVER</span>
+              <h3 className={styles.tierName}>Community Core</h3>
               <div className={styles.tierPriceRow}>
                 <span className={styles.tierPrice}>$0</span>
-                <span className={styles.tierPeriod}>Free Forever</span>
+                <span className={styles.tierPeriod}>Always Free</span>
               </div>
               <p className={styles.tierDesc}>
                 Complete, unhindered Scripture study and prayer tools for every believer on earth.
@@ -665,15 +649,15 @@ export default function MarketingShowcase() {
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Local Notes &amp; Highlights</span>
+                <span>Notes, Highlights &amp; Vault Exports</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>5 Free Hosted AI Answers / Day</span>
+                <span>5 Free Server AI Answers / Day</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span><strong>Unlimited AI with BYOK (Free Gemini)</strong></span>
+                <span>Open REST API &amp; Model Context Protocol</span>
               </div>
             </div>
 
@@ -682,92 +666,96 @@ export default function MarketingShowcase() {
             </Link>
           </div>
 
-          {/* Tier 2: BibleDesk Pro */}
+          {/* Option 2: BYOK Gemini */}
           <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
             <div className={styles.tierHeader}>
-              <span className={styles.featuredBadge}>MOST POPULAR</span>
-              <h3 className={styles.tierName}>BibleDesk Pro</h3>
+              <span className={styles.featuredBadge}>RECOMMENDED</span>
+              <h3 className={styles.tierName}>BYOK Gemini AI</h3>
               <div className={styles.tierPriceRow}>
-                <span className={styles.tierPrice}>{annualBilling ? '$5' : '$7'}</span>
-                <span className={styles.tierPeriod}>/ month {annualBilling ? '($60 billed yearly)' : ''}</span>
+                <span className={styles.tierPrice}>$0</span>
+                <span className={styles.tierPeriod}>Google AI Studio Key</span>
               </div>
               <p className={styles.tierDesc}>
-                For deep researchers, seminary students, and teachers who want hosted AI compute with zero key configuration.
+                Bring your free personal Google Gemini API key to unlock unlimited 5-dimension AI study answers.
               </p>
             </div>
 
             <div className={styles.tierFeatureList}>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Everything in Free Core</span>
+                <span>Everything in Community Core</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span><strong>250 Hosted 5D AI Answers / Day</strong></span>
+                <span><strong>Unlimited 5D AI Study Answers</strong></span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Real-Time Cloud Notes Sync</span>
+                <span>Bypasses Daily 5-Answer Limit</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>1-Click Obsidian Vault (.zip) Export</span>
+                <span>Stored Privately on Your Profile</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Printable Passage Study Guides</span>
+                <span>Direct Google Gemini 2.5 Flash Inference</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Google Calendar Prayer Care Sync</span>
+                <span>Zero Subscription or Credit Card</span>
               </div>
             </div>
 
-            <Link href="/pricing" className={styles.tierActionPrimary}>
-              <span>Upgrade to Pro</span>
+            <Link href="/bible" className={styles.tierActionPrimary}>
+              <span>Configure in Settings</span>
               <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Tier 3: Ministry & Pastoral */}
+          {/* Option 3: Muse AI Account */}
           <div className={styles.pricingCard}>
             <div className={styles.tierHeader}>
-              <span className={styles.tierBadge}>MINISTRY</span>
-              <h3 className={styles.tierName}>Pastoral &amp; Ministry</h3>
+              <span className={styles.tierBadge}>INTEGRATION</span>
+              <h3 className={styles.tierName}>Muse AI Connection</h3>
               <div className={styles.tierPriceRow}>
-                <span className={styles.tierPrice}>{annualBilling ? '$15' : '$19'}</span>
-                <span className={styles.tierPeriod}>/ month {annualBilling ? '($180 billed yearly)' : ''}</span>
+                <span className={styles.tierPrice}>$0</span>
+                <span className={styles.tierPeriod}>Personal Muse Account</span>
               </div>
               <p className={styles.tierDesc}>
-                For pastors, small group leaders, and church care teams discipling congregations.
+                Connect your personal Muse AI account token to execute queries against your Muse quota.
               </p>
             </div>
 
             <div className={styles.tierFeatureList}>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Everything in BibleDesk Pro</span>
+                <span>Everything in Community Core</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span><strong>1,000 Hosted AI Answers / Day</strong></span>
+                <span><strong>Use Your Own Muse Account Quota</strong></span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Reviewed Pastoral Gmail Draft Export</span>
+                <span>Unlimited AI Answers via Muse</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Priority Research Assistant Compute</span>
+                <span>Muse Code CLI Terminal Pairing Ready</span>
               </div>
               <div className={styles.tierFeatureItem}>
                 <Check size={14} className={styles.checkIcon} />
-                <span>Church Directory &amp; Group Workspaces</span>
+                <span>Works Across All Workspaces</span>
+              </div>
+              <div className={styles.tierFeatureItem}>
+                <Check size={14} className={styles.checkIcon} />
+                <span>Seamless Agent Handoff</span>
               </div>
             </div>
 
-            <Link href="/pricing" className={styles.tierActionSecondary}>
-              <span>View Ministry Plans</span>
+            <Link href="/bible" className={styles.tierActionSecondary}>
+              <span>Connect Muse Account</span>
             </Link>
           </div>
         </div>

@@ -43,7 +43,7 @@ const CHURCH_LINKS = [
 
 const TOOL_LINKS = [
   { href: '/system',    label: 'System Health & Recovery', icon: Activity },
-  { href: '/pricing',   label: 'Membership & Pro', icon: Crown },
+  { href: '/pricing',   label: 'Free Access & AI', icon: Crown },
   { href: '/developers',label: 'Developers & SDK', icon: Code },
   { href: '/download',  label: 'Install App',   icon: Download },
 ];

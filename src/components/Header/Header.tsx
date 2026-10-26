@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { href: '/research',         label: '5D Research' },
   { href: '/study-resources',  label: 'Resources' },
   { href: '/prayer',           label: 'Prayer Atlas' },
-  { href: '/pricing',          label: 'Membership' },
+  { href: '/pricing',          label: 'Free Access' },
   { href: '/developers',       label: 'Developers' },
 ];
 

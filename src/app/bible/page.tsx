@@ -719,10 +719,8 @@ function BibleReaderContent() {
       const res = await fetch('/api/export/obsidian', { headers });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        if (res.status === 403 || data?.code === 'PRO_REQUIRED') {
-          showToast('Obsidian Vault export is a Pro feature. Upgrade at /pricing.', 'error');
-        } else if (res.status === 401) {
-          showToast('Please sign in or configure Pro membership to export.', 'error');
+        if (res.status === 401) {
+          showToast('Please sign in to export your study vault.', 'error');
         } else {
           showToast(data?.error || 'Obsidian export failed.', 'error');
         }
@@ -1728,10 +1726,10 @@ function BibleReaderContent() {
                           className={styles.notesTextarea}
                         />
                         <div className={styles.notesFooter}>
-                          {hasCloudSync && currentUser ? (
-                            <span style={{ color: 'var(--dim-theological)' }}>☁️ Synced to cloud (Pro)</span>
+                          {currentUser ? (
+                            <span style={{ color: 'var(--dim-theological)' }}>☁️ Synced to cloud</span>
                           ) : (
-                            <span>💾 Saved locally (Free) · <a href="/pricing" style={{ color: 'var(--sage)', textDecoration: 'underline' }}>Upgrade for Cloud Sync</a></span>
+                            <span>💾 Saved locally · <a href="/login" style={{ color: 'var(--sage)', textDecoration: 'underline' }}>Sign in to sync across devices</a></span>
                           )}
                           <button
                             type="button"
