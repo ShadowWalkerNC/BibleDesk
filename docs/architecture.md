@@ -7,12 +7,12 @@
 
 ## 1. Executive Architecture Overview
 
-BibleDesk is a Bible study and theological research platform centered on verse analysis, cross-referencing, evidence-based commentary, and AI-assisted web research.
+BibleDesk is a Bible study and theological research platform centered on verse analysis, cross-referencing, evidence-based commentary, and AI-assisted research.
 
 The architecture comprises five core layers:
 1. **Persistent Relational Database (PostgreSQL + Drizzle ORM)**: Stores canonical Scripture text across public-domain translations, indexed cross-references, structured 5-dimension commentary, user accounts, and personal study collections/notes. Full-text search is powered by PostgreSQL `tsvector`.
 2. **Reusable Evidence & Confidence Engine (`src/lib/evidence.ts`)**: Evaluates theological and biblical claims across 5 distinct hermeneutical dimensions, deriving an explainable confidence rating via deterministic multi-factor scoring.
-3. **Backend Research Assistant Service (`POST /api/research`)**: Integrates Anthropic's Claude 3.5 Sonnet SDK (`@anthropic-ai/sdk`) with web research tools, citation validation, rate limiting, and 5-dimension evidence synthesis.
+3. **Backend Research Assistant Service (`POST /api/research`)**: Integrates Anthropic's Claude (`claude-sonnet-4-5`) via `@anthropic-ai/sdk` with citation validation, rate limiting, and 5-dimension evidence synthesis. Grounding is local (bundled Scripture, lexicons, and cross-references); there is no web-search tool.
 4. **Interactive Study Desk UI (`/bible`, `/research`)**: Unifies chapter reading, cross-reference discovery, 5D commentary display, research queries, and personal study organization into a cohesive desktop/tablet/mobile workspace.
 5. **Quality Assurance Suite**: Vitest/Node unit and integration test suite coupled with Playwright E2E testing for the critical-path user journey.
 
@@ -141,15 +141,15 @@ The engine produces both the numeric score, the categorical tier, and an explici
 
 ---
 
-## 4. Research Assistant & Anthropic Web-Search Integration
+## 4. Research Assistant
 
-The research flow builds on Anthropic's Claude 3.5 Sonnet (`@anthropic-ai/sdk`) wrapped in a secure server-side endpoint `POST /api/research`.
+The research flow builds on Anthropic's Claude (`claude-sonnet-4-5`, `@anthropic-ai/sdk`) wrapped in a secure server-side endpoint `POST /api/research`.
 
 ### 4.1 Request & Execution Flow
 1. **Rate Limiting & Authentication**: Enforces per-IP and per-user token buckets to prevent abuse.
 2. **Query Normalization**: Parses target scripture references (e.g. "John 1:1") and core research questions.
-3. **Anthropic Web Search Execution**: Claude performs targeted web search for scholarly, historical, and archaeological evidence regarding the passage.
-4. **Citation Extraction & Verification**: Every factual assertion must be accompanied by a concrete citation. Web sources must provide real, traceable URLs (e.g. CCEL, BibleHub, academic repositories).
+3. **Grounded Claude Execution**: Claude synthesizes evidence from the bundled Scripture, lexicon, and cross-reference data regarding the passage. There is no web-search step; when the hosted call is unavailable the route falls back to locally grounded scholarly content.
+4. **Citation Extraction & Verification**: Every factual assertion must be accompanied by a concrete citation to a traceable source in the local corpus.
 5. **Evidence Model Scoring**: The response is parsed into the 5 hermeneutical dimensions, passed through `calculateConfidence()`, and validated.
 6. **Persistence**: The finding is saved to `research_findings` and returned to the client.
 
@@ -169,7 +169,7 @@ To satisfy the requirement that:
 *"The app runs locally end-to-end from a clean clone with only `npm install`, env setup, and documented commands"*
 
 The database client (`src/db/index.ts`) supports dual-mode operation:
-- **Standard PostgreSQL Mode**: Used when `DATABASE_URL` is configured (production Supabase, Docker, or local PostgreSQL).
+- **Standard PostgreSQL Mode**: Used when `DATABASE_URL` is configured (Railway, Docker, or local PostgreSQL).
 - **Embedded PostgreSQL Mode (`@electric-sql/pglite`)**: If `DATABASE_URL` is omitted or points to `pglite://`, Drizzle runs on top of embedded WebAssembly PostgreSQL storing data locally in `./data/bibledesk.db`. This provides 100% genuine PostgreSQL dialect, indexes, and migrations with zero external daemon dependencies.
 
 ---

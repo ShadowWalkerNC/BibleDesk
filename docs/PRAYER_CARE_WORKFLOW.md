@@ -1,5 +1,7 @@
 # Prayer Care Workflow
 
+> **Implementation note (2026-11-09):** The workflow design in this document (owner-derived access, explicit consent, reviewed Gmail drafts only, no automatic sending) remains in force, but the storage/auth mechanics described below predate the Railway migration. Supabase has been removed: ownership is now derived from the stateless JWT bearer token (`/api/auth/*`), and data lives in Railway PostgreSQL via Drizzle. Read "Supabase" references below as historical design context, not current implementation.
+
 > Status: First increment implemented in code; migration/OAuth setup not deployed
 > Added: 2026-09-03
 > Product area: Church tools / personal prayer

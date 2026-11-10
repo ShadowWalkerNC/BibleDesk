@@ -6,20 +6,20 @@ BibleDesk provides a completely free, open-source foundation for Scripture study
 
 The bundled Strong's dictionaries are real source data and accept direct number lookups. The current Bible modules do not yet contain word-by-word Greek/Hebrew tagging, so BibleDesk does not claim that an English word click identifies its underlying lemma. A properly licensed, attributed, verse-level source corpus is required before that interaction returns.
 
-Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MCP Server** from external tools. Native desktop, Android, and Chrome extension shells are preserved under `archive/` and are not current releases. Scripture reading and local study data need no paid subscription; AI features require host configuration or a user-provided Gemini key.
+Use BibleDesk as a web app or installed PWA, or consume its **Open REST API & MCP Server** from external tools. Native desktop, Android, and Chrome extension shells are preserved under `archive/` and are not current releases. Scripture reading and local study data need no paid subscription; AI features require host configuration or a user-provided Gemini or Claude key.
 
 ---
 
-## Current Status (2026-09-19)
+## Current Status (2026-11-09)
 
 | | |
 |---|---|
 | **Active phase** | **Phase 0 — Local-first Bible foundation** |
 | **What exists in code** | Centralized Study Desk workspace (`/bible`) with 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT) for offline reading/search; Strong's Greek & Hebrew lexicons; TSK cross-references; optional 5-dimension AI study assistant; consent-based public Prayer Atlas; local private prayer commitments; authenticated Prayer Care with ICS, Google Calendar export, and reviewed Gmail draft creation; multi-tradition study resources; TypeScript SDK; REST API, MCP server, Stripe Customer Portal, and Obsidian vault exporter. |
-| **MVP scope (2026-09-12)** | Discord & WhatsApp bots deleted; worship radio dock, graph explorer UI, and download storefront cut; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. |
+| **MVP scope (2026-09-12, updated)** | Discord & WhatsApp bots deleted; worship radio dock cut; the download storefront was replaced by an honest PWA / build-from-source page at `/download`; sermons, church suite, and creators hub archived under `archive/`; native shells (Android/Electron/Chrome extension) parked under `archive/` — build from source, not offered as downloads. The knowledge-graph UI (`GraphView`, `/api/graph`) has since returned inside `/bible`. |
 | **Bible data** | Fully local static public domain modules with zero network requirement for reading/search |
 | **Open APIs & MCP** | Exposes `/api/mcp`, `/api/bible/search`, `/api/bible/chapter`, `/api/bible/lexicon`, `/api/cross-references`, `/api/commentary`, `/api/research`, `/api/notes`, `/api/collections`, `/api/search`, `/api/graph`, `/api/prayer`, `/api/daily`, `/api/export/obsidian`, `/api/billing/portal` |
-| **Deploy & Build** | Next.js 16.3.5 production build, TypeScript typecheck, 32 automated tests (unit, database, API, and E2E critical path), environment doctor, and production dependency audit pass. |
+| **Deploy & Build** | Next.js 16.3.5 production build, TypeScript typecheck, 33 automated tests (unit, database, API, security-boundary, SDK, and E2E critical path), environment doctor, and production dependency audit pass. Verified fresh at `1bf0ef6` on 2026-11-09: `npm install`, `npm run typecheck`, `npm test` (33/33), and `npm run build` all exit 0. |
 | **Database & ORM** | PostgreSQL with Drizzle ORM. Dual-mode support: zero-config embedded PostgreSQL via WASM PGlite or external PostgreSQL connection string (`DATABASE_URL`). |
 | **Source of truth** | [TODO.md](TODO.md) for work · [ARCHITECTURE.md](ARCHITECTURE.md) for system design · [DEPLOYMENT.md](DEPLOYMENT.md) for deployment · [OPS_REPORT.md](OPS_REPORT.md) for ops audit · [AGENTS.md](AGENTS.md) for agent rules |
 
@@ -32,7 +32,7 @@ All primary Scripture reading, concordance keyword search, Strong's Greek/Hebrew
 
 ### 2. Evidence-Based 5-Dimension Research Assistant
 When investigating difficult passages, claims, or interpretations, BibleDesk applies a rigorous, multi-factor confidence rating ($w_1=0.30$ Scripture, $w_2=0.20$ Original Language, $w_3=0.20$ Historical Setting, $w_4=0.15$ Theology, $w_5=0.15$ Traceability):
-- 🔍 **Research Assistant (`/research` & `/bible` Tab)**: Backed by Anthropic Claude 3.5 Sonnet with web search tool capabilities. Formats findings across all 5 dimensions with real, clickable citations and transparent confidence derivation.
+- 🔍 **Research Assistant (`/research` & `/bible` Tab)**: Backed by Anthropic Claude (`claude-sonnet-4-5`). Formats findings across all 5 dimensions with real, clickable citations and transparent confidence derivation. It does not use a web-search tool; when the hosted call is unavailable it falls back to locally grounded scholarly content.
 - 💾 **Personal Notes & Collections**: Organize insights with tagged personal study notes (`/api/notes`) and thematic study collections (`/api/collections`).
 - 🔎 **Unified Full-Text Search (`/api/search`)**: Query scripture verses, 5-dimension commentary records, and personal study notes in one request.
 
@@ -51,7 +51,7 @@ When investigating difficult passages, claims, or interpretations, BibleDesk app
   - `GET /api/bible/chapter?book=John&chapter=3&translation=web`
   - `GET /api/cross-references?reference=John 1:1`
   - `GET /api/commentary?reference=John 1:1`
-  - `POST /api/research` (Anthropic web-search grounded research)
+  - `POST /api/research` (Anthropic Claude research, locally grounded fallback; no web-search tool)
   - `GET|POST|DELETE /api/notes` (Personal study notes)
   - `GET|POST /api/collections` (Thematic study collections)
   - `GET /api/search?q=beginning&type=all` (Unified search)
@@ -59,7 +59,7 @@ When investigating difficult passages, claims, or interpretations, BibleDesk app
   - `GET /api/bible/lexicon?strongs=G2889`
   - `GET /api/graph?nodeKey=grace`
   - `GET /api/daily`
-- **Included 5D AI Study Assistant**: Users who sign in receive automatic access to the server-hosted Google Gemini assistant (`gemini-2.5-flash`, 5 free questions/day, then BYOK for unlimited) with zero API key configuration. Guests can also supply their own free Gemini key (BYOK).
+- **Included 5D AI Study Assistant**: Signed-in users receive 5 free AI answers per day from the server-hosted Anthropic Claude engine (`claude-sonnet-4-5`), with zero API key configuration. For unlimited use, store your own Gemini or Claude API key in your profile (BYOK). Guests must supply their own free Gemini key (sent header-only, never in the request body).
 - **Prayer Care**: Local private commitments support recurring rhythms and gratitude tracking. With Railway PostgreSQL (`DATABASE_URL`) and direct BibleDesk Google OAuth configured, signed-in users can export ICS/Calendar events and create an editable Gmail draft after explicit review. BibleDesk does not send Gmail messages automatically.
 
 ### 3. Bidirectional Biblical Knowledge Graph
@@ -157,11 +157,11 @@ BibleDesk has **no paid tiers, no paywalls, and no subscriptions**:
 1. **Free Core Foundation**:
    - Bundled public-domain Bibles (KJV, ASV, WEB, BBE, Darby, YLT), Strong's Greek/Hebrew lexicons, TSK cross-references, prayer tracking, notes, and exports are completely free.
 2. **5 Free AI Questions / Day**:
-   - Every signed-in user receives 5 free AI answers daily powered by the server's Google Gemini engine.
-3. **Bring Your Own Key (BYOK Gemini)**:
-   - Provide your personal free Google Gemini API key from Google AI Studio in settings to unlock unlimited 5-dimension study queries.
-4. **Muse AI Account Connection**:
-   - Connect your personal Muse AI account token to execute queries against your Muse quota instead of the default 5 free daily answers. Fully integrates with the Muse Code CLI for terminal-based study pairing.
+   - Every signed-in user receives 5 free AI answers daily powered by the server's Anthropic Claude engine.
+3. **Bring Your Own Key (BYOK)**:
+   - Store your personal Google Gemini API key (from Google AI Studio) or your personal Anthropic Claude API key in your profile settings to unlock unlimited 5-dimension study queries against your own quota.
+4. **Tier & billing code (self-hosted)**:
+   - The repository ships a tier system (`src/lib/tiers.ts`) and Stripe billing routes (`/api/billing/*`) so self-hosters can enable optional plans on their own deployments. The hosted service at the canonical URL runs the free model above; plan activation there runs in local/self-hosted mode and no hosted paid plan is sold.
 
 ---
 

@@ -1,5 +1,7 @@
 # BibleDesk ✦ Operations Manager & Product Audit Report
 
+> **HISTORICAL SNAPSHOT — DO NOT USE AS CURRENT STATE.** This audit describes the application as it was in August–September 2026, before the Railway PostgreSQL migration. It references removed systems (Supabase auth and sync, the sermon workspace, Discord publishing, the former graph/radio surfaces) and local machine paths that no longer apply. For current, verified state see [STATUS.md](STATUS.md) (fresh acceptance pass, 2026-11-09). This report is preserved as an audit record only.
+
 **Date:** August 25, 2026  
 **Auditor:** Operations Manager & Product Consultant  
 **Status:** Phase 0 Complete — Local-First Foundation Ready for Deployment  

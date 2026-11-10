@@ -1,7 +1,7 @@
 # BibleDesk Architecture
 
 > **Status:** Phase 0 — local-first Bible foundation
-> **Updated:** 2026-09-30
+> **Updated:** 2026-11-09
 
 BibleDesk is a Next.js 16 and React 19 web application. Its product center is the bundled public-domain Bible reader and search experience. AI, JWT accounts on Railway PostgreSQL, public prayer, and Google Prayer Care exports are optional server capabilities.
 
@@ -16,13 +16,13 @@ BibleDesk is a Next.js 16 and React 19 web application. Its product center is th
 | `/prayer` | Local private commitments and the consent-based public Prayer Atlas |
 | `/developers` | REST API, SDK and MCP documentation |
 | `/download` | PWA installation guidance and accurate status of parked native shells |
-| `/pricing` | Transparent Kingdom-first pricing and Pro SaaS membership tiers |
+| `/pricing` | Free-access pricing: 5 hosted AI answers/day, then BYOK. Tier/billing code ships for self-hosted deployments; no hosted paid plan is sold |
 | `/login` | JWT email/password auth (`/api/auth/*`), with a local profile only in explicitly local/development builds |
 | `/mod` | Server-authorized moderation UI |
 | `/system` | In-app System Health, Diagnostics & Disaster Recovery Hub (diagnostics, 1-click repairs, full JSON backup/restore) |
 | `/share/[slug]` | Public shared study answers |
 
-Sermons, church tools, creator pages, the graph explorer UI, radio, Discord and WhatsApp bots, and native wrappers are outside the web MVP. Preserved work lives under `archive/`. Direct `wa.me` sharing remains a client-side convenience.
+Sermons, church tools, creator pages, radio, Discord and WhatsApp bots, and native wrappers are outside the web MVP. Preserved work lives under `archive/`. The knowledge-graph UI (`GraphView`, backed by `/api/graph`) is part of the active `/bible` workspace. Direct `wa.me` sharing remains a client-side convenience.
 
 ## Runtime layers
 
@@ -36,9 +36,9 @@ Next.js server routes
   ├─ Bible, cross-references, commentary, research, notes, collections, search, and MCP APIs
   ├─ Drizzle ORM connecting to dual-mode PostgreSQL (embedded WASM PGlite or remote DATABASE_URL)
   ├─ 5-dimension evidence scoring engine with multi-factor confidence rating ($w_1..w_5$)
-  ├─ Anthropic Claude 3.5 Sonnet research pipeline with web-search citations and traceability
-  ├─ Stripe checkout, portal, and webhook billing lifecycle
-  ├─ rate-limited Gemini/AI answer pipeline
+  ├─ Anthropic Claude (claude-sonnet-4-5) research pipeline with citations and traceability (no web-search tool; locally grounded fallback)
+  ├─ Stripe checkout, portal, and webhook billing lifecycle (self-hosted tier support; hosted service runs the free model)
+  ├─ rate-limited Claude-hosted answer pipeline with Gemini BYOK
   ├─ owner-scoped Prayer Care APIs
   ├─ consent-gated public prayer submission
   ├─ system health diagnostics and repair endpoints (/api/system/diagnostics, /api/system/repair)
@@ -46,7 +46,7 @@ Next.js server routes
 
 External services when configured
   ├─ Railway PostgreSQL via Drizzle ORM (+ pgvector extension for RAG)
-  ├─ Anthropic Claude (claude-3-5-sonnet) with web search for research assistant
+  ├─ Anthropic Claude (claude-sonnet-4-5) for hosted answers and the research assistant
   ├─ Google Gemini and OpenAI embeddings
   ├─ Stripe for subscription billing & Customer Portal
   └─ Google OAuth for Calendar events and Gmail draft creation

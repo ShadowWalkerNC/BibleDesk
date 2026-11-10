@@ -1,5 +1,7 @@
 # Security batch 1 — 2026-09-11
 
+> **Note (2026-11-09):** This batch predates the Railway PostgreSQL migration. Supabase has since been removed from the application entirely (PostgreSQL via Drizzle is the data layer), so the Supabase migration referenced below is a historical record, not a pending action. The boundary decisions in this document (consent-gated Atlas publication, owner-derived Prayer Care access, reviewed Gmail drafts only) remain in force.
+
 Phase 0 — Local-first Bible foundation (security hardening; release verification pending).
 
 ## Implemented boundaries

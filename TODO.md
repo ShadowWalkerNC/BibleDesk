@@ -66,6 +66,6 @@
 
 ## Parked scope
 
-Sermons, church and creator suites; the graph explorer UI; worship radio; Discord and WhatsApp bots; and Android, Electron and Chrome extension packaging are preserved under `archive/`. They are not part of the current public web release. Reintroduce each only with its own security, UX and deployment review.
+Sermons, church and creator suites; worship radio; Discord and WhatsApp bots; and Android, Electron and Chrome extension packaging are preserved under `archive/`. They are not part of the current public web release. Reintroduce each only with its own security, UX and deployment review. (The knowledge-graph UI is no longer parked: `GraphView` and `/api/graph` are active inside `/bible`.)
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries and [README.md](README.md) for setup.

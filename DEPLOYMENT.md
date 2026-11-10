@@ -86,7 +86,7 @@ BibleDesk is built on Next.js 16 with the App Router. The built application (`st
    - *Note: If `DATABASE_URL` is omitted, BibleDesk automatically operates in self-contained embedded (PGlite) mode.*
 
 ### Step 2: Configure Environment Variables
-In your Railway (or Vercel) project environment settings, add the following variables:
+In your Railway project environment settings, add the following variables:
 
 | Variable | Required? | Purpose |
 |---|---|---|
@@ -94,7 +94,8 @@ In your Railway (or Vercel) project environment settings, add the following vari
 | `DATABASE_URL` | Recommended | Railway PostgreSQL connection string (enables accounts, cloud sync, prayer) |
 | `JWT_SECRET` | Recommended | Secret for stateless auth sessions (`openssl rand -hex 32`) |
 | `PGLITE_DATA_DIR` | Optional | Embedded database directory when `DATABASE_URL` is unset |
-| `GEMINI_API_KEY` | Recommended | Google Gemini key for hosted AI study assistant |
+| `GEMINI_API_KEY` | Recommended | Google Gemini key for the `/api/bible/study` companion route and BYOK fallback |
+| `ANTHROPIC_API_KEY` | Required for hosted AI | Anthropic Claude key for the hosted answer pipeline (`/api/ask`) and research assistant |
 | `OPENAI_API_KEY` | Recommended | OpenAI key for text-embedding-3-small pgvector RAG |
 | `IP_HASH_SALT` | Recommended | Secret salt for SHA-256 rate limiting (`openssl rand -hex 16`) |
 | `MCP_SECRET` | Recommended | Bearer secret for external MCP agent connections |
@@ -112,11 +113,9 @@ BibleDesk is pre-configured for 1-click Railway deployments via `railway.json` a
 5. In **Settings** → **Networking**, click **Generate Domain** (or assign a custom domain).
 6. Verify deployment by visiting `/api/health` and your public URL.
 
-### Step 4: Deploy to Vercel (Alternative)
-Deploy directly via GitHub integration or CLI:
-```bash
-vercel --prod
-```
+### Step 4: Other platforms
+
+Railway is the only supported deployment target. The canonical production deployment is [https://bibledesk.up.railway.app](https://bibledesk.up.railway.app). Vercel is not a supported target for this project.
 
 ---
 
