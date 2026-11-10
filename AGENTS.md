@@ -2,7 +2,7 @@
 
 > **Extends:** `ShadowWalkerNC/.github/AGENTS.md` — all global rules apply unconditionally.  
 > **Auto-loaded by:** Claude Code · GitHub Copilot · OpenAI Codex · Cursor · Windsurf  
-> **Updated:** 2026-09-19
+> **Updated:** 2026-11-09
 
 ---
 
@@ -25,7 +25,7 @@ Phase:        Phase 0 — Local-first Bible foundation
 Language:     TypeScript
 Framework:    Next.js 16 (App Router) · React 19
 Database:     Railway PostgreSQL + pgvector (Drizzle ORM) · stateless JWT auth
-AI Engine:    Google Gemini (gemini-2.5-flash) — BYOK x-gemini-api-key or server fallback
+AI Engine:    Anthropic Claude (claude-sonnet-4-5) server-hosted — BYOK Gemini (x-gemini-api-key header) or stored per-user Gemini/Claude keys; Gemini also powers /api/bible/study
 Embeddings:   OpenAI text-embedding-3-small — server-only (pgvector RAG)
 Bible data:   Local public domain modules (KJV, ASV, WEB, BBE, Darby, YLT) + Strong's Lexicons + TSK
 Integrations: MCP · Sigil · direct per-user Google OAuth for Prayer Care · wa.me sharing
@@ -88,7 +88,7 @@ Active work (Phase 0 Complete):
   ✓ Module format + 6 public-domain translations (KJV, ASV, WEB, BBE, Darby, YLT)
   ✓ Local read + concordance search path
   ✓ Strong's Greek (5.5k) & Hebrew (8.6k) lexicon data + TSK cross-refs
-  ✓ Quick Jump modal (Ctrl+K) & Chrome Extension MV3 side panel
+  ✓ Quick Jump modal (Ctrl+K)
   ✓ Modernized Bible-themed UI with clean Lucide icons across desktop & mobile
   ✓ Bring-Your-Own-Key (BYOK) Gemini API key setup with shared/free Bible guarantee
   ✓ Dynamic Workspace Panel Layout Controls (Left Hub, Distraction-Free Focus Reader, Right Study Drawer)
@@ -138,7 +138,7 @@ TODO.md · README.md · ARCHITECTURE.md · .env.example
 
 ---
 
-*Updated: 2026-09-30 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
+*Updated: 2026-11-09 | Extends: ShadowWalkerNC/.github/AGENTS.md | Repo: [BibleDesk](https://github.com/ShadowWalkerNC/BibleDesk)*
 
 <!-- BEGIN:nextjs-agent-rules -->
 

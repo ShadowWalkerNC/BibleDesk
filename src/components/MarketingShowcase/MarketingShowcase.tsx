@@ -116,7 +116,7 @@ const FAQS = [
   },
   {
     q: 'Why do you offer Pro and Ministry plans if the core is free?',
-    a: 'Paid plans exist for users who want hosted AI compute without having to manage their own API keys, as well as multi-device real-time cloud synchronization, 1-click Obsidian vault export, and church pastoral care team workflows. Paid subscriptions fund server compute so the core Bible app can remain free for everyone.',
+    a: 'The hosted BibleDesk service is completely free — there are no paid plans to buy. The tier definitions in the open-source codebase exist so self-hosters can enable optional plans on their own deployments; on the hosted service, plan activation runs in local/self-hosted mode and every feature of the free core, including BYOK unlimited AI, is available to everyone.',
   },
 ];
 
